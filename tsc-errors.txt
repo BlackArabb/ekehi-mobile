@@ -1,0 +1,57 @@
+app/(tabs)/leaderboard.tsx(13,7): error TS6133: 'API_BASE_URL' is declared but its value is never read.
+app/(tabs)/leaderboard.tsx(83,9): error TS6133: 'getRankColors' is declared but its value is never read.
+app/(tabs)/mine.tsx(2,83): error TS6133: 'Platform' is declared but its value is never read.
+app/(tabs)/mine.tsx(21,7): error TS6133: 'width' is declared but its value is never read.
+app/(tabs)/mine.tsx(26,20): error TS6133: 'isMining' is declared but its value is never read.
+app/(tabs)/mine.tsx(26,59): error TS6133: 'performMine' is declared but its value is never read.
+app/(tabs)/mine.tsx(28,24): error TS6133: 'setClickEffects' is declared but its value is never read.
+app/(tabs)/mine.tsx(360,9): error TS6133: 'resetMiningSession' is declared but its value is never read.
+app/(tabs)/mine.tsx(393,9): error TS6133: 'animatedStyle' is declared but its value is never read.
+app/(tabs)/mine.tsx(570,9): error TS6133: 'dailyProgress' is declared but its value is never read.
+app/(tabs)/profile.tsx(6,1): error TS6133: 'UserProfile' is declared but its value is never read.
+app/(tabs)/profile.tsx(273,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+app/(tabs)/profile.tsx(315,19): error TS2304: Cannot find name 'window'.
+app/(tabs)/profile.tsx(340,19): error TS2304: Cannot find name 'window'.
+app/(tabs)/social.tsx(14,7): error TS6133: 'API_BASE_URL' is declared but its value is never read.
+app/(tabs)/social.tsx(153,59): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+app/_layout.tsx(54,13): error TS7030: Not all code paths return a value.
+app/forgot-password.tsx(41,30): error TS2304: Cannot find name 'window'.
+app/index.tsx(12,26): error TS6133: 'setShowTestButton' is declared but its value is never read.
+app/oauth/callback.tsx(76,51): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+app/oauth/return.tsx(39,24): error TS2304: Cannot find name 'window'.
+app/oauth/return.tsx(62,53): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+app/oauth/return.tsx(98,51): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+app/referral/[code].tsx(11,26): error TS6133: 'isLoading' is declared but its value is never read.
+src/components/AchievementSystem.tsx(7,3): error TS6133: 'Crown' is declared but its value is never read.
+src/components/AchievementSystem.tsx(12,3): error TS6133: 'Medal' is declared but its value is never read.
+src/components/AchievementSystem.tsx(22,7): error TS6133: 'API_BASE_URL' is declared but its value is never read.
+src/components/AdModal.tsx(36,16): error TS2503: Cannot find namespace 'NodeJS'.
+src/components/AutoMiningStatus.tsx(19,7): error TS6133: 'API_BASE_URL' is declared but its value is never read.
+src/components/NotificationSystem.tsx(79,13): error TS7030: Not all code paths return a value.
+src/components/ReferralScreen.tsx(168,42): error TS6133: 'index' is declared but its value is never read.
+src/contexts/AuthContext.tsx(4,1): error TS6133: 'Linking' is declared but its value is never read.
+src/contexts/AuthContext.tsx(159,19): error TS2304: Cannot find name 'window'.
+src/contexts/AuthContext.tsx(186,11): error TS2304: Cannot find name 'window'.
+src/contexts/AuthContext.tsx(189,11): error TS2304: Cannot find name 'window'.
+src/contexts/AuthContext.tsx(189,43): error TS2339: Property 'href' does not exist on type 'never'.
+src/contexts/AuthContext.tsx(197,78): error TS2339: Property 'toString' does not exist on type 'void'.
+src/contexts/AuthContext.tsx(224,57): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+  Target signature provides too few arguments. Expected 1 or more, but got 0.
+src/contexts/AuthContext.tsx(254,54): error TS2304: Cannot find name 'window'.
+src/contexts/AuthContext.tsx(332,11): error TS2304: Cannot find name 'window'.
+src/contexts/AuthContext.tsx(344,11): error TS2304: Cannot find name 'window'.
+src/contexts/AuthContext.tsx(363,58): error TS6133: 'secret' is declared but its value is never read.
+src/contexts/AuthContext.tsx(374,54): error TS6133: 'url' is declared but its value is never read.
+src/contexts/AuthContext.tsx(384,57): error TS6133: 'secret' is declared but its value is never read.
+src/contexts/AuthContext.tsx(384,73): error TS6133: 'password' is declared but its value is never read.
+src/contexts/MiningContext.tsx(2,1): error TS6133: 'AsyncStorage' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(22,20): error TS6133: 'setIsActive' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(23,22): error TS6133: 'setTokenPrice' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(24,23): error TS6133: 'setMinPurchase' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(36,33): error TS6133: 'amountUSD' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(36,52): error TS6133: 'paymentMethod' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(43,47): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+src/contexts/PresaleContext.tsx(135,13): error TS6133: 'response' is declared but its value is never read.
+src/contexts/ReferralContext.tsx(5,17): error TS6133: 'ID' is declared but its value is never read.
+src/contexts/ReferralContext.tsx(23,11): error TS6133: 'addCoins' is declared but its value is never read.
+src/contexts/ReferralContext.tsx(29,10): error TS6133: 'userProfileId' is declared but its value is never read.

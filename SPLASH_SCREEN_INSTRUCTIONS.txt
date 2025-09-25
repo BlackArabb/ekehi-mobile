@@ -1,0 +1,14 @@
+
+Custom Splash Screen for Ekehi Network App:
+
+1. Logo size: Reduced to 100x100 pixels
+2. Text effect: "ekehi network" placed under the logo
+3. Text styling:
+   - "ekehi" in white with shadow effect
+   - "network" in orange (#ffa000) with shadow effect
+4. Background: Dark blue gradient (#1a1a2e to #0f3460)
+
+Implementation plan:
+- Replace assets/splash.png with new 100x100 logo version
+- Add text rendering in the custom splash component
+- Update app.json to use new splash configuration if needed
