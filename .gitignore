@@ -255,3 +255,136 @@ typedoc-out/
 # EAS
 *eas-build-*.tar.gz
 *eas-build-*.log
+
+# Admin dashboard build files
+admin/.next
+admin/.env
+admin/node_modules
+admin/.DS_Store
+admin/.next
+admin/out
+admin/.env*.local
+admin/.vercel
+admin/.npm
+admin/.yarn/cache
+admin/.yarn/unplugged
+admin/.yarn/build-state.yml
+admin/.yarn/install-state.gz
+admin/.pnp.*
+
+# PNPM
+.pnpm-store/
+pnpm-lock.yaml
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# Editor files
+*.code-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Distribution files
+dist/
+build/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Temp directories
+tmp/
+temp/
+
+# Debug files
+*.debug.*
+*.stackdump
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# Folders that should not be included
+node_modules/
+*/node_modules/
+
+# Build outputs
+*.build
+*.bundle
+*.min.js
+*.min.css
+
+# Log files
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env*.local
+
+# IDE configs
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
