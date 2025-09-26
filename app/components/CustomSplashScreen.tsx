@@ -1,13 +1,12 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
-export default function CustomSplashScreen() {
-  React.useEffect(() => {
-    // Keep the splash screen visible while we fetch resources
+const CustomSplashScreen: React.FC = () => {
+  useEffect(() => {
     SplashScreen.preventAutoHideAsync();
     
-    // Simulate loading time
+    // Simulate loading time or actual app initialization
     setTimeout(async () => {
       await SplashScreen.hideAsync();
     }, 2000);
@@ -16,33 +15,20 @@ export default function CustomSplashScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* Logo with reduced size */}
         <Image 
           source={require('../../assets/splash.png')} 
           style={styles.logo}
           resizeMode="contain"
         />
         
-        {/* Text effect for "ekehi network" */}
         <View style={styles.textContainer}>
-          <Text style={styles.title}>
-            ekehi
-          </Text>
-          <Text style={styles.subtitle}>
-            network
-          </Text>
-        </View>
-        
-        {/* Simple loader dots */}
-        <View style={styles.loaderContainer}>
-          <View style={[styles.loaderDot, { opacity: 0.6 }]} />
-          <View style={[styles.loaderDot, { opacity: 0.8 }]} />
-          <View style={[styles.loaderDot, { opacity: 1 }]} />
+          <Text style={[styles.mainText, styles.textShadow]}>ekehi</Text>
+          <Text style={[styles.networkText, styles.textShadow]}>network</Text>
         </View>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -62,36 +48,25 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     alignItems: 'center',
-    marginBottom: 40,
   },
-  title: {
+  mainText: {
     fontSize: 32,
     fontWeight: '800',
     color: '#ffffff',
     letterSpacing: 1.5,
-    textShadowColor: 'rgba(255, 160, 0, 0.5)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
   },
-  subtitle: {
+  networkText: {
     fontSize: 24,
     fontWeight: '600',
     color: '#ffa000',
     marginTop: 5,
     letterSpacing: 1,
+  },
+  textShadow: {
     textShadowColor: 'rgba(255, 160, 0, 0.5)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
   },
-  loaderContainer: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  loaderDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#ffa000',
-    marginHorizontal: 5,
-  },
 });
+
+export default CustomSplashScreen;
