@@ -10,13 +10,14 @@ import { useRouter } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { databases, appwriteConfig } from '@/config/appwrite';
-import JellyTriangleLoader from '@/components/JellyTriangleLoader';
+import PulseLoader from '@/components/PulseLoader';
 import LoadingDots from '@/components/LoadingDots';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { profile, isLoading: isMiningLoading, refreshProfile } = useMining();
+  const { profile: miningProfile, isLoading: isMiningLoading, refreshProfile } = useMining();
+  const profile: UserProfile | null = miningProfile;
   const insets = useSafeAreaInsets();
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
@@ -264,7 +265,7 @@ export default function ProfilePage() {
     try {
       // In a real app, you would update the password through your backend
       // For now, we'll just simulate the process
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(() => resolve(null), 1000));
       
       Alert.alert('Success', 'Password changed successfully!');
       setShowChangePassword(false);
@@ -310,8 +311,13 @@ export default function ProfilePage() {
                 await signOut();
                 // Force redirect to auth page with a small delay to ensure session deletion
                 setTimeout(() => {
-                  if (typeof window !== 'undefined') {
-                    window.location.href = '/auth';
+                  // Only execute on web platform
+                  if (Platform.OS === 'web') {
+                    // @ts-ignore - window object only exists on web
+                    if (typeof window !== 'undefined' && window?.location?.href) {
+                      // @ts-ignore
+                      window.location.href = '/auth';
+                    }
                   }
                 }, 300);
               } else {
@@ -337,7 +343,9 @@ export default function ProfilePage() {
               // Even if there's an error, redirect to auth page on web
               if (Platform.OS === 'web') {
                 setTimeout(() => {
-                  if (typeof window !== 'undefined') {
+                  // @ts-ignore - window object only exists on web
+                  if (typeof window !== 'undefined' && window?.location?.href) {
+                    // @ts-ignore
                     window.location.href = '/auth';
                   }
                 }, 300);
@@ -361,9 +369,9 @@ export default function ProfilePage() {
 
   if (isMiningLoading) {
     return (
-      <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <JellyTriangleLoader size={40} color="#8b5cf6" speed={1750} />
+      <LinearGradient colors={['#0F172A', '#1E293B']} style={styles.container}>
+        <View style={[styles.content, { paddingTop: insets.top }]}>
+          <PulseLoader />
         </View>
       </LinearGradient>
     );
@@ -392,6 +400,11 @@ export default function ProfilePage() {
   const miningEfficiency = profile?.dailyMiningRate && profile?.miningPower 
     ? ((profile.dailyMiningRate / profile.miningPower) * 100).toFixed(1) 
     : '0';
+    
+  // Calculate daily mining progress
+  const dailyProgress = profile?.maxDailyEarnings 
+    ? Math.min((profile.todayEarnings / profile.maxDailyEarnings) * 100, 100)
+    : 0;
 
   // Format numbers with commas
   const formatNumber = (num: number | undefined) => {
@@ -488,8 +501,9 @@ export default function ProfilePage() {
               
               <View style={styles.statCard}>
                 <Zap size={24} color="#8b5cf6" />
-                <Text style={styles.statValue}>{profile?.miningPower || '0'}</Text>
-                <Text style={styles.statLabel}>Mining Power</Text>
+                <Text style={styles.statValue}>{(2 / 24).toFixed(4)}</Text>
+                <Text style={styles.statLabel}>Mining Rate</Text>
+                <Text style={styles.statSubLabel}>EKH/hour</Text>
               </View>
               
               <View style={styles.statCard}>
@@ -510,6 +524,35 @@ export default function ProfilePage() {
                 <Text style={styles.statLabel}>Efficiency</Text>
               </View>
             </View>
+          </LinearGradient>
+        </View>
+
+        {/* Daily Mining Progress */}
+        <View style={styles.profileContainer}>
+          <LinearGradient
+            colors={['rgba(147, 51, 234, 0.2)', 'rgba(168, 85, 247, 0.2)']}
+            style={styles.profileCard}
+          >
+            <View style={styles.miningProgressHeader}>
+              <Text style={styles.miningProgressTitle}>Daily Mining Progress</Text>
+              <Text style={styles.miningProgressValue}>
+                {profile?.todayEarnings?.toFixed(2) || '0.00'} / {profile?.maxDailyEarnings?.toFixed(2) || '0.00'} EKH
+              </Text>
+            </View>
+            <View style={styles.progressBarBackground}>
+              <View 
+                style={[
+                  styles.progressBarFill, 
+                  { 
+                    backgroundColor: '#8b5cf6',
+                    width: `${dailyProgress}%`
+                  }
+                ]} 
+              />
+            </View>
+            <Text style={styles.progressText}>
+              {dailyProgress.toFixed(1)}% of daily limit reached
+            </Text>
           </LinearGradient>
         </View>
 
@@ -568,6 +611,22 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
+        {/* Referral Stats */}
+        <View style={styles.referralStatsContainer}>
+          <View style={styles.referralStat}>
+            <Text style={styles.referralStatValue}>{profile?.totalReferrals || '0'}</Text>
+            <Text style={styles.referralStatLabel}>Total Referrals</Text>
+          </View>
+          <View style={styles.referralStat}>
+            <Text style={styles.referralStatValue}>0.2 EKH</Text>
+            <Text style={styles.referralStatLabel}>Per Referral</Text>
+          </View>
+          <View style={styles.referralStat}>
+            <Text style={styles.referralStatValue}>2.0 EKH</Text>
+            <Text style={styles.referralStatLabel}>For Referred</Text>
+          </View>
+        </View>
+
         {/* Achievement Highlights */}
         <View style={styles.achievementsContainer}>
           <Text style={styles.achievementsTitle}>Achievements</Text>
@@ -585,7 +644,7 @@ export default function ProfilePage() {
             
             <View style={styles.achievementItem}>
               <Text style={styles.achievementLabel}>Daily Mining Rate</Text>
-              <Text style={styles.achievementValue}>{profile?.dailyMiningRate?.toFixed(2) || '0.00'} EKH/day</Text>
+              <Text style={styles.achievementValue}>{(2 / 24).toFixed(4)} EKH/hour</Text>
             </View>
             
             <View style={styles.achievementItem}>
@@ -897,6 +956,44 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: 4,
   },
+  statSubLabel: {
+    fontSize: 10,
+    color: '#8b5cf6',
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  progressBarBackground: {
+    width: '100%',
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 2,
+    marginTop: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  progressText: {
+    fontSize: 8,
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginTop: 2,
+  },
+  miningProgressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  miningProgressTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  miningProgressValue: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
   referralContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 16,
@@ -972,6 +1069,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#ffa000',
+  },
+  referralStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 16,
+  },
+  referralStat: {
+    alignItems: 'center',
+  },
+  referralStatValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  referralStatLabel: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
   },
   achievementsContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',

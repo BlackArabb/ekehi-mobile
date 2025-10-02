@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput, Animated, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Store, DollarSign, Zap, Clock, CheckCircle, TrendingUp, Lock, Gift, BarChart3, Users, Award } from 'lucide-react-native';
@@ -17,7 +17,6 @@ export default function PresalePage() {
   const insets = useSafeAreaInsets();
   const [purchaseAmount, setPurchaseAmount] = useState('');
   const [selectedPayment, setSelectedPayment] = useState('crypto');
-  const [progressAnimation] = useState(new Animated.Value(0));
 
   useEffect(() => {
     if (!user) {
@@ -28,23 +27,6 @@ export default function PresalePage() {
       return;
     }
     fetchPurchases();
-    
-    // Start progress animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(progressAnimation, {
-          toValue: 1,
-          duration: 2000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.timing(progressAnimation, {
-          toValue: 0,
-          duration: 0,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
   }, [user]);
 
   const handlePurchase = async () => {
@@ -84,6 +66,9 @@ export default function PresalePage() {
   
   // Calculate progress percentage for presale
   const progressPercentage = Math.min(100, (totalPurchased / 100000) * 100); // Assuming 100,000 token goal
+  
+  // Pre-calculate the minimum purchase placeholder to avoid template literals in TextInput
+  const minPurchasePlaceholder = `Min $${minPurchase}`;
 
   return (
     <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
@@ -115,14 +100,11 @@ export default function PresalePage() {
             <Text style={styles.progressText}>{progressPercentage.toFixed(1)}%</Text>
           </View>
           <View style={styles.progressBar}>
-            <Animated.View 
+            <View 
               style={[
                 styles.progressFill, 
                 {
-                  width: progressAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', `${progressPercentage}%`]
-                  })
+                  width: `${progressPercentage}%`
                 }
               ]} 
             />
@@ -184,7 +166,7 @@ export default function PresalePage() {
                 style={styles.input}
                 value={purchaseAmount}
                 onChangeText={setPurchaseAmount}
-                placeholder={`Min $${minPurchase}`}
+                placeholder={minPurchasePlaceholder}
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 keyboardType="numeric"
               />

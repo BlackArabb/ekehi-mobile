@@ -43,8 +43,9 @@ The system supports deep linking through:
 - Fallback generation method ensures codes are always created
 
 ### Referral Rewards
-- **Referrer Reward**: 100 EKH coins for each successful referral
-- **Referee Reward**: 50 EKH coins for using a referral code
+- **Referee Reward**: 2.0 EKH coins for using a referral code
+- **Referrer Reward**: No direct coins but increased mining rate by 0.2 EKH/second for each referral
+- **Maximum Referrals**: Each user can refer up to 50 new users
 - Automatic reward distribution when referrals are claimed
 
 ### Referral Tracking
@@ -52,6 +53,7 @@ The system supports deep linking through:
 - Referral history with referred user information
 - Prevention of self-referrals
 - Prevention of multiple referrals for the same user
+- Maximum referral limit enforcement (50 referrals per user)
 
 ### Deep Linking
 - Users can open referral links directly in the app
@@ -65,16 +67,18 @@ The referral system uses the existing user profile structure with these fields:
 - `referralCode`: Unique code for each user
 - `referredBy`: ID of the user who referred this user
 - `totalReferrals`: Count of successful referrals
+- `coinsPerSecond`: Mining rate that increases with referrals
 
 ### Reward Distribution
 Rewards are distributed through direct database updates:
-1. Referrer receives 100 coins
-2. Referee receives 50 coins
+1. Referrer receives increased mining rate (0.2 EKH/second per referral)
+2. Referee receives 2.0 EKH coins
 3. Both user profiles are updated in real-time
 
 ### Security Measures
 - Users cannot refer themselves
 - Users cannot claim multiple referral codes
+- Users cannot exceed 50 referrals
 - Proper error handling for invalid codes
 - Authentication required for all operations
 
@@ -84,32 +88,13 @@ Rewards are distributed through direct database updates:
    - Opens profile screen
    - Sees their referral code
    - Shares referral code with friends
-   - Receives rewards when friends use the code
+   - Receives increased mining rate when friends use the code
 
 2. **New User**:
    - Receives referral link from friend
    - Opens link in app or browser
-   - Automatically navigates to referral processing
-   - Receives reward for using referral code
-
-## API Endpoints
-
-The system uses Appwrite database operations:
-- `listDocuments`: Query user profiles by referral code
-- `updateDocument`: Update user profiles with referral information and rewards
-
-## Error Handling
-
-The system provides comprehensive error handling:
-- Invalid referral codes
-- Self-referral attempts
-- Duplicate referral attempts
-- Network errors
-- Authentication errors
-
-## Testing
-
-The system includes a test script (`test-referral-system.js`) for verifying functionality, though it requires proper authentication to run successfully.
+   - Claims referral code and receives 2 EKH
+   - Friend's mining rate increases by 0.2 EKH/second
 
 ## Future Enhancements
 

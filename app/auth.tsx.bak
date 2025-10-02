@@ -1,0 +1,309 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, SafeAreaView, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '@/contexts/AuthContext';
+import { validateEmail, validatePassword, validateName } from '@/utils/validation';
+import LoadingDots from '@/components/LoadingDots';
+
+export default function AuthPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [autoFilled, setAutoFilled] = useState(false);
+  const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
+  const [signupErrorOccurred, setSignupErrorOccurred] = useState(false); // New state to track signup errors
+  const router = useRouter();
+  const { signIn, signInWithEmail, signUp } = useAuth();
+
+  // Detect auto-filled credentials
+  useEffect(() => {
+    // Check if both email and password are filled (likely from auto-fill)
+    // Only attempt auto-login if we haven't had a signup error
+    if (email && password && !autoFilled && !autoLoginAttempted && !isLoading && !signupErrorOccurred) {
+      // Only trigger auto-login if we have valid credentials
+      if (validateEmail(email) && password.length >= 6) {
+        setAutoFilled(true);
+        setAutoLoginAttempted(true);
+        // Small delay to ensure fields are properly populated
+        setTimeout(() => {
+          handleEmailAuth();
+        }, 300);
+      }
+    }
+  }, [email, password, autoFilled, autoLoginAttempted, isLoading, signupErrorOccurred]);
+
+  const validateForm = () => {
+    // Reset errors
+    setEmailError('');
+    setPasswordError('');
+    setNameError('');
+    
+    let isValid = true;
+    
+    // Email validation
+    if (!email) {
+      setEmailError('Email is required');
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      isValid = false;
+    }
+    
+    // Password validation
+    if (!password) {
+      setPasswordError('Password is required');
+      isValid = false;
+    } else {
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        setPasswordError(passwordValidation.message);
+        isValid = false;
+      }
+    }
+    
+    // Name validation (only for sign up)
+    if (isSignUp) {
+      if (!name) {
+        setNameError('Name is required');
+        isValid = false;
+      } else {
+        const nameValidation = validateName(name);
+        if (!nameValidation.isValid) {
+          setNameError(nameValidation.message);
+          isValid = false;
+        }
+      }
+    }
+    
+    return isValid;
+  };
+
+  const handleEmailAuth = async () => {
+    if (!validateForm()) {
+      // Reset auto-filled state if form validation fails
+      if (autoFilled) {
+        setAutoFilled(false);
+      }
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isSignUp) {
+        await signUp(email, password, name);
+        Alert.alert('Success', 'Account created successfully! Please check your email for verification instructions.');
+        router.replace('/(tabs)/mine');
+        // Reset error state on successful signup
+        setSignupErrorOccurred(false);
+      } else {
+        await signInWithEmail(email, password);
+        router.replace('/(tabs)/mine');
+      }
+      // Reset auto-filled state on successful authentication
+      if (autoFilled) {
+        setAutoFilled(false);
+        setAutoLoginAttempted(false);
+      }
+    } catch (error: any) {
+      console.error('Email auth error:', error);
+      let errorMessage = error.message || 'Failed to authenticate';
+      
+      // Handle specific Appwrite error codes
+      if (error.code === 401) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (error.code === 409) {
+        errorMessage = 'An account with this email already exists. Please sign in instead.';
+      } else if (error.code === 400) {
+        errorMessage = 'Invalid input. Please check your email and password.';
+      }
+      
+      Alert.alert('Authentication Error', errorMessage);
+      setAutoFilled(false); // Reset auto-filled state on error
+      setAutoLoginAttempted(false); // Reset auto-login attempted state on error
+      
+      // Set signup error state if this was a signup attempt
+      if (isSignUp) {
+        setSignupErrorOccurred(true);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await signIn();
+      // Navigation will be handled by the OAuth flow
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      let errorMessage = error.message || 'Failed to authenticate with Google';
+      
+      // Handle specific OAuth errors
+      if (errorMessage.includes('Invalid redirect URL')) {
+        errorMessage = 'OAuth is not properly configured. Please contact support.';
+      } else if (errorMessage.includes('cancelled')) {
+        errorMessage = 'Authentication was cancelled.';
+      } else if (errorMessage.includes('timeout')) {
+        errorMessage = 'Authentication timed out. Please check your internet connection and try again.';
+      }
+      
+      Alert.alert('Authentication Error', errorMessage);
+    } finally {
+      // Ensure loading state is reset even if there's an error
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    }
+  };
+
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    // Clear error when user starts typing
+    if (emailError) setEmailError('');
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    // Clear error when user starts typing
+    if (passwordError) setPasswordError('');
+  };
+
+  const handleNameChange = (text: string) => {
+    setName(text);
+    // Clear error when user starts typing
+    if (nameError) setNameError('');
+  };
+
+  return (
+    <LinearGradient
+      colors={['#1a1a2e', '#16213e', '#0f3460']}
+      style={styles.container}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.content}>
+            <Text style={styles.title}>{isSignUp ? 'Create Account' : 'Welcome Back'}</Text>
+            <Text style={styles.subtitle}>
+              {isSignUp ? 'Sign up to get started' : 'Sign in to continue'}
+            </Text>
+
+            {/* Auth Card */}
+            <View style={styles.authCard}>
+              {isSignUp && (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Name</Text>
+                  <TextInput
+                    style={[styles.input, nameError ? styles.inputError : undefined]}
+                    value={name}
+                    onChangeText={handleNameChange}
+                    placeholder="Enter your name"
+                    placeholderTextColor="#aaa"
+                  />
+                  {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
+                </View>
+              )}
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  style={[styles.input, emailError ? styles.inputError : undefined]}
+                  value={email}
+                  onChangeText={handleEmailChange}
+                  placeholder="Enter your email"
+                  placeholderTextColor="#aaa"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Password</Text>
+                <TextInput
+                  style={[styles.input, passwordError ? styles.inputError : undefined]}
+                  value={password}
+                  onChangeText={handlePasswordChange}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#aaa"
+                  secureTextEntry
+                />
+                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+              </View>
+
+              <TouchableOpacity
+                style={[styles.button, isLoading && styles.buttonDisabled]}
+                onPress={handleEmailAuth}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <LoadingDots color="#000000" size={8} />
+                ) : (
+                  <Text style={styles.buttonText}>
+                    {isSignUp ? 'Sign Up' : 'Sign In'}
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.googleButton, isLoading && styles.buttonDisabled]}
+                onPress={handleGoogleSignIn}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <LoadingDots color="#000000" size={8} />
+                ) : (
+                  <Text style={styles.googleButtonText}>
+                    Continue with Google
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.switchMode}
+              onPress={() => {
+                setIsSignUp(!isSignUp);
+                // Clear errors when switching modes
+                setEmailError('');
+                setPasswordError('');
+                setNameError('');
+                // Reset signup error state when switching modes
+                setSignupErrorOccurred(false);
+              }}
+            >
+              <Text style={styles.switchModeText}>
+                {isSignUp
+                  ? 'Already have an account? Sign In'
+                  : "Don't have an account? Sign Up"}
+              </Text>
+            </TouchableOpacity>
+
+            {!isSignUp && (
+              <TouchableOpacity
+                style={styles.forgotPassword}
+                onPress={() => router.push('/forgot-password')}
+              >
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
+// ... existing styles ...

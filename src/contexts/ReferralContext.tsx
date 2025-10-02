@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useAuth } from '@/contexts/AuthContext';
 import { useMining } from '@/contexts/MiningContext';
 import { databases, appwriteConfig } from '@/config/appwrite';
-import { Query, ID } from 'appwrite';
+import { Query } from 'appwrite';
 
 interface ReferralContextType {
   referralCode: string | null;
@@ -14,19 +14,19 @@ interface ReferralContextType {
   generateReferralLink: () => string;
   refreshReferralData: () => Promise<void>;
   getReferralHistory: () => Promise<any[]>;
+  generateUniqueReferralCode: () => Promise<string>;
 }
 
 const ReferralContext = createContext<ReferralContextType | undefined>(undefined);
 
 export function ReferralProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const { addCoins, refreshProfile } = useMining();
+  const { refreshProfile } = useMining();
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [totalReferrals, setTotalReferrals] = useState(0);
   const [referralReward, setReferralReward] = useState(0);
   const [referredBy, setReferredBy] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [userProfileId, setUserProfileId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -52,23 +52,7 @@ export function ReferralProvider({ children }: { children: ReactNode }) {
         setReferralCode(doc.referralCode || null);
         setTotalReferrals(doc.totalReferrals || 0);
         setReferredBy(doc.referredBy || null);
-        setReferralReward(100); // Fixed reward amount, could be dynamic
-        setUserProfileId(doc.$id);
-        
-        // Generate referral code if it doesn't exist
-        if (!doc.referralCode) {
-          const newReferralCode = await generateUniqueReferralCode();
-          await databases.updateDocument(
-            appwriteConfig.databaseId,
-            appwriteConfig.collections.userProfiles,
-            doc.$id,
-            {
-              referralCode: newReferralCode,
-              updatedAt: new Date().toISOString()
-            }
-          );
-          setReferralCode(newReferralCode);
-        }
+        setReferralReward(0); // No direct reward for referrer in new system
       }
     } catch (error) {
       console.error('Failed to fetch referral data:', error);
@@ -140,6 +124,11 @@ export function ReferralProvider({ children }: { children: ReactNode }) {
         return { success: false, message: 'You cannot refer yourself' };
       }
       
+      // Check if referrer has reached maximum referrals (50)
+      if (referrerDoc.totalReferrals >= 50) {
+        return { success: false, message: 'This referrer has reached the maximum number of referrals (50)' };
+      }
+      
       // Check if user already has a referrer
       const currentUserResponse = await databases.listDocuments(
         appwriteConfig.databaseId,
@@ -158,45 +147,30 @@ export function ReferralProvider({ children }: { children: ReactNode }) {
         return { success: false, message: 'You have already been referred' };
       }
       
-      // Give referrer a reward
+      // Calculate new mining rate for referrer (increase by 0.2 EKH per referral)
+      const newMiningRate = (referrerDoc.coinsPerSecond || 0) + 0.2;
+      
+      // Update referrer's profile with increased mining rate and referral count
       await databases.updateDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.userProfiles,
         referrerDoc.$id,
         {
           totalReferrals: (referrerDoc.totalReferrals || 0) + 1,
+          coinsPerSecond: newMiningRate, // Increase mining rate by 0.2 EKH
           updatedAt: new Date().toISOString()
         }
       );
       
-      // Give referrer coins
-      await databases.updateDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userProfiles,
-        referrerDoc.$id,
-        {
-          totalCoins: (referrerDoc.totalCoins || 0) + 100 // Referrer reward
-        }
-      );
-      
-      // Update the current user's referredBy field
+      // Update the current user's referredBy field and give them 2 EKH
       await databases.updateDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.userProfiles,
         currentUserDoc.$id,
         {
           referredBy: referrerDoc.userId,
+          totalCoins: (currentUserDoc.totalCoins || 0) + 2.0, // 2 EKH for referee
           updatedAt: new Date().toISOString()
-        }
-      );
-      
-      // Give current user a reward
-      await databases.updateDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userProfiles,
-        currentUserDoc.$id,
-        {
-          totalCoins: (currentUserDoc.totalCoins || 0) + 50 // Referee reward
         }
       );
       
@@ -205,7 +179,7 @@ export function ReferralProvider({ children }: { children: ReactNode }) {
       
       // Refresh referral data
       await refreshReferralData();
-      return { success: true, message: 'Referral claimed successfully! You received 50 coins.' };
+      return { success: true, message: 'Referral claimed successfully! You received 2 EKH.' };
     } catch (error) {
       console.error('Failed to claim referral:', error);
       return { success: false, message: 'Failed to claim referral. Please try again.' };
@@ -252,7 +226,8 @@ export function ReferralProvider({ children }: { children: ReactNode }) {
       claimReferral,
       generateReferralLink,
       refreshReferralData,
-      getReferralHistory
+      getReferralHistory,
+      generateUniqueReferralCode
     }}>
       {children}
     </ReferralContext.Provider>

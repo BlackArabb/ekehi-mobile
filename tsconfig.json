@@ -4,10 +4,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./src/*"
+        "./src/*",
+        "./app/*"
       ],
       "@/components/*": [
-        "./src/components/*"
+        "./src/components/*",
+        "./app/components/*"
       ],
       "@/screens/*": [
         "./src/screens/*"
@@ -49,7 +51,8 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "app/assets.d.ts"
   ],
   "exclude": [
     "admin"

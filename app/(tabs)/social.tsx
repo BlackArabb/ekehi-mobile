@@ -8,10 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import { ID, Query } from 'appwrite';
-import JellyTriangleLoader from '@/components/JellyTriangleLoader';
+import PulseLoader from '@/components/PulseLoader';
 import LoadingDots from '@/components/LoadingDots';
-
-const API_BASE_URL = 'https://ekehi-network-api.your-subdomain.workers.dev';
 
 // Function to extract domain from URL
 const extractDomain = (url: string): string => {
@@ -150,7 +148,7 @@ export default function SocialPage() {
                 text: 'OK',
                 onPress: async () => {
                   // Simulate some processing time
-                  await new Promise(resolve => setTimeout(resolve, 3000));
+                  await new Promise(resolve => setTimeout(() => resolve(undefined), 3000));
                   await completeTask(task);
                 }
               }
@@ -284,9 +282,9 @@ export default function SocialPage() {
 
   if (isLoading) {
     return (
-      <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
+      <LinearGradient colors={['#0F172A', '#1E293B', '#334155']} style={styles.container}>
         <View style={styles.loadingContainer}>
-          <JellyTriangleLoader size={40} color="#ffa000" speed={1750} />
+          <PulseLoader />
         </View>
       </LinearGradient>
     );
@@ -296,7 +294,7 @@ export default function SocialPage() {
   const totalRewards = tasks.filter(task => task.isCompleted).reduce((sum, task) => sum + task.rewardCoins, 0);
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
+    <LinearGradient colors={['#0F172A', '#1E293B']} style={styles.container}>
       <ScrollView 
         style={[styles.scrollView, { paddingTop: insets.top }]}
         contentContainerStyle={styles.content}

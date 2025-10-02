@@ -110,6 +110,14 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace 'com.ekehi.network'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
     defaultConfig {
         applicationId 'com.ekehi.network'
         minSdkVersion rootProject.ext.minSdkVersion

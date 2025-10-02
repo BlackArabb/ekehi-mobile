@@ -38,7 +38,15 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       // For web, we'll use the current origin
-      const recoveryUrl = `${window.location.origin}/reset-password`;
+      let recoveryUrl = '';
+      // @ts-ignore - window object only exists on web
+      if (typeof window !== 'undefined' && window?.location?.origin) {
+        // @ts-ignore
+        recoveryUrl = `${window.location.origin}/reset-password`;
+      } else {
+        // Fallback for mobile platforms
+        recoveryUrl = 'ekehi://reset-password';
+      }
       console.log('Sending password recovery to:', email, 'with URL:', recoveryUrl);
       
       await sendPasswordRecovery(email, recoveryUrl);

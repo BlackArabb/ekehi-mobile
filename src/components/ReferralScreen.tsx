@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ScrollView, Clipboard, ActivityIndicator } from 'react-native';
 import { useReferral } from '@/contexts/ReferralContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Share2, Users, Gift, Copy } from 'lucide-react-native';
+import { Share2, Users, Gift, Copy, Coins } from 'lucide-react-native';
 
 const ReferralScreen = () => {
   const { 
     referralCode, 
     totalReferrals, 
-    referralReward, 
     referredBy, 
     isLoading, 
     claimReferral, 
@@ -112,21 +111,20 @@ const ReferralScreen = () => {
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Claim Referral</Text>
         <Text style={styles.description}>
-          Enter a referral code you received from a friend
+          Enter a referral code you received from a friend to get 2 EKH!
         </Text>
         <TextInput
           style={styles.input}
           placeholder="Enter referral code"
           value={referralCodeInput}
           onChangeText={setReferralCodeInput}
-          autoCapitalize="characters"
         />
         <TouchableOpacity 
           style={styles.claimButton}
           onPress={handleClaimReferral}
           disabled={isLoading}
         >
-          <Text style={styles.buttonText}>Claim Referral</Text>
+          <Text style={styles.buttonText}>Claim 2 EKH</Text>
         </TouchableOpacity>
       </View>
 
@@ -139,8 +137,13 @@ const ReferralScreen = () => {
           </View>
           <View style={styles.statItem}>
             <Gift size={24} color="#ffa000" />
-            <Text style={styles.statValue}>{referralReward} coins</Text>
+            <Text style={styles.statValue}>1.0 EKH</Text>
             <Text style={styles.statLabel}>Per Referral</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Coins size={24} color="#ffa000" />
+            <Text style={styles.statValue}>0.5 EKH</Text>
+            <Text style={styles.statLabel}>For You</Text>
           </View>
         </View>
       </View>
@@ -165,7 +168,7 @@ const ReferralScreen = () => {
             <Text style={styles.loadingText}>Loading referral history...</Text>
           </View>
         ) : referralHistory.length > 0 ? (
-          referralHistory.map((referral, index) => (
+          referralHistory.map((referral) => (
             <View key={referral.id} style={styles.referralItem}>
               <Text style={styles.referralName}>{referral.username}</Text>
               <Text style={styles.referralDate}>

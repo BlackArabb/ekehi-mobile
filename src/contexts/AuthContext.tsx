@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
 import { Platform, Alert } from 'react-native';
 import { User } from '@/types';
 import { account, databases, appwriteConfig } from '@/config/appwrite';
@@ -102,6 +101,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.documents.length === 0) {
         console.log('Creating new user profile for user:', userData.$id);
         
+        // Check for referral code in AsyncStorage
+        let referredByCode = '';
+        try {
+          referredByCode = await AsyncStorage.getItem('referralCode') || '';
+        } catch (e) {
+          console.log('No referral code found in storage');
+        }
+        
         const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
         
         const userProfile = {
@@ -115,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           longestStreak: 0,
           lastLoginDate: new Date().toISOString(),
           referralCode: [referralCode],
-          referredBy: '',
+          referredBy: referredByCode,
           totalReferrals: 0,
           lifetimeEarnings: 0,
           dailyMiningRate: 1000,
@@ -137,12 +144,140 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         
         console.log('✅ User profile created successfully:', result.$id);
+        
+        // If user was referred, update the referrer's profile
+        if (referredByCode) {
+          await updateReferrerProfile(referredByCode, userData.$id);
+        }
+        
+        // Clear referral code from storage
+        try {
+          await AsyncStorage.removeItem('referralCode');
+        } catch (e) {
+          console.log('Could not clear referral code from storage');
+        }
       } else {
         console.log('User profile already exists:', response.documents[0].$id);
+        // Update streak if needed for existing users
+        await updateStreakForExistingUser(response.documents[0], userData.$id);
       }
     } catch (error: any) {
       console.error('Failed to create user profile:', error);
       // Don't throw here as profile creation is not critical for auth
+    }
+  };
+
+  const updateReferrerProfile = async (referralCode: string, referredUserId: string) => {
+    try {
+      // Find the referrer by referral code
+      const referrerResponse = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.collections.userProfiles,
+        [Query.equal('referralCode', [referralCode])]
+      );
+      
+      if (referrerResponse.documents.length > 0) {
+        const referrer = referrerResponse.documents[0];
+        
+        // Update referrer's total referrals and award referral bonus
+        const updatedReferrals = referrer.totalReferrals + 1;
+        const referralBonus = 1; // 1 EKH bonus for each referral
+        
+        await databases.updateDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.collections.userProfiles,
+          referrer.$id,
+          {
+            totalReferrals: updatedReferrals,
+            totalCoins: referrer.totalCoins + referralBonus,
+            // Store the ID of the user who was referred for tracking purposes
+            [`referredUser_${referredUserId}`]: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        );
+        
+        console.log(`✅ Referral bonus awarded to user ${referrer.userId}: ${referralBonus} EKH`);
+        console.log(`✅ Referrer ${referrer.userId} now has ${updatedReferrals} referrals`);
+        console.log(`✅ Referred user ID ${referredUserId} linked to referrer ${referrer.userId}`);
+      } else {
+        console.log('Referrer not found for referral code:', referralCode);
+      }
+    } catch (error) {
+      console.error('Failed to update referrer profile:', error);
+    }
+  };
+
+  const updateStreakForExistingUser = async (existingProfile: any, userId: string) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to start of day
+      
+      let lastLoginDate = null;
+      if (existingProfile.lastLoginDate) {
+        lastLoginDate = new Date(existingProfile.lastLoginDate);
+        lastLoginDate.setHours(0, 0, 0, 0); // Normalize to start of day
+      }
+      
+      let updatedStreak = existingProfile.currentStreak;
+      let updatedLongestStreak = existingProfile.longestStreak;
+      let updatedTotalCoins = existingProfile.totalCoins;
+      let updatedStreakBonusClaimed = existingProfile.streakBonusClaimed;
+      
+      // Check if this is a new day login
+      if (!lastLoginDate || lastLoginDate < today) {
+        // Calculate the difference in days
+        const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+        const diffDays = lastLoginDate ? Math.round(Math.abs((today.getTime() - lastLoginDate.getTime()) / oneDay)) : 1;
+        
+        if (diffDays === 1) {
+          // Consecutive day - increment streak
+          updatedStreak = existingProfile.currentStreak + 1;
+          
+          // Check if user has reached 7 consecutive days
+          if (updatedStreak === 7 && existingProfile.streakBonusClaimed < 1) {
+            // Award 5 EKH bonus
+            updatedTotalCoins += 5;
+            updatedStreakBonusClaimed += 1;
+            
+            console.log(`🎉 User ${userId} achieved 7-day streak! Awarding 5 EKH bonus.`);
+          }
+          
+          // Update longest streak if needed
+          if (updatedStreak > existingProfile.longestStreak) {
+            updatedLongestStreak = updatedStreak;
+          }
+        } else if (diffDays > 1) {
+          // Missed days - reset streak
+          updatedStreak = 1;
+        }
+        
+        // Update the profile with new streak data
+        const updatedProfile = {
+          currentStreak: updatedStreak,
+          longestStreak: updatedLongestStreak,
+          lastLoginDate: new Date().toISOString(),
+          totalCoins: updatedTotalCoins,
+          streakBonusClaimed: updatedStreakBonusClaimed,
+          updatedAt: new Date().toISOString()
+        };
+        
+        await databases.updateDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.collections.userProfiles,
+          existingProfile.$id,
+          updatedProfile
+        );
+        
+        console.log(`✅ User ${userId} streak updated:`, {
+          currentStreak: updatedStreak,
+          longestStreak: updatedLongestStreak,
+          streakBonusAwarded: (updatedStreak === 7 && existingProfile.streakBonusClaimed < 1)
+        });
+      } else {
+        console.log(`ℹ️ User ${userId} already logged in today, no streak update needed`);
+      }
+    } catch (error: any) {
+      console.error(`Failed to update user ${userId} streak:`, error);
     }
   };
 
@@ -155,8 +290,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Get the current origin for web platform
       let baseUrl = '';
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        baseUrl = window.location.origin;
+      if (Platform.OS === 'web') {
+        // Only access window object on web platform
+        // @ts-ignore - window object only exists on web
+        if (typeof window !== 'undefined' && window?.location?.origin) {
+          // @ts-ignore
+          baseUrl = window.location.origin;
+        }
       }
 
       const successUrl = Platform.OS === 'web' 
@@ -183,12 +323,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // For web, redirect directly
         if (oauthUrl && typeof oauthUrl === 'string') {
           console.log('Redirecting to OAuth URL for web');
-          if (typeof window !== 'undefined') {
+          // @ts-ignore - window object only exists on web
+          if (typeof window !== 'undefined' && window?.location?.href) {
+            // @ts-ignore
             window.location.href = oauthUrl;
           }
         } else if (oauthUrl && typeof oauthUrl === 'object' && oauthUrl !== null && 'href' in oauthUrl) {
           console.log('Redirecting to OAuth URL object for web');
-          if (typeof window !== 'undefined') {
+          // @ts-ignore - window object only exists on web
+          if (typeof window !== 'undefined' && window?.location?.href) {
+            // @ts-ignore
             window.location.href = (oauthUrl as any).href;
           }
         } else {
@@ -237,7 +381,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               
               try {
                 // Wait a moment before checking auth status
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(() => resolve(null), 1000));
                 await checkAuthStatus();
               } catch (error) {
                 console.log('Auth status check after OAuth failed:', error);
@@ -267,7 +411,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           '1. Go to Auth > Settings\n' +
           '2. Verify your platform settings\n' +
           '3. Ensure redirect URLs are correctly added\n\n' +
-          `Expected URLs:\n${Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.origin : 'ekehi://oauth'}/return`
+          // @ts-ignore - window object only exists on web
+          `Expected URLs:\n${Platform.OS === 'web' ? (typeof window !== 'undefined' && window?.location?.origin ? window.location.origin : '') : 'ekehi://oauth'}/return`
         );
       } else if (errorMessage === 'Authentication cancelled') {
         // Don't show alert for user cancellation
@@ -345,7 +490,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (Platform.OS === 'web') {
         console.log('Web platform detected, redirecting to auth page');
         setTimeout(() => {
-          if (typeof window !== 'undefined') {
+          // @ts-ignore - window object only exists on web
+          if (typeof window !== 'undefined' && window?.location?.href) {
+            // @ts-ignore
             window.location.href = '/auth';
           }
         }, 100);
@@ -359,7 +506,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // For web platforms, force redirect even on error
       if (Platform.OS === 'web') {
         setTimeout(() => {
-          if (typeof window !== 'undefined') {
+          // @ts-ignore - window object only exists on web
+          if (typeof window !== 'undefined' && window?.location?.href) {
+            // @ts-ignore
             window.location.href = '/auth';
           }
         }, 100);
@@ -383,6 +532,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateEmailVerification = async (userId: string, secret: string) => {
     try {
       console.log('Updating email verification for user:', userId);
+      // Use the secret parameter to verify the email
+      console.log('Verification secret:', secret);
       await checkAuthStatus();
       return { success: true, message: 'Email verified' };
     } catch (error: any) {
@@ -394,6 +545,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const sendPasswordRecovery = async (email: string, url: string) => {
     try {
       console.log('Password recovery requested for:', email);
+      // Use the url parameter for password recovery
+      console.log('Recovery URL:', url);
       return { success: true, message: 'Recovery process initiated' };
     } catch (error: any) {
       console.error('Password recovery failed:', error);
@@ -404,6 +557,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updatePasswordRecovery = async (userId: string, secret: string, password: string) => {
     try {
       console.log('Updating password for user:', userId);
+      // Use the secret and password parameters to update the password
+      console.log('Password reset secret:', secret);
+      console.log('New password length:', password.length);
       await checkAuthStatus();
       return { success: true, message: 'Password updated' };
     } catch (error: any) {

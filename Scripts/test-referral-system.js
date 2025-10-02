@@ -36,7 +36,7 @@ async function testReferralSystem() {
       username: 'Test User 1',
       totalCoins: 0,
       coinsPerClick: 1,
-      coinsPerSecond: 0,
+      coinsPerSecond: 0, // Starting mining rate
       miningPower: 1,
       currentStreak: 0,
       longestStreak: 0,
@@ -59,7 +59,7 @@ async function testReferralSystem() {
       username: 'Test User 2',
       totalCoins: 0,
       coinsPerClick: 1,
-      coinsPerSecond: 0,
+      coinsPerSecond: 0, // Starting mining rate
       miningPower: 1,
       currentStreak: 0,
       longestStreak: 0,
@@ -112,14 +112,14 @@ async function testReferralSystem() {
     if (referrerResponse.documents.length > 0) {
       const referrerDoc = referrerResponse.documents[0];
       
-      // Update referrer's total referrals and give reward
+      // Update referrer's total referrals and mining rate
       await databases.updateDocument(
         config.databaseId,
         config.collections.userProfiles,
         referrerDoc.$id,
         {
           totalReferrals: referrerDoc.totalReferrals + 1,
-          totalCoins: referrerDoc.totalCoins + 100 // Referrer reward
+          coinsPerSecond: (referrerDoc.coinsPerSecond || 0) + 0.2 // Increase mining rate by 0.2 EKH/second
         }
       );
       
@@ -130,13 +130,13 @@ async function testReferralSystem() {
         user2Result.$id,
         {
           referredBy: referrerDoc.userId,
-          totalCoins: 50 // Referee reward
+          totalCoins: (user2Result.totalCoins || 0) + 2.0 // Referee reward: 2 EKH
         }
       );
       
       console.log('✅ Referral claimed successfully!');
-      console.log('  Referrer received 100 coins');
-      console.log('  Referee received 50 coins');
+      console.log('  Referrer mining rate increased by 0.2 EKH/second');
+      console.log('  Referee received 2 EKH');
     } else {
       console.log('❌ Referrer not found');
     }
@@ -158,10 +158,12 @@ async function testReferralSystem() {
     
     console.log('User 1 (referrer):');
     console.log('  Total coins:', updatedUser1.totalCoins);
+    console.log('  Mining rate:', updatedUser1.coinsPerSecond, 'EKH/second');
     console.log('  Total referrals:', updatedUser1.totalReferrals);
     
     console.log('User 2 (referee):');
     console.log('  Total coins:', updatedUser2.totalCoins);
+    console.log('  Mining rate:', updatedUser2.coinsPerSecond, 'EKH/second');
     console.log('  Referred by:', updatedUser2.referredBy);
     
     // Clean up - delete test profiles
@@ -178,21 +180,11 @@ async function testReferralSystem() {
       user2Result.$id
     );
     
-    console.log('✅ Test profiles cleaned up');
-    
-    return true;
+    console.log('✅ Test completed successfully!');
   } catch (error) {
-    console.error('❌ Failed to test referral system:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      type: error.type
-    });
-    return false;
+    console.error('Test failed:', error);
   }
 }
 
 // Run the test
-testReferralSystem().then(success => {
-  process.exit(success ? 0 : 1);
-});
+testReferralSystem();

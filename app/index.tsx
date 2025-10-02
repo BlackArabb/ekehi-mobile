@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pickaxe, Coins, Users, TrendingUp, Gift, Shield } from 'lucide-react-native';
@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function HomeScreen() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const [showTestButton, setShowTestButton] = useState(__DEV__); // Only show in development
+  
   const [manualLoading, setManualLoading] = useState(false);
   const [hasVisited, setHasVisited] = useState(false);
   const navigationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -271,26 +271,14 @@ export default function HomeScreen() {
                 colors={['#ffa000', '#ff8f00']}
                 style={styles.buttonGradient}
               >
-                <Text style={styles.buttonText}>
-                  {actualIsLoading ? 'Loading...' : user ? 'Go to Mining Dashboard' : 'Get Started Now'}
-                </Text>
+                {actualIsLoading || user ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <Text style={styles.buttonText}>
+                    Get Started Now
+                  </Text>
+                )}
               </LinearGradient>
-            </TouchableOpacity>
-
-            {showTestButton && (
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={() => router.push('/test-deeplink')}
-              >
-                <Text style={styles.buttonText}>Test Deep Link</Text>
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => router.push('/auth')}
-            >
-              <Text style={styles.buttonText}>Go to Auth</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -496,6 +484,8 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 32,
     alignItems: 'center',
+    justifyContent: 'center',
+    height: 54, // Maintain consistent height
   },
   buttonText: {
     fontSize: 18,

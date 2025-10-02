@@ -36,7 +36,14 @@ export default function OAuthReturnPage() {
         // Get current URL to extract OAuth parameters
         let currentUrl = '';
         try {
-          currentUrl = window.location.href;
+          // @ts-ignore - window object only exists on web platforms
+          if (typeof window !== 'undefined' && window?.location?.href) {
+            // @ts-ignore - accessing window.location.href on web
+            currentUrl = window.location.href;
+          } else {
+            // Fallback for non-web platforms
+            currentUrl = await Linking.getInitialURL() || '';
+          }
         } catch (e) {
           // Fallback for non-web platforms
           currentUrl = await Linking.getInitialURL() || '';

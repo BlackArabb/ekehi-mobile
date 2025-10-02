@@ -10,10 +10,21 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ReferralProvider } from '@/contexts/ReferralContext';
 import { PresaleProvider } from '@/contexts/PresaleContext';
 import { useRouter } from 'expo-router';
-import CustomSplashScreen from './splash';
+import { initializeDeepLinking } from '@/utils/deepLinking';
+import { View, StyleSheet, Image } from 'react-native';
+import PulseLoader from '@/components/PulseLoader';
+import SplashPNG from '../assets/splash.png';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync();
+
+// Simple loading component to show while app is initializing
+const AppLoadingScreen = () => (
+  <View style={styles.loadingContainer}>
+    <Image source={SplashPNG} resizeMode="contain" style={{ width: 400, height: 400 }} />
+    <PulseLoader size={14} />
+  </View>
+);
 
 // Create a component that handles background authentication
 function AuthenticatedApp() {
@@ -89,20 +100,22 @@ function AuthenticatedApp() {
       
       return () => clearTimeout(timer);
     }
+    // Return undefined explicitly to satisfy TypeScript
+    return undefined;
   }, [backgroundAuthChecked, isLoading, user, router, segments]);
 
-  // Show custom splash screen while authentication is being checked
+  // Show loading screen while authentication is being checked
   if (!backgroundAuthChecked || isLoading) {
-    return <CustomSplashScreen />;
+    return <AppLoadingScreen />;
   }
 
   return (
     <>
-      <StatusBar style="light" backgroundColor="#1a1a2e" />
+      <StatusBar style="light" backgroundColor="#000000" />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#1a1a2e' },
+          contentStyle: { backgroundColor: '#000000' },
         }}
       >
         <Stack.Screen name="index" />
@@ -130,6 +143,14 @@ function AuthenticatedApp() {
 export default function RootLayout() {
   const [appReady, setAppReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
+
+  // Initialize deep linking
+  useEffect(() => {
+    const cleanup = initializeDeepLinking();
+    return () => {
+      cleanup();
+    };
+  }, []);
 
   // Emergency timeout to ensure app never gets stuck on splash screen
   useEffect(() => {
@@ -164,7 +185,7 @@ export default function RootLayout() {
 
   if ((!appReady && !forceReady)) {
     console.log('⏳ Waiting for app to be ready...', { appReady, forceReady });
-    return <CustomSplashScreen />;
+    return <AppLoadingScreen />;
   }
 
   console.log('🚀 Rendering app layout with authentication provider');
@@ -187,3 +208,14 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  
+});

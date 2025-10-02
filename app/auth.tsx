@@ -11,28 +11,33 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isEmailAuthLoading, setIsEmailAuthLoading] = useState(false); // Separate loading state for email auth
+  const [isGoogleAuthLoading, setIsGoogleAuthLoading] = useState(false); // Separate loading state for Google auth
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [nameError, setNameError] = useState('');
   const [autoFilled, setAutoFilled] = useState(false);
+  const [autoLoginAttempted, setAutoLoginAttempted] = useState(false);
+  const [signupErrorOccurred, setSignupErrorOccurred] = useState(false); // New state to track signup errors
   const router = useRouter();
   const { signIn, signInWithEmail, signUp } = useAuth();
 
   // Detect auto-filled credentials
   useEffect(() => {
     // Check if both email and password are filled (likely from auto-fill)
-    if (email && password && !autoFilled && !isLoading) {
+    // Only attempt auto-login if we haven't had a signup error
+    if (email && password && !autoFilled && !autoLoginAttempted && !isEmailAuthLoading && !isGoogleAuthLoading && !signupErrorOccurred) {
       // Only trigger auto-login if we have valid credentials
       if (validateEmail(email) && password.length >= 6) {
         setAutoFilled(true);
+        setAutoLoginAttempted(true);
         // Small delay to ensure fields are properly populated
         setTimeout(() => {
           handleEmailAuth();
         }, 300);
       }
     }
-  }, [email, password, autoFilled, isLoading]);
+  }, [email, password, autoFilled, autoLoginAttempted, isEmailAuthLoading, isGoogleAuthLoading, signupErrorOccurred]);
 
   const validateForm = () => {
     // Reset errors
@@ -82,18 +87,29 @@ export default function AuthPage() {
 
   const handleEmailAuth = async () => {
     if (!validateForm()) {
+      // Reset auto-filled state if form validation fails
+      if (autoFilled) {
+        setAutoFilled(false);
+      }
       return;
     }
 
-    setIsLoading(true);
+    setIsEmailAuthLoading(true);
     try {
       if (isSignUp) {
         await signUp(email, password, name);
         Alert.alert('Success', 'Account created successfully! Please check your email for verification instructions.');
         router.replace('/(tabs)/mine');
+        // Reset error state on successful signup
+        setSignupErrorOccurred(false);
       } else {
         await signInWithEmail(email, password);
         router.replace('/(tabs)/mine');
+      }
+      // Reset auto-filled state on successful authentication
+      if (autoFilled) {
+        setAutoFilled(false);
+        setAutoLoginAttempted(false);
       }
     } catch (error: any) {
       console.error('Email auth error:', error);
@@ -110,13 +126,19 @@ export default function AuthPage() {
       
       Alert.alert('Authentication Error', errorMessage);
       setAutoFilled(false); // Reset auto-filled state on error
+      setAutoLoginAttempted(false); // Reset auto-login attempted state on error
+      
+      // Set signup error state if this was a signup attempt
+      if (isSignUp) {
+        setSignupErrorOccurred(true);
+      }
     } finally {
-      setIsLoading(false);
+      setIsEmailAuthLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
+    setIsGoogleAuthLoading(true);
     try {
       await signIn();
       // Navigation will be handled by the OAuth flow
@@ -137,7 +159,7 @@ export default function AuthPage() {
     } finally {
       // Ensure loading state is reset even if there's an error
       setTimeout(() => {
-        setIsLoading(false);
+        setIsGoogleAuthLoading(false);
       }, 1000);
     }
   };
@@ -217,11 +239,11 @@ export default function AuthPage() {
               </View>
 
               <TouchableOpacity
-                style={[styles.button, isLoading && styles.buttonDisabled]}
+                style={[styles.button, isEmailAuthLoading && styles.buttonDisabled]}
                 onPress={handleEmailAuth}
-                disabled={isLoading}
+                disabled={isEmailAuthLoading}
               >
-                {isLoading ? (
+                {isEmailAuthLoading ? (
                   <LoadingDots color="#000000" size={8} />
                 ) : (
                   <Text style={styles.buttonText}>
@@ -237,11 +259,11 @@ export default function AuthPage() {
               </View>
 
               <TouchableOpacity
-                style={[styles.googleButton, isLoading && styles.buttonDisabled]}
+                style={[styles.googleButton, isGoogleAuthLoading && styles.buttonDisabled]}
                 onPress={handleGoogleSignIn}
-                disabled={isLoading}
+                disabled={isGoogleAuthLoading}
               >
-                {isLoading ? (
+                {isGoogleAuthLoading ? (
                   <LoadingDots color="#000000" size={8} />
                 ) : (
                   <Text style={styles.googleButtonText}>
@@ -259,6 +281,8 @@ export default function AuthPage() {
                 setEmailError('');
                 setPasswordError('');
                 setNameError('');
+                // Reset signup error state when switching modes
+                setSignupErrorOccurred(false);
               }}
             >
               <Text style={styles.switchModeText}>

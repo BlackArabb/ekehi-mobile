@@ -12,7 +12,7 @@ Custom Splash Screen for Ekehi Network App:
 3. Text styling:
    - "ekehi" in white with shadow effect
    - "network" in orange (#ffa000) with shadow effect
-4. Background: Dark blue gradient (#1a1a2e to #0f3460)
+4. Background: Black (#000000)
 
 Implementation plan:
 - Replace assets/splash.png with new 100x100 logo version
@@ -46,7 +46,7 @@ async function createSplashScreen() {
         width: 1000,
         height: 1000,
         channels: 4,
-        background: { r: 26, g: 26, b: 46, alpha: 1 } // #1a1a2e
+        background: { r: 0, g: 0, b: 0, alpha: 1 } // #000000 (black)
       }
     });
     

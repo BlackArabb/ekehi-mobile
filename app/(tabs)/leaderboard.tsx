@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -8,7 +8,12 @@ import { databases, appwriteConfig } from '@/config/appwrite';
 import { Query } from 'appwrite';
 import { LeaderboardEntry } from '@/types';
 import { Trophy, Crown, Medal, Award, RefreshCw, Star, Zap, Flame } from 'lucide-react-native';
-import JellyTriangleLoader from '@/components/JellyTriangleLoader';
+import PulseLoader from '@/components/PulseLoader';
+
+// Import trophy images with correct relative paths
+import Trophy1 from '../../assets/trophy/trophy1.png';
+import Trophy2 from '../../assets/trophy/trophy2.png';
+import Trophy3 from '../../assets/trophy/trophy3.png';
 
 export default function LeaderboardPage() {
   const router = useRouter();
@@ -63,48 +68,48 @@ export default function LeaderboardPage() {
   };
 
   const getCraftRankBadge = (rank: number) => {
-    const badgeProps = {
-      size: rank === 1 ? 32 : rank <= 3 ? 28 : 24,
-      style: [
-        styles.craftBadge,
-        rank === 1 && styles.championBadge,
-        rank === 2 && styles.silverBadge,
-        rank === 3 && styles.bronzeBadge,
-        rank > 3 && styles.regularBadge
-      ]
-    };
-
+    // For top 3 ranks, use trophy images with larger size
+    if (rank === 1) {
+      return (
+        <View style={styles.trophyBadgeContainer}>
+          <Image source={Trophy1} style={styles.boldTrophyImage} resizeMode="contain" />
+        </View>
+      );
+    }
+    
+    if (rank === 2) {
+      return (
+        <View style={styles.trophyBadgeContainer}>
+          <Image source={Trophy2} style={styles.boldTrophyImage} resizeMode="contain" />
+        </View>
+      );
+    }
+    
+    if (rank === 3) {
+      return (
+        <View style={styles.trophyBadgeContainer}>
+          <Image source={Trophy3} style={styles.boldTrophyImage} resizeMode="contain" />
+        </View>
+      );
+    }
+    
+    // For ranks beyond 3, use the original badge design
     return (
       <LinearGradient
-        colors={
-          rank === 1 ? ['#FFD700', '#FFA500', '#FF8C00'] :
-          rank === 2 ? ['#C0C0C0', '#A8A8A8', '#808080'] :
-          rank === 3 ? ['#CD7F32', '#B87333', '#8B4513'] :
-          ['#4A5568', '#2D3748', '#1A202C']
-        }
-        style={badgeProps.style}
+        colors={['#4A5568', '#2D3748', '#1A202C']}
+        style={[styles.craftBadge, styles.regularBadge]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.craftBadgeInner}>
-          {rank === 1 && <Crown size={20} color="#FFFFFF" />}
-          {rank === 2 && <Medal size={18} color="#FFFFFF" />}
-          {rank === 3 && <Award size={18} color="#FFFFFF" />}
-          {rank > 3 && (
-            <Text style={[styles.rankText, { fontSize: rank <= 10 ? 14 : 12 }]}>
-              {rank}
-            </Text>
-          )}
+          <Text style={[styles.rankText, { fontSize: rank <= 10 ? 14 : 12 }]}>
+            {rank}
+          </Text>
         </View>
         
         {/* Craft-like decorative elements */}
         <View style={styles.craftDecoration}>
-          {rank <= 3 && (
-            <>
-              <View style={[styles.craftGem, { backgroundColor: rank === 1 ? '#FF6B6B' : rank === 2 ? '#4ECDC4' : '#45B7D1' }]} />
-              <View style={[styles.craftGem, { backgroundColor: rank === 1 ? '#4ECDC4' : rank === 2 ? '#45B7D1' : '#FF6B6B', right: 2, top: 12 }]} />
-            </>
-          )}
+          <View style={[styles.craftGem, { backgroundColor: '#4ECDC4', right: 2, top: 12 }]} />
         </View>
       </LinearGradient>
     );
@@ -122,7 +127,7 @@ export default function LeaderboardPage() {
     return (
       <LinearGradient colors={['#0F172A', '#1E293B', '#334155']} style={styles.container}>
         <View style={styles.loadingContainer}>
-          <JellyTriangleLoader size={40} color="#ffa000" speed={1750} />
+          <PulseLoader />
         </View>
       </LinearGradient>
     );
@@ -174,9 +179,6 @@ export default function LeaderboardPage() {
               <View style={styles.podiumArrangement}>
                 {/* Second Place */}
                 <View style={[styles.podiumSlot, styles.secondSlot]}>
-                  <View style={styles.podiumPlatform}>
-                    <Text style={styles.podiumNumber}>2</Text>
-                  </View>
                   {getCraftRankBadge(2)}
                   <Text style={styles.championName} numberOfLines={1}>
                     {leaderboard[1]?.username}
@@ -189,12 +191,6 @@ export default function LeaderboardPage() {
 
                 {/* First Place - Champion */}
                 <View style={[styles.podiumSlot, styles.championSlot]}>
-                  <View style={styles.crownContainer}>
-                    <Crown size={24} color="#FFD700" />
-                  </View>
-                  <View style={styles.podiumPlatform}>
-                    <Text style={styles.podiumNumber}>1</Text>
-                  </View>
                   {getCraftRankBadge(1)}
                   <Text style={[styles.championName, styles.championNameGold]} numberOfLines={1}>
                     {leaderboard[0]?.username}
@@ -208,9 +204,6 @@ export default function LeaderboardPage() {
 
                 {/* Third Place */}
                 <View style={[styles.podiumSlot, styles.thirdSlot]}>
-                  <View style={styles.podiumPlatform}>
-                    <Text style={styles.podiumNumber}>3</Text>
-                  </View>
                   {getCraftRankBadge(3)}
                   <Text style={styles.championName} numberOfLines={1}>
                     {leaderboard[2]?.username}
@@ -264,19 +257,19 @@ export default function LeaderboardPage() {
                         <View style={styles.rankLeft}>
                           <View style={styles.rankBadgeContainer}>
                             {getCraftRankBadge(entry.rank)}
-                          </View>
+                          </View><View style={[styles.tierBadge, { backgroundColor: tier.color + '20' }]}>
+                                <TierIcon size={12} color={tier.color} />
+                                <Text style={[styles.tierText, { color: tier.color }]}>
+                                  {tier.name}
+                                </Text>
+                              </View>
                           
                           <View style={styles.userDetails}>
                             <View style={styles.userNameRow}>
                               <Text style={styles.userName} numberOfLines={1}>
                                 {entry.username}
                               </Text>
-                              <View style={[styles.tierBadge, { backgroundColor: tier.color + '20' }]}>
-                                <TierIcon size={12} color={tier.color} />
-                                <Text style={[styles.tierText, { color: tier.color }]}>
-                                  {tier.name}
-                                </Text>
-                              </View>
+                             
                             </View>
                             
                             <View style={styles.userStats}>
@@ -421,23 +414,7 @@ const styles = StyleSheet.create({
     top: -20,
     zIndex: 4,
   },
-  podiumPlatform: {
-    width: 40,
-    height: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  podiumNumber: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
+  
   championName: {
     fontSize: 14,
     fontWeight: '600',
@@ -538,6 +515,22 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 
+  // Trophy Badge Styles
+  trophyBadgeContainer: {
+    width: 65,
+    height: 65,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  boldTrophyImage: {
+    width: 75,
+    height: 75,
+  },
+  trophyImage: {
+    width: 100,
+    height: 100,
+  },
+
   // Rankings Section
   rankingsSection: {
     flex: 1,
@@ -627,6 +620,7 @@ const styles = StyleSheet.create({
   },
   rankRight: {
     alignItems: 'flex-end',
+    marginRight: 5,
   },
   earningsAmount: {
     fontSize: 18,

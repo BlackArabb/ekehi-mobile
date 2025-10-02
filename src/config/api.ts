@@ -7,13 +7,13 @@
 
 export const API_CONFIG = {
   // Appwrite Configuration
-  APPWRITE_ENDPOINT: 'https://cloud.appwrite.io/v1',
+  APPWRITE_ENDPOINT: 'https://fra.cloud.appwrite.io/v1',
   APPWRITE_PROJECT_ID: '68c2dd6e002112935ed2',
   
   // Ekehi Network Blockchain API Configuration
   EKEHI_NETWORK: {
-    BASE_URL: '', // Set to your Ekehi Network API endpoint
-    API_KEY: '', // Set your API key
+    BASE_URL: 'https://api.ekehi.network/v1',
+    API_KEY: 'YOUR_PRODUCTION_API_KEY_HERE',
     CHAIN_ID: 'ekehi-mainnet',
     TOKEN_CONTRACT_ADDRESS: '0x0000000000000000000000000000000000000000' // Replace with actual contract address
   },
@@ -23,15 +23,15 @@ export const API_CONFIG = {
   
   // Collection IDs (these will be actual collection IDs from Appwrite)
   COLLECTIONS: {
-    USERS: 'users_collection_id',
-    USER_PROFILES: 'user_profiles_collection_id',
-    MINING_SESSIONS: 'mining_sessions_collection_id',
-    SOCIAL_TASKS: 'social_tasks_collection_id',
-    USER_SOCIAL_TASKS: 'user_social_tasks_collection_id',
-    ACHIEVEMENTS: 'achievements_collection_id',
-    USER_ACHIEVEMENTS: 'user_achievements_collection_id',
-    PRESALE_PURCHASES: 'presale_purchases_collection_id',
-    AD_VIEWS: 'ad_views_collection_id'
+    USERS: 'users',
+    USER_PROFILES: 'user_profiles',
+    MINING_SESSIONS: 'mining_sessions',
+    SOCIAL_TASKS: 'social_tasks',
+    USER_SOCIAL_TASKS: 'user_social_tasks',
+    ACHIEVEMENTS: 'achievements',
+    USER_ACHIEVEMENTS: 'user_achievements',
+    PRESALE_PURCHASES: 'presale_purchases',
+    AD_VIEWS: 'ad_views'
   },
   
   // Authentication Methods

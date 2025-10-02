@@ -3,8 +3,6 @@ module.exports = function(api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      // Required for expo-router
-      
       // Required for react-native-reanimated
       'react-native-reanimated/plugin',
     ],
