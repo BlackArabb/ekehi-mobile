@@ -27,6 +27,7 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 - Visual click effects with EKH amount shown
 - Mining rate based on user level and power
 - Daily mining limit with progress bar
+- **Dynamic hourly mining rate display**
 
 **Technical Implementation**:
 - Implemented in `app/(tabs)/mine.tsx`
@@ -34,6 +35,7 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 - Haptics feedback with [expo-haptics](file://c:\Users\ARQAM%20TV\Downloads\mobile\node_modules\expo-haptics)
 - Tracks session coins and clicks
 - Visual effects with `LinearGradient` and position animation
+- **Dynamic mining rate calculation based on user profile data**
 
 **UI/UX**:
 - Large circular mining button with pickaxe icon
@@ -41,6 +43,7 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 - Glow effect on interaction
 - Session stats showing earned coins and taps
 - Progress bar for daily mining limit
+- **Personalized hourly mining rate display (EKH/hour)**
 
 ### 3.2 Social Task Engine
 **Description**: A system that allows users to complete platform-specific tasks (Twitter, YouTube, Telegram, Discord) for bonus rewards.

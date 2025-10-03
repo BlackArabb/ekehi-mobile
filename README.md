@@ -1,8 +1,10 @@
-# Ekehi Network Mobile App
+# Ekehi Network Mobile App & Landing Page
 
 ## Overview
 
 A React Native mobile application for the Ekehi Network cryptocurrency mining platform, featuring an interactive tap-to-mine system, social task engine, referral program, token presale, wallet integration, and achievement system.
+
+The project also includes a modern, responsive landing page built with Next.js for web presence and marketing.
 
 ## 🚀 Features
 
@@ -11,6 +13,7 @@ A React Native mobile application for the Ekehi Network cryptocurrency mining pl
 - **⚡ Mining Power System**: Upgradeable mining power with automatic calculations
 - **🔥 Daily Streak Bonuses**: Consecutive login rewards and streak multipliers
 - **📊 Real-time Analytics**: Live mining statistics and performance tracking
+- **🔄 Dynamic Mining Rates**: Personalized hourly mining rates based on user profile data
 
 ### Social & Community Features
 - **📱 Social Task Engine**: Complete tasks on Twitter, YouTube, Telegram, and Discord for rewards
@@ -83,6 +86,11 @@ A React Native mobile application for the Ekehi Network cryptocurrency mining pl
 
 ```
 ekehi-mobile/
+├── Ekehi-LandingPage/      # Next.js landing page
+│   ├── components/         # Modern UI components
+│   ├── pages/              # Next.js pages
+│   ├── public/             # Static assets
+│   └── styles/             # Global CSS styles
 ├── app/                    # Expo Router app directory
 │   ├── (tabs)/            # Tab navigation screens
 │   ├── oauth/             # OAuth handling

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput, Share, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,7 +16,12 @@ import LoadingDots from '@/components/LoadingDots';
 export default function ProfilePage() {
   const router = useRouter();
   const { user, signOut } = useAuth();
-  const { profile: miningProfile, isLoading: isMiningLoading, refreshProfile } = useMining();
+  const { 
+    profile: miningProfile, 
+    isLoading: isMiningLoading, 
+    silentRefreshProfile, 
+    updateCoinsOnly 
+  } = useMining();
   const profile: UserProfile | null = miningProfile;
   const insets = useSafeAreaInsets();
   const [isEditing, setIsEditing] = useState(false);
@@ -31,6 +36,37 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Create a separate state for the rapidly changing Total EKH value
+  const [totalEKH, setTotalEKH] = useState<number>(0);
+  const totalEKHRef = useRef<number>(0);
+  
+  // Create refs to track when we should update the Total EKH value
+  const lastTotalEKHUpdateRef = useRef<number>(0);
+
+  // Function to update only the Total EKH value efficiently
+  const updateTotalEKH = useCallback((newTotal: number) => {
+    const now = Date.now();
+    
+    // Debounce updates to prevent too-frequent changes
+    if (now - lastTotalEKHUpdateRef.current < 100) {
+      return;
+    }
+    
+    // Only update if the value actually changed
+    if (totalEKHRef.current !== newTotal) {
+      totalEKHRef.current = newTotal;
+      setTotalEKH(newTotal);
+      lastTotalEKHUpdateRef.current = now;
+    }
+  }, []);
+
+  // Watch for profile changes and update Total EKH accordingly
+  useEffect(() => {
+    if (profile?.totalCoins !== undefined) {
+      updateTotalEKH(profile.totalCoins);
+    }
+  }, [profile?.totalCoins, updateTotalEKH]);
+
   useEffect(() => {
     if (!user) {
       // Add a small delay to ensure router is ready
@@ -39,15 +75,25 @@ export default function ProfilePage() {
       }, 100);
       return;
     }
+    
     // Initialize username for editing
     if (profile?.username) {
       setNewUsername(profile.username);
     }
+    
+    // Initialize Total EKH value
+    if (profile?.totalCoins !== undefined) {
+      setTotalEKH(profile.totalCoins);
+      totalEKHRef.current = profile.totalCoins;
+    }
+    
     // Profile is already loaded by MiningContext
     
     // Load saved settings
     loadSavedSettings();
-  }, [user, profile, router]);
+    
+    // Profile is already loaded by MiningContext
+  }, [user, profile?.username, profile, router]); // Include profile to track changes
 
   const loadSavedSettings = async () => {
     try {
@@ -89,7 +135,7 @@ export default function ProfilePage() {
       );
       
       // Refresh profile to get updated data
-      refreshProfile();
+      silentRefreshProfile();
       setIsEditing(false);
       Alert.alert('Success', 'Username updated successfully!');
     } catch (error) {
@@ -290,6 +336,12 @@ export default function ProfilePage() {
     setConfirmPassword('');
   };
 
+  // Use silent refresh for real-time updates without visual feedback
+  const handleSilentRefresh = useCallback(() => {
+    console.log('🔄 Silent profile refresh triggered');
+    silentRefreshProfile();
+  }, [silentRefreshProfile]);
+
   const handleSignOut = () => {
     Alert.alert(
       'Sign Out',
@@ -384,7 +436,7 @@ export default function ProfilePage() {
           <Text style={styles.loadingText}>Profile not found</Text>
           <TouchableOpacity 
             style={styles.retryButton}
-            onPress={refreshProfile}
+            onPress={silentRefreshProfile}
           >
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
@@ -423,7 +475,7 @@ export default function ProfilePage() {
         <View style={styles.header}>
           <View style={styles.headerContent}>
             <Text style={styles.title}>Profile</Text>
-            <TouchableOpacity style={styles.refreshButton} onPress={refreshProfile}>
+            <TouchableOpacity style={styles.refreshButton} onPress={handleSilentRefresh}>
               <Trophy size={20} color="#ffffff" />
             </TouchableOpacity>
           </View>
@@ -491,17 +543,18 @@ export default function ProfilePage() {
               )}
             </View>
 
-            {/* Stats Grid */}
+            {/* Stats Grid - Will update individually */}
             <View style={styles.statsGrid}>
               <View style={styles.statCard}>
                 <Coins size={24} color="#ffa000" />
-                <Text style={styles.statValue}>{formatNumber(profile?.totalCoins)}</Text>
+                {/* Use the optimized Total EKH state */}
+                <Text style={styles.statValue}>{formatNumber(totalEKH)}</Text>
                 <Text style={styles.statLabel}>Total EKH</Text>
               </View>
               
               <View style={styles.statCard}>
                 <Zap size={24} color="#8b5cf6" />
-                <Text style={styles.statValue}>{(2 / 24).toFixed(4)}</Text>
+                <Text style={styles.statValue}>{profile?.dailyMiningRate ? (profile.dailyMiningRate / 24).toFixed(4) : '0.0000'}</Text>
                 <Text style={styles.statLabel}>Mining Rate</Text>
                 <Text style={styles.statSubLabel}>EKH/hour</Text>
               </View>
@@ -520,43 +573,19 @@ export default function ProfilePage() {
               
               <View style={styles.statCard}>
                 <Trophy size={24} color="#6366f1" />
-                <Text style={styles.statValue}>{miningEfficiency}%</Text>
+                <Text style={styles.statValue}>
+                  {profile?.miningPower && profile?.dailyMiningRate 
+                    ? ((profile.dailyMiningRate / profile.miningPower) * 100).toFixed(1) 
+                    : '0'}
+                  %
+                </Text>
                 <Text style={styles.statLabel}>Efficiency</Text>
               </View>
             </View>
           </LinearGradient>
         </View>
 
-        {/* Daily Mining Progress */}
-        <View style={styles.profileContainer}>
-          <LinearGradient
-            colors={['rgba(147, 51, 234, 0.2)', 'rgba(168, 85, 247, 0.2)']}
-            style={styles.profileCard}
-          >
-            <View style={styles.miningProgressHeader}>
-              <Text style={styles.miningProgressTitle}>Daily Mining Progress</Text>
-              <Text style={styles.miningProgressValue}>
-                {profile?.todayEarnings?.toFixed(2) || '0.00'} / {profile?.maxDailyEarnings?.toFixed(2) || '0.00'} EKH
-              </Text>
-            </View>
-            <View style={styles.progressBarBackground}>
-              <View 
-                style={[
-                  styles.progressBarFill, 
-                  { 
-                    backgroundColor: '#8b5cf6',
-                    width: `${dailyProgress}%`
-                  }
-                ]} 
-              />
-            </View>
-            <Text style={styles.progressText}>
-              {dailyProgress.toFixed(1)}% of daily limit reached
-            </Text>
-          </LinearGradient>
-        </View>
-
-        {/* Referral Section */}
+        {/* Referral Section - Will update individually */}
         <View style={styles.referralContainer}>
           <Text style={styles.referralTitle}>Invite Friends</Text>
           <Text style={styles.referralDescription}>
@@ -611,7 +640,7 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
-        {/* Referral Stats */}
+        {/* Referral Stats - Will update individually */}
         <View style={styles.referralStatsContainer}>
           <View style={styles.referralStat}>
             <Text style={styles.referralStatValue}>{profile?.totalReferrals || '0'}</Text>
@@ -627,37 +656,6 @@ export default function ProfilePage() {
           </View>
         </View>
 
-        {/* Achievement Highlights */}
-        <View style={styles.achievementsContainer}>
-          <Text style={styles.achievementsTitle}>Achievements</Text>
-          
-          <View style={styles.achievementsList}>
-            <View style={styles.achievementItem}>
-              <Text style={styles.achievementLabel}>Longest Streak</Text>
-              <Text style={styles.achievementValue}>{profile?.longestStreak || '0'} days</Text>
-            </View>
-            
-            <View style={styles.achievementItem}>
-              <Text style={styles.achievementLabel}>Lifetime Earnings</Text>
-              <Text style={styles.achievementValue}>{formatNumber(profile?.lifetimeEarnings)} EKH</Text>
-            </View>
-            
-            <View style={styles.achievementItem}>
-              <Text style={styles.achievementLabel}>Daily Mining Rate</Text>
-              <Text style={styles.achievementValue}>{(2 / 24).toFixed(4)} EKH/hour</Text>
-            </View>
-            
-            <View style={styles.achievementItem}>
-              <Text style={styles.achievementLabel}>Today's Earnings</Text>
-              <Text style={styles.achievementValue}>{profile?.todayEarnings?.toFixed(2) || '0.00'} EKH</Text>
-            </View>
-            
-            <View style={styles.achievementItem}>
-              <Text style={styles.achievementLabel}>Mining Efficiency</Text>
-              <Text style={styles.achievementValue}>{miningEfficiency}%</Text>
-            </View>
-          </View>
-        </View>
 
         {/* Account Settings */}
         <View style={styles.settingsContainer}>
@@ -1091,6 +1089,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.7)',
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 20,
+  },
+  
   achievementsContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 16,
@@ -1099,29 +1104,84 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 160, 0, 0.3)',
   },
+  
   achievementsTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#ffffff',
-    marginBottom: 16,
   },
-  achievementsList: {
-    gap: 12,
-  },
-  achievementItem: {
+  
+  achievementsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap: 16,
+  },
+  
+  achievementCard: {
+    width: '48%',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
   },
-  achievementLabel: {
-    fontSize: 16,
+  
+  achievementCardPurple: {
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  
+  achievementCardOrange: {
+    borderColor: 'rgba(255, 160, 0, 0.3)',
+  },
+  
+  achievementCardGreen: {
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  
+  achievementCardBlue: {
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  
+  achievementIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  
+  achievementCardLabel: {
+    fontSize: 14,
     color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    marginBottom: 8,
   },
-  achievementValue: {
-    fontSize: 16,
-    fontWeight: '600',
+  
+  achievementCardValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: 12,
   },
+  
+  achievementProgress: {
+    width: '100%',
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  
+  achievementProgressFill: {
+    height: '100%',
+    backgroundColor: '#ffa000',
+    borderRadius: 3,
+  },
+  
   settingsContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 16,

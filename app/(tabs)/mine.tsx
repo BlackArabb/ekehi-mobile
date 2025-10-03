@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Animated, Easing } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { Pickaxe, Coins, Flame, Users, TrendingUp, Zap, Trophy, Play, X, Share2, Store, Wallet, User } from 'lucide-react-native';
+import { Pickaxe, Coins, Flame, Users, TrendingUp, Trophy, Play, X, Share2, Store, Wallet, User } from 'lucide-react-native';
 import { useMining } from '@/contexts/MiningContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReferral } from '@/contexts/ReferralContext';
@@ -20,10 +20,13 @@ import { ID } from 'appwrite';
 import PulseLoader from '@/components/PulseLoader';
 import CircularProgressBar from '@/components/CircularProgressBar';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BUTTON_SIZE = Math.min(150, SCREEN_WIDTH * 0.4);
+
 export default function MinePage() {
     const router = useRouter();
     const { user, isLoading: authLoading } = useAuth();
-    const { profile, sessionCoins, sessionClicks, refreshProfile, startMiningSession, addCoins, endMiningSession } = useMining();
+    const { profile,  refreshProfile, startMiningSession, addCoins, endMiningSession } = useMining();
     const { referralCode, generateReferralLink } = useReferral();
     const insets = useSafeAreaInsets();
     const [showAchievements, setShowAchievements] = useState(false);
@@ -34,7 +37,7 @@ export default function MinePage() {
     const [finalRewardClaimed, setFinalRewardClaimed] = useState(false); // Track if final reward has been claimed
     const [showAdModal, setShowAdModal] = useState(false); // For ad bonus modal
     const [adCooldown, setAdCooldown] = useState(0); // Cooldown timer for ad watching
-    const [clickEffects, setClickEffects] = useState<Array<{ id: number; x: number; y: number }>>([]); // For click effects animation
+    const [clickEffects] = useState<Array<{ id: number; x: number; y: number }>>([]); // For click effects animation
     const [copied, setCopied] = useState(false); // For referral link copy status
 
     const { showNotification } = useNotifications();
@@ -480,22 +483,52 @@ export default function MinePage() {
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Professional User Card */}
-                <View style={styles.userCard}>
-                    <View style={styles.userCardGradient}>
-                        <View style={styles.userCardContent}>
-                            <View style={styles.userInfoContainer}>
-                                <View style={styles.userAvatar}>
-                                    <User size={20} color="#ffffff" />
+                {/* Modern Professional User Card */}
+                <LinearGradient
+                    colors={['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']}
+                    style={styles.userCardModern}
+                >
+                    <View style={styles.userCardInner}>
+                        {/* User Avatar with modern styling */}
+                        <View style={styles.userAvatarModern}>
+                            <LinearGradient
+                                colors={['#8b5cf6', '#a855f7']}
+                                style={styles.userAvatarGradient}
+                            >
+                                <User size={24} color="#ffffff" />
+                            </LinearGradient>
+                            <View style={styles.onlineIndicator} />
+                        </View>
+                        
+                        {/* User Info with better layout */}
+                        <View style={styles.userInfoModern}>
+                            <View style={styles.usernameContainerModern}>
+                                <Text style={styles.usernameModern} numberOfLines={1}>
+                                    {profile.username || user?.name || 'User'}
+                                </Text>
+                                <View style={styles.verificationBadge}>
+                                    <View style={styles.verificationIcon} />
                                 </View>
-                                <View style={styles.userInfo}>
-                                    <Text style={styles.username} numberOfLines={1}>{profile.username || user?.name || 'User'}</Text>
-                                    <Text style={styles.userScore}>{profile.totalCoins.toLocaleString()} EKH</Text>
-                                </View>
+                            </View>
+                            <Text style={styles.userScoreLabel}>Total Balance</Text>
+                            <Text style={styles.userScoreModern}>
+                                {profile.totalCoins.toLocaleString()} <Text style={styles.currencyLabel}>EKH</Text>
+                            </Text>
+                        </View>
+                        
+                        {/* Stats with modern cards */}
+                        <View style={styles.userStatsModern}>
+                            <View style={styles.statItemModern}>
+                                <Text style={styles.statValueModern}>{profile.currentStreak}</Text>
+                                <Text style={styles.statLabelModern}>Streak</Text>
+                            </View>
+                            <View style={styles.statItemModern}>
+                                <Text style={styles.statValueModern}>{profile.totalReferrals}</Text>
+                                <Text style={styles.statLabelModern}>Referrals</Text>
                             </View>
                         </View>
                     </View>
-                </View>
+                </LinearGradient>
 
                 {/* Stats Display */}
                 <View style={styles.statsContainer}>
@@ -513,27 +546,22 @@ export default function MinePage() {
 
                     <View style={styles.statCard}>
                         <TrendingUp size={20} color="#10b981" />
-                        <Text style={styles.statValue}>{(2 / 24).toFixed(4)}</Text>
+                        <Text style={styles.statValue}>
+                            {profile ? (profile.dailyMiningRate / 24).toFixed(4) : '0.0000'}
+                        </Text>
                         <Text style={styles.statLabel}>EKH/hour</Text>
                     </View>
                 </View>
 
-               
-
-                {/* Mining Button - Clean Implementation */}
+                {/* Mining Button - Balanced Implementation */}
                 <View style={styles.miningContainer}>
                     <View style={styles.miningButtonWrapper}>
-                        {/* Floating Energy Particles - keep existing */}
-                        <View style={styles.particlesContainer} pointerEvents="none">
-                            {/* Your existing particles code */}
-                        </View>
-
                         {/* Circular Progress Bar */}
                         {is24HourMiningActive && remainingTime > 0 && (
-                            <View style={styles.circularProgressContainer} pointerEvents="none">
+                            <View style={[styles.circularProgressContainer, { width: BUTTON_SIZE + 20, height: BUTTON_SIZE + 20 }]} pointerEvents="none">
                                 <CircularProgressBar 
-                                    size={180} 
-                                    strokeWidth={8} 
+                                    size={BUTTON_SIZE + 20} 
+                                    strokeWidth={10} 
                                     progress={progressPercentage}
                                     strokeColor="#ffa000"
                                     backgroundColor="rgba(255, 255, 255, 0.1)"
@@ -545,7 +573,7 @@ export default function MinePage() {
 
                         {/* Main Mining Button */}
                         <TouchableOpacity
-                            style={styles.miningButton}
+                            style={[styles.miningButton, { width: BUTTON_SIZE, height: BUTTON_SIZE, borderRadius: BUTTON_SIZE / 2 }]}
                             onPress={handleMine}
                             activeOpacity={0.8}
                             disabled={is24HourMiningActive && remainingTime > 0}
@@ -558,13 +586,17 @@ export default function MinePage() {
                                             : ['#ffa000', '#ff8f00']
                                         : ['#ffa000', '#ff8f00', '#ff6f00']
                                 }
-                                style={styles.miningButtonGradient}
+                                style={[styles.miningButtonGradient, { borderRadius: BUTTON_SIZE / 2 }]}
                             >
-                                {is24HourMiningActive && remainingTime <= 0 ? (
+                                {/* Mining Time Display - Overlays when active */}
+                                {is24HourMiningActive && remainingTime > 0 ? (
+                                    <View style={styles.miningTimeOverlay} pointerEvents="none">
+                                        <Text style={styles.miningTimeText}>{formatTime(remainingTime)}</Text>
+                                        <Text style={styles.miningTimeLabelText}>Remaining</Text>
+                                    </View>
+                                ) : is24HourMiningActive && remainingTime <= 0 ? (
                                     <Coins size={60} color="#ffffff" />
-                                ) : (
-                                    <Pickaxe size={60} color="#ffffff" />
-                                )}
+                                ) : null}
                             </LinearGradient>
                         </TouchableOpacity>
                     </View>
@@ -572,7 +604,7 @@ export default function MinePage() {
                     <Text style={styles.miningRate}>
                         {is24HourMiningActive
                             ? remainingTime > 0
-                                ? `Mining...`
+                                ? `Mining in progress...`
                                 : `Claim ${sessionReward} EKH Reward`
                             : `Start Extended Session (+${sessionReward} EKH)`}
                     </Text>
@@ -812,10 +844,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 20,
     },
-    loadingText: {
-        color: '#ffffff',
-        fontSize: 18,
-    },
     header: {
         alignItems: 'center',
         marginBottom: 24,
@@ -880,6 +908,109 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#ffa000',
         fontWeight: '700',
+    },
+    // Modern Professional User Card Styles
+    userCardModern: {
+        borderRadius: 20,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        overflow: 'hidden',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+    },
+    userCardInner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    userAvatarModern: {
+        position: 'relative',
+        marginRight: 16,
+    },
+    userAvatarGradient: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    onlineIndicator: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+        backgroundColor: '#10b981',
+        borderWidth: 2,
+        borderColor: '#0f3460',
+    },
+    userInfoModern: {
+        flex: 1,
+    },
+    usernameContainerModern: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 6,
+    },
+    usernameModern: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#ffffff',
+        marginRight: 8,
+    },
+    verificationBadge: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: '#3b82f6',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    verificationIcon: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#ffffff',
+    },
+    userScoreLabel: {
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.6)',
+        marginBottom: 4,
+    },
+    userScoreModern: {
+        fontSize: 24,
+        fontWeight: '800',
+        color: '#ffa000',
+        flexDirection: 'row',
+        alignItems: 'baseline',
+    },
+    currencyLabel: {
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontWeight: '600',
+    },
+    userStatsModern: {
+        flexDirection: 'row',
+        gap: 20,
+    },
+    statItemModern: {
+        alignItems: 'center',
+    },
+    statValueModern: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#ffffff',
+    },
+    statLabelModern: {
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.6)',
+        marginTop: 2,
     },
     miningRateText: {
         fontSize: 12,
@@ -959,22 +1090,16 @@ const styles = StyleSheet.create({
     },
     miningButtonWrapper: {
         position: 'relative',
-        marginBottom: 16,
+        marginBottom: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     particlesContainer: {
         ...StyleSheet.absoluteFillObject,
         zIndex: 1,
     },
-    particle: {
-        position: 'absolute',
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-    },
     circularProgressContainer: {
         position: 'absolute',
-        width: '100%',
-        height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 2,
@@ -996,15 +1121,13 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.7)',
     },
     miningButton: {
-        width: 150,
-        height: 150,
-        borderRadius: 75,
         zIndex: 3,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     miningButtonGradient: {
         width: '100%',
         height: '100%',
-        borderRadius: 75,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -1163,5 +1286,18 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         color: '#ffffff',
+    },
+    miningTimeLabelText: {
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.7)',
+        textAlign: 'center',
+    },
+    miningTimeOverlay: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: [{ translateX: -50 }, { translateY: -50 }],
+        alignItems: 'center',
+        zIndex: 4,
     },
 });

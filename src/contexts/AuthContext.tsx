@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform, Alert } from 'react-native';
@@ -28,27 +28,38 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastCheckTime, setLastCheckTime] = useState<number>(0);
+  const lastCheckTimeRef = useRef<number>(0);
+  const checkInProgressRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Initial auth check when app starts
     checkAuthStatus();
   }, []);
 
-  const checkAuthStatus = async () => {
-    // Prevent excessive auth checks (max 1 per second)
+  const checkAuthStatus = useCallback(async () => {
+    // Prevent excessive auth checks
     const now = Date.now();
-    if (now - lastCheckTime < 1000) {
+    
+    // If a check is already in progress, skip
+    if (checkInProgressRef.current) {
+      console.log('⚠️ Auth check already in progress, skipping');
+      return;
+    }
+    
+    // Prevent too-frequent checks (max 1 per 2 seconds)
+    if (now - lastCheckTimeRef.current < 2000) {
       console.log('⚠️ Skipping auth check (too frequent)');
       return;
     }
     
     console.log('🔍 Starting auth status check...');
-    setLastCheckTime(now);
+    lastCheckTimeRef.current = now;
+    checkInProgressRef.current = true;
     
     const timeoutId = setTimeout(() => {
       console.log('⏰ Auth check timeout - setting loading to false');
       setIsLoading(false);
+      checkInProgressRef.current = false;
     }, 10000); // Increased timeout to 10 seconds
     
     try {
@@ -61,8 +72,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: accountData.email || undefined,
           name: accountData.name || undefined
         };
-        setUser(userData);
-        console.log('✅ User authenticated:', userData.name || userData.email);
+        
+        // Only update state if user data actually changed
+        setUser(prevUser => {
+          if (!prevUser || 
+              prevUser.id !== userData.id || 
+              prevUser.email !== userData.email || 
+              prevUser.name !== userData.name) {
+            console.log('✅ User authenticated (data changed):', userData.name || userData.email);
+            return userData;
+          }
+          console.log('ℹ️ User authenticated (no data change)');
+          return prevUser;
+        });
         
         // Create user profile if it doesn't exist (in background)
         createUserProfileIfNotExists(accountData).catch(error => {
@@ -84,8 +106,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeoutId);
       console.log('🏁 Auth check completed - setting loading to false');
       setIsLoading(false);
+      checkInProgressRef.current = false;
     }
-  };
+  }, []);
 
   const createUserProfileIfNotExists = async (userData: any) => {
     try {
@@ -125,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           referredBy: referredByCode,
           totalReferrals: 0,
           lifetimeEarnings: 0,
-          dailyMiningRate: 1000,
+          dailyMiningRate: 2, // Standard user daily mining rate (2 EKH per day)
           maxDailyEarnings: 10000,
           todayEarnings: 0,
           lastMiningDate: '',

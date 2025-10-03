@@ -66,3 +66,60 @@ Created comprehensive documentation in:
 - Updated README.md with a new section explaining the mining session recording feature
 
 This solution ensures that all mining sessions are properly recorded, enabling better analytics, rewards tracking, and user engagement metrics for the Ekehi Network platform.
+
+---
+
+# Dynamic Mining Rate Implementation - Solution Summary
+
+## Problem Identified
+
+The user reported that "the fixed rate value is the correct value for the mining rate but it should be dynamic not fixed". Upon investigation, I found that:
+
+1. The mining rate was displayed using a fixed calculation `(2 / 24).toFixed(4)` which always showed 0.0833 EKH/hour
+2. This approach didn't account for users with different mining powers or bonuses
+3. The displayed rate wasn't personalized to each user's actual mining capability
+
+## Solution Implemented
+
+I implemented a dynamic mining rate calculation by making the following changes:
+
+### 1. Updated Mine Page ([app/(tabs)/mine.tsx](file:///c:/ekehi-mobile/app/(tabs)/mine.tsx))
+
+- Replaced the fixed calculation with a dynamic one based on user profile data
+- Changed from `(2 / 24).toFixed(4)` to `{profile ? (profile.dailyMiningRate / 24).toFixed(4) : '0.0000'}`
+- Now displays each user's actual hourly mining rate based on their profile
+
+### 2. Verified Profile Page ([app/(tabs)/profile.tsx](file:///c:/ekehi-mobile/app/(tabs)/profile.tsx))
+
+- Confirmed that the profile page already had the correct dynamic calculation
+- Maintained consistency between both pages
+
+## Key Features of the Solution
+
+1. **Personalization**: Each user sees their actual mining rate based on their profile data
+2. **Accuracy**: The displayed rate accurately reflects what the user will earn per hour
+3. **Scalability**: Future mining rate adjustments will automatically be reflected
+4. **Fallback Handling**: Properly handles cases where profile data is not available
+
+## How It Works
+
+- **Standard User**: A user with a `dailyMiningRate` of 2 EKH will see 0.0833 EKH/hour (2 ÷ 24 = 0.0833)
+- **Power User**: A user with a `dailyMiningRate` of 4 EKH will see 0.1667 EKH/hour (4 ÷ 24 = 0.1667)
+- **No Profile**: If no profile data is available, it defaults to 0.0000 EKH/hour
+
+## Verification
+
+The solution can be verified by:
+1. Checking different user accounts with varying mining powers
+2. Verifying that the displayed rate matches `dailyMiningRate / 24`
+3. Confirming that referral bonuses properly affect the displayed rate
+4. Testing with accounts that have no profile data to ensure proper fallback
+
+## Documentation
+
+Created comprehensive documentation in:
+- [Documentations/DYNAMIC_MINING_RATE_IMPLEMENTATION.md](file:///c:/ekehi-mobile/Documentations/DYNAMIC_MINING_RATE_IMPLEMENTATION.md) - Detailed implementation documentation
+- Updated README.md with a new feature highlighting dynamic mining rates
+- Updated FEATURE_DOCUMENTATION.md with information about the dynamic mining rate feature
+
+This solution ensures that all users see their personalized mining rate, providing a more accurate and engaging experience in the Ekehi Network platform.
