@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput, Share, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +12,42 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import PulseLoader from '@/components/PulseLoader';
 import LoadingDots from '@/components/LoadingDots';
+
+// Memoized component for the Total EKH display to prevent unnecessary re-renders
+const TotalEKHDisplay = memo(({ value }: { value: number }) => {
+  const formatNumber = (num: number | undefined) => {
+    if (num === undefined) return '0';
+    return num.toLocaleString();
+  };
+
+  return (
+    <View style={styles.statCard}>
+      <Coins size={24} color="#ffa000" />
+      <Text style={styles.statValue}>{formatNumber(value)}</Text>
+      <Text style={styles.statLabel}>Total EKH</Text>
+    </View>
+  );
+});
+
+// Memoized component for the referral stats to prevent unnecessary re-renders
+const ReferralStatsDisplay = memo(({ profile }: { profile: UserProfile | null }) => {
+  return (
+    <View style={styles.referralStatsContainer}>
+      <View style={styles.referralStat}>
+        <Text style={styles.referralStatValue}>{profile?.totalReferrals || '0'}</Text>
+        <Text style={styles.referralStatLabel}>Total Referrals</Text>
+      </View>
+      <View style={styles.referralStat}>
+        <Text style={styles.referralStatValue}>0.2 EKH</Text>
+        <Text style={styles.referralStatLabel}>Per Referral</Text>
+      </View>
+      <View style={styles.referralStat}>
+        <Text style={styles.referralStatValue}>2.0 EKH</Text>
+        <Text style={styles.referralStatLabel}>For Referred</Text>
+      </View>
+    </View>
+  );
+});
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -545,16 +581,14 @@ export default function ProfilePage() {
 
             {/* Stats Grid - Will update individually */}
             <View style={styles.statsGrid}>
-              <View style={styles.statCard}>
-                <Coins size={24} color="#ffa000" />
-                {/* Use the optimized Total EKH state */}
-                <Text style={styles.statValue}>{formatNumber(totalEKH)}</Text>
-                <Text style={styles.statLabel}>Total EKH</Text>
-              </View>
+              {/* Use the memoized Total EKH component */}
+              <TotalEKHDisplay value={totalEKH} />
               
               <View style={styles.statCard}>
                 <Zap size={24} color="#8b5cf6" />
-                <Text style={styles.statValue}>{profile?.dailyMiningRate ? (profile.dailyMiningRate / 24).toFixed(4) : '0.0000'}</Text>
+                <Text style={styles.statValue}>
+                  {profile?.dailyMiningRate ? (profile.dailyMiningRate / 24).toFixed(4) : '0.0000'}
+                </Text>
                 <Text style={styles.statLabel}>Mining Rate</Text>
                 <Text style={styles.statSubLabel}>EKH/hour</Text>
               </View>
@@ -641,21 +675,7 @@ export default function ProfilePage() {
         </View>
 
         {/* Referral Stats - Will update individually */}
-        <View style={styles.referralStatsContainer}>
-          <View style={styles.referralStat}>
-            <Text style={styles.referralStatValue}>{profile?.totalReferrals || '0'}</Text>
-            <Text style={styles.referralStatLabel}>Total Referrals</Text>
-          </View>
-          <View style={styles.referralStat}>
-            <Text style={styles.referralStatValue}>0.2 EKH</Text>
-            <Text style={styles.referralStatLabel}>Per Referral</Text>
-          </View>
-          <View style={styles.referralStat}>
-            <Text style={styles.referralStatValue}>2.0 EKH</Text>
-            <Text style={styles.referralStatLabel}>For Referred</Text>
-          </View>
-        </View>
-
+        <ReferralStatsDisplay profile={profile} />
 
         {/* Account Settings */}
         <View style={styles.settingsContainer}>

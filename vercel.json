@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "domains": ["ekehi.club"],
   "builds": [
     {
       "src": "package.json",

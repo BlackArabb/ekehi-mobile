@@ -36,6 +36,7 @@ export function MiningProvider({ children }: { children: ReactNode }) {
   const lastRefreshTimeRef = useRef<number>(0);
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const profileFetchPromiseRef = useRef<Promise<void> | null>(null);
+  const profileUpdateListenersRef = useRef<(() => void)[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -61,6 +62,25 @@ export function MiningProvider({ children }: { children: ReactNode }) {
       }
     };
   }, [isMining]);
+
+  // Add a function to subscribe to profile updates
+  const subscribeToProfileUpdates = useCallback((callback: () => void) => {
+    profileUpdateListenersRef.current.push(callback);
+    return () => {
+      profileUpdateListenersRef.current = profileUpdateListenersRef.current.filter(cb => cb !== callback);
+    };
+  }, []);
+
+  // Add a function to notify all subscribers of profile updates
+  const notifyProfileSubscribers = useCallback(() => {
+    profileUpdateListenersRef.current.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('Error in profile update subscriber:', error);
+      }
+    });
+  }, []);
 
   const refreshProfile = useCallback(async () => {
     // Debounce profile refreshes
@@ -226,6 +246,8 @@ export function MiningProvider({ children }: { children: ReactNode }) {
             const hasChanged = JSON.stringify(prevProfile) !== JSON.stringify(userProfile);
             if (hasChanged) {
               console.log('✅ User profile silently updated (data changed):', userProfile);
+              // Notify subscribers of the change
+              notifyProfileSubscribers();
               return userProfile;
             }
             console.log('ℹ️ User profile silently unchanged, skipping update');
@@ -249,7 +271,7 @@ export function MiningProvider({ children }: { children: ReactNode }) {
     })();
     
     return profileFetchPromiseRef.current;
-  }, [user]);
+  }, [user, notifyProfileSubscribers]);
 
   // Create a separate state for coins to avoid full profile re-renders
   const [totalCoins, setTotalCoins] = useState<number>(0);
@@ -400,7 +422,8 @@ export function MiningProvider({ children }: { children: ReactNode }) {
       startMiningSession,
       endMiningSession,
       silentRefreshProfile,
-      updateCoinsOnly // Add the new function
+      updateCoinsOnly, // Add the new function
+      subscribeToProfileUpdates // Add the subscription function
     }}>
       {children}
     </MiningContext.Provider>
