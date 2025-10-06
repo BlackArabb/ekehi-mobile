@@ -1,0 +1,459 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Ekehi Color Palette */
+  --ekehi-gold: #ffa000;
+  --deep-black: #000000;
+  --rich-charcoal: #0a0a0a;
+  --dark-slate: #1a1a1a;
+  --amber-glow: #ffb333;
+  --dark-amber: #cc8000;
+  --pure-white: #ffffff;
+  --soft-white: #f5f5f5;
+  --medium-gray: #9e9e9e;
+  --charcoal-gray: #424242;
+  --success-green: #4caf50;
+  --warning-amber: #ff9800;
+  --info-blue: #2196f3;
+  --error-red: #f44336;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Improve scrolling on mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  background: var(--deep-black);
+  color: var(--pure-white);
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* Prevent zoom on input focus */
+  font-size: 16px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--rich-charcoal);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ekehi-gold);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--amber-glow);
+}
+
+/* Typography Classes */
+.font-display {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+}
+
+.text-hero {
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.text-h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-h2 {
+  font-size: 2.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.text-h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-body-large {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.text-body {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.text-body-small {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.text-caption {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Mobile Typography */
+@media (max-width: 768px) {
+  .text-hero {
+    font-size: 2.5rem;
+  }
+  
+  .text-h1 {
+    font-size: 2rem;
+  }
+  
+  .text-h2 {
+    font-size: 1.75rem;
+  }
+  
+  .text-h3 {
+    font-size: 1.5rem;
+  }
+  
+  .text-h4 {
+    font-size: 1.25rem;
+  }
+  
+  .text-body-large {
+    font-size: 1rem;
+  }
+  
+  .text-body {
+    font-size: 0.9375rem;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .text-hero {
+    font-size: 2rem;
+  }
+  
+  .text-h1 {
+    font-size: 1.75rem;
+  }
+  
+  .text-h2 {
+    font-size: 1.5rem;
+  }
+  
+  .text-h3 {
+    font-size: 1.25rem;
+  }
+  
+  .text-h4 {
+    font-size: 1.125rem;
+  }
+}
+
+/* Gradient Text */
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--ekehi-gold) 0%, var(--amber-glow) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow Effects */
+.glow-gold {
+  text-shadow: 0 0 20px rgba(255, 160, 0, 0.5);
+}
+
+.shadow-gold {
+  box-shadow: 0 0 30px rgba(255, 160, 0, 0.3);
+}
+
+.shadow-gold-lg {
+  box-shadow: 0 10px 50px rgba(255, 160, 0, 0.4);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: var(--ekehi-gold);
+  color: var(--deep-black);
+  font-weight: 600;
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  /* Prevent text selection */
+  -webkit-tap-highlight-color: transparent;
+  /* Ensure proper sizing on mobile */
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn-primary:hover {
+  background: var(--amber-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 160, 0, 0.4);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--pure-white);
+  font-weight: 600;
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  border: 2px solid var(--ekehi-gold);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  /* Prevent text selection */
+  -webkit-tap-highlight-color: transparent;
+  /* Ensure proper sizing on mobile */
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn-secondary:hover {
+  background: var(--ekehi-gold);
+  color: var(--deep-black);
+  transform: translateY(-2px);
+}
+
+/* Mobile button adjustments */
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.875rem 2rem;
+    font-size: 0.9375rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    width: 100%;
+  }
+}
+
+/* Card Styles */
+.card {
+  background: var(--dark-slate);
+  border: 1px solid var(--charcoal-gray);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  border-color: var(--ekehi-gold);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(255, 160, 0, 0.2);
+}
+
+/* Mobile card adjustments */
+@media (max-width: 768px) {
+  .card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+  }
+}
+
+/* Animation Utilities */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 160, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 160, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section spacing */
+.section-padding {
+  padding: 7.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 4rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-padding {
+    padding: 3rem 0;
+  }
+}
+
+/* Container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+/* Status badges */
+.badge-live {
+  background: var(--success-green);
+  color: var(--pure-white);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-coming-soon {
+  background: var(--warning-amber);
+  color: var(--deep-black);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-planned {
+  background: var(--medium-gray);
+  color: var(--pure-white);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-development {
+  background: var(--info-blue);
+  color: var(--pure-white);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  a, button, input, textarea, select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent accidental zoom */
+  input, textarea, select {
+    font-size: 16px;
+  }
+  
+  /* Adjust line height for better readability */
+  body, p {
+    line-height: 1.5;
+  }
+}
+
+/* Hide scroll indicator on mobile */
+@media (max-width: 768px) {
+  .scroll-indicator {
+    display: none;
+  }
+}
+
+/* Fix for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .ios-safe-area {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
