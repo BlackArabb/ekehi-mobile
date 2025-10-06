@@ -39,5 +39,6 @@
     "check": "tsc && vite build && wrangler deploy --dry-run",
     "dev": "vite",
     "lint": "eslint ."
-  }
+  },
+  "packageManager": "pnpm@9.12.3"
 }
