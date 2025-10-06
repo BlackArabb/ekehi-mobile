@@ -9,33 +9,23 @@
       }
     }
   ],
-  "routes": [
-    {
-      "src": "/assets/(.*)",
-      "headers": {
-        "cache-control": "public, immutable, max-age=31536000"
-      }
-    },
-    {
-      "src": "/_expo/(.*)",
-      "headers": {
-        "cache-control": "public, immutable, max-age=31536000"
-      }
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/assets/favicon.ico"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
   "rewrites": [
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/_expo/(.*)",
+      "destination": "/_expo/$1"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/assets/favicon.ico"
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "/assets/$1"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
