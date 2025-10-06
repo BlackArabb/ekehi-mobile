@@ -4,7 +4,7 @@
 
 A React Native mobile application for the Ekehi Network cryptocurrency mining platform, featuring an interactive tap-to-mine system, social task engine, referral program, token presale, wallet integration, and achievement system.
 
-The project also includes a modern, responsive landing page built with Next.js for web presence and marketing.
+The project also includes a modern, responsive landing page built with React and Vite for web presence and marketing.
 
 ## 🚀 Features
 
@@ -13,7 +13,7 @@ The project also includes a modern, responsive landing page built with Next.js f
 - **⚡ Mining Power System**: Upgradeable mining power with automatic calculations
 - **🔥 Daily Streak Bonuses**: Consecutive login rewards and streak multipliers
 - **📊 Real-time Analytics**: Live mining statistics and performance tracking
-- **🔄 Dynamic Mining Rates**: Personalized hourly mining rates based on user profile data
+- **🔄 Dynamic Mining Rates**: Personalized hourly mining rates based on user profile data (2 EKH per day, 0.083 EKH per hour)
 
 ### Social & Community Features
 - **📱 Social Task Engine**: Complete tasks on Twitter, YouTube, Telegram, and Discord for rewards
@@ -36,7 +36,7 @@ The project also includes a modern, responsive landing page built with Next.js f
 
 ## 🛠 Technology Stack
 
-### Frontend Technologies
+### Mobile App Technologies
 - **React Native** - Cross-platform mobile development framework
 - **Expo SDK** - Development toolchain and runtime platform
 - **TypeScript** - Type-safe JavaScript development
@@ -48,10 +48,18 @@ The project also includes a modern, responsive landing page built with Next.js f
 - **Appwrite Database** - Document-based database for all app data
 - **Appwrite Auth** - Google OAuth and email/password authentication
 
+### Landing Page Technologies
+- **React** - Modern UI library with hooks and context
+- **TypeScript** - Type-safe JavaScript development
+- **Vite** - Fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Modern icon library
+
 ### UI & Design
 - **Expo Linear Gradient** - Beautiful gradient effects and backgrounds
 - **Expo Haptics** - Native touch feedback and vibrations
-- **Lucide React Native** - Modern icon library
+- **Lucide React Native** - Modern icon library for mobile
+- **Tailwind CSS** - Utility classes for responsive design
 
 ## ⚡ Quick Start
 
@@ -82,15 +90,36 @@ The project also includes a modern, responsive landing page built with Next.js f
    pnpm start
    ```
 
+### Landing Page Development
+
+1. **Navigate to Landing Page Directory**
+   ```bash
+   cd LandPage
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Start Development Server**
+   ```bash
+   pnpm run dev
+   ```
+
 ## 📁 Project Structure
 
 ```
 ekehi-mobile/
-├── Ekehi-LandingPage/      # Next.js landing page
-│   ├── components/         # Modern UI components
-│   ├── pages/              # Next.js pages
+├── LandPage/               # React landing page
+│   ├── src/
+│   │   ├── react-app/
+│   │   │   ├── components/ # UI components
+│   │   │   └── App.tsx     # Main application component
+│   │   └── ...
 │   ├── public/             # Static assets
-│   └── styles/             # Global CSS styles
+│   ├── index.html          # HTML entry point
+│   └── vite.config.ts      # Vite configuration
 ├── app/                    # Expo Router app directory
 │   ├── (tabs)/            # Tab navigation screens
 │   ├── oauth/             # OAuth handling
@@ -113,7 +142,7 @@ ekehi-mobile/
 
 ## 🏗 Building & Deployment
 
-### Development Builds
+### Mobile App Development Builds
 ```bash
 # iOS Development Build
 npx eas build --profile development --platform ios
@@ -122,7 +151,7 @@ npx eas build --profile development --platform ios
 npx eas build --profile development --platform android
 ```
 
-### Production Builds
+### Mobile App Production Builds
 ```bash
 # iOS Production Build
 npx eas build --profile production --platform ios
@@ -130,6 +159,27 @@ npx eas build --profile production --platform ios
 # Android Production Build
 npx eas build --profile production --platform android
 ```
+
+### Landing Page Build
+```bash
+# Navigate to LandPage directory
+cd LandPage
+
+# Build for production
+pnpm run build
+```
+
+## 📖 Documentation
+
+Detailed documentation is available in the [Documentations](Documentations/) directory:
+
+### Mobile App Documentation
+- [Feature Documentation](Documentations/FEATURE_DOCUMENTATION.md) - Comprehensive feature overview
+- [Authentication Guide](Documentations/OAUTH_SETUP_GUIDE.md) - OAuth implementation details
+- [Appwrite Integration](Documentations/APPWRITE_MIGRATION_GUIDE.md) - Backend setup and configuration
+
+### Landing Page Documentation
+- [Landing Page Documentation](Documentations/LANDING_PAGE_DOCUMENTATION.md) - Complete landing page guide
 
 ## 📄 License
 
