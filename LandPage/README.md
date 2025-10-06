@@ -32,7 +32,6 @@ src/
 │   │   ├── EcosystemSection.tsx
 │   │   ├── HeroSection.tsx
 │   │   ├── Navigation.tsx
-│   │   ├── PresaleSection.tsx
 │   │   ├── RoadmapSection.tsx
 │   │   ├── TokenomicsSection.tsx
 │   │   └── WhitepaperSection.tsx

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Ekehi Network landing page is a modern, responsive web application built with React and TypeScript. It serves as the primary web presence for the Ekehi cryptocurrency platform, providing information about the project, tokenomics, roadmap, and presale opportunities.
+The Ekehi Network landing page is a modern, responsive web application built with React and TypeScript. It serves as the primary web presence for the Ekehi cryptocurrency platform, providing information about the project, tokenomics, roadmap, and investment opportunities.
 
 ## 🚀 Key Features
 
@@ -16,7 +16,6 @@ The Ekehi Network landing page is a modern, responsive web application built wit
 - Animated hero section with call-to-action buttons
 - Comprehensive tokenomics visualization
 - Detailed roadmap with milestone tracking
-- Presale section with timer and progress tracking
 - Whitepaper viewer with chapter navigation
 - Ecosystem overview with feature highlights
 - Contact form with validation
@@ -54,7 +53,6 @@ LandPage/
 │   │   │   ├── EcosystemSection.tsx
 │   │   │   ├── HeroSection.tsx
 │   │   │   ├── Navigation.tsx
-│   │   │   ├── PresaleSection.tsx
 │   │   │   ├── RoadmapSection.tsx
 │   │   │   ├── TokenomicsSection.tsx
 │   │   │   └── WhitepaperSection.tsx
@@ -101,12 +99,6 @@ LandPage/
 - Completed and upcoming phases
 - Mobile-optimized timeline layout
 - Interactive progress indicators
-
-### Presale Section (`PresaleSection.tsx`)
-- Live presale timer
-- Progress tracking visualization
-- Investment tiers and bonuses
-- Responsive card layout
 
 ### Whitepaper Section (`WhitepaperSection.tsx`)
 - Interactive document viewer

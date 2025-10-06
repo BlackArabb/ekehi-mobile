@@ -2,7 +2,7 @@ import Navigation from '@/react-app/components/Navigation';
 import HeroSection from '@/react-app/components/HeroSection';
 import AboutSection from '@/react-app/components/AboutSection';
 import WhitepaperSection from '@/react-app/components/WhitepaperSection';
-import PresaleSection from '@/react-app/components/PresaleSection';
+// PresaleSection import removed
 import EcosystemSection from '@/react-app/components/EcosystemSection';
 import TokenomicsSection from '@/react-app/components/TokenomicsSection';
 import RoadmapSection from '@/react-app/components/RoadmapSection';
@@ -17,7 +17,7 @@ export default function Home() {
         <main>
           <AboutSection />
           <WhitepaperSection />
-          <PresaleSection />
+          {/* PresaleSection removed */}
           <EcosystemSection />
           <TokenomicsSection />
           <RoadmapSection />
