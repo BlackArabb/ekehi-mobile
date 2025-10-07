@@ -8,7 +8,6 @@ import { MiningProvider } from '@/contexts/MiningContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { ReferralProvider } from '@/contexts/ReferralContext';
-import { PresaleProvider } from '@/contexts/PresaleContext';
 import { useRouter } from 'expo-router';
 import { initializeDeepLinking } from '@/utils/deepLinking';
 import { View, StyleSheet, Image } from 'react-native';
@@ -195,13 +194,11 @@ export default function RootLayout() {
       <AuthProvider>
         <WalletProvider>
           <MiningProvider>
-            <PresaleProvider>
-              <ReferralProvider>
-                <NotificationProvider>
-                  <AuthenticatedApp />
-                </NotificationProvider>
-              </ReferralProvider>
-            </PresaleProvider>
+            <ReferralProvider>
+              <NotificationProvider>
+                <AuthenticatedApp />
+              </NotificationProvider>
+            </ReferralProvider>
           </MiningProvider>
         </WalletProvider>
       </AuthProvider>

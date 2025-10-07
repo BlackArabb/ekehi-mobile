@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wallet, ArrowLeftRight, Coins, Image, TrendingUp, Vote, ChevronDown, ExternalLink } from 'lucide-react';
+import { Wallet, ArrowLeftRight, Coins, Image, TrendingUp, Vote, ChevronDown } from 'lucide-react';
 
 const ecosystemProducts = [
   {
@@ -35,7 +35,7 @@ const ecosystemProducts = [
   {
     id: 3,
     name: 'Ekehi Staking',
-    status: 'live',
+    status: 'coming-soon',
     icon: Coins,
     description: 'Earn passive income by staking your EKH tokens. Flexible and fixed-term options with competitive APY rates.',
     features: [
@@ -44,7 +44,7 @@ const ecosystemProducts = [
       'Compound rewards',
       'No minimum stake'
     ],
-    cta: 'Start Staking',
+    cta: 'Coming Soon',
     position: { x: 15, y: 65 }
   },
   {
@@ -168,117 +168,150 @@ export default function EcosystemSection() {
           </div>
         </div>
 
-        {/* Desktop Ecosystem Visualization */}
-        <div className="hidden lg:block relative mb-12 md:mb-16">
-          <div className="relative h-80 md:h-96 max-w-4xl mx-auto">
-            {/* Central Hub */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-yellow-500 to-amber-glow rounded-full flex items-center justify-center shadow-gold-lg animate-pulse-gold">
-              <span className="text-lg md:text-2xl font-bold text-black">EKEHI</span>
+        {/* Desktop Ecosystem Visualization - COMPLETELY RESTRUCTURED to fix overlapping issue */}
+        <div className="hidden lg:block mb-12 md:mb-16">
+          {/* Central Hub with Logo - ENHANCED DESIGN */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-yellow-500 bg-transparent shadow-gold-lg animate-pulse-glow mx-auto p-2 transition-transform duration-300 hover:scale-105">
+              <img 
+                src="/logo.png" 
+                alt="EKEHI Logo" 
+                className="w-20 h-20 md:w-28 md:h-28 object-contain logo-glow"
+              />
             </div>
-
-            {/* Product Nodes */}
+            <h3 className="text-xl md:text-2xl font-bold text-gradient-gold mt-4">EKEHI ECOSYSTEM</h3>
+            <p className="text-medium-gray text-sm md:text-base mt-2 max-w-md mx-auto">
+              The heart of our interconnected universe of products and services
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {ecosystemProducts.map((product) => {
               const IconComponent = product.icon;
+              const isExpanded = expandedProduct === product.id;
+              
               return (
-                <div
-                  key={product.id}
-                  className="absolute w-40 md:w-48 transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
-                  style={{ 
-                    left: `${product.position.x}%`, 
-                    top: `${product.position.y}%` 
-                  }}
+                <div 
+                  key={product.id} 
+                  className={`card group cursor-pointer transition-all duration-300 ${isExpanded ? 'border-yellow-500 shadow-gold' : ''}`}
                   onClick={() => toggleProduct(product.id)}
                 >
-                  {/* Connection Line */}
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                    <line
-                      x1="50%"
-                      y1="50%"
-                      x2="200%"
-                      y2="150%"
-                      stroke="rgba(255,160,0,0.3)"
-                      strokeWidth="2"
-                      strokeDasharray="8,4"
-                      className="group-hover:stroke-yellow-500 transition-colors"
-                    />
-                  </svg>
-
-                  <div className={`card group-hover:border-yellow-500 group-hover:shadow-gold transition-all duration-300 p-4 ${expandedProduct === product.id ? 'border-yellow-500 shadow-gold' : ''}`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-yellow-500/10 rounded-full flex items-center justify-center">
-                        <IconComponent size={20} className="text-yellow-500" />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors">
+                        <IconComponent size={24} className="text-yellow-500" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white text-sm">{product.name}</h4>
-                        <span className={`${getStatusBadge(product.status)} text-xs`}>
+                        <h3 className="text-lg font-semibold text-white">{product.name}</h3>
+                        <span className={getStatusBadge(product.status)}>
                           {getStatusText(product.status)}
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs text-soft-white line-clamp-3">
-                      {product.description}
-                    </p>
+                    <ChevronDown 
+                      size={20} 
+                      className={`text-yellow-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                    />
                   </div>
+                  
+                  <p className={`text-soft-white mb-4 transition-all duration-300 ${isExpanded ? 'line-clamp-none' : 'line-clamp-2'}`}>
+                    {product.description}
+                  </p>
+                  
+                  {isExpanded && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold text-white mb-2">Features:</h4>
+                      <ul className="grid grid-cols-1 gap-2 text-sm text-medium-gray">
+                        {product.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  <button className={`w-full ${product.status === 'live' ? 'btn-primary' : 'btn-secondary'} text-sm py-2.5`}>
+                    {product.cta}
+                  </button>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Mobile Product Cards */}
-        <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-12 md:mb-16">
-          {ecosystemProducts.map((product) => {
-            const IconComponent = product.icon;
-            const isExpanded = expandedProduct === product.id;
-            
-            return (
-              <div 
-                key={product.id} 
-                className={`card group cursor-pointer transition-all duration-300 ${isExpanded ? 'border-yellow-500 shadow-gold' : ''}`}
-                onClick={() => toggleProduct(product.id)}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-yellow-500/10 rounded-full flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors">
-                      <IconComponent size={20} className="text-yellow-500" />
+        {/* Mobile Product Cards - ENHANCED layout */}
+        <div className="lg:hidden grid grid-cols-1 gap-4 md:gap-6 mb-12 md:mb-16">
+          {/* Central Hub with Logo for mobile - ENHANCED DESIGN */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full border-4 border-yellow-500 bg-transparent shadow-gold-lg animate-pulse-glow mx-auto p-2 transition-transform duration-300 hover:scale-105">
+              <img 
+                src="/logo.png" 
+                alt="EKEHI Logo" 
+                className="w-16 h-16 object-contain logo-glow"
+              />
+            </div>
+            <h3 className="text-lg font-bold text-gradient-gold mt-3">EKEHI ECOSYSTEM</h3>
+            <p className="text-medium-gray text-xs md:text-sm mt-1 max-w-xs mx-auto">
+              The heart of our interconnected universe
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4">
+            {ecosystemProducts.map((product) => {
+              const IconComponent = product.icon;
+              const isExpanded = expandedProduct === product.id;
+              
+              return (
+                <div 
+                  key={product.id} 
+                  className={`card group cursor-pointer transition-all duration-300 ${isExpanded ? 'border-yellow-500 shadow-gold' : ''}`}
+                  onClick={() => toggleProduct(product.id)}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors">
+                        <IconComponent size={24} className="text-yellow-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">{product.name}</h3>
+                        <span className={getStatusBadge(product.status)}>
+                          {getStatusText(product.status)}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">{product.name}</h3>
-                      <span className={getStatusBadge(product.status)}>
-                        {getStatusText(product.status)}
-                      </span>
-                    </div>
+                    <ChevronDown 
+                      size={20} 
+                      className={`text-yellow-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                    />
                   </div>
-                  <ChevronDown 
-                    size={20} 
-                    className={`text-yellow-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
-                  />
+                  
+                  <p className={`text-soft-white mb-4 transition-all duration-300 ${isExpanded ? 'line-clamp-none' : 'line-clamp-2'}`}>
+                    {product.description}
+                  </p>
+                  
+                  {isExpanded && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold text-white mb-2">Features:</h4>
+                      <ul className="grid grid-cols-1 gap-2 text-sm text-medium-gray">
+                        {product.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  <button className={`w-full ${product.status === 'live' ? 'btn-primary' : 'btn-secondary'} text-sm py-2.5`}>
+                    {product.cta}
+                  </button>
                 </div>
-                
-                <p className={`text-soft-white mb-4 transition-all duration-300 ${isExpanded ? 'line-clamp-none' : 'line-clamp-2'}`}>
-                  {product.description}
-                </p>
-                
-                {isExpanded && (
-                  <div className="mb-6">
-                    <h4 className="text-sm font-semibold text-white mb-2">Features:</h4>
-                    <ul className="grid grid-cols-1 gap-2 text-sm text-medium-gray">
-                      {product.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                
-                <button className={`w-full ${product.status === 'live' ? 'btn-primary' : 'btn-secondary'} text-sm py-2.5`}>
-                  {product.cta}
-                </button>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* Statistics */}

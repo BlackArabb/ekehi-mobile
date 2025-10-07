@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Eye, FileText, ChevronRight, BookOpen, Zap, Users, Shield, TrendingUp, Globe, Leaf } from 'lucide-react';
+import { Download, FileText, ChevronRight, BookOpen, Zap, Users, Shield, TrendingUp, Leaf } from 'lucide-react';
 
 // Sample whitepaper content structure
 const whitepaperContent = {
@@ -57,7 +57,7 @@ const whitepaperContent = {
         <h3 class="text-xl font-bold text-white mb-4">3.1 Token Distribution</h3>
         <p class="text-soft-white mb-4">Ekehi has a total supply of 1 billion tokens distributed as follows:</p>
         <ul class="list-disc list-inside text-soft-white mb-4 ml-4">
-          <li>Presale: 40% (400,000,000 EKH)</li>
+          <li>Community Allocation: 40% (400,000,000 EKH)</li>
           <li>Liquidity: 7% (70,000,000 EKH)</li>
           <li>Team: 15% (150,000,000 EKH)</li>
           <li>Marketing: 10% (100,000,000 EKH)</li>
@@ -70,7 +70,7 @@ const whitepaperContent = {
         <p class="text-soft-white mb-4">EKH tokens serve multiple purposes within the ecosystem:</p>
         <ul class="list-disc list-inside text-soft-white mb-4 ml-4">
           <li>Governance: Vote on protocol changes and upgrades</li>
-          <li>Staking: Earn rewards by securing the network</li>
+          <li>Staking: Coming soon - Earn rewards by securing the network</li>
           <li>Fee Discounts: Reduced transaction fees across all platforms</li>
           <li>Liquidity Mining: Earn additional tokens by providing liquidity</li>
         </ul>
@@ -94,9 +94,9 @@ const whitepaperContent = {
         
         <h3 class="text-xl font-bold text-white mb-4 mt-6">4.2 Phase 2: Development (Q1-Q2 2025)</h3>
         <ul class="list-disc list-inside text-soft-white mb-4 ml-4">
-          <li>Presale smart contract development</li>
+          <li>Token contract development</li>
           <li>Ekehi Wallet beta launch</li>
-          <li>Staking protocol implementation</li>
+          <li>Staking protocol implementation and testing</li>
           <li>Security audit completion</li>
         </ul>
         
@@ -182,7 +182,7 @@ const highlights = [
 
 const statistics = [
   { label: '1B Total Supply', value: '1B EKH' },
-  { label: '40% Presale', value: '400M' },
+  { label: 'Ecosystem Focus', value: '6 Products' },
   { label: '150+ Validators', value: '150+' },
   { label: '0.5% Burn Rate', value: '0.5%' }
 ];
@@ -394,8 +394,8 @@ export default function WhitepaperSection() {
               <Download size={18} className="md:size-20 mr-2" />
               Download PDF
             </a>
-            <a href="#presale" className="btn-secondary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
-              Join Presale Now
+            <a href="#ecosystem" className="btn-secondary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
+              Explore Ecosystem
             </a>
           </div>
         </div>

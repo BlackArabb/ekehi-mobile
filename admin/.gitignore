@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Environment files
+.env*
+!.env.example
+.env*.local
+
+# Logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+/coverage
+/.nyc_output
+
+# TypeDoc
+typedoc-out/
+
+# Netlify
+.netlify
+
+# Vercel
+.vercel
+
+# IDE
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# Debug files
+*.debug.*
+*.stackdump
+
+# Build outputs
+dist/
+build/
+
+# Cache files
+.cache/
+.npm/
+.eslintcache
+*.tsbuildinfo
+
+# Package manager files
+package-lock.json
+yarn.lock
+.pnpm-store/

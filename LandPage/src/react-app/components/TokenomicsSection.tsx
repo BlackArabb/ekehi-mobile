@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import { TrendingUp, Users, Shield, Zap, DollarSign, Globe, Info, ChevronDown } from 'lucide-react';
+import { TrendingUp, Users, Shield, Zap, DollarSign, Globe, ChevronDown } from 'lucide-react';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const tokenDistribution = [
-  { label: 'Presale', percentage: 40, amount: 400000000, color: '#ffa000', description: 'Available to early supporters at discounted rates', vesting: 'Unlocked at TGE' },
+  { label: 'Community Allocation', percentage: 40, amount: 400000000, color: '#ffa000', description: 'Available to early supporters at discounted rates', vesting: 'Unlocked at TGE' },
   { label: 'Liquidity', percentage: 7, amount: 70000000, color: '#ffb333', description: 'DEX liquidity pools and market making', vesting: 'Locked for 2 years' },
   { label: 'Team', percentage: 15, amount: 150000000, color: '#cc8000', description: 'Core team and early contributors', vesting: '1-year cliff, 3-year linear vesting' },
   { label: 'Marketing', percentage: 10, amount: 100000000, color: '#ff9800', description: 'Brand awareness and user acquisition', vesting: '6-month cliff, 2-year linear vesting' },
@@ -17,14 +17,14 @@ const tokenDistribution = [
 
 const tokenStats = [
   { icon: DollarSign, label: 'Total Supply', value: '1B EKH', subtext: '1,000,000,000 tokens' },
-  { icon: TrendingUp, label: 'Initial Market Cap', value: '$21M', subtext: 'At $0.05 presale price' },
+  { icon: TrendingUp, label: 'Initial Market Cap', value: '$21M', subtext: 'At $0.05 initial price' },
   { icon: Shield, label: 'Circulating Supply', value: '420M', subtext: '42% at launch' },
   { icon: Globe, label: 'Fully Diluted Value', value: '$50M', subtext: 'At $0.05 price' }
 ];
 
 const tokenUtilities = [
   { icon: Users, title: 'Governance', description: 'Vote on proposals and protocol changes' },
-  { icon: Zap, title: 'Staking', description: 'Earn rewards by locking tokens' },
+  { icon: Zap, title: 'Staking', description: 'Coming soon - Earn rewards by locking tokens' },
   { icon: DollarSign, title: 'Fee Discounts', description: 'Reduced fees across Ekehi ecosystem' },
   { icon: TrendingUp, title: 'Liquidity Mining', description: 'Earn additional tokens by providing liquidity' }
 ];
@@ -71,7 +71,7 @@ export default function TokenomicsSection() {
       animateRotate: true,
       duration: 1500
     },
-    onClick: (event: any, elements: any) => {
+    onClick: (_event: any, elements: any) => {
       if (elements.length > 0) {
         const index = elements[0].index;
         setActiveDistribution(index);

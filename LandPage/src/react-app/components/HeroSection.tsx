@@ -31,16 +31,6 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-5xl mx-auto px-4">
-        {/* Live Presale Indicator */}
-        <div 
-          className={`inline-flex items-center gap-2 bg-black/60 backdrop-blur-sm border border-yellow-500/20 rounded-full px-4 py-2 mb-6 md:mb-8 transition-all duration-800 ${
-            isVisible ? 'animate-fade-in' : 'opacity-0'
-          }`}
-        >
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse-gold"></div>
-          <span className="text-sm font-semibold text-white">PRESALE LIVE</span>
-        </div>
-
         {/* Main Title */}
         <h1 
           className={`text-hero font-display text-gradient-gold glow-gold mb-4 md:mb-6 transition-all duration-1000 ${
