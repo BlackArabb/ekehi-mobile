@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set Node.js version explicitly
+export NODE_VERSION=22.x
+
 # Install pnpm with the same version as specified in package.json
 echo "Installing pnpm..."
 npm install -g pnpm@9.12.3
