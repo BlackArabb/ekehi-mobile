@@ -1,89 +1,85 @@
 #!/bin/bash
 
-# Debug: Print environment information
-echo "=== Environment Information ==="
-echo "Node version: $(node --version)"
-echo "NPM version: $(npm --version)"
+# Install pnpm with the same version as specified in package.json
+echo "Installing pnpm..."
+npm install -g pnpm@9.12.3
+
+# Clear npm cache
+echo "Clearing npm cache..."
+npm cache clean --force
+
+# Show current directory and files
 echo "Current directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
-# Install pnpm
-echo "=== Installing pnpm ==="
-npm install -g pnpm
-echo "PNPM version: $(pnpm --version)"
-
-# Clear npm cache to avoid issues
-echo "=== Clearing npm cache ==="
-npm cache clean --force
-
-# Use existing .npmrc configuration for network settings
+# Show .npmrc configuration
 echo "=== .npmrc configuration ==="
-if [ -f .npmrc ]; then
-  cat .npmrc
-else
-  echo ".npmrc file not found"
+cat .npmrc
+
+# Remove conflicting lock files
+echo "Removing conflicting lock files..."
+rm -f package-lock.json
+
+# Install dependencies with proper error handling
+echo "Installing dependencies..."
+PNPM_INSTALL_EXIT_CODE=0
+pnpm install --no-frozen-lockfile --fetch-timeout=60000 --prefer-offline || PNPM_INSTALL_EXIT_CODE=$?
+
+# Check installation result
+if [ $PNPM_INSTALL_EXIT_CODE -ne 0 ]; then
+  echo "Install failed with exit code $PNPM_INSTALL_EXIT_CODE, trying clean install..."
+  rm -rf node_modules
+  pnpm install --no-frozen-lockfile --fetch-timeout=60000 || {
+    echo "Clean install also failed"
+    exit 1
+  }
 fi
 
-# Check package.json
-echo "=== Package.json ==="
-if [ -f package.json ]; then
-  echo "package.json found"
-  cat package.json | grep -E "(name|version|scripts|dependencies|devDependencies)"
-else
-  echo "ERROR: package.json not found!"
+# Verify node_modules was created
+if [ ! -d "node_modules" ]; then
+  echo "ERROR: node_modules directory was not created"
   exit 1
 fi
 
-# Install dependencies with pnpm
-echo "=== Installing dependencies ==="
-echo "Running pnpm install --no-frozen-lockfile --prefer-offline"
-pnpm install --no-frozen-lockfile --prefer-offline
+# Verify vite is installed
+echo "Checking if vite is installed..."
+if [ ! -d "node_modules/vite" ]; then
+  echo "vite not found in node_modules, this is a critical error"
+  echo "Contents of node_modules:"
+  ls -la node_modules/ | head -20
+  exit 1
+fi
 
-# Check if install was successful
-if [ $? -ne 0 ]; then
-  echo "First install attempt failed"
-  
-  # Try alternative approaches
-  echo "Trying with clean install..."
-  rm -rf node_modules
-  pnpm install --no-frozen-lockfile
-  
-  if [ $? -ne 0 ]; then
-    echo "Second install attempt failed"
-    echo "Listing available space:"
-    df -h
-    echo "Listing pnpm store:"
-    pnpm store path 2>/dev/null || echo "Could not get pnpm store path"
+# Check if vite command is available in PATH
+echo "Checking if vite command is available..."
+if command -v vite &> /dev/null; then
+  echo "vite command found in PATH"
+  vite --version
+else
+  echo "vite command not found in PATH, will use direct path"
+  if [ -f "node_modules/.bin/vite" ]; then
+    echo "Direct vite binary found"
+    node_modules/.bin/vite --version
+  else
+    echo "ERROR: vite binary not found in node_modules/.bin/"
     exit 1
   fi
 fi
 
-# Verify dependencies
-echo "=== Verifying dependencies ==="
-echo "node_modules size:"
-du -sh node_modules 2>/dev/null || echo "Could not determine node_modules size"
+# Build with fallback options
+echo "Building project..."
+BUILD_EXIT_CODE=0
+pnpm run build || BUILD_EXIT_CODE=$?
 
-echo "Checking for vite:"
-if [ -d "node_modules/vite" ]; then
-  echo "vite found"
-else
-  echo "vite NOT found"
-  echo "Available modules in node_modules:"
-  ls node_modules | grep -E "(vite|react)" || echo "No matching modules found"
+if [ $BUILD_EXIT_CODE -ne 0 ]; then
+  echo "Build with pnpm failed with exit code $BUILD_EXIT_CODE, trying direct vite build..."
+  if [ -f "node_modules/.bin/vite" ]; then
+    node_modules/.bin/vite build
+  else
+    echo "ERROR: Cannot run vite build, binary not found"
+    exit 1
+  fi
 fi
 
-# Build the project
-echo "=== Building the project ==="
-echo "Available scripts:"
-cat package.json | grep -A 10 '"scripts"'
-echo "Running pnpm run build"
-pnpm run build
-
-# Check build result
-if [ $? -ne 0 ]; then
-  echo "Build failed"
-  exit 1
-else
-  echo "Build successful"
-fi
+echo "Build completed successfully!"
