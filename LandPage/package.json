@@ -38,16 +38,5 @@
     "dev": "vite",
     "lint": "eslint ."
   },
-  "packageManager": "pnpm@9.12.3",
-  "vercel": {
-    "builds": [
-      {
-        "src": "vercel-build.sh",
-        "use": "@vercel/static-build",
-        "config": {
-          "distDir": "dist"
-        }
-      }
-    ]
-  }
+  "packageManager": "pnpm@9.12.3"
 }
