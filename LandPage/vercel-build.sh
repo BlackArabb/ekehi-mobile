@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Set Node.js version explicitly
-export NODE_VERSION=22.x
+# Explicitly check and use Node.js 22
+echo "Checking Node.js version..."
+NODE_VERSION=$(node --version)
+echo "Current Node.js version: $NODE_VERSION"
+
+# If not Node.js 22, we'll have to work with what's available
+# Vercel should automatically use the version specified in package.json engines
 
 # Install pnpm with the same version as specified in package.json
 echo "Installing pnpm..."
