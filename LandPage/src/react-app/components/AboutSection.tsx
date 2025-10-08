@@ -56,7 +56,7 @@ export default function AboutSection() {
             About Ekehi
           </h2>
           <p className="text-body text-soft-white max-w-4xl mx-auto px-4 md:px-0">
-            Ekehi is more than just a cryptocurrency—it's a movement towards sustainable, 
+            Ekehi is more than just a cryptocurrency, it's a movement towards sustainable, 
             transparent, and inclusive finance. We're building a blockchain ecosystem that 
             prioritizes environmental responsibility, community governance, and global accessibility.
           </p>

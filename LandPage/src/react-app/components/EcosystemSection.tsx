@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Wallet, ArrowLeftRight, Coins, Image, TrendingUp, Vote, ChevronDown } from 'lucide-react';
+import { Wallet, ArrowLeftRight, Coins, Image, Building, Users, ChevronDown } from 'lucide-react';
 
 const ecosystemProducts = [
   {
     id: 1,
     name: 'Ekehi Wallet',
-    status: 'live',
+    status: 'coming-soon',
     icon: Wallet,
     description: 'Secure, non-custodial wallet supporting multiple chains. Store, send, and receive EKH and other cryptocurrencies with ease.',
     features: [
@@ -19,10 +19,10 @@ const ecosystemProducts = [
   },
   {
     id: 2,
-    name: 'Ekehi Exchange',
+    name: 'Ekehi Swap',
     status: 'coming-soon',
     icon: ArrowLeftRight,
-    description: 'Decentralized exchange with low fees, deep liquidity, and lightning-fast trades. Swap tokens without intermediaries.',
+    description: 'Instantly swap tokens with minimal fees and maximum security. Our AMM-based decentralized exchange ensures deep liquidity and seamless trading experiences.',
     features: [
       'Automated market making',
       'Yield farming pools',
@@ -64,30 +64,30 @@ const ecosystemProducts = [
   },
   {
     id: 5,
-    name: 'Ekehi DeFi Hub',
+    name: 'Ekehi RWA Tokenization',
     status: 'planned',
-    icon: TrendingUp,
-    description: 'Complete DeFi suite including lending, borrowing, and yield optimization strategies. Maximize your crypto returns.',
+    icon: Building,
+    description: 'EKEHI RWA tokenization digitizes real-world assets on the EKEHI blockchain, making them easier to trade, increasing liquidity, and broadening investor access. It streamlines asset management and enables fractional ownership, enhancing efficiency and transparency in transactions.',
     features: [
-      'Lending protocols',
-      'Flash loans',
-      'Liquidity mining',
-      'Portfolio tracker'
+      'Real estate tokenization',
+      'Commodity-backed tokens',
+      'Fractional ownership',
+      'Asset-backed lending'
     ],
     cta: 'Coming Q3 2025',
     position: { x: 25, y: 85 }
   },
   {
     id: 6,
-    name: 'Ekehi Governance',
+    name: 'Ekehi Foundation',
     status: 'planned',
-    icon: Vote,
-    description: 'Decentralized governance platform where token holders shape the future. Propose, vote, and execute community decisions.',
+    icon: Users,
+    description: 'The EKEHI Foundation is a charity leveraging blockchain for efficient and transparent giving, aiming to maximize the impact of donations to address social and humanitarian issues globally.',
     features: [
-      'On-chain voting',
-      'Proposal creation',
-      'Treasury management',
-      'Delegation system'
+      'Blockchain education programs',
+      'Sustainability grants',
+      'Community development',
+      'Open-source research'
     ],
     cta: 'Coming Q4 2025',
     position: { x: 65, y: 85 }
@@ -112,15 +112,15 @@ const getStatusBadge = (status: string) => {
 const getStatusText = (status: string) => {
   switch (status) {
     case 'live':
-      return '✅ LIVE';
+      return 'Live';
     case 'coming-soon':
-      return '🔄 COMING SOON';
+      return 'Coming Soon';
     case 'development':
-      return '🛠️ IN DEVELOPMENT';
+      return 'In Development';
     case 'planned':
-      return '📋 PLANNED';
+      return 'Planned';
     default:
-      return 'PLANNED';
+      return 'Planned';
   }
 };
 

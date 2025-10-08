@@ -58,7 +58,7 @@ export default function HeroSection() {
           }`}
           style={{ animationDelay: '0.6s' }}
         >
-          <a href="#whitepaper" className="btn-primary group w-full sm:w-auto">
+          <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary group w-full sm:w-auto">
             <Download size={20} />
             Download Whitepaper
             <Sparkles size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />

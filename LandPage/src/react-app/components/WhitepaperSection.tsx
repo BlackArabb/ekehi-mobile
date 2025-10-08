@@ -54,19 +54,21 @@ const whitepaperContent = {
       title: "Tokenomics",
       icon: TrendingUp,
       content: `
-        <h3 class="text-xl font-bold text-white mb-4">3.1 Token Distribution</h3>
+        <h3 class="text-xl font-bold text-white mb-4">3.1 The Ekehi Token</h3>
+        <p class="text-soft-white mb-4">The EKEHI token is the native cryptocurrency of the ecosystem, designed to be a leader in sustainable cryptocurrency. It is environmentally friendly, energy-efficient, and supports global sustainability goals.</p>
+        
+        <h3 class="text-xl font-bold text-white mb-4 mt-6">3.2 Token Distribution</h3>
         <p class="text-soft-white mb-4">Ekehi has a total supply of 1 billion tokens distributed as follows:</p>
         <ul class="list-disc list-inside text-soft-white mb-4 ml-4">
-          <li>Community Allocation: 40% (400,000,000 EKH)</li>
-          <li>Liquidity: 7% (70,000,000 EKH)</li>
-          <li>Team: 15% (150,000,000 EKH)</li>
-          <li>Marketing: 10% (100,000,000 EKH)</li>
-          <li>Development: 15% (150,000,000 EKH)</li>
-          <li>Reserves: 10% (100,000,000 EKH)</li>
-          <li>Community Rewards: 3% (30,000,000 EKH)</li>
+          <li>Community: 50% (500,000,000 EKH)</li>
+          <li>Public Sale: 20% (200,000,000 EKH)</li>
+          <li>Liquidity: 10% (100,000,000 EKH)</li>
+          <li>Reserve: 10% (100,000,000 EKH)</li>
+          <li>Team: 5% (50,000,000 EKH)</li>
+          <li>Staking: 5% (50,000,000 EKH)</li>
         </ul>
         
-        <h3 class="text-xl font-bold text-white mb-4 mt-6">3.2 Token Utility</h3>
+        <h3 class="text-xl font-bold text-white mb-4 mt-6">3.3 Token Utility</h3>
         <p class="text-soft-white mb-4">EKH tokens serve multiple purposes within the ecosystem:</p>
         <ul class="list-disc list-inside text-soft-white mb-4 ml-4">
           <li>Governance: Vote on protocol changes and upgrades</li>
@@ -75,7 +77,7 @@ const whitepaperContent = {
           <li>Liquidity Mining: Earn additional tokens by providing liquidity</li>
         </ul>
         
-        <h3 class="text-xl font-bold text-white mb-4 mt-6">3.3 Deflationary Mechanism</h3>
+        <h3 class="text-xl font-bold text-white mb-4 mt-6">3.4 Deflationary Mechanism</h3>
         <p class="text-soft-white mb-4">0.5% of all transaction fees are automatically burned, reducing the total supply over time and increasing token scarcity.</p>
       `
     },
@@ -189,12 +191,6 @@ const statistics = [
   { label: '0.5% Burn Rate', value: '0.5%' }
 ];
 
-const documentDetails = {
-  pages: 45,
-  size: '2.4 MB',
-  version: '2.0',
-  lastUpdated: 'January 2025'
-};
 
 export default function WhitepaperSection() {
   const [activeChapter, setActiveChapter] = useState(1);
@@ -351,28 +347,7 @@ export default function WhitepaperSection() {
                 })}
               </div>
 
-              {/* Document Details */}
-              <div className="mt-8 bg-dark-slate rounded-xl p-5 md:p-6 border border-charcoal-gray">
-                <h4 className="text-lg font-semibold text-white mb-4">Document Details</h4>
-                <div className="grid grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-medium-gray">Pages:</span>
-                    <span className="text-white ml-2">{documentDetails.pages}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-medium-gray">Size:</span>
-                    <span className="text-white ml-2">{documentDetails.size}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-medium-gray">Version:</span>
-                    <span className="text-white ml-2">{documentDetails.version}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-medium-gray">Updated:</span>
-                    <span className="text-white ml-2">{documentDetails.lastUpdated}</span>
-                  </div>
-                </div>
-              </div>
+             
             </div>
           </div>
 
@@ -480,7 +455,7 @@ export default function WhitepaperSection() {
             Download our whitepaper today and discover how Ekehi is building the future of sustainable finance.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-            <a href="#" className="btn-primary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
+            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
               <Download size={18} className="md:size-20 mr-2" />
               Download PDF
             </a>

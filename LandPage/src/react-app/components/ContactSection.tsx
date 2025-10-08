@@ -313,7 +313,7 @@ export default function ContactSection() {
               Looking for quick answers? Check out our comprehensive FAQ section covering 
               tokenomics, presale details, and technical questions.
             </p>
-            <a href="#whitepaper" className="btn-secondary inline-flex items-center gap-2 py-2.5 px-5 text-sm">
+            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-secondary inline-flex items-center gap-2 py-2.5 px-5 text-sm">
               View FAQ Section
               <ExternalLink size={14} />
             </a>

@@ -1,24 +1,23 @@
 import { useState, useRef } from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { TrendingUp, Users, Shield, Zap, DollarSign, Globe, ChevronDown } from 'lucide-react';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
 const tokenDistribution = [
-  { label: 'Community Allocation', percentage: 40, amount: 400000000, color: '#ffa000', description: 'Available to early supporters at discounted rates', vesting: 'Unlocked at TGE' },
-  { label: 'Liquidity', percentage: 7, amount: 70000000, color: '#ffb333', description: 'DEX liquidity pools and market making', vesting: 'Locked for 2 years' },
-  { label: 'Team', percentage: 15, amount: 150000000, color: '#cc8000', description: 'Core team and early contributors', vesting: '1-year cliff, 3-year linear vesting' },
-  { label: 'Marketing', percentage: 10, amount: 100000000, color: '#ff9800', description: 'Brand awareness and user acquisition', vesting: '6-month cliff, 2-year linear vesting' },
-  { label: 'Development', percentage: 15, amount: 150000000, color: '#2196f3', description: 'Product development and ecosystem growth', vesting: 'Released quarterly based on milestones' },
-  { label: 'Reserves', percentage: 10, amount: 100000000, color: '#9e9e9e', description: 'Strategic partnerships and future opportunities', vesting: 'Multi-sig controlled, community governed' },
-  { label: 'Community Rewards', percentage: 3, amount: 30000000, color: '#4caf50', description: 'Airdrops, contests, and community initiatives', vesting: 'Distributed over 5 years' }
+  { label: 'Community', percentage: 50, amount: 500000000, color: '#ffa000', description: 'Available to community members and early supporters', vesting: 'Unlocked at TGE' },
+  { label: 'Public Sale', percentage: 20, amount: 200000000, color: '#ffb333', description: 'Available to public investors during token sale', vesting: 'Unlocked at TGE' },
+  { label: 'Liquidity', percentage: 10, amount: 100000000, color: '#ff9800', description: 'DEX liquidity pools and market making', vesting: 'Locked for 2 years' },
+  { label: 'Reserve', percentage: 10, amount: 100000000, color: '#9e9e9e', description: 'Strategic partnerships and future opportunities', vesting: 'Multi-sig controlled, community governed' },
+  { label: 'Team', percentage: 5, amount: 50000000, color: '#cc8000', description: 'Core team and early contributors', vesting: '1-year cliff, 3-year linear vesting' },
+  { label: 'Staking', percentage: 5, amount: 50000000, color: '#4caf50', description: 'Staking rewards for network security', vesting: 'Released over 5 years' }
 ];
 
 const tokenStats = [
   { icon: DollarSign, label: 'Total Supply', value: '1B EKH', subtext: '1,000,000,000 tokens' },
   { icon: TrendingUp, label: 'Initial Market Cap', value: '$21M', subtext: 'At $0.05 initial price' },
-  { icon: Shield, label: 'Circulating Supply', value: '420M', subtext: '42% at launch' },
+  { icon: Shield, label: 'Circulating Supply', value: '750M', subtext: '75% at launch' },
   { icon: Globe, label: 'Fully Diluted Value', value: '$50M', subtext: 'At $0.05 price' }
 ];
 
@@ -60,16 +59,44 @@ export default function TokenomicsSection() {
         bodyColor: '#f5f5f5',
         borderColor: '#ffa000',
         borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: true,
         callbacks: {
           label: function(context: any) {
-            return `${context.label}: ${context.parsed}% (${tokenDistribution[context.dataIndex].amount.toLocaleString()} EKH)`;
+            const item = tokenDistribution[context.dataIndex];
+            return [
+              `${context.label}: ${context.parsed}%`,
+              `${item.amount.toLocaleString()} EKH`,
+              `Vesting: ${item.vesting}`
+            ];
           }
+        }
+      },
+      title: {
+        display: true,
+        text: 'EKEHI Token Distribution',
+        color: '#ffffff',
+        font: {
+          size: 16,
+          family: 'Space Grotesk, sans-serif',
+          weight: '600'
+        },
+        padding: {
+          top: 10,
+          bottom: 30
         }
       }
     },
     animation: {
       animateRotate: true,
-      duration: 1500
+      animateScale: true,
+      duration: 1500,
+      easing: 'easeOutQuart'
+    },
+    hover: {
+      mode: 'nearest',
+      intersect: true,
+      animationDuration: 300
     },
     onClick: (_event: any, elements: any) => {
       if (elements.length > 0) {
@@ -128,7 +155,7 @@ export default function TokenomicsSection() {
               <div 
                 key={index} 
                 className={`bg-dark-slate rounded-lg p-4 border-l-4 transition-all duration-300 cursor-pointer hover:bg-dark-slate/80 ${
-                  activeDistribution === index ? 'border-yellow-500 bg-dark-slate/80' : 'border-charcoal-gray'
+                  activeDistribution === index ? 'border-yellow-500 bg-dark-slate/80 shadow-gold' : 'border-charcoal-gray'
                 }`}
                 style={{ borderLeftColor: item.color }}
                 onClick={() => setActiveDistribution(index)}

@@ -224,7 +224,7 @@ export default function RoadmapSection() {
             <a href="#presale" className="btn-primary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
               Join Presale Now
             </a>
-            <a href="#whitepaper" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
+            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
               Download Whitepaper
             </a>
             <a href="https://t.me/ekehi_official" target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
