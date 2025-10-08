@@ -6,8 +6,8 @@ const contactMethods = [
     icon: Mail,
     title: 'Email Us',
     description: 'Get in touch for partnerships and support',
-    contact: 'hello@ekehi.com',
-    link: 'mailto:hello@ekehi.com'
+    contact: 'contact@ekehi.xyz',
+    link: 'mailto:contact@ekehi.xyz'
   },
   {
     icon: MessageSquare,
@@ -34,9 +34,7 @@ const contactMethods = [
 
 const socialLinks = [
   { name: 'Telegram', url: 'https://t.me/ekehi_official', users: '10K+', icon: 'T' },
-  { name: 'Twitter', url: 'https://twitter.com/ekehi_official', users: '25K+', icon: 'X' },
-  { name: 'Discord', url: 'https://discord.gg/ekehi', users: '5K+', icon: 'D' },
-  { name: 'Reddit', url: 'https://reddit.com/r/ekehi', users: '3K+', icon: 'R' }
+  { name: 'Twitter', url: 'https://twitter.com/ekehi_official', users: '25K+', icon: 'X' }
 ];
 
 export default function ContactSection() {

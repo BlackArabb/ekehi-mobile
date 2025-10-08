@@ -69,8 +69,7 @@ export default function Navigation() {
       }`}>
         <div className="flex items-center">
           <a href="#home" className="flex items-center">
-            <img src="/logo.png" alt="EKEHI Logo" className="h-8 w-auto mr-2" />
-            <span className="text-xl font-bold text-white">EKEHI</span>
+            <img src="/header.jpg" alt="EKEHI Logo" className="h-12 w-auto mr-2" />
           </a>
         </div>
 
@@ -109,8 +108,7 @@ export default function Navigation() {
       }`}>
         <div className="flex items-center">
           <a href="#home" className="flex items-center">
-            <img src="/logo.png" alt="EKEHI Logo" className="h-8 w-auto mr-2" />
-            <span className="text-xl font-bold text-white">EKEHI</span>
+            <img src="/header.jpg" alt="EKEHI Logo" className="h-10 w-auto mr-2" />
           </a>
         </div>
 

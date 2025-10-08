@@ -115,21 +115,23 @@ const whitepaperContent = {
       icon: Users,
       content: `
         <h3 class="text-xl font-bold text-white mb-4">5.1 Core Team</h3>
-        <p class="text-soft-white mb-4">Our team consists of experienced blockchain developers, financial experts, and sustainability advocates:</p>
-        <ul class="list-disc list-inside text-soft-white mb-4 ml-4">
-          <li>Alex Chen - CEO & Lead Developer (10+ years in blockchain)</li>
-          <li>Sarah Johnson - CFO & Financial Strategist (Former investment banker)</li>
-          <li>Miguel Rodriguez - CTO & Security Expert (Cybersecurity specialist)</li>
-          <li>Dr. Yuki Tanaka - Sustainability Advisor (Environmental scientist)</li>
-        </ul>
+        <p class="text-soft-white mb-4">Our team consists of experienced blockchain developers, financial experts, and product designers:</p>
         
-        <h3 class="text-xl font-bold text-white mb-4 mt-6">5.2 Advisory Board</h3>
-        <p class="text-soft-white mb-4">We're supported by industry leaders and experts:</p>
-        <ul class="list-disc list-inside text-soft-white mb-4 ml-4">
-          <li>Prof. Michael Roberts - Blockchain Academic (MIT)</li>
-          <li>Lisa Wang - DeFi Specialist (Former Uniswap team)</li>
-          <li>David Kim - Regulatory Advisor (Former SEC attorney)</li>
-        </ul>
+        <div class="mb-4">
+          <h4 class="text-lg font-bold text-yellow-500 mb-2">Ahmad A – CEO & Co-Founder</h4>
+          <p class="text-soft-white mb-4">Blockchain strategist with over 5 years of experience in decentralized technologies and financial systems. Ahmad leads the overall vision, strategy, and external partnerships, ensuring alignment with the project's long-term goals.</p>
+        </div>
+
+         <div class="mb-4">
+          <h4 class="text-lg font-bold text-yellow-500 mb-2">Kamal M. Saleh – COO, CFO & Product Designer, Co-Founder</h4>
+          <p class="text-soft-white mb-4">Experienced in go-to-market strategies for DeFi projects and product development. Kamal manages operations and financial systems while also contributing to product design and front-end user experience, bridging business strategy with user-focused design.</p>
+        </div>
+        
+        <div class="mb-4">
+          <h4 class="text-lg font-bold text-yellow-500 mb-2">Suleiman Akaaba – CTO & CIO, Co-Founder</h4>
+          <p class="text-soft-white mb-4">Specialist in Layer-2 scaling solutions, cryptography, and smart contract development. Suleiman leads the technical direction, security, and scalability of the EKEHI ecosystem.</p>
+        </div>
+        
       `
     },
     {

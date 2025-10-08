@@ -31,17 +31,17 @@ export default function Home() {
             <div className="text-center">
               <div className="flex justify-center mb-4">
                 <img 
-                  src="/logo.png" 
+                  src="/header.jpg" 
                   alt="EKEHI Logo" 
-                  className="h-10 w-auto"
+                  className="h-12 w-auto"
                 />
               </div>
               <p className="text-medium-gray text-sm mb-4">Building a Sustainable and Inclusive Financial Future</p>
               <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 text-xs text-medium-gray">
                 <span>© 2025 Ekehi. All rights reserved.</span>
-                <span className="hidden sm:inline">•</span>
+                <span className="hidden sm:inline text-yellow-500">•</span>
                 <a href="#" className="hover:text-yellow-500 transition-colors">Privacy Policy</a>
-                <span className="hidden sm:inline">•</span>
+                <span className="hidden sm:inline text-yellow-500">•</span>
                 <a href="#" className="hover:text-yellow-500 transition-colors">Terms of Service</a>
               </div>
             </div>
