@@ -12,7 +12,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navigation />
-      <div className="relative z-0">
+      {/* Removed relative z-0 to allow proper sticky positioning */}
+      <div>
         <HeroSection />
         <main>
           <AboutSection />

@@ -15,13 +15,33 @@ const navigationLinks = [
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      
+      // Determine active section based on scroll position
+      const sections = navigationLinks.map(link => link.href.substring(1));
+      const scrollPosition = window.scrollY + 100;
+      
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const height = element.offsetHeight;
+          
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + height) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
+    // Initialize on load
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -44,7 +64,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className={`hidden md:flex items-center justify-between py-4 px-6 transition-all duration-300 ${
+      <nav className={`hidden md:flex items-center justify-between py-4 px-6 transition-all duration-300 sticky top-0 z-50 ${
         isScrolled ? 'bg-black/80 backdrop-blur-md border-b border-charcoal-gray' : 'bg-transparent'
       }`}>
         <div className="flex items-center">
@@ -55,16 +75,26 @@ export default function Navigation() {
         </div>
 
         <div className="flex items-center space-x-8">
-          {navigationLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-medium-gray hover:text-yellow-500 transition-colors flex items-center gap-1.5 text-sm font-medium"
-            >
-              <link.icon size={16} />
-              {link.label}
-            </a>
-          ))}
+          {navigationLinks.map((link) => {
+            const isActive = activeSection === link.href.substring(1);
+            return (
+              <a
+                key={link.label}
+                href={link.href}
+                className={`transition-colors flex items-center gap-1.5 text-sm font-medium ${
+                  isActive 
+                    ? 'text-white' // White color for active state
+                    : 'text-medium-gray hover:text-yellow-500'
+                }`}
+              >
+                <link.icon 
+                  size={16} 
+                  className={isActive ? 'text-white' : 'text-ekehi-gold'} 
+                />
+                {link.label}
+              </a>
+            );
+          })}
         </div>
 
         {/* Connect Wallet Button - REMOVED as per request */}
@@ -74,7 +104,7 @@ export default function Navigation() {
       </nav>
 
       {/* Mobile Navigation */}
-      <nav className={`md:hidden flex items-center justify-between py-4 px-6 transition-all duration-300 ${
+      <nav className={`md:hidden flex items-center justify-between py-4 px-6 transition-all duration-300 sticky top-0 z-50 ${
         isScrolled ? 'bg-black/80 backdrop-blur-md border-b border-charcoal-gray' : 'bg-transparent'
       }`}>
         <div className="flex items-center">
@@ -98,17 +128,27 @@ export default function Navigation() {
         <div className="md:hidden fixed inset-0 bg-black/90 backdrop-blur-lg z-50">
           <div className="flex flex-col h-full pt-20 px-6">
             <div className="flex flex-col space-y-6 flex-grow">
-              {navigationLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-2xl text-white hover:text-yellow-500 transition-colors flex items-center gap-3 py-3 border-b border-charcoal-gray"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <link.icon size={24} />
-                  {link.label}
-                </a>
-              ))}
+              {navigationLinks.map((link) => {
+                const isActive = activeSection === link.href.substring(1);
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className={`text-2xl transition-colors flex items-center gap-3 py-3 border-b border-charcoal-gray ${
+                      isActive 
+                        ? 'text-white' // White color for active state
+                        : 'text-white hover:text-yellow-500'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <link.icon 
+                      size={24} 
+                      className={isActive ? 'text-white' : 'text-ekehi-gold'} 
+                    />
+                    {link.label}
+                  </a>
+                );
+              })}
             </div>
 
             {/* Connect Wallet Button - REMOVED as per request */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, FileText, ChevronRight, BookOpen, Zap, Users, Shield, TrendingUp, Leaf } from 'lucide-react';
+import { Download, FileText, ChevronRight, BookOpen, Zap, Users, Shield, TrendingUp, Leaf, ChevronDown, ChevronUp } from 'lucide-react';
 
 // Sample whitepaper content structure
 const whitepaperContent = {
@@ -197,6 +197,7 @@ const documentDetails = {
 export default function WhitepaperSection() {
   const [activeChapter, setActiveChapter] = useState(1);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileExpandedChapter, setMobileExpandedChapter] = useState<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -209,6 +210,11 @@ export default function WhitepaperSection() {
 
   // Get the active chapter content
   const activeChapterContent = whitepaperContent.chapters.find(chapter => chapter.id === activeChapter) || whitepaperContent.chapters[0];
+  
+  // Handle mobile chapter toggle
+  const toggleMobileChapter = (chapterId: number) => {
+    setMobileExpandedChapter(mobileExpandedChapter === chapterId ? null : chapterId);
+  };
 
   return (
     <section id="whitepaper" className="section-padding bg-black">
@@ -227,35 +233,117 @@ export default function WhitepaperSection() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12 mb-12 md:mb-16">
           {/* Table of Contents */}
           <div className="lg:col-span-2">
-            <div className={`sticky top-20 transition-all duration-300 ${isScrolled ? 'pt-4' : ''}`}>
+            <div className={`lg:sticky top-20 transition-all duration-300`}>
               <h3 className="text-h3 text-white mb-6">Table of Contents</h3>
               <div className="space-y-3">
                 {whitepaperContent.chapters.map((chapter) => {
                   const IconComponent = chapter.icon;
+                  const isMobileExpanded = mobileExpandedChapter === chapter.id;
+                  const isDesktopActive = activeChapter === chapter.id;
+                  
                   return (
-                    <div
-                      key={chapter.id}
-                      className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 cursor-pointer group ${
-                        activeChapter === chapter.id 
-                          ? 'bg-yellow-500/10 border border-yellow-500' 
-                          : 'bg-dark-slate border border-charcoal-gray hover:border-yellow-500 hover:bg-yellow-500/5'
-                      }`}
-                      onClick={() => setActiveChapter(chapter.id)}
-                    >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${
-                        activeChapter === chapter.id 
-                          ? 'bg-yellow-500 text-black' 
-                          : 'bg-black/50 text-yellow-500'
-                      }`}>
-                        <IconComponent size={20} />
+                    <div key={chapter.id}>
+                      {/* Chapter Item */}
+                      <div
+                        className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 cursor-pointer group ${
+                          isDesktopActive 
+                            ? 'bg-yellow-500/10 border border-yellow-500' 
+                            : 'bg-dark-slate border border-charcoal-gray hover:border-yellow-500 hover:bg-yellow-500/5'
+                        }`}
+                        onClick={() => {
+                          // Desktop behavior
+                          setActiveChapter(chapter.id);
+                          // Mobile behavior
+                          toggleMobileChapter(chapter.id);
+                        }}
+                      >
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${
+                          isDesktopActive 
+                            ? 'bg-yellow-500 text-black' 
+                            : 'bg-black/50 text-yellow-500'
+                        }`}>
+                          <IconComponent size={20} />
+                        </div>
+                        <span className={`font-medium transition-colors flex-grow ${
+                          isDesktopActive 
+                            ? 'text-yellow-500' 
+                            : 'text-white group-hover:text-yellow-500'
+                        }`}>
+                          {chapter.title}
+                        </span>
+                        {/* Mobile expand/collapse icon */}
+                        <div className="md:hidden">
+                          {isMobileExpanded ? 
+                            <ChevronUp size={20} className="text-white" /> : 
+                            <ChevronDown size={20} className="text-white" />
+                          }
+                        </div>
                       </div>
-                      <span className={`font-medium transition-colors ${
-                        activeChapter === chapter.id 
-                          ? 'text-yellow-500' 
-                          : 'text-white group-hover:text-yellow-500'
-                      }`}>
-                        {chapter.title}
-                      </span>
+                      
+                      {/* Mobile Content Expansion */}
+                      <div className="md:hidden">
+                        {isMobileExpanded && (
+                          <div className="bg-dark-slate border-2 border-yellow-500 rounded-2xl p-6 mt-2">
+                            <div className="mb-4">
+                              <div className="flex items-center gap-3 mb-4">
+                                <FileText size={24} className="text-yellow-500" />
+                                <div>
+                                  <h4 className="text-h4 text-white">{whitepaperContent.title}</h4>
+                                  <p className="text-medium-gray text-sm">{whitepaperContent.subtitle}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                <span className="bg-yellow-500/10 text-yellow-500 px-2 py-1 rounded-full text-xs">
+                                  Version {whitepaperContent.version}
+                                </span>
+                                <span className="bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full text-xs">
+                                  Updated {whitepaperContent.lastUpdated}
+                                </span>
+                              </div>
+                              
+                              {/* Chapter Content */}
+                              <div className="prose prose-invert max-w-none">
+                                <div 
+                                  className="text-soft-white text-sm"
+                                  dangerouslySetInnerHTML={{ __html: chapter.content }} 
+                                />
+                              </div>
+                            </div>
+                            
+                            {/* Mobile Navigation */}
+                            <div className="flex justify-between items-center pt-4 border-t border-charcoal-gray">
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveChapter(Math.max(1, chapter.id - 1));
+                                  setMobileExpandedChapter(Math.max(1, chapter.id - 1));
+                                }}
+                                disabled={chapter.id === 1}
+                                className="btn-secondary py-1 px-3 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                ← Previous
+                              </button>
+                              
+                              <div className="text-medium-gray text-xs">
+                                Chapter {chapter.id} of {whitepaperContent.chapters.length}
+                              </div>
+                              
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveChapter(Math.min(whitepaperContent.chapters.length, chapter.id + 1));
+                                  setMobileExpandedChapter(Math.min(whitepaperContent.chapters.length, chapter.id + 1));
+                                }}
+                                disabled={chapter.id === whitepaperContent.chapters.length}
+                                className="btn-secondary py-1 px-3 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Next →
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -286,8 +374,8 @@ export default function WhitepaperSection() {
             </div>
           </div>
 
-          {/* Document Content */}
-          <div className="lg:col-span-3">
+          {/* Desktop Document Content (Hidden on mobile) */}
+          <div className="hidden md:block lg:col-span-3">
             <div className="bg-dark-slate border-2 border-yellow-500 rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-gold-lg mb-8">
               <div className="mb-6 md:mb-8">
                 <div className="flex items-center gap-3 mb-4">
@@ -303,8 +391,8 @@ export default function WhitepaperSection() {
                     Version {whitepaperContent.version}
                   </span>
                   <span className="bg-blue-500/10 text-blue-500 px-3 py-1 rounded-full text-xs">
-    Updated {whitepaperContent.lastUpdated}
-  </span>
+                    Updated {whitepaperContent.lastUpdated}
+                  </span>
                 </div>
                 
                 {/* Chapter Content */}
@@ -393,9 +481,6 @@ export default function WhitepaperSection() {
             <a href="#" className="btn-primary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
               <Download size={18} className="md:size-20 mr-2" />
               Download PDF
-            </a>
-            <a href="#ecosystem" className="btn-secondary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
-              Explore Ecosystem
             </a>
           </div>
         </div>

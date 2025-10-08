@@ -39,9 +39,15 @@ body {
   background: var(--deep-black);
   color: var(--pure-white);
   line-height: 1.6;
-  overflow-x: hidden;
+  /* Changed from overflow-x: hidden to allow proper sticky positioning */
+  overflow-x: visible;
   /* Prevent zoom on input focus */
   font-size: 16px;
+}
+
+/* Ensure proper positioning for sticky elements */
+#root {
+  position: relative;
 }
 
 /* Custom scrollbar */
@@ -177,6 +183,11 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Custom text color classes */
+.text-ekehi-gold {
+  color: var(--ekehi-gold);
 }
 
 /* Glow Effects */
@@ -412,74 +423,6 @@ body {
 /* Status badges */
 .badge-live {
   background: var(--success-green);
-  color: var(--pure-white);
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
 }
 
-.badge-coming-soon {
-  background: var(--warning-amber);
-  color: var(--deep-black);
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.badge-planned {
-  background: var(--medium-gray);
-  color: var(--pure-white);
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.badge-development {
-  background: var(--info-blue);
-  color: var(--pure-white);
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-/* Mobile-specific improvements */
-@media (max-width: 768px) {
-  /* Improve touch targets */
-  a, button, input, textarea, select {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  /* Prevent accidental zoom */
-  input, textarea, select {
-    font-size: 16px;
-  }
-  
-  /* Adjust line height for better readability */
-  body, p {
-    line-height: 1.5;
-  }
-}
-
-/* Hide scroll indicator on mobile */
-@media (max-width: 768px) {
-  .scroll-indicator {
-    display: none;
-  }
-}
-
-/* Fix for iOS Safari */
-@supports (-webkit-touch-callout: none) {
-  .ios-safe-area {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-}
+/* Add more custom styles as needed */
