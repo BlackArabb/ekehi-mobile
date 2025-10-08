@@ -82,6 +82,24 @@ export default function MiningAppSection() {
                 </div>
               ))}
             </div>
+
+            {/* Download CTA */}
+        <div className="text-center mt-10">
+          <a 
+            href="#"
+            className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base"
+          >
+            <Download size={20} />
+            Download Mining App
+           {/* <span className="text-xs opacity-70 group-hover:opacity-100 transition-opacity">
+              Available for iOS & Android
+            </span>*/}
+          </a>
+          
+          <div className="mt-4 text-sm text-medium-gray">
+            <p>Not available on app stores yet. Direct download only.</p>
+          </div>
+        </div>
           </div>
 
           {/* App Features */}
@@ -110,9 +128,11 @@ export default function MiningAppSection() {
                         className={`text-yellow-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
                       />
                     </div>
-                    <p className={`text-soft-white text-sm md:text-base transition-all duration-300 ${isExpanded ? 'line-clamp-none' : 'line-clamp-2'}`}>
-                      {feature.description}
-                    </p>
+                    <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+                      <p className="text-soft-white text-sm md:text-base">
+                        {feature.description}
+                      </p>
+                    </div>
                   </div>
                 );
               })}
@@ -120,23 +140,7 @@ export default function MiningAppSection() {
           </div>
         </div>
 
-        {/* Download CTA */}
-        <div className="text-center">
-          <a 
-            href="#"
-            className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base"
-          >
-            <Download size={20} />
-            Download Mining App
-            <span className="text-xs opacity-70 group-hover:opacity-100 transition-opacity">
-              Available for iOS & Android
-            </span>
-          </a>
-          
-          <div className="mt-4 text-sm text-medium-gray">
-            <p>Not available on app stores yet. Direct download only.</p>
-          </div>
-        </div>
+        
       </div>
     </section>
   );
