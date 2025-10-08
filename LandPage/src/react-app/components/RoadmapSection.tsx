@@ -1,4 +1,4 @@
-import { Check, Target, Clock, Calendar, TrendingUp, Rocket } from 'lucide-react';
+import { Check, Target, Clock, Calendar, TrendingUp, Rocket, Download, Youtube, Facebook } from 'lucide-react';
 
 const roadmapPhases = [
   {
@@ -7,10 +7,10 @@ const roadmapPhases = [
     status: 'completed',
     progress: 100,
     milestones: [
-      { text: 'Concept development and whitepaper v1.0', completed: true },
-      { text: 'Team formation and advisory board setup', completed: true },
-      { text: 'Smart contract architecture design', completed: true },
-      { text: 'Initial community building (Telegram, Twitter, Discord)', completed: true },
+      { text: 'Marketing and Promotions', completed: true },
+      { text: 'Listing on Tracking Platforms (CMC, CG etc)', completed: true },
+      { text: 'Partnership and Collaborations', completed: true },
+      { text: 'Mining App release', completed: true },
       { text: 'Website and branding launch', completed: true },
       { text: 'Legal structure and compliance framework', completed: true },
       { text: 'Tokenomics finalization', completed: true },
@@ -23,38 +23,40 @@ const roadmapPhases = [
     status: 'in-progress',
     progress: 65,
     milestones: [
-      { text: 'Presale smart contract development', completed: true },
-      { text: 'Ekehi Wallet beta launch', completed: true },
-      { text: 'Staking protocol implementation', completed: true },
-      { text: 'Security audit completion (CertiK)', completed: false, inProgress: true },
-      { text: 'Presale campaign launch', completed: false, inProgress: true },
+      { text: 'Staking and lockup Events', completed: true },
+      { text: 'Launch new version for Ekehi Network app and test initial layer 1 blockchain solution', completed: true },
+      { text: 'Roll out Ekehi Swap with integrated privacy features', completed: true },
+      { text: 'Initiate pilot for RWA tokenization', completed: false, inProgress: true },
+      { text: 'Trading Events/ DEX/CEX promotion/ Listing', completed: false, inProgress: true },
+      { text: 'Marketing campaign phase 1', completed: false },
       { text: 'Exchange integration negotiations', completed: false, inProgress: true },
-      { text: 'DEX listing preparations', completed: false },
-      { text: 'Marketing campaign phase 1', completed: false }
+      { text: 'DEX listing preparations', completed: false }
     ]
   },
   {
-    phase: 'Phase 3: Launch',
+    phase: 'Phase 3: Expansion',
     period: 'Q3 2025',
     status: 'upcoming',
     progress: 0,
     milestones: [
-      { text: 'Token Generation Event (TGE)', completed: false },
+      { text: 'Expand community adoption', completed: false },
+      { text: 'Partnership with De-Fi projects', completed: false },
+      { text: 'Continuation of blockchain Updates and development', completed: false },
+      { text: 'RWA tokenization public offering phase 2', completed: false },
       { text: 'DEX listings (Uniswap, PancakeSwap)', completed: false },
       { text: 'CEX listings (Tier 2 exchanges)', completed: false },
-      { text: 'Ekehi Exchange beta launch', completed: false },
-      { text: 'NFT Marketplace development start', completed: false },
       { text: 'Strategic partnerships announcements', completed: false },
-      { text: 'Community governance activation', completed: false },
       { text: 'Staking rewards program expansion', completed: false }
     ]
   },
   {
-    phase: 'Phase 4: Expansion',
+    phase: 'Phase 4: Global Adoption',
     period: 'Q4 2025 - 2026',
     status: 'planned',
     progress: 0,
     milestones: [
+      { text: 'Achieve 10 million active users', completed: false },
+      { text: 'Secure RWA partnership for assets backed solutions across the world', completed: false },
       { text: 'Tier 1 CEX listings (Binance, Coinbase target)', completed: false },
       { text: 'Ekehi DeFi Hub launch', completed: false },
       { text: 'NFT Marketplace public launch', completed: false },
@@ -62,9 +64,7 @@ const roadmapPhases = [
       { text: 'Cross-chain bridge implementation', completed: false },
       { text: 'Global payment integrations', completed: false },
       { text: 'Real-world use case partnerships', completed: false },
-      { text: 'Ecosystem grants program', completed: false },
-      { text: 'Regulatory licenses (multiple jurisdictions)', completed: false },
-      { text: '1M+ users milestone', completed: false }
+      { text: 'Ecosystem grants program', completed: false }
     ]
   }
 ];
@@ -221,15 +221,38 @@ export default function RoadmapSection() {
         <div className="text-center mt-12 md:mt-16 px-4">
           <h3 className="text-h3 md:text-h3 text-white mb-6">Ready to Join Our Journey?</h3>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-            <a href="#presale" className="btn-primary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
-              Join Presale Now
-            </a>
-            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
+            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
+              <Download size={20} className="md:size-24 mr-2 inline" />
               Download Whitepaper
             </a>
-            <a href="https://t.me/ekehi_official" target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
-              Join Community
+            <a href="#" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
+              <img src='/logo.png' className="md:size-24 mr-2 inline" />
+              Download App
             </a>
+          </div>
+          
+          {/* Tokenomics Info */}
+          <div className="mt-8 bg-dark-slate rounded-xl p-5 md:p-6 border border-charcoal-gray max-w-4xl mx-auto">
+            <h4 className="text-lg font-semibold text-white mb-3">Tokenomics Update</h4>
+            <p className="text-body-small md:text-body text-soft-white mb-3">
+              50% of transaction fees are burnt to reduce supply and increase scarcity. 
+              25% goes to liquidity pools to ensure market stability. 
+              25% supports the Ekehi Foundation for community development and sustainability initiatives.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+              <div className="bg-yellow-500/10 p-3 rounded-lg">
+                <div className="text-yellow-500 font-bold">50% Burnt</div>
+                <div className="text-xs text-medium-gray">Supply Reduction</div>
+              </div>
+              <div className="bg-blue-500/10 p-3 rounded-lg">
+                <div className="text-blue-500 font-bold">25% Liquidity</div>
+                <div className="text-xs text-medium-gray">Market Stability</div>
+              </div>
+              <div className="bg-green-500/10 p-3 rounded-lg">
+                <div className="text-green-500 font-bold">25% Foundation</div>
+                <div className="text-xs text-medium-gray">Community Growth</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

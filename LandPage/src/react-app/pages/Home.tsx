@@ -2,11 +2,12 @@ import Navigation from '@/react-app/components/Navigation';
 import HeroSection from '@/react-app/components/HeroSection';
 import AboutSection from '@/react-app/components/AboutSection';
 import WhitepaperSection from '@/react-app/components/WhitepaperSection';
-import PresaleSection from '@/react-app/components/PresaleSection';
+// PresaleSection import removed
 import EcosystemSection from '@/react-app/components/EcosystemSection';
 import TokenomicsSection from '@/react-app/components/TokenomicsSection';
 import RoadmapSection from '@/react-app/components/RoadmapSection';
 import ContactSection from '@/react-app/components/ContactSection';
+import MiningAppSection from '@/react-app/components/MiningAppSection';
 
 export default function Home() {
   return (
@@ -18,10 +19,11 @@ export default function Home() {
         <main>
           <AboutSection />
           <WhitepaperSection />
-          <PresaleSection />
+          {/* PresaleSection removed */}
           <EcosystemSection />
           <TokenomicsSection />
           <RoadmapSection />
+          <MiningAppSection />
           <ContactSection />
         </main>
         

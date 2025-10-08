@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, MessageSquare, Phone, MapPin, Send, ExternalLink, Users, ChevronDown, CheckCircle } from 'lucide-react';
+import { Mail, MessageSquare, Phone, MapPin, Send, ExternalLink, Users, ChevronDown, CheckCircle, Youtube, Facebook } from 'lucide-react';
 
 const contactMethods = [
   {
@@ -34,7 +34,9 @@ const contactMethods = [
 
 const socialLinks = [
   { name: 'Telegram', url: 'https://t.me/ekehi_official', users: '10K+', icon: 'T' },
-  { name: 'Twitter', url: 'https://twitter.com/ekehi_official', users: '25K+', icon: 'X' }
+  { name: 'Twitter', url: 'https://twitter.com/ekehi_official', users: '25K+', icon: 'X' },
+  { name: 'YouTube', url: 'https://youtube.com/ekehi_official', users: '5K+', icon: <Youtube size={16} /> },
+  { name: 'Facebook', url: 'https://facebook.com/ekehi_official', users: '15K+', icon: <Facebook size={16} /> }
 ];
 
 export default function ContactSection() {

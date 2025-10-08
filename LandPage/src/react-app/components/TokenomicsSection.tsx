@@ -78,8 +78,7 @@ export default function TokenomicsSection() {
         color: '#ffffff',
         font: {
           size: 16,
-          family: 'Space Grotesk, sans-serif',
-          weight: '600'
+          family: 'Space Grotesk, sans-serif'
         },
         padding: {
           top: 10,
@@ -90,13 +89,14 @@ export default function TokenomicsSection() {
     animation: {
       animateRotate: true,
       animateScale: true,
-      duration: 1500,
-      easing: 'easeOutQuart'
+      duration: 1500
     },
     hover: {
-      mode: 'nearest',
+      mode: 'nearest' as const,
       intersect: true,
-      animationDuration: 300
+      onHover: (event: any, chartElement: any) => {
+        event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+      }
     },
     onClick: (_event: any, elements: any) => {
       if (elements.length > 0) {
@@ -129,7 +129,7 @@ export default function TokenomicsSection() {
             <div className="relative w-64 h-64 md:w-80 md:h-80 mb-6 md:mb-8">
               <Doughnut ref={chartRef} data={chartData} options={chartOptions} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
+                <div className="text-center align-middle">
                   <div className="text-2xl md:text-3xl font-bold text-gradient-gold">{tokenDistribution[activeDistribution].percentage}%</div>
                   <div className="text-medium-gray text-xs md:text-sm">{tokenDistribution[activeDistribution].label}</div>
                 </div>
@@ -141,9 +141,25 @@ export default function TokenomicsSection() {
               <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                 🔥 Burn Mechanism
               </h4>
-              <p className="text-body-small md:text-body text-soft-white">
-                Deflationary tokenomics: 0.5% of all transaction fees automatically burned, 
-                reducing supply over time and increasing scarcity.
+              <p className="text-body-small md:text-body text-soft-white mb-4">
+                Deflationary tokenomics with transparent fee distribution:
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-soft-white">50% Burnt</span>
+                  <span className="text-yellow-500 font-medium">Supply Reduction</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-soft-white">25% Liquidity Pool</span>
+                  <span className="text-blue-500 font-medium">Market Stability</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-soft-white">25% Ekehi Foundation</span>
+                  <span className="text-green-500 font-medium">Community Growth</span>
+                </div>
+              </div>
+              <p className="text-xs text-medium-gray mt-3">
+                0.5% of all transaction fees automatically distributed according to this mechanism
               </p>
             </div>
           </div>

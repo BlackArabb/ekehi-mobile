@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Home, Info, FileText, Rocket, Globe, PieChart, Map, Mail, Wallet } from 'lucide-react';
+import { Menu, X, Home, Info, FileText, Rocket, Globe, PieChart, Map, Mail, Smartphone } from 'lucide-react';
 
 const navigationLinks = [
   { href: '#home', label: 'Home', icon: Home },
   { href: '#about', label: 'About', icon: Info },
   { href: '#whitepaper', label: 'Whitepaper', icon: FileText },
-  { href: '#presale', label: 'Presale', icon: Rocket },
+  { href: '#mining-app', label: 'Mining App', icon: Smartphone },
   { href: '#ecosystem', label: 'Ecosystem', icon: Globe },
   { href: '#tokenomics', label: 'Tokenomics', icon: PieChart },
   { href: '#roadmap', label: 'Roadmap', icon: Map },

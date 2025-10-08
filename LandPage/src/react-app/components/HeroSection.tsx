@@ -63,8 +63,8 @@ export default function HeroSection() {
             Download Whitepaper
             <Sparkles size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
-          <a href="#presale" className="btn-secondary group w-full sm:w-auto">
-            Join Presale
+          <a href="#mining-app" className="btn-secondary group w-full sm:w-auto">
+            Start Mining
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></span>
           </a>
         </div>
