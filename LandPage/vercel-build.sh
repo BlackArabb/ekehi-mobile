@@ -5,12 +5,10 @@ echo "Checking Node.js version..."
 NODE_VERSION=$(node --version)
 echo "Current Node.js version: $NODE_VERSION"
 
-# If not Node.js 22, we'll have to work with what's available
-# Vercel should automatically use the version specified in package.json engines
-
-# Install pnpm with the same version as specified in package.json
+# Install pnpm
 echo "Installing pnpm..."
-npm install -g pnpm@9.12.3
+npm install -g pnpm@8.15.8
+echo "PNPM version: $(pnpm --version)"
 
 # Clear npm cache
 echo "Clearing npm cache..."
@@ -29,20 +27,33 @@ cat .npmrc
 echo "Removing conflicting lock files..."
 rm -f package-lock.json
 
-# Install dependencies with proper error handling
-echo "Installing dependencies..."
-PNPM_INSTALL_EXIT_CODE=0
-pnpm install --no-frozen-lockfile --fetch-timeout=60000 --prefer-offline || PNPM_INSTALL_EXIT_CODE=$?
+# Set npm registry to a more reliable mirror and configure network settings
+echo "Configuring npm registry and network settings..."
+npm config set registry https://registry.npmjs.org/
+npm config set strict-ssl false
 
-# Check installation result
-if [ $PNPM_INSTALL_EXIT_CODE -ne 0 ]; then
-  echo "Install failed with exit code $PNPM_INSTALL_EXIT_CODE, trying clean install..."
-  rm -rf node_modules
-  pnpm install --no-frozen-lockfile --fetch-timeout=60000 || {
-    echo "Clean install also failed"
-    exit 1
+# Try npm first as it might be more reliable
+echo "Attempting installation with npm first..."
+npm install --prefer-offline || {
+  echo "npm install failed, trying pnpm..."
+  
+  # First attempt: Standard pnpm install
+  echo "Attempt 1: Standard pnpm install"
+  pnpm install --no-frozen-lockfile --fetch-timeout=60000 --prefer-offline || {
+    echo "First pnpm install attempt failed"
+    
+    # Second attempt: Clean install with registry override
+    echo "Attempt 2: Clean pnpm install with registry override"
+    rm -rf node_modules
+    pnpm store prune 2>/dev/null || echo "Could not prune pnpm store"
+    
+    # Try with explicit registry
+    pnpm install --no-frozen-lockfile --registry=https://registry.npmjs.org/ --fetch-timeout=120000 || {
+      echo "Second pnpm install attempt failed"
+      exit 1
+    }
   }
-fi
+}
 
 # Verify node_modules was created
 if [ ! -d "node_modules" ]; then
@@ -53,10 +64,12 @@ fi
 # Verify vite is installed
 echo "Checking if vite is installed..."
 if [ ! -d "node_modules/vite" ]; then
-  echo "vite not found in node_modules, this is a critical error"
-  echo "Contents of node_modules:"
-  ls -la node_modules/ | head -20
-  exit 1
+  echo "vite not found in node_modules"
+  ls -la node_modules/ | grep vite || echo "No vite directory found"
+  
+  # Try to install vite specifically
+  echo "Attempting to install vite specifically..."
+  pnpm add vite --save-dev || npm install vite --save-dev
 fi
 
 # Check if vite command is available in PATH
@@ -78,16 +91,15 @@ fi
 # Build with fallback options
 echo "Building project..."
 BUILD_EXIT_CODE=0
-pnpm run build || BUILD_EXIT_CODE=$?
+if command -v vite &> /dev/null; then
+  pnpm run build || BUILD_EXIT_CODE=$?
+else
+  node_modules/.bin/vite build || BUILD_EXIT_CODE=$?
+fi
 
 if [ $BUILD_EXIT_CODE -ne 0 ]; then
-  echo "Build with pnpm failed with exit code $BUILD_EXIT_CODE, trying direct vite build..."
-  if [ -f "node_modules/.bin/vite" ]; then
-    node_modules/.bin/vite build
-  else
-    echo "ERROR: Cannot run vite build, binary not found"
-    exit 1
-  fi
+  echo "Build failed with exit code $BUILD_EXIT_CODE"
+  exit 1
 fi
 
 echo "Build completed successfully!"
