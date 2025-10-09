@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, MessageSquare, Phone, MapPin, Send, ExternalLink, Users, ChevronDown, CheckCircle, Youtube, Facebook } from 'lucide-react';
+import { Mail, MessageSquare, Phone, MapPin, Send, ExternalLink, Users, ChevronDown, CheckCircle, Youtube, Facebook, Twitter } from 'lucide-react';
 
 const contactMethods = [
   {
@@ -20,14 +20,14 @@ const contactMethods = [
     icon: Phone,
     title: 'Business Inquiries',
     description: 'For institutional partnerships',
-    contact: 'partnerships@ekehi.com',
-    link: 'mailto:partnerships@ekehi.com'
+    contact: 'project@ekehi.xyz',
+    link: 'mailto:project@ekehi.xyz'
   }
 ];
 
 const socialLinks = [
   { name: 'Telegram', url: 'https://t.me/ekehi_official', users: '10K+', icon: 'T' },
-  { name: 'Twitter', url: 'https://twitter.com/ekehi_official', users: '25K+', icon: 'X' },
+  { name: 'Twitter', url: 'https://twitter.com/ekehi_official', users: '25K+', icon: <Twitter size={16} /> },
   { name: 'YouTube', url: 'https://youtube.com/ekehi_official', users: '5K+', icon: <Youtube size={16} /> },
   { name: 'Facebook', url: 'https://facebook.com/ekehi_official', users: '15K+', icon: <Facebook size={16} /> }
 ];
@@ -157,9 +157,9 @@ export default function ContactSection() {
                       </div>
                       <span className="text-white text-sm font-medium">{social.name}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-medium-gray">{social.users}</span>
-                      <ExternalLink size={12} className="text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-2 ml-2">
+                      <span className="text-xs text-medium-gray whitespace-nowrap">{social.users}</span>
+                      <ExternalLink size={12} className="text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                     </div>
                   </a>
                 ))}
@@ -308,7 +308,7 @@ export default function ContactSection() {
               Looking for quick answers? Check out our comprehensive FAQ section covering 
               tokenomics, presale details, and technical questions.
             </p>
-            <a href="/faq" className="btn-secondary inline-flex items-center gap-2 py-2.5 px-5 text-sm">
+            <a href="#faq" className="btn-secondary inline-flex items-center gap-2 py-2.5 px-5 text-sm">
               View FAQ Section
               <ExternalLink size={14} />
             </a>
