@@ -42,9 +42,9 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 text-xs text-medium-gray">
                 <span>© 2025 Ekehi. All rights reserved.</span>
                 <span className="hidden sm:inline text-yellow-500">•</span>
-                <a href="#" className="hover:text-yellow-500 transition-colors">Privacy Policy</a>
+                <a href="/privacy-policy" className="hover:text-yellow-500 transition-colors">Privacy Policy</a>
                 <span className="hidden sm:inline text-yellow-500">•</span>
-                <a href="#" className="hover:text-yellow-500 transition-colors">Terms of Service</a>
+                <a href="/terms" className="hover:text-yellow-500 transition-colors">Terms of Service</a>
               </div>
             </div>
           </div>

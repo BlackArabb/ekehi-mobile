@@ -5,7 +5,7 @@ const navigationLinks = [
   { href: '#home', label: 'Home', icon: Home },
   { href: '#about', label: 'About', icon: Info },
   { href: '#whitepaper', label: 'Whitepaper', icon: FileText },
-  { href: '#mining-app', label: 'Mining App', icon: Smartphone },
+  { href: '#mining-app', label: 'Mining', icon: Smartphone },
   { href: '#ecosystem', label: 'Ecosystem', icon: Globe },
   { href: '#tokenomics', label: 'Tokenomics', icon: PieChart },
   { href: '#roadmap', label: 'Roadmap', icon: Map },

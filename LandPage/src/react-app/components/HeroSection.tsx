@@ -58,14 +58,13 @@ export default function HeroSection() {
           }`}
           style={{ animationDelay: '0.6s' }}
         >
-          <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary group w-full sm:w-auto">
-            <Download size={20} />
-            Download Whitepaper
+          <a href="/Whitepaperv2.0.pdf"  target="_blank" rel="noopener noreferrer" className="btn-primary group w-full sm:w-auto">
+            Join Private Sale
             <Sparkles size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
           <a href="#mining-app" className="btn-secondary group w-full sm:w-auto">
-            Start Mining
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></span>
+            Claim Free EKH
+            <span className="w-2 h-2 bg-green-500 rounded-full ml-2"></span>
           </a>
         </div>
 

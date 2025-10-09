@@ -225,7 +225,7 @@ export default function RoadmapSection() {
               <Download size={20} className="md:size-24 mr-2 inline" />
               Download Whitepaper
             </a>
-            <a href="#" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
+            <a href="#" className="btn-secondary text-sm hover:bg-gold-200 md:text-base py-3 px-6 md:py-4 md:px-8">
               <img src='/logo.png' className="md:size-24 mr-2 inline" />
               Download App
             </a>
