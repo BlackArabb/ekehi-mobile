@@ -22,13 +22,6 @@ const contactMethods = [
     description: 'For institutional partnerships',
     contact: 'partnerships@ekehi.com',
     link: 'mailto:partnerships@ekehi.com'
-  },
-  {
-    icon: MapPin,
-    title: 'Location',
-    description: 'Registered in Delaware, USA',
-    contact: 'Global Remote Team',
-    link: '#'
   }
 ];
 

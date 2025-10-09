@@ -65,20 +65,20 @@ export default function MiningAppSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-16">
           {/* App Preview */}
           <div className="flex flex-col items-center">
-            <div className="relative w-64 h-64 md:w-80 md:h-80 mb-8">
+            <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-80 md:h-80 mb-8">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-3xl transform rotate-6"></div>
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-3xl transform -rotate-6"></div>
               <div className="relative bg-black rounded-3xl w-full h-full flex items-center justify-center border-8 border-yellow-500/20 shadow-gold-lg">
-                <img  src='/logo.png' className="text-yellow-500" />
+                <img src='/logo.png' alt="Ekehi Logo" className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 object-contain" />
               </div>
             </div>
             
             {/* App Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-md">
+            <div className="grid grid-cols-2 gap-3 w-full max-w-xs sm:max-w-sm">
               {appStats.map((stat, index) => (
-                <div key={index} className="bg-dark-slate rounded-lg p-3 text-center border border-charcoal-gray">
-                  <div className="text-lg md:text-xl font-bold text-gradient-gold">{stat.value}</div>
-                  <div className="text-xs md:text-sm text-medium-gray">{stat.label}</div>
+                <div key={index} className="bg-dark-slate rounded-lg p-2 sm:p-3 text-center border border-charcoal-gray">
+                  <div className="text-lg sm:text-xl font-bold text-gradient-gold">{stat.value}</div>
+                  <div className="text-xs text-medium-gray">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -88,7 +88,7 @@ export default function MiningAppSection() {
               <p className="text-yellow-500 font-bold mb-2 text-center">Start Claiming Now</p>
               <a 
                 href="#"
-                className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base"
+                className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
               >
                 <Download size={20} />
                 Download Mining App

@@ -221,12 +221,12 @@ export default function RoadmapSection() {
         <div className="text-center mt-12 md:mt-16 px-4">
           <h3 className="text-h3 md:text-h3 text-white mb-6">Ready to Join Our Journey?</h3>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm md:text-base py-3 px-6 md:py-4 md:px-8">
-              <Download size={20} className="md:size-24 mr-2 inline" />
+            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm md:text-base py-3 px-6 md:py-4 md:px-8 centered-button inline-flex items-center justify-center">
+              <Download size={20} className="mr-2" />
               Download Whitepaper
             </a>
-            <a href="#" className="btn-secondary text-sm hover:bg-gold-200 md:text-base py-3 px-6 md:py-4 md:px-8">
-              <img src='/logo.png' className="md:size-24 mr-2 inline" />
+            <a href="#" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8 centered-button inline-flex items-center justify-center">
+              <Download size={20} className="mr-2" />
               Download App
             </a>
           </div>

@@ -53,16 +53,16 @@ export default function HeroSection() {
 
         {/* CTA Buttons */}
         <div 
-          className={`flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 md:mb-16 transition-all duration-1000 ${
+          className={`flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 md:mb-16 transition-all duration-1000 hero-section ${
             isVisible ? 'animate-slide-up' : 'opacity-0 translate-y-8'
           }`}
           style={{ animationDelay: '0.6s' }}
         >
-          <a href="/Whitepaperv2.0.pdf"  target="_blank" rel="noopener noreferrer" className="btn-primary group w-full sm:w-auto">
+          <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary group">
             Join Private Sale
             <Sparkles size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
-          <a href="#mining-app" className="btn-secondary group w-full sm:w-auto">
+          <a href="#mining-app" className="btn-secondary group">
             Claim Free EKH
             <span className="w-2 h-2 bg-green-500 rounded-full ml-2"></span>
           </a>

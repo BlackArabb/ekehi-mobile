@@ -125,7 +125,18 @@ export default function Navigation() {
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 bg-black/90 backdrop-blur-lg z-50">
           <div className="flex flex-col h-full pt-20 px-6">
-            <div className="flex flex-col space-y-6 flex-grow">
+            {/* Close Button */}
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={toggleMobileMenu}
+                className="text-white p-2 rounded-full hover:bg-charcoal-gray transition-colors"
+                aria-label="Close menu"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="flex flex-col space-y-6 flex-grow pt-8">
               {navigationLinks.map((link) => {
                 const isActive = activeSection === link.href.substring(1);
                 return (

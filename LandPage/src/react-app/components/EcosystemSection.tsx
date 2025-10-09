@@ -232,9 +232,10 @@ export default function EcosystemSection() {
                     </div>
                   )}
                   
-                  <button className={`w-full ${product.status === 'live' ? 'btn-primary' : 'btn-secondary'} text-sm py-2.5`}>
+                  <button className={`w-full sm:w-auto ${product.status === 'live' ? 'btn-primary' : 'btn-secondary'} text-sm py-2.5 centered-button`}>
                     {product.cta}
                   </button>
+
                 </div>
               );
             })}
@@ -305,9 +306,10 @@ export default function EcosystemSection() {
                     </div>
                   )}
                   
-                  <button className={`w-full ${product.status === 'live' ? 'btn-primary' : 'btn-secondary'} text-sm py-2.5`}>
+                  <button className={`w-full sm:w-auto ${product.status === 'live' ? 'btn-primary' : 'btn-secondary'} text-sm py-2.5 centered-button`}>
                     {product.cta}
                   </button>
+
                 </div>
               );
             })}
