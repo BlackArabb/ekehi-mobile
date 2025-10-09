@@ -157,10 +157,10 @@ export default function ContactSection() {
                       </div>
                       <span className="text-white text-sm font-medium">{social.name}</span>
                     </div>
-                    <div className="flex items-center gap-2 ml-2">
+                    {/*<div className="flex items-center gap-2 ml-2">
                       <span className="text-xs text-medium-gray whitespace-nowrap">{social.users}</span>
                       <ExternalLink size={12} className="text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                    </div>
+                    </div>*/}
                   </a>
                 ))}
               </div>

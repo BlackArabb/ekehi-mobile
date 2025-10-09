@@ -31,10 +31,14 @@ src/
 │   │   ├── ContactSection.tsx
 │   │   ├── EcosystemSection.tsx
 │   │   ├── HeroSection.tsx
+│   │   ├── MiningAppSection.tsx
 │   │   ├── Navigation.tsx
+│   │   ├── PresaleSection.tsx
 │   │   ├── RoadmapSection.tsx
 │   │   ├── TokenomicsSection.tsx
 │   │   └── WhitepaperSection.tsx
+│   ├── pages/
+│   │   └── Home.tsx
 │   └── App.tsx
 ├── shared/
 └── worker/
@@ -63,10 +67,10 @@ npm run build
 
 ## 📖 Documentation
 
-For detailed documentation about the landing page implementation, features, and customization options, please refer to the main project documentation:
+For detailed documentation about the landing page implementation, features, and customization options, please refer to:
 
-- [Landing Page Documentation](../Documentations/LANDING_PAGE_DOCUMENTATION.md) - Complete guide to the landing page
-- [Mobile App Documentation](../Documentations/) - Documentation for the mobile application
+- [Landing Page Documentation](DOCUMENTATION.md) - Complete and updated guide to the landing page
+- [Original Documentation](../mobileApp/Documentations/LANDING_PAGE_DOCUMENTATION.md) - Original documentation for reference
 
 ## 🤝 Community
 
