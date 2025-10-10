@@ -1,0 +1,48 @@
+app/(tabs)/_layout.tsx(2,60): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+app/(tabs)/leaderboard.tsx(10,25): error TS6133: 'Medal' is declared but its value is never read.
+app/(tabs)/leaderboard.tsx(10,32): error TS6133: 'Award' is declared but its value is never read.
+app/(tabs)/leaderboard.tsx(10,74): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+app/(tabs)/mine.tsx(6,10): error TS6133: 'Pickaxe' is declared but its value is never read.
+app/(tabs)/mine.tsx(6,104): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+app/(tabs)/mine.tsx(40,26): error TS6133: 'setClickEffects' is declared but its value is never read.
+app/(tabs)/mine.tsx(41,12): error TS6133: 'copied' is declared but its value is never read.
+app/(tabs)/mine.tsx(346,11): error TS6133: 'handleAdComplete' is declared but its value is never read.
+app/(tabs)/mine.tsx(409,11): error TS6133: 'resetMiningSession' is declared but its value is never read.
+app/(tabs)/mine.tsx(471,11): error TS6133: 'dailyProgress' is declared but its value is never read.
+app/(tabs)/mine.tsx(476,11): error TS6133: 'miningRatePerMinute' is declared but its value is never read.
+app/(tabs)/mine.tsx(477,11): error TS6133: 'miningRatePerHour' is declared but its value is never read.
+app/(tabs)/presale.tsx(5,109): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+app/(tabs)/profile.tsx(5,95): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+app/(tabs)/profile.tsx(63,5): error TS6133: 'updateCoinsOnly' is declared but its value is never read.
+app/(tabs)/profile.tsx(488,9): error TS6133: 'miningEfficiency' is declared but its value is never read.
+app/(tabs)/profile.tsx(493,9): error TS6133: 'dailyProgress' is declared but its value is never read.
+app/(tabs)/profile.tsx(498,9): error TS6133: 'formatNumber' is declared but its value is never read.
+app/(tabs)/social.tsx(5,59): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+app/(tabs)/wallet.tsx(5,108): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+app/index.tsx(5,65): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+src/components/AchievementSystem.tsx(14,8): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+src/components/AdModal.tsx(4,38): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+src/components/AutoMiningStatus.tsx(13,8): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+src/components/CircularProgressBar.tsx(2,46): error TS6133: 'Text' is declared but its value is never read.
+src/components/NotificationSystem.tsx(4,62): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+src/components/ReferralScreen.tsx(5,50): error TS7016: Could not find a declaration file for module 'lucide-react-native'. 'c:/ekehi-mobile/mobileApp/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/lucide-react-native` if it exists or add a new declaration (.d.ts) file containing `declare module 'lucide-react-native';`
+src/contexts/MiningContext.tsx(277,10): error TS6133: 'totalCoins' is declared but its value is never read.
+src/contexts/MiningContext.tsx(426,7): error TS2353: Object literal may only specify known properties, and 'subscribeToProfileUpdates' does not exist in type 'MiningContextType'.
+src/contexts/PresaleContext.tsx(38,33): error TS6133: 'amountUSD' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(38,52): error TS6133: 'paymentMethod' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(137,13): error TS6133: 'response' is declared but its value is never read.
+src/services/AdMobService.ts(198,11): error TS18048: 'RewardedAdEventType' is possibly 'undefined'.
+src/services/AdMobService.ts(207,11): error TS18048: 'AdEventType' is possibly 'undefined'.

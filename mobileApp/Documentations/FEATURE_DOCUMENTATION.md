@@ -96,20 +96,55 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 - Auto-mining unlock based on purchase
 - Purchase history tracking
 - Minimum purchase amount enforcement
+- **Maximum purchase limits with tiered restrictions**
 
 **Technical Implementation**:
 - Implemented in `app/(tabs)/presale.tsx`
 - Purchase validation with min/max checks
 - API integration for purchase processing
 - Visual feedback on purchase success/failure
+- **Maximum limits enforcement (mmPA, mGPA, mMR)**
 
 **UI/UX**:
 - Purchase amount input field
 - Price display with EKH token conversion
 - Transaction history
 - Visual feedback on purchase success
+- **Clear display of purchase limits and current progress**
 
-### 3.5 Wallet Management
+### 3.5 Auto Mining System
+**Description**: A passive income generation system that automatically earns EKH tokens for users based on their presale purchases.
+
+**Key Features**:
+- Automatic earnings based on purchase amount
+- Real-time rate calculation and updates
+- Minimum purchase requirement for eligibility ($50)
+- Proportional rate calculation (0.001 EKH/second per dollar spent)
+- **Maximum limits with tiered restrictions**:
+  - Maximum Mining Rate Purchase Amount (mmPA): $10,000
+  - Maximum General Purchase Amount (mGPA): $50,000
+  - Maximum Mining Rate (mMR): 10 EKH/second
+- Profile integration with status display
+- Progress tracking for ineligible users
+
+**Technical Implementation**:
+- Implemented in `src/components/AutoMiningManager.tsx` and `src/components/AutoMiningInfo.tsx`
+- Integrated with `PresaleContext` for purchase data
+- Uses `MiningContext` for rate updates
+- Database updates with automatic profile refresh
+- Silent updates to prevent visual disruption
+- **Maximum limits enforcement in rate calculation**
+
+**UI/UX**:
+- Clear eligibility status display in profile
+- Current EKH/second rate for eligible users
+- Progress toward minimum requirement for ineligible users
+- Potential rate calculation for all users
+- Visual indicators for active/inactive status
+- **Clear display of maximum limits and current progress**
+- **Indicators when limits are reached**
+
+### 3.6 Wallet Management
 **Description**: A system for managing EKH tokens, including sending, receiving, and transaction history.
 
 **Key Features**:
@@ -133,7 +168,7 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 - Transaction history list with type, amount, and status
 - Status indicators for transaction states
 
-### 3.6 Achievement System
+### 3.7 Achievement System
 **Description**: A milestone-based reward system that tracks user progress and achievements.
 
 **Key Features**:
@@ -154,7 +189,7 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 - Achievement progress tracking
 - Rewards display
 
-### 3.7 Leaderboards
+### 3.8 Leaderboards
 **Description**: A competitive feature that shows global user rankings based on mining performance.
 
 **Key Features**:
@@ -174,7 +209,7 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 - User avatar/name display
 - Ranking statistics
 
-### 3.8 Authentication System
+### 3.9 Authentication System
 **Description**: Google OAuth authentication with deep linking.
 
 **Key Features**:
@@ -269,6 +304,8 @@ The app follows a dark theme with vibrant accents and animations:
 - Lazy loading of components
 - Debounced input handling
 - Efficient rendering with PureComponent patterns
+- Silent profile updates for auto mining rate changes
+- Memoized components to prevent unnecessary re-renders
 
 ## 9.0 Platform-Specific Features
 - **Android**: Haptic feedback, deep linking
@@ -309,6 +346,8 @@ The app follows a dark theme with vibrant accents and animations:
 - Add dark/light theme toggle
 - Improve offline functionality
 - Add more detailed tutorials and onboarding
+- Tiered auto mining rewards based on purchase amounts
+- Time-based bonuses for long-term presale supporters
 
 ## 14.0 Project Structure
 The app follows a modular structure:

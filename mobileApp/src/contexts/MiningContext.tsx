@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { UserProfile, MiningSession } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePresale } from '@/contexts/PresaleContext';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import { Query, ID } from 'appwrite';
+import { retryWithBackoff, isNetworkError } from '@/utils/retry';
+import LoggingService from '@/services/LoggingService';
+import PerformanceMonitor from '@/services/PerformanceMonitor';
 
 interface MiningContextType {
   profile: UserProfile | null;
@@ -19,12 +23,15 @@ interface MiningContextType {
   silentRefreshProfile: () => Promise<void>;
   // Add a function to update only coins for better performance
   updateCoinsOnly: (newTotalCoins: number) => void;
+  // Add a function to subscribe to profile updates
+  subscribeToProfileUpdates: (callback: () => void) => () => void;
 }
 
 const MiningContext = createContext<MiningContextType | undefined>(undefined);
 
 export function MiningProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { purchases, fetchPurchases, calculateAutoMiningRate } = usePresale();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isMining, setIsMining] = useState(false);
@@ -40,15 +47,24 @@ export function MiningProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (user) {
+      LoggingService.info('User detected, fetching profile', 'MiningContext');
       console.log('MiningContext: User detected, fetching profile');
       refreshProfile();
     } else {
       // Clear profile data when user is null (signed out)
+      LoggingService.info('User is null, clearing profile data', 'MiningContext');
       console.log('MiningContext: User is null, clearing profile data');
       setProfile(null);
       setIsLoading(false);
     }
   }, [user]);
+
+  // Effect to update auto mining rate when purchases change
+  useEffect(() => {
+    if (user && profile) {
+      updateAutoMiningRate();
+    }
+  }, [purchases, user, profile]);
 
   useEffect(() => {
     // Record mining session when component unmounts or when mining stops
@@ -83,16 +99,22 @@ export function MiningProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshProfile = useCallback(async () => {
+    PerformanceMonitor.startTiming('refreshProfile');
+    
     // Debounce profile refreshes
     const now = Date.now();
     if (now - lastRefreshTimeRef.current < 2000) {
+      LoggingService.debug('Skipping profile refresh (too frequent)', 'MiningContext');
       console.log('⚠️ Skipping profile refresh (too frequent)');
+      PerformanceMonitor.endTiming('refreshProfile');
       return;
     }
     
     // If there's already a fetch in progress, return that promise
     if (profileFetchPromiseRef.current) {
+      LoggingService.debug('Profile fetch already in progress, returning existing promise', 'MiningContext');
       console.log('🔄 Profile fetch already in progress, returning existing promise');
+      PerformanceMonitor.endTiming('refreshProfile');
       return profileFetchPromiseRef.current;
     }
     
@@ -100,18 +122,39 @@ export function MiningProvider({ children }: { children: ReactNode }) {
     profileFetchPromiseRef.current = (async () => {
       if (!user) return;
       
+      LoggingService.info(`Refreshing user profile for user: ${user.id}`, 'MiningContext');
       console.log('🔄 Refreshing user profile for user:', user.id);
       lastRefreshTimeRef.current = now;
       setIsLoading(true);
       
       try {
-        // Fetch user profile from Appwrite database
-        const response = await databases.listDocuments(
-          appwriteConfig.databaseId,
-          appwriteConfig.collections.userProfiles,
-          [Query.equal('userId', [user.id])]
+        // Use retry mechanism for network operations
+        const result = await retryWithBackoff(
+          async () => {
+            PerformanceMonitor.startTiming('fetchUserProfile');
+            // Fetch user profile from Appwrite database
+            const response = await databases.listDocuments(
+              appwriteConfig.databaseId,
+              appwriteConfig.collections.userProfiles,
+              [Query.equal('userId', [user.id])]
+            );
+            PerformanceMonitor.endTiming('fetchUserProfile');
+            return response;
+          },
+          {
+            maxRetries: 3,
+            delay: 1000,
+            shouldRetry: isNetworkError
+          }
         );
 
+        if (!result.success) {
+          throw result.error;
+        }
+
+        const response = result.data!;
+
+        LoggingService.debug(`Profile fetch result: ${response.total} profiles found`, 'MiningContext');
         console.log('Profile fetch result:', response.total, 'profiles found');
 
         if (response.documents.length > 0) {
@@ -143,6 +186,7 @@ export function MiningProvider({ children }: { children: ReactNode }) {
           // Only update state if profile data actually changed
           setProfile(prevProfile => {
             if (!prevProfile) {
+              LoggingService.info(`User profile loaded (first load): ${userProfile.username || userProfile.userId}`, 'MiningContext');
               console.log('✅ User profile loaded (first load):', userProfile);
               return userProfile;
             }
@@ -150,17 +194,21 @@ export function MiningProvider({ children }: { children: ReactNode }) {
             // Deep comparison to check if data actually changed
             const hasChanged = JSON.stringify(prevProfile) !== JSON.stringify(userProfile);
             if (hasChanged) {
+              LoggingService.info(`User profile updated (data changed): ${userProfile.username || userProfile.userId}`, 'MiningContext');
               console.log('✅ User profile updated (data changed):', userProfile);
               return userProfile;
             }
+            LoggingService.debug('User profile unchanged, skipping update', 'MiningContext');
             console.log('ℹ️ User profile unchanged, skipping update');
             return prevProfile;
           });
         } else {
+          LoggingService.warn(`No user profile found for user: ${user.id}`, 'MiningContext');
           console.log('❌ No user profile found for user:', user.id);
           setProfile(null);
         }
       } catch (error: any) {
+        LoggingService.error('Failed to fetch profile', 'MiningContext', { userId: user?.id }, error);
         console.error('Failed to fetch profile:', error);
         console.error('Error details:', {
           message: error.message,
@@ -171,6 +219,7 @@ export function MiningProvider({ children }: { children: ReactNode }) {
       } finally {
         setIsLoading(false);
         profileFetchPromiseRef.current = null; // Clear the promise reference
+        PerformanceMonitor.endTiming('refreshProfile');
       }
     })();
     
@@ -179,16 +228,20 @@ export function MiningProvider({ children }: { children: ReactNode }) {
 
   // Silent refresh function that updates profile without visual loading state
   const silentRefreshProfile = useCallback(async () => {
+    PerformanceMonitor.startTiming('silentRefreshProfile');
+    
     // Debounce profile refreshes
     const now = Date.now();
     if (now - lastRefreshTimeRef.current < 2000) {
       console.log('⚠️ Skipping silent profile refresh (too frequent)');
+      PerformanceMonitor.endTiming('silentRefreshProfile');
       return;
     }
     
     // If there's already a fetch in progress, return that promise
     if (profileFetchPromiseRef.current) {
       console.log('🔄 Silent profile fetch already in progress, returning existing promise');
+      PerformanceMonitor.endTiming('silentRefreshProfile');
       return profileFetchPromiseRef.current;
     }
     
@@ -200,12 +253,31 @@ export function MiningProvider({ children }: { children: ReactNode }) {
       lastRefreshTimeRef.current = now;
       
       try {
-        // Fetch user profile from Appwrite database
-        const response = await databases.listDocuments(
-          appwriteConfig.databaseId,
-          appwriteConfig.collections.userProfiles,
-          [Query.equal('userId', [user.id])]
+        // Use retry mechanism for network operations
+        const result = await retryWithBackoff(
+          async () => {
+            PerformanceMonitor.startTiming('fetchUserProfileSilent');
+            // Fetch user profile from Appwrite database
+            const response = await databases.listDocuments(
+              appwriteConfig.databaseId,
+              appwriteConfig.collections.userProfiles,
+              [Query.equal('userId', [user.id])]
+            );
+            PerformanceMonitor.endTiming('fetchUserProfileSilent');
+            return response;
+          },
+          {
+            maxRetries: 3,
+            delay: 1000,
+            shouldRetry: isNetworkError
+          }
         );
+
+        if (!result.success) {
+          throw result.error;
+        }
+
+        const response = result.data!;
 
         console.log('Silent profile fetch result:', response.total, 'profiles found');
 
@@ -238,23 +310,21 @@ export function MiningProvider({ children }: { children: ReactNode }) {
           // Only update state if profile data actually changed
           setProfile(prevProfile => {
             if (!prevProfile) {
-              console.log('✅ User profile silently loaded (first load):', userProfile);
+              console.log('✅ User profile loaded (silent):', userProfile);
               return userProfile;
             }
             
             // Deep comparison to check if data actually changed
             const hasChanged = JSON.stringify(prevProfile) !== JSON.stringify(userProfile);
             if (hasChanged) {
-              console.log('✅ User profile silently updated (data changed):', userProfile);
-              // Notify subscribers of the change
-              notifyProfileSubscribers();
+              console.log('✅ User profile updated (silent):', userProfile);
               return userProfile;
             }
-            console.log('ℹ️ User profile silently unchanged, skipping update');
+            console.log('ℹ️ User profile unchanged (silent), skipping update');
             return prevProfile;
           });
         } else {
-          console.log('❌ No user profile found for user:', user.id);
+          console.log('❌ No user profile found for user (silent):', user.id);
           setProfile(null);
         }
       } catch (error: any) {
@@ -267,17 +337,87 @@ export function MiningProvider({ children }: { children: ReactNode }) {
         setProfile(null);
       } finally {
         profileFetchPromiseRef.current = null; // Clear the promise reference
+        PerformanceMonitor.endTiming('silentRefreshProfile');
       }
     })();
     
     return profileFetchPromiseRef.current;
-  }, [user, notifyProfileSubscribers]);
+  }, [user]);
 
-  // Create a separate state for coins to avoid full profile re-renders
-  const [totalCoins, setTotalCoins] = useState<number>(0);
+  const addCoins = useCallback(async (amount: number) => {
+    PerformanceMonitor.startTiming('addCoins');
+    
+    if (!profile) {
+      PerformanceMonitor.endTiming('addCoins');
+      return;
+    }
+
+    try {
+      // Use retry mechanism for network operations
+      const result = await retryWithBackoff(
+        async () => {
+          PerformanceMonitor.startTiming('updateUserProfile');
+          
+          // Update user profile with new coin balance
+          const updatedProfile = {
+            ...profile,
+            totalCoins: profile.totalCoins + amount,
+            lifetimeEarnings: profile.lifetimeEarnings + amount,
+            todayEarnings: profile.todayEarnings + amount,
+            updatedAt: new Date().toISOString()
+          };
+
+          const response = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.collections.userProfiles,
+            profile.id,
+            {
+              totalCoins: updatedProfile.totalCoins,
+              lifetimeEarnings: updatedProfile.lifetimeEarnings,
+              todayEarnings: updatedProfile.todayEarnings,
+              updatedAt: updatedProfile.updatedAt
+            }
+          );
+          
+          PerformanceMonitor.endTiming('updateUserProfile');
+          return { response, updatedProfile };
+        },
+        {
+          maxRetries: 3,
+          delay: 1000,
+          shouldRetry: isNetworkError
+        }
+      );
+
+      if (!result.success) {
+        throw result.error;
+      }
+
+      const data = result.data!;
+      const updatedProfile = data.updatedProfile;
+
+      // Update local state immediately for responsive UI
+      setProfile(updatedProfile);
+      
+      // Notify subscribers of profile updates
+      notifyProfileSubscribers();
+      
+      console.log(`✅ Added ${amount} coins to user profile`);
+    } catch (error: any) {
+      console.error('Failed to add coins:', error);
+      throw error;
+    } finally {
+      PerformanceMonitor.endTiming('addCoins');
+    }
+  }, [profile]);
 
   const performMine = async () => {
-    if (!user || !profile) return;
+    PerformanceMonitor.startTiming('performMine');
+    
+    if (!user || !profile) {
+      PerformanceMonitor.endTiming('performMine');
+      return;
+    }
 
     try {
       const newTotalCoins = profile.totalCoins + profile.coinsPerClick;
@@ -301,7 +441,6 @@ export function MiningProvider({ children }: { children: ReactNode }) {
 
       // Update local states efficiently
       setProfile(updatedProfile as UserProfile);
-      setTotalCoins(newTotalCoins);
       setSessionCoins(prev => prev + profile.coinsPerClick);
       setSessionClicks(prev => prev + 1);
       
@@ -310,38 +449,13 @@ export function MiningProvider({ children }: { children: ReactNode }) {
       
     } catch (error: any) {
       console.error('Mining failed:', error);
+    } finally {
+      PerformanceMonitor.endTiming('performMine');
     }
   };
 
-  const addCoins = async (amount: number) => {
-    if (!user || !profile) return;
-
-    try {
-      const newTotalCoins = profile.totalCoins + amount;
-      
-      // Update user profile with new coin balance
-      const updatedProfile = {
-        ...profile,
-        totalCoins: newTotalCoins,
-        updatedAt: new Date().toISOString()
-      };
-
-      // Update document in Appwrite database
-      await databases.updateDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userProfiles,
-        profile.id,
-        updatedProfile
-      );
-
-      // Update local states efficiently
-      setProfile(updatedProfile as UserProfile);
-      setTotalCoins(newTotalCoins);
-      
-    } catch (error: any) {
-      console.error('Failed to add coins:', error);
-    }
-  };
+  // Create a separate state for coins to avoid full profile re-renders
+  const [totalCoins, setTotalCoins] = useState<number>(0);
 
   // Function to update only coins for better performance
   const updateCoinsOnly = useCallback((newTotalCoins: number) => {
@@ -408,6 +522,49 @@ export function MiningProvider({ children }: { children: ReactNode }) {
       console.error('Failed to record mining session:', error);
     }
   };
+
+  // Function to update auto mining rate based on presale purchases
+  const updateAutoMiningRate = useCallback(async () => {
+    if (!user || !profile) return;
+
+    try {
+      // Calculate the new auto mining rate
+      const newCoinsPerSecond = calculateAutoMiningRate();
+      
+      // Only update if the rate has changed
+      if (profile.coinsPerSecond !== newCoinsPerSecond) {
+        console.log(`Updating auto mining rate from ${profile.coinsPerSecond} to ${newCoinsPerSecond}`);
+        
+        // Update user profile with new mining rate
+        const updatedProfile = {
+          ...profile,
+          coinsPerSecond: newCoinsPerSecond,
+          updatedAt: new Date().toISOString()
+        };
+
+        // Update document in Appwrite database
+        await databases.updateDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.collections.userProfiles,
+          profile.id,
+          {
+            coinsPerSecond: updatedProfile.coinsPerSecond,
+            updatedAt: updatedProfile.updatedAt
+          }
+        );
+
+        // Update local state
+        setProfile(updatedProfile as UserProfile);
+        
+        // Notify subscribers of profile updates
+        notifyProfileSubscribers();
+        
+        console.log(`✅ Auto mining rate updated to ${newCoinsPerSecond} EKH/second`);
+      }
+    } catch (error: any) {
+      console.error('Failed to update auto mining rate:', error);
+    }
+  }, [user, profile, calculateAutoMiningRate]);
 
   return (
     <MiningContext.Provider value={{

@@ -225,6 +225,9 @@ This comprehensive guide will walk you through setting up Google OAuth authentic
 3. **Click** "Next" → "Create"
 4. **Verify** platform appears in the list and shows as "Active"
 
+For detailed step-by-step instructions with screenshots on how to find and configure the platform settings in Appwrite Console, please refer to our dedicated guide:
+[Appwrite Mobile Platform Setup Guide](./APPWRITE_MOBILE_PLATFORM_SETUP.md)
+
 ### **Step 3.3: Configure Google OAuth Provider**
 
 1. **Go to** Authentication → Settings

@@ -1,190 +1,173 @@
-# Ekehi Network Mobile App & Landing Page
+# Ekehi Network Mobile App
 
-## Overview
+## Project Overview
 
-A React Native mobile application for the Ekehi Network cryptocurrency mining platform, featuring an interactive tap-to-mine system, social task engine, referral program, token presale, wallet integration, and achievement system.
+Ekehi Network is a mobile mining application built with React Native and Expo, utilizing Appwrite as the backend service. The app allows users to mine EKH tokens through various activities and features a comprehensive presale system with auto-mining capabilities.
 
-The project also includes a modern, responsive landing page built with React and Vite for web presence and marketing.
+## Key Features
 
-## 🚀 Features
+### 🔧 Core Functionality
+- **User Authentication**: Email/password and Google OAuth sign-in
+- **Token Mining**: Interactive mining with real-time coin accumulation
+- **Auto Mining**: Passive income generation based on presale purchases
+- **Social Tasks**: Engagement-based reward system
+- **Achievements**: Milestone-based recognition system
+- **Referral Program**: User acquisition through invite bonuses
+- **Token Presale**: Early access token purchase with benefits
+- **Wallet Management**: Secure token storage and transaction history
+- **Leaderboard**: Community ranking based on mining performance
 
-### Core Mining System
-- **🎯 Tap-to-Mine Interface**: Touch-optimized mining with haptic feedback and real-time balance updates
-- **⚡ Mining Power System**: Upgradeable mining power with automatic calculations
-- **🔥 Daily Streak Bonuses**: Consecutive login rewards and streak multipliers
-- **📊 Real-time Analytics**: Live mining statistics and performance tracking
-- **🔄 Dynamic Mining Rates**: Personalized hourly mining rates based on user profile data (2 EKH per day, 0.083 EKH per hour)
+### 🎯 Auto Mining System
+- **Eligibility**: Users must purchase a minimum amount during presale to unlock auto mining
+- **Rate Calculation**: Mining rate increases proportionally with purchase amount
+- **Maximum Limits**: 
+  - Maximum Mining Rate Purchase Amount (mmPA): $10,000 for mining rate calculation
+  - Maximum General Purchase Amount (mGPA): $50,000 total purchase limit
+  - Maximum Mining Rate (mMR): 10 EKH/second cap
+- **Real-time Updates**: Automatic profile updates without UI refresh disruption
 
-### Social & Community Features
-- **📱 Social Task Engine**: Complete tasks on Twitter, YouTube, Telegram, and Discord for rewards
-- **🤝 Multi-level Referral System**: Share referral codes and earn bonuses based on referral tiers
-- **🏆 Global Leaderboards**: Competitive rankings and user achievements
-- **🎖️ Achievement System**: Milestone-based rewards and progression tracking
+### 📱 Technical Features
+- **Cross-platform**: iOS and Android support via Expo
+- **Real-time Updates**: WebSocket-powered live data synchronization
+- **Offline Support**: AsyncStorage-based local data persistence
+- **Performance Optimized**: Memoization and efficient rendering
+- **Error Resilience**: Comprehensive error handling and retry mechanisms
+- **Security**: Appwrite-powered authentication and data protection
 
-### Financial Features
-- **💰 Token Presale**: Early access token purchasing with automatic mining unlocks
-- **👛 Wallet Integration**: Manage token balances, send transactions, and view history
-- **💸 Token Transfers**: Send and receive tokens between users
-- **📈 Portfolio Tracking**: Real-time balance monitoring and transaction history
-
-### User Experience
-- **🔐 Multi-Auth Support**: Google OAuth and email/password authentication
-- **🛡 Security Features**: Email verification and password recovery
-- **📱 Cross-platform**: Native iOS, Android, and web compatibility
-- **💾 Offline Support**: Local data persistence with AsyncStorage
-- **🔗 Deep Linking**: OAuth callbacks and referral link handling
-
-## 🛠 Technology Stack
-
-### Mobile App Technologies
-- **React Native** - Cross-platform mobile development framework
-- **Expo SDK** - Development toolchain and runtime platform
-- **TypeScript** - Type-safe JavaScript development
-- **React Navigation** - Bottom tabs and native stack navigation
-- **React Native Reanimated** - High-performance animations
-
-### Backend & Services
-- **Appwrite** - Backend-as-a-Service for authentication and database
-- **Appwrite Database** - Document-based database for all app data
-- **Appwrite Auth** - Google OAuth and email/password authentication
-
-### Landing Page Technologies
-- **React** - Modern UI library with hooks and context
-- **TypeScript** - Type-safe JavaScript development
-- **Vite** - Fast build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Modern icon library
-
-### UI & Design
-- **Expo Linear Gradient** - Beautiful gradient effects and backgrounds
-- **Expo Haptics** - Native touch feedback and vibrations
-- **Lucide React Native** - Modern icon library for mobile
-- **Tailwind CSS** - Utility classes for responsive design
-
-## ⚡ Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js 18+**
-- **pnpm** - Package manager
-- **Expo CLI**
+- Node.js (v16 or higher)
+- npm or pnpm
+- Expo CLI
+- Android Studio or Xcode for mobile development
 
 ### Installation
 
-1. **Clone the Repository**
-   ```bash
-   git clone <repository-url>
-   cd ekehi-mobile
-   ```
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd mobileApp
+```
 
-2. **Install Dependencies**
-   ```bash
-   pnpm install
-   ```
+2. Install dependencies:
+```bash
+npm install
+# or
+pnpm install
+```
 
-3. **Configure Appwrite**
-   - Set up Appwrite project and collections
-   - Update configuration in `src/config/appwrite.ts`
-
-4. **Start Development Server**
-   ```bash
-   pnpm start
-   ```
-
-### Landing Page Development
-
-1. **Navigate to Landing Page Directory**
-   ```bash
-   cd LandPage
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   pnpm install
-   ```
-
-3. **Start Development Server**
-   ```bash
-   pnpm run dev
-   ```
+3. Start the development server:
+```bash
+npm start
+# or
+pnpm start
+```
 
 ## 📁 Project Structure
 
 ```
-ekehi-mobile/
-├── LandPage/               # React landing page
-│   ├── src/
-│   │   ├── react-app/
-│   │   │   ├── components/ # UI components
-│   │   │   └── App.tsx     # Main application component
-│   │   └── ...
-│   ├── public/             # Static assets
-│   ├── index.html          # HTML entry point
-│   └── vite.config.ts      # Vite configuration
-├── app/                    # Expo Router app directory
-│   ├── (tabs)/            # Tab navigation screens
-│   ├── oauth/             # OAuth handling
-│   ├── _layout.tsx        # Root layout with providers
-│   ├── index.tsx          # Landing/redirect page
-│   └── auth.tsx           # Authentication screen
-├── src/                   # Source code
-│   ├── contexts/          # React Context providers
-│   ├── components/        # Reusable UI components
-│   ├── config/            # Configuration files
-│   ├── utils/             # Utility functions
-│   └── types/             # TypeScript definitions
-├── assets/                # Static assets
-├── android/               # Android-specific code
-├── ios/                   # iOS-specific code
-├── Documentations/        # Project documentation
-├── admin/                 # Admin dashboard
-└── Scripts/               # Utility scripts
+mobileApp/
+├── app/                 # App Router pages and layouts
+├── src/                 # Source code
+│   ├── components/      # Reusable UI components
+│   ├── contexts/        # React Context providers
+│   ├── services/        # API and utility services
+│   ├── types/           # TypeScript type definitions
+│   └── utils/           # Helper functions
+├── assets/              # Images, fonts, and other assets
+├── Documentations/      # Project documentation
+└── Scripts/             # Utility scripts
 ```
 
-## 🏗 Building & Deployment
+## 🔐 Authentication Setup
 
-### Mobile App Development Builds
+### OAuth Configuration
+To set up Google OAuth authentication:
+
+1. Configure Google Cloud Platform OAuth credentials
+2. Register platforms in Appwrite Console
+3. Add redirect URLs:
+   - Success: `ekehi://oauth/return`
+   - Failure: `ekehi://auth`
+
+For detailed instructions on configuring OAuth, see:
+- [OAuth Setup Guide](./Documentations/OAUTH_SETUP_GUIDE.md)
+- [Appwrite OAuth Configuration Fix](./Documentations/APPWRITE_OAUTH_FIX.md)
+- [Appwrite Mobile Platform Setup Guide](./Documentations/APPWRITE_MOBILE_PLATFORM_SETUP.md)
+
+### Test Credentials
+A test user is pre-configured for development:
+- Email: `test@ekehi.network`
+- Password: `testpassword123`
+
+## 🛠 Development
+
+### Running the App
 ```bash
-# iOS Development Build
-npx eas build --profile development --platform ios
+# Start development server
+npm start
 
-# Android Development Build
-npx eas build --profile development --platform android
+# Run on Android
+npm run android
+
+# Run on iOS
+npm run ios
+
+# Run in web browser
+npm run web
 ```
 
-### Mobile App Production Builds
+### Testing OAuth Configuration
 ```bash
-# iOS Production Build
-npx eas build --profile production --platform ios
-
-# Android Production Build
-npx eas build --profile production --platform android
+npm run test-oauth-config
 ```
 
-### Landing Page Build
+### Building for Production
 ```bash
-# Navigate to LandPage directory
-cd LandPage
+# Build for Android
+npx expo build:android
 
-# Build for production
-pnpm run build
+# Build for iOS
+npx expo build:ios
+
+# Build for web
+npx expo build:web
 ```
 
 ## 📖 Documentation
 
-Detailed documentation is available in the [Documentations](Documentations/) directory:
+- [Feature Documentation](./Documentations/FEATURE_DOCUMENTATION.md)
+- [Auto Mining Feature](./Documentations/AUTO_MINING_FEATURE.md)
+- [OAuth Setup Guide](./Documentations/OAUTH_SETUP_GUIDE.md)
+- [Appwrite OAuth Configuration Fix](./Documentations/APPWRITE_OAUTH_FIX.md)
+- [Appwrite Mobile Platform Setup Guide](./Documentations/APPWRITE_MOBILE_PLATFORM_SETUP.md)
+- [Auto Mining Improvements Summary](./Documentations/AUTO_MINING_IMPROVEMENTS_SUMMARY.md)
 
-### Mobile App Documentation
-- [Feature Documentation](Documentations/FEATURE_DOCUMENTATION.md) - Comprehensive feature overview
-- [Authentication Guide](Documentations/OAUTH_SETUP_GUIDE.md) - OAuth implementation details
-- [Appwrite Integration](Documentations/APPWRITE_MIGRATION_GUIDE.md) - Backend setup and configuration
+## 🐛 Troubleshooting
 
-### Landing Page Documentation
-- [Landing Page Documentation](Documentations/LANDING_PAGE_DOCUMENTATION.md) - Complete landing page guide
+### Common Issues
+
+1. **OAuth Redirect Errors**: Ensure redirect URLs are properly registered in Appwrite Console
+2. **Auto Mining Not Updating**: Check purchase amounts meet minimum requirements
+3. **Profile Refresh Issues**: Verify network connectivity and Appwrite configuration
+
+### Need Help?
+
+If you're having trouble with any part of the setup:
+1. Run the OAuth test script: `npm run test-oauth-config`
+2. Check the detailed documentation files listed above
+3. Review Appwrite and Expo documentation
+4. Reach out to the development team
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a pull request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-For support, please open an issue in the GitHub repository.

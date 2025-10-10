@@ -16,9 +16,9 @@ const tokenDistribution = [
 
 const tokenStats = [
   { icon: DollarSign, label: 'Total Supply', value: '1B EKH', subtext: '1,000,000,000 tokens' },
-  { icon: TrendingUp, label: 'Initial Market Cap', value: '$21M', subtext: 'At $0.05 initial price' },
-  { icon: Shield, label: 'Circulating Supply', value: '750M', subtext: '75% at launch' },
-  { icon: Globe, label: 'Fully Diluted Value', value: '$50M', subtext: 'At $0.05 price' }
+  { icon: TrendingUp, label: 'Initial Market Cap', value: '$60M', subtext: 'At $0.1 initial price' },
+  { icon: Shield, label: 'Circulating Supply', value: '750M', subtext: '20% at launch' },
+  { icon: Globe, label: 'Fully Diluted Value', value: '$50M', subtext: 'At $0.1 price' }
 ];
 
 const tokenUtilities = [

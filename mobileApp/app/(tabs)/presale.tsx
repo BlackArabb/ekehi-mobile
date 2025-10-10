@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// @ts-ignore - TypeScript declaration issue with lucide-react-native
 import { Store, DollarSign, Zap, Clock, CheckCircle, TrendingUp, Lock, Gift, BarChart3, Users, Award } from 'lucide-react-native';
 import { usePresale } from '@/contexts/PresaleContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,24 +52,28 @@ export default function PresalePage() {
   };
 
   const calculateTokens = (usdAmount: number) => {
+    if (!tokenPrice || tokenPrice <= 0) return 0;
     return usdAmount / tokenPrice;
   };
 
-  const totalPurchased = purchases.reduce((sum, purchase) => 
-    purchase.status === 'completed' ? sum + purchase.tokensAmount : sum, 0
-  );
+  // Safe calculation of total purchased tokens
+  const totalPurchased = Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
+    purchase && purchase.status === 'completed' ? sum + (purchase.tokensAmount || 0) : sum, 0
+  ) : 0;
 
-  const totalSpent = purchases.reduce((sum, purchase) => 
-    purchase.status === 'completed' ? sum + purchase.amountUsd : sum, 0
-  );
+  // Safe calculation of total spent amount
+  const totalSpent = Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
+    purchase && purchase.status === 'completed' ? sum + (purchase.amountUsd || 0) : sum, 0
+  ) : 0;
 
   const autoMiningRate = totalPurchased > 0 ? (totalPurchased / 10000) : 0;
   
-  // Calculate progress percentage for presale
-  const progressPercentage = Math.min(100, (totalPurchased / 100000) * 100); // Assuming 100,000 token goal
+  // Calculate progress percentage for presale with safety checks
+  const progressPercentage = totalPurchased > 0 && 100000 > 0 ? 
+    Math.min(100, (totalPurchased / 100000) * 100) : 0; // Assuming 100,000 token goal
   
   // Pre-calculate the minimum purchase placeholder to avoid template literals in TextInput
-  const minPurchasePlaceholder = `Min $${minPurchase}`;
+  const minPurchasePlaceholder = minPurchase > 0 ? `Min $${minPurchase}` : 'Min $10';
 
   return (
     <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
@@ -97,20 +102,20 @@ export default function PresalePage() {
         <View style={styles.progressContainer}>
           <View style={styles.progressHeader}>
             <Text style={styles.progressTitle}>Presale Progress</Text>
-            <Text style={styles.progressText}>{progressPercentage.toFixed(1)}%</Text>
+            <Text style={styles.progressText}>{isNaN(progressPercentage) ? '0.0' : progressPercentage.toFixed(1)}%</Text>
           </View>
           <View style={styles.progressBar}>
             <View 
               style={[
                 styles.progressFill, 
                 {
-                  width: `${progressPercentage}%`
+                  width: `${isNaN(progressPercentage) ? 0 : progressPercentage}%`
                 }
               ]} 
             />
           </View>
           <View style={styles.progressStats}>
-            <Text style={styles.progressStat}>{totalPurchased.toLocaleString()} EKH</Text>
+            <Text style={styles.progressStat}>{isNaN(totalPurchased) ? '0' : totalPurchased.toLocaleString()} EKH</Text>
             <Text style={styles.progressStat}>100,000 EKH Goal</Text>
           </View>
         </View>
@@ -120,7 +125,7 @@ export default function PresalePage() {
           <View style={styles.tokenInfoCard}>
             <DollarSign size={24} color="#ffa000" />
             <View style={styles.tokenInfoText}>
-              <Text style={styles.tokenInfoValue}>${tokenPrice.toFixed(4)}</Text>
+              <Text style={styles.tokenInfoValue}>${isNaN(tokenPrice) ? '0.1000' : tokenPrice.toFixed(4)}</Text>
               <Text style={styles.tokenInfoLabel}>per EKH</Text>
             </View>
           </View>
@@ -128,7 +133,7 @@ export default function PresalePage() {
           <View style={styles.tokenInfoCard}>
             <Store size={24} color="#3b82f6" />
             <View style={styles.tokenInfoText}>
-              <Text style={styles.tokenInfoValue}>${minPurchase}</Text>
+              <Text style={styles.tokenInfoValue}>${isNaN(minPurchase) ? '10' : minPurchase}</Text>
               <Text style={styles.tokenInfoLabel}>min purchase</Text>
             </View>
           </View>
@@ -148,7 +153,7 @@ export default function PresalePage() {
               </Text>
               {profile && profile.coinsPerSecond && profile.coinsPerSecond > 0 && (
                 <Text style={styles.currentRate}>
-                  Current rate: {profile.coinsPerSecond.toFixed(2)} EKH/second
+                  Current rate: {isNaN(profile.coinsPerSecond) ? '0.00' : profile.coinsPerSecond.toFixed(2)} EKH/second
                 </Text>
               )}
             </View>
@@ -258,49 +263,49 @@ export default function PresalePage() {
             
             <View style={styles.purchaseStats}>
               <View style={styles.purchaseStatCard}>
-                <Text style={styles.purchaseStatValue}>{totalPurchased.toLocaleString()}</Text>
+                <Text style={styles.purchaseStatValue}>{isNaN(totalPurchased) ? '0' : totalPurchased.toLocaleString()}</Text>
                 <Text style={styles.purchaseStatLabel}>EKH Tokens</Text>
               </View>
               
               <View style={styles.purchaseStatCard}>
-                <Text style={styles.purchaseStatValue}>${totalSpent.toFixed(2)}</Text>
+                <Text style={styles.purchaseStatValue}>${isNaN(totalSpent) ? '0.00' : totalSpent.toFixed(2)}</Text>
                 <Text style={styles.purchaseStatLabel}>Total Spent</Text>
               </View>
               
               <View style={styles.purchaseStatCard}>
-                <Text style={styles.purchaseStatValue}>{autoMiningRate.toFixed(2)}/s</Text>
+                <Text style={styles.purchaseStatValue}>{isNaN(autoMiningRate) ? '0.00' : autoMiningRate.toFixed(2)}/s</Text>
                 <Text style={styles.purchaseStatLabel}>Auto Mining</Text>
               </View>
             </View>
 
             {/* Recent Purchases */}
             <View style={styles.recentPurchases}>
-              {purchases.slice(0, 3).map((purchase, index) => (
+              {Array.isArray(purchases) && purchases.slice(0, 3).map((purchase, index) => (
                 <View key={index} style={styles.purchaseItem}>
                   <View style={styles.purchaseItemLeft}>
                     <Text style={styles.purchaseItemTokens}>
-                      {purchase.tokensAmount.toLocaleString()} EKH
+                      {purchase && purchase.tokensAmount ? purchase.tokensAmount.toLocaleString() : '0'} EKH
                     </Text>
                     <Text style={styles.purchaseItemDate}>
-                      {new Date(purchase.createdAt).toLocaleDateString()}
+                      {purchase && purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : 'N/A'}
                     </Text>
                   </View>
                   
                   <View style={styles.purchaseItemRight}>
                     <Text style={styles.purchaseItemAmount}>
-                      ${purchase.amountUsd.toFixed(2)}
+                      ${purchase && purchase.amountUsd ? purchase.amountUsd.toFixed(2) : '0.00'}
                     </Text>
                     <View style={styles.purchaseItemStatus}>
-                      {purchase.status === 'completed' ? (
+                      {purchase && purchase.status === 'completed' ? (
                         <CheckCircle size={16} color="#10b981" />
                       ) : (
                         <Clock size={16} color="#f59e0b" />
                       )}
                       <Text style={[
                         styles.purchaseItemStatusText,
-                        { color: purchase.status === 'completed' ? '#10b981' : '#f59e0b' }
+                        { color: purchase && purchase.status === 'completed' ? '#10b981' : '#f59e0b' }
                       ]}>
-                        {purchase.status}
+                        {purchase && purchase.status ? purchase.status : 'pending'}
                       </Text>
                     </View>
                   </View>

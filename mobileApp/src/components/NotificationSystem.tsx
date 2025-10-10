@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react-native';
+import { CheckCircle, XCircle, AlertTriangle, Info, X, RefreshCw } from 'lucide-react-native';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 const { width } = Dimensions.get('window');
@@ -92,13 +92,16 @@ function NotificationItem({ notification, Icon, colors, onDismiss }: Notificatio
     ]).start();
 
     // Auto dismiss after duration
+    let timer: ReturnType<typeof setTimeout> | null = null;
     if (notification.duration) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         handleDismiss();
       }, notification.duration);
-
-      return () => clearTimeout(timer);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   const handleDismiss = () => {
@@ -116,6 +119,13 @@ function NotificationItem({ notification, Icon, colors, onDismiss }: Notificatio
     ]).start(() => {
       onDismiss();
     });
+  };
+
+  const handleRetry = () => {
+    if (notification.onRetry) {
+      notification.onRetry();
+    }
+    handleDismiss();
   };
 
   return (
@@ -148,9 +158,16 @@ function NotificationItem({ notification, Icon, colors, onDismiss }: Notificatio
             )}
           </View>
 
-          <TouchableOpacity style={styles.closeButton} onPress={handleDismiss}>
-            <X size={20} color="rgba(255, 255, 255, 0.6)" />
-          </TouchableOpacity>
+          <View style={styles.actionsContainer}>
+            {notification.onRetry && (
+              <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+                <RefreshCw size={20} color="rgba(255, 255, 255, 0.6)" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.closeButton} onPress={handleDismiss}>
+              <X size={20} color="rgba(255, 255, 255, 0.6)" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Progress bar for auto-hide */}
@@ -220,6 +237,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
     lineHeight: 18,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  retryButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   closeButton: {
     width: 32,

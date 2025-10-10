@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { Pickaxe, Coins, Flame, Users, TrendingUp, Trophy, Play, X, Share2, Store, Wallet, User } from 'lucide-react-native';
+import { Coins, Flame, Users, TrendingUp, Trophy, Play, X, Share2, Store, Wallet, User } from 'lucide-react-native';
 import { useMining } from '@/contexts/MiningContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReferral } from '@/contexts/ReferralContext';
@@ -17,8 +17,9 @@ import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import { ID } from 'appwrite';
-import PulseLoader from '@/components/PulseLoader';
 import CircularProgressBar from '@/components/CircularProgressBar';
+import EnhancedLoading from '@/components/EnhancedLoading';
+import MemoizedMiningButton from '@/components/MemoizedMiningButton';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BUTTON_SIZE = Math.min(150, SCREEN_WIDTH * 0.4);
@@ -37,7 +38,7 @@ export default function MinePage() {
     const [finalRewardClaimed, setFinalRewardClaimed] = useState(false); // Track if final reward has been claimed
     const [showAdModal, setShowAdModal] = useState(false); // For ad bonus modal
     const [adCooldown, setAdCooldown] = useState(0); // Cooldown timer for ad watching
-    const [clickEffects] = useState<Array<{ id: number; x: number; y: number }>>([]); // For click effects animation
+    const [clickEffects, setClickEffects] = useState<Array<{ id: number; x: number; y: number }>>([]); // For click effects animation
     const [copied, setCopied] = useState(false); // For referral link copy status
 
     const { showNotification } = useNotifications();
@@ -343,13 +344,6 @@ export default function MinePage() {
         setShowAdModal(true);
     };
 
-    const handleAdComplete = async () => {
-        // Use real AdMob service instead of simulation
-        // This function is now handled by the AdModal component
-        // We return a default success response here as a fallback
-        return Promise.resolve({ success: true, reward: 0.5 });
-    };
-
     const handleAdReward = async (result: { success: boolean; reward?: number; error?: string }) => {
         if (result.success && result.reward && profile) {
             try {
@@ -391,7 +385,8 @@ export default function MinePage() {
                     type: 'error',
                     title: 'Reward Failed',
                     message: 'Failed to process your ad reward. Please try again.',
-                    duration: 3000,
+                    duration: 5000,
+                    onRetry: () => handleAdReward(result),
                 });
                 return;
             }
@@ -400,49 +395,19 @@ export default function MinePage() {
                 type: 'error',
                 title: 'Ad Not Completed',
                 message: result.error || 'Ad was not completed successfully.',
-                duration: 3000,
+                duration: 5000,
             });
             return;
         }
     };
 
-    const resetMiningSession = () => {
-        // Clear intervals
-        if (miningIntervalRef.current) {
-            clearInterval(miningIntervalRef.current);
-            miningIntervalRef.current = null;
-        }
 
-        if (timeIntervalRef.current) {
-            clearInterval(timeIntervalRef.current);
-            timeIntervalRef.current = null;
-        }
-
-        if (adCooldownRef.current) {
-            clearInterval(adCooldownRef.current);
-            adCooldownRef.current = null;
-        }
-
-        // Reset state
-        setIs24HourMiningActive(false);
-        setMiningStartTime(null);
-        setRemainingTime(24 * 60 * 60);
-        setSessionReward(2);
-        setFinalRewardClaimed(false);
-
-        // Clear AsyncStorage
-        AsyncStorage.removeItem('miningSession').catch(() => {
-            // Silently handle errors
-        });
-    };
 
     // Show loading state while checking authentication
     if (authLoading) {
         return (
             <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
-                <View style={styles.loadingContainer}>
-                    <PulseLoader />
-                </View>
+                <EnhancedLoading message="Authenticating..." />
             </LinearGradient>
         );
     }
@@ -451,9 +416,7 @@ export default function MinePage() {
     if (!profile && user && !authLoading) {
         return (
             <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
-                <View style={styles.loadingContainer}>
-                    <PulseLoader />
-                </View>
+                <EnhancedLoading message="Loading your profile..." />
             </LinearGradient>
         );
     }
@@ -468,13 +431,7 @@ export default function MinePage() {
         return null;
     }
 
-    const dailyProgress = (profile.todayEarnings / 2) * 100; // Based on 2 EKH total reward
     const progressPercentage = ((24 * 60 * 60 - remainingTime) / (24 * 60 * 60)) * 100;
-    
-    // Calculate mining rate per second to reach 2 EKH in 24 hours
-    const miningRatePerSecond = 2 / (24 * 60 * 60); // 2 EKH / 86400 seconds
-    const miningRatePerMinute = miningRatePerSecond * 60;
-    const miningRatePerHour = miningRatePerSecond * 3600;
 
     return (
         <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
@@ -554,61 +511,15 @@ export default function MinePage() {
                 </View>
 
                 {/* Mining Button - Balanced Implementation */}
-                <View style={styles.miningContainer}>
-                    <View style={styles.miningButtonWrapper}>
-                        {/* Circular Progress Bar */}
-                        {is24HourMiningActive && remainingTime > 0 && (
-                            <View style={[styles.circularProgressContainer, { width: BUTTON_SIZE + 20, height: BUTTON_SIZE + 20 }]} pointerEvents="none">
-                                <CircularProgressBar 
-                                    size={BUTTON_SIZE + 20} 
-                                    strokeWidth={10} 
-                                    progress={progressPercentage}
-                                    strokeColor="#ffa000"
-                                    backgroundColor="rgba(255, 255, 255, 0.1)"
-                                    showStars={true}
-                                    pulsate={true}
-                                />
-                            </View>
-                        )}
-
-                        {/* Main Mining Button */}
-                        <TouchableOpacity
-                            style={[styles.miningButton, { width: BUTTON_SIZE, height: BUTTON_SIZE, borderRadius: BUTTON_SIZE / 2 }]}
-                            onPress={handleMine}
-                            activeOpacity={0.8}
-                            disabled={is24HourMiningActive && remainingTime > 0}
-                        >
-                            <LinearGradient
-                                colors={
-                                    is24HourMiningActive
-                                        ? remainingTime > 0
-                                            ? ['#10b981', '#059669']
-                                            : ['#ffa000', '#ff8f00']
-                                        : ['#ffa000', '#ff8f00', '#ff6f00']
-                                }
-                                style={[styles.miningButtonGradient, { borderRadius: BUTTON_SIZE / 2 }]}
-                            >
-                                {/* Mining Time Display - Overlays when active */}
-                                {is24HourMiningActive && remainingTime > 0 ? (
-                                    <View style={styles.miningTimeOverlay} pointerEvents="none">
-                                        <Text style={styles.miningTimeText}>{formatTime(remainingTime)}</Text>
-                                        <Text style={styles.miningTimeLabelText}>Remaining</Text>
-                                    </View>
-                                ) : is24HourMiningActive && remainingTime <= 0 ? (
-                                    <Coins size={60} color="#ffffff" />
-                                ) : null}
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
-
-                    <Text style={styles.miningRate}>
-                        {is24HourMiningActive
-                            ? remainingTime > 0
-                                ? `Mining in progress...`
-                                : `Claim ${sessionReward} EKH Reward`
-                            : `Start Extended Session (+${sessionReward} EKH)`}
-                    </Text>
-                </View>
+                <MemoizedMiningButton
+                  is24HourMiningActive={is24HourMiningActive}
+                  remainingTime={remainingTime}
+                  progressPercentage={progressPercentage}
+                  BUTTON_SIZE={BUTTON_SIZE}
+                  handleMine={handleMine}
+                  formatTime={formatTime}
+                  sessionReward={sessionReward}
+                />
 
                 {/* Ad Bonus Button */}
                 <View style={styles.adBonusContainer}>

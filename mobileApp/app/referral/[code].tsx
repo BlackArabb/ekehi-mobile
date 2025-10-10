@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function ReferralLinkPage() {
   const { code } = useLocalSearchParams();
   const router = useRouter();
-  const { claimReferral, isLoading } = useReferral();
+  const { claimReferral } = useReferral();
   const { user } = useAuth();
 
   useEffect(() => {

@@ -23,7 +23,6 @@ const navigation = [
   { name: 'Wallet', href: '/dashboard/wallet', icon: WalletIcon, current: false },
   { name: 'Social Tasks', href: '/dashboard/social', icon: MegaphoneIcon, current: false },
   { name: 'Ads', href: '/dashboard/ads', icon: GiftIcon, current: false },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, current: false },
   { name: 'Settings', href: '/dashboard/settings', icon: CogIcon, current: false },
 ]
 

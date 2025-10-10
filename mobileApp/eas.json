@@ -1,12 +1,28 @@
-    {
-      "build": {
-        "production": {
-          "android": {
-            "buildType": "apk" 
-          },
-          "ios": {
-            "buildConfiguration": "Release"
-          }
-        }
+{
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "app-bundle",
+        "minify": true,
+        "split": true
+      },
+      "ios": {
+        "buildConfiguration": "Release",
+        "resourceClass": "m1-medium"
+      },
+      "env": {
+        "ENV": "production"
       }
-    }    
+    },
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "buildConfiguration": "Debug"
+      }
+    }
+  }
+}

@@ -7,6 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import * as Linking from 'expo-linking';
 import { account } from '@/config/appwrite';
 
+// Type declaration for window object on web platform
+declare const window: any;
+
 export default function OAuthReturnPage() {
   const router = useRouter();
   const segments = useSegments();
@@ -36,9 +39,8 @@ export default function OAuthReturnPage() {
         // Get current URL to extract OAuth parameters
         let currentUrl = '';
         try {
-          // @ts-ignore - window object only exists on web platforms
+          // Only access window object on web platforms
           if (typeof window !== 'undefined' && window?.location?.href) {
-            // @ts-ignore - accessing window.location.href on web
             currentUrl = window.location.href;
           } else {
             // Fallback for non-web platforms
@@ -52,9 +54,9 @@ export default function OAuthReturnPage() {
         console.log('Current URL:', currentUrl);
         
         // Check if we have OAuth success parameters in the URL
-        const urlObj = new URL(currentUrl);
-        const secret = urlObj.searchParams.get('secret') || params.secret as string;
-        const userId = urlObj.searchParams.get('userId') || params.userId as string;
+        const urlObj = new URL(currentUrl, 'http://localhost'); // Provide base URL to avoid errors
+        const secret = urlObj.searchParams.get('secret') || (params.secret as string);
+        const userId = urlObj.searchParams.get('userId') || (params.userId as string);
         
         if (secret && userId) {
           console.log('OAuth parameters found:', { userId, secretLength: secret.length });
@@ -141,7 +143,7 @@ export default function OAuthReturnPage() {
         clearTimeout(navigationTimeout.current);
       }
     };
-  }, [router, checkAuthStatus, params, segments]);
+  }, [router, params, segments]);
 
   // Watch for user authentication and navigate
   useEffect(() => {

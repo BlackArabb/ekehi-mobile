@@ -4,12 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { 
   Trophy, 
   Star, 
-  Crown, 
   Target, 
   Coins, 
   Users, 
   Flame,
-  Medal,
   Gift,
   Lock,
   Sparkles
@@ -18,8 +16,6 @@ import { UserProfile, Achievement } from '@/types';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import { ID, Query } from 'appwrite';
 import LoadingDots from '@/components/LoadingDots';
-
-const API_BASE_URL = 'https://ekehi-network-api.your-subdomain.workers.dev';
 
 interface AchievementSystemProps {
   profile: UserProfile;

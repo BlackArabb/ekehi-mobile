@@ -1,0 +1,28 @@
+app/(tabs)/leaderboard.tsx(10,25): error TS6133: 'Medal' is declared but its value is never read.
+app/(tabs)/leaderboard.tsx(10,32): error TS6133: 'Award' is declared but its value is never read.
+app/(tabs)/mine.tsx(6,10): error TS6133: 'Pickaxe' is declared but its value is never read.
+app/(tabs)/mine.tsx(20,1): error TS6133: 'PulseLoader' is declared but its value is never read.
+app/(tabs)/mine.tsx(41,26): error TS6133: 'setClickEffects' is declared but its value is never read.
+app/(tabs)/mine.tsx(42,12): error TS6133: 'copied' is declared but its value is never read.
+app/(tabs)/mine.tsx(437,11): error TS6133: 'miningRatePerSecond' is declared but its value is never read.
+app/(tabs)/presale.tsx(5,17): error TS2614: Module '"lucide-react-native"' has no exported member 'DollarSign'. Did you mean to use 'import DollarSign from "lucide-react-native"' instead?
+app/(tabs)/presale.tsx(5,34): error TS2724: '"lucide-react-native"' has no exported member named 'Clock'. Did you mean 'Lock'?
+app/(tabs)/presale.tsx(5,78): error TS2614: Module '"lucide-react-native"' has no exported member 'BarChart3'. Did you mean to use 'import BarChart3 from "lucide-react-native"' instead?
+app/(tabs)/profile.tsx(63,5): error TS6133: 'updateCoinsOnly' is declared but its value is never read.
+app/(tabs)/profile.tsx(488,9): error TS6133: 'formatNumber' is declared but its value is never read.
+app/(tabs)/social.tsx(5,10): error TS2614: Module '"lucide-react-native"' has no exported member 'ExternalLink'. Did you mean to use 'import ExternalLink from "lucide-react-native"' instead?
+app/(tabs)/social.tsx(5,31): error TS2724: '"lucide-react-native"' has no exported member named 'Clock'. Did you mean 'Lock'?
+app/(tabs)/social.tsx(5,38): error TS2614: Module '"lucide-react-native"' has no exported member 'MessageCircle'. Did you mean to use 'import MessageCircle from "lucide-react-native"' instead?
+app/(tabs)/wallet.tsx(5,32): error TS2614: Module '"lucide-react-native"' has no exported member 'Send'. Did you mean to use 'import Send from "lucide-react-native"' instead?
+app/(tabs)/wallet.tsx(5,38): error TS2614: Module '"lucide-react-native"' has no exported member 'ArrowDownLeft'. Did you mean to use 'import ArrowDownLeft from "lucide-react-native"' instead?
+app/(tabs)/wallet.tsx(5,53): error TS2614: Module '"lucide-react-native"' has no exported member 'ArrowUpRight'. Did you mean to use 'import ArrowUpRight from "lucide-react-native"' instead?
+app/(tabs)/wallet.tsx(5,67): error TS2724: '"lucide-react-native"' has no exported member named 'Clock'. Did you mean 'Lock'?
+app/(tabs)/wallet.tsx(5,96): error TS2614: Module '"lucide-react-native"' has no exported member 'Link'. Did you mean to use 'import Link from "lucide-react-native"' instead?
+app/index.tsx(5,51): error TS2614: Module '"lucide-react-native"' has no exported member 'Shield'. Did you mean to use 'import Shield from "lucide-react-native"' instead?
+src/components/AutoMiningStatus.tsx(8,3): error TS2614: Module '"lucide-react-native"' has no exported member 'Pause'. Did you mean to use 'import Pause from "lucide-react-native"' instead?
+src/components/CircularProgressBar.tsx(2,46): error TS6133: 'Text' is declared but its value is never read.
+src/contexts/MiningContext.tsx(405,10): error TS6133: 'totalCoins' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(39,33): error TS6133: 'amountUSD' is declared but its value is never read.
+src/contexts/PresaleContext.tsx(39,52): error TS6133: 'paymentMethod' is declared but its value is never read.
+src/services/ErrorService.ts(2,1): error TS6133: 'useNotifications' is declared but its value is never read.
+src/services/ErrorService.ts(14,7): error TS6133: 'ERROR_CODES' is declared but its value is never read.

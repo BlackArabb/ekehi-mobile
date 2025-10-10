@@ -52,7 +52,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "app/assets.d.ts"
+    "app/assets.d.ts",
+    "src/types/*.d.ts"
   ],
   "exclude": [
     "admin"

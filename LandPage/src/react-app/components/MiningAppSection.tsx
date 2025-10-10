@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, Smartphone, Zap, Users, Shield, Award, ChevronDown, Play } from 'lucide-react';
 
 const appFeatures = [
@@ -43,6 +43,16 @@ const appStats = [
 
 export default function MiningAppSection() {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
+  // State to control whether the app is ready for download or coming soon
+  const [isAppReady, setIsAppReady] = useState(false); // Set to false initially for "COMING SOON"
+
+  // Load the app status from localStorage when component mounts
+  useEffect(() => {
+    const savedStatus = localStorage.getItem('ekehiAppReady');
+    if (savedStatus !== null) {
+      setIsAppReady(savedStatus === 'true');
+    }
+  }, []);
 
   const toggleFeature = (index: number) => {
     setExpandedFeature(expandedFeature === index ? null : index);
@@ -86,16 +96,25 @@ export default function MiningAppSection() {
             {/* Download CTA */}
             <div className="text-center mt-10">
               <p className="text-yellow-500 font-bold mb-2 text-center">Start Claiming Now</p>
-              <a 
-                href="#"
-                className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
-              >
-                <Download size={20} />
-                Download Mining App
-              </a>
+              {isAppReady ? (
+                <a 
+                  href="#"
+                  className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
+                >
+                  <Download size={20} />
+                  Download Mining App
+                </a>
+              ) : (
+                <button 
+                  className="btn-secondary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button cursor-not-allowed opacity-75"
+                  disabled
+                >
+                  <span className="animate-pulse">COMING SOON</span>
+                </button>
+              )}
               
               <div className="mt-4 text-sm text-medium-gray">
-                <p>Not available on app stores yet. Direct download only.</p>
+                <p>{isAppReady ? "Not available on app stores yet. Direct download only." : "App is currently in development. Check back soon!"}</p>
               </div>
             </div>
           </div>

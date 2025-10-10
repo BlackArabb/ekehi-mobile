@@ -5,6 +5,12 @@ import { Platform, Alert } from 'react-native';
 import { User } from '@/types';
 import { account, databases, appwriteConfig } from '@/config/appwrite';
 import { ID, OAuthProvider, Query } from 'appwrite';
+import { retryWithBackoff, isNetworkError } from '@/utils/retry';
+import LoggingService from '@/services/LoggingService';
+import PerformanceMonitor from '@/services/PerformanceMonitor';
+
+// Type declaration for window object on web platform
+declare const window: any;
 
 // Configure WebBrowser for OAuth
 WebBrowser.maybeCompleteAuthSession();
@@ -37,35 +43,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkAuthStatus = useCallback(async () => {
+    PerformanceMonitor.startTiming('checkAuthStatus');
+    
     // Prevent excessive auth checks
     const now = Date.now();
     
     // If a check is already in progress, skip
     if (checkInProgressRef.current) {
+      LoggingService.debug('Auth check already in progress, skipping', 'AuthContext');
       console.log('⚠️ Auth check already in progress, skipping');
+      PerformanceMonitor.endTiming('checkAuthStatus');
       return;
     }
     
     // Prevent too-frequent checks (max 1 per 2 seconds)
     if (now - lastCheckTimeRef.current < 2000) {
+      LoggingService.debug('Skipping auth check (too frequent)', 'AuthContext');
       console.log('⚠️ Skipping auth check (too frequent)');
+      PerformanceMonitor.endTiming('checkAuthStatus');
       return;
     }
     
+    LoggingService.info('Starting auth status check...', 'AuthContext');
     console.log('🔍 Starting auth status check...');
     lastCheckTimeRef.current = now;
     checkInProgressRef.current = true;
     
     const timeoutId = setTimeout(() => {
+      LoggingService.warn('Auth check timeout - setting loading to false', 'AuthContext');
       console.log('⏰ Auth check timeout - setting loading to false');
       setIsLoading(false);
       checkInProgressRef.current = false;
+      PerformanceMonitor.endTiming('checkAuthStatus');
     }, 10000); // Increased timeout to 10 seconds
     
     try {
+      LoggingService.debug('Checking auth status with Appwrite...', 'AuthContext');
       console.log('📡 Checking auth status with Appwrite...');
       
-      const accountData = await account.get();
+      // Use retry mechanism for network operations
+      const result = await retryWithBackoff(
+        async () => {
+          PerformanceMonitor.startTiming('getAccount');
+          const accountData = await account.get();
+          PerformanceMonitor.endTiming('getAccount');
+          return accountData;
+        },
+        {
+          maxRetries: 3,
+          delay: 1000,
+          shouldRetry: isNetworkError
+        }
+      );
+
+      if (!result.success) {
+        throw result.error;
+      }
+
+      const accountData = result.data!;
+
       if (accountData && accountData.$id) {
         const userData: User = {
           id: accountData.$id,
@@ -79,49 +115,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               prevUser.id !== userData.id || 
               prevUser.email !== userData.email || 
               prevUser.name !== userData.name) {
+            LoggingService.info(`User authenticated (data changed): ${userData.name || userData.email}`, 'AuthContext');
             console.log('✅ User authenticated (data changed):', userData.name || userData.email);
             return userData;
           }
+          LoggingService.debug('User authenticated (no data change)', 'AuthContext');
           console.log('ℹ️ User authenticated (no data change)');
           return prevUser;
         });
         
         // Create user profile if it doesn't exist (in background)
         createUserProfileIfNotExists(accountData).catch(error => {
+          LoggingService.error('Failed to create user profile', 'AuthContext', { userId: accountData.$id }, error);
           console.error('Failed to create user profile:', error);
         });
       } else {
+        LoggingService.debug('No user data received from Appwrite', 'AuthContext');
         console.log('No user data received from Appwrite');
         setUser(null);
       }
     } catch (error: any) {
       if (error?.code === 401 || error?.type === 'general_unauthorized_scope' || error?.message?.includes('Unauthorized')) {
+        LoggingService.info('User not authenticated (guest)', 'AuthContext');
         console.log('👤 User not authenticated (guest)');
         setUser(null);
       } else {
+        LoggingService.error('Auth check failed', 'AuthContext', undefined, error);
         console.error('❌ Auth check failed:', error);
         setUser(null);
       }
     } finally {
       clearTimeout(timeoutId);
+      LoggingService.info('Auth check completed - setting loading to false', 'AuthContext');
       console.log('🏁 Auth check completed - setting loading to false');
       setIsLoading(false);
       checkInProgressRef.current = false;
+      PerformanceMonitor.endTiming('checkAuthStatus');
     }
   }, []);
 
   const createUserProfileIfNotExists = async (userData: any) => {
+    PerformanceMonitor.startTiming('createUserProfileIfNotExists');
+    
     try {
+      LoggingService.debug('Checking if user profile exists for user:', userData.$id, 'AuthContext');
       console.log('Checking if user profile exists for user:', userData.$id);
-      const response = await databases.listDocuments(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userProfiles,
-        [Query.equal('userId', [userData.$id])]
+      
+      // Use retry mechanism for database operations
+      const result = await retryWithBackoff(
+        async () => {
+          PerformanceMonitor.startTiming('listUserProfiles');
+          const response = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.collections.userProfiles,
+            [Query.equal('userId', [userData.$id])]
+          );
+          PerformanceMonitor.endTiming('listUserProfiles');
+          return response;
+        },
+        {
+          maxRetries: 3,
+          delay: 1000,
+          shouldRetry: isNetworkError
+        }
       );
+
+      if (!result.success) {
+        throw result.error;
+      }
+
+      const response = result.data!;
 
       console.log('User profile check result:', response.total, 'profiles found');
 
       if (response.documents.length === 0) {
+        LoggingService.debug('Creating new user profile for user:', userData.$id, 'AuthContext');
         console.log('Creating new user profile for user:', userData.$id);
         
         // Check for referral code in AsyncStorage
@@ -159,12 +227,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         console.log('Creating user profile with data:', userProfile);
         
-        const result = await databases.createDocument(
-          appwriteConfig.databaseId,
-          appwriteConfig.collections.userProfiles,
-          ID.unique(),
-          userProfile
+        // Use retry mechanism for database operations
+        const createResult = await retryWithBackoff(
+          async () => {
+            PerformanceMonitor.startTiming('createUserProfile');
+            const result = await databases.createDocument(
+              appwriteConfig.databaseId,
+              appwriteConfig.collections.userProfiles,
+              ID.unique(),
+              userProfile
+            );
+            PerformanceMonitor.endTiming('createUserProfile');
+            return result;
+          },
+          {
+            maxRetries: 3,
+            delay: 1000,
+            shouldRetry: isNetworkError
+          }
         );
+
+        if (!createResult.success) {
+          throw createResult.error;
+        }
+
+        const result = createResult.data!;
         
         console.log('✅ User profile created successfully:', result.$id);
         
@@ -187,18 +274,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       console.error('Failed to create user profile:', error);
       // Don't throw here as profile creation is not critical for auth
+    } finally {
+      PerformanceMonitor.endTiming('createUserProfileIfNotExists');
     }
   };
 
   const updateReferrerProfile = async (referralCode: string, referredUserId: string) => {
     try {
-      // Find the referrer by referral code
-      const referrerResponse = await databases.listDocuments(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userProfiles,
-        [Query.equal('referralCode', [referralCode])]
+      // Use retry mechanism for database operations
+      const referrerResult = await retryWithBackoff(
+        async () => {
+          // Find the referrer by referral code
+          const referrerResponse = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.collections.userProfiles,
+            [Query.equal('referralCode', [referralCode])]
+          );
+          return referrerResponse;
+        },
+        {
+          maxRetries: 3,
+          delay: 1000,
+          shouldRetry: isNetworkError
+        }
       );
-      
+
+      if (!referrerResult.success) {
+        throw referrerResult.error;
+      }
+
+      const referrerResponse = referrerResult.data!;
+
       if (referrerResponse.documents.length > 0) {
         const referrer = referrerResponse.documents[0];
         
@@ -206,18 +312,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const updatedReferrals = referrer.totalReferrals + 1;
         const referralBonus = 1; // 1 EKH bonus for each referral
         
-        await databases.updateDocument(
-          appwriteConfig.databaseId,
-          appwriteConfig.collections.userProfiles,
-          referrer.$id,
+        // Use retry mechanism for database operations
+        const updateResult = await retryWithBackoff(
+          async () => {
+            const response = await databases.updateDocument(
+              appwriteConfig.databaseId,
+              appwriteConfig.collections.userProfiles,
+              referrer.$id,
+              {
+                totalReferrals: updatedReferrals,
+                totalCoins: referrer.totalCoins + referralBonus,
+                // Store the ID of the user who was referred for tracking purposes
+                [`referredUser_${referredUserId}`]: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+            );
+            return response;
+          },
           {
-            totalReferrals: updatedReferrals,
-            totalCoins: referrer.totalCoins + referralBonus,
-            // Store the ID of the user who was referred for tracking purposes
-            [`referredUser_${referredUserId}`]: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            maxRetries: 3,
+            delay: 1000,
+            shouldRetry: isNetworkError
           }
         );
+
+        if (!updateResult.success) {
+          throw updateResult.error;
+        }
         
         console.log(`✅ Referral bonus awarded to user ${referrer.userId}: ${referralBonus} EKH`);
         console.log(`✅ Referrer ${referrer.userId} now has ${updatedReferrals} referrals`);
@@ -284,12 +405,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updatedAt: new Date().toISOString()
         };
         
-        await databases.updateDocument(
-          appwriteConfig.databaseId,
-          appwriteConfig.collections.userProfiles,
-          existingProfile.$id,
-          updatedProfile
+        // Use retry mechanism for database operations
+        const updateResult = await retryWithBackoff(
+          async () => {
+            const response = await databases.updateDocument(
+              appwriteConfig.databaseId,
+              appwriteConfig.collections.userProfiles,
+              existingProfile.$id,
+              updatedProfile
+            );
+            return response;
+          },
+          {
+            maxRetries: 3,
+            delay: 1000,
+            shouldRetry: isNetworkError
+          }
         );
+
+        if (!updateResult.success) {
+          throw updateResult.error;
+        }
         
         console.log(`✅ User ${userId} streak updated:`, {
           currentStreak: updatedStreak,
@@ -315,9 +451,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let baseUrl = '';
       if (Platform.OS === 'web') {
         // Only access window object on web platform
-        // @ts-ignore - window object only exists on web
         if (typeof window !== 'undefined' && window?.location?.origin) {
-          // @ts-ignore
           baseUrl = window.location.origin;
         }
       }
@@ -346,16 +480,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // For web, redirect directly
         if (oauthUrl && typeof oauthUrl === 'string') {
           console.log('Redirecting to OAuth URL for web');
-          // @ts-ignore - window object only exists on web
           if (typeof window !== 'undefined' && window?.location?.href) {
-            // @ts-ignore
             window.location.href = oauthUrl;
           }
         } else if (oauthUrl && typeof oauthUrl === 'object' && oauthUrl !== null && 'href' in oauthUrl) {
           console.log('Redirecting to OAuth URL object for web');
-          // @ts-ignore - window object only exists on web
           if (typeof window !== 'undefined' && window?.location?.href) {
-            // @ts-ignore
             window.location.href = (oauthUrl as any).href;
           }
         } else {
@@ -392,28 +522,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (result.type === 'success') {
           console.log('OAuth successful, URL:', result.url);
-          
-          // Parse the result URL to extract OAuth parameters
-          if (result.url) {
-            const url = new URL(result.url);
-            const secret = url.searchParams.get('secret');
-            const userId = url.searchParams.get('userId');
-            
-            if (secret && userId) {
-              console.log('OAuth parameters found, creating session...');
-              
-              try {
-                // Wait a moment before checking auth status
-                await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-                await checkAuthStatus();
-              } catch (error) {
-                console.log('Auth status check after OAuth failed:', error);
-                // Continue anyway as the session might still be established
-              }
-            }
-          }
-          
           // The navigation will be handled by the return page
+          // Don't call checkAuthStatus here as it will be called in the return page
         } else if (result.type === 'dismiss') {
           throw new Error('Authentication cancelled');
         } else {
@@ -434,7 +544,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           '1. Go to Auth > Settings\n' +
           '2. Verify your platform settings\n' +
           '3. Ensure redirect URLs are correctly added\n\n' +
-          // @ts-ignore - window object only exists on web
           `Expected URLs:\n${Platform.OS === 'web' ? (typeof window !== 'undefined' && window?.location?.origin ? window.location.origin : '') : 'ekehi://oauth'}/return`
         );
       } else if (errorMessage === 'Authentication cancelled') {
@@ -513,9 +622,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (Platform.OS === 'web') {
         console.log('Web platform detected, redirecting to auth page');
         setTimeout(() => {
-          // @ts-ignore - window object only exists on web
           if (typeof window !== 'undefined' && window?.location?.href) {
-            // @ts-ignore
             window.location.href = '/auth';
           }
         }, 100);
@@ -529,9 +636,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // For web platforms, force redirect even on error
       if (Platform.OS === 'web') {
         setTimeout(() => {
-          // @ts-ignore - window object only exists on web
           if (typeof window !== 'undefined' && window?.location?.href) {
-            // @ts-ignore
             window.location.href = '/auth';
           }
         }, 100);

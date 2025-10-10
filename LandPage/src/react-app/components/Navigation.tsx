@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Home, Info, FileText, Rocket, Globe, PieChart, Map, Mail, Smartphone } from 'lucide-react';
+import { useLocation } from 'react-router';
 
 const navigationLinks = [
   { href: '#home', label: 'Home', icon: Home },
@@ -10,9 +11,11 @@ const navigationLinks = [
   { href: '#tokenomics', label: 'Tokenomics', icon: PieChart },
   { href: '#roadmap', label: 'Roadmap', icon: Map },
   { href: '#contact', label: 'Contact', icon: Mail },
+  // Removed Mobile Auth link as it's not needed in navigation
 ];
 
 export default function Navigation() {
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -22,7 +25,9 @@ export default function Navigation() {
       setIsScrolled(window.scrollY > 50);
       
       // Determine active section based on scroll position
-      const sections = navigationLinks.map(link => link.href.substring(1));
+      const sections = navigationLinks
+        .filter(link => link.href.startsWith('#'))
+        .map(link => link.href.substring(1));
       const scrollPosition = window.scrollY + 100;
       
       for (const section of sections) {
@@ -61,6 +66,9 @@ export default function Navigation() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  // Check if we're on a page route (not a section anchor)
+  const isPageRoute = (href: string) => !href.startsWith('#');
+
   return (
     <>
       {/* Desktop Navigation */}
@@ -75,6 +83,29 @@ export default function Navigation() {
 
         <div className="flex items-center space-x-8">
           {navigationLinks.map((link) => {
+            // For page routes, check if the current location matches
+            if (isPageRoute(link.href)) {
+              const isActive = location.pathname === link.href;
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className={`transition-colors flex items-center gap-1.5 text-sm font-medium ${
+                    isActive 
+                      ? 'text-white' // White color for active state
+                      : 'text-medium-gray hover:text-yellow-500'
+                  }`}
+                >
+                  <link.icon 
+                    size={16} 
+                    className={isActive ? 'text-white' : 'text-ekehi-gold'} 
+                  />
+                  {link.label}
+                </a>
+              );
+            }
+            
+            // For section anchors, use the existing logic
             const isActive = activeSection === link.href.substring(1);
             return (
               <a
@@ -138,6 +169,30 @@ export default function Navigation() {
             
             <div className="flex flex-col space-y-6 flex-grow pt-8">
               {navigationLinks.map((link) => {
+                // For page routes, check if the current location matches
+                if (isPageRoute(link.href)) {
+                  const isActive = location.pathname === link.href;
+                  return (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      className={`text-2xl transition-colors flex items-center gap-3 py-3 border-b border-charcoal-gray ${
+                        isActive 
+                          ? 'text-white' // White color for active state
+                          : 'text-white hover:text-yellow-500'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <link.icon 
+                        size={24} 
+                        className={isActive ? 'text-white' : 'text-ekehi-gold'} 
+                      />
+                      {link.label}
+                    </a>
+                  );
+                }
+                
+                // For section anchors, use the existing logic
                 const isActive = activeSection === link.href.substring(1);
                 return (
                   <a

@@ -3,6 +3,7 @@ import HomePage from "@/react-app/pages/Home";
 import FAQPage from "@/react-app/pages/FAQ";
 import PrivacyPolicyPage from "@/react-app/pages/PrivacyPolicy";
 import TermsPage from "@/react-app/pages/Terms";
+import OAuthRedirect from "@/react-app/pages/OAuthRedirect";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/faq" element={<FAQPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/oauth/callback" element={<OAuthRedirect />} />
       </Routes>
     </Router>
   );

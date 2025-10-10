@@ -129,8 +129,8 @@ export default function SocialPage() {
               {
                 text: 'I have completed the task',
                 style: 'default',
-                onPress: async () => {
-                  await completeTask(task);
+                onPress: () => {
+                  completeTask(task);
                 }
               }
             ]
@@ -146,10 +146,10 @@ export default function SocialPage() {
             [
               {
                 text: 'OK',
-                onPress: async () => {
+                onPress: () => {
                   // Simulate some processing time
-                  await new Promise(resolve => setTimeout(() => resolve(undefined), 3000));
-                  await completeTask(task);
+                  new Promise(resolve => setTimeout(() => resolve(undefined), 3000))
+                    .then(() => completeTask(task));
                 }
               }
             ]
@@ -176,8 +176,8 @@ export default function SocialPage() {
               {
                 text: 'I have completed the task',
                 style: 'default',
-                onPress: async () => {
-                  await completeTask(task);
+                onPress: () => {
+                  completeTask(task);
                 }
               }
             ]

@@ -142,6 +142,7 @@ export default function AuthPage() {
     try {
       await signIn();
       // Navigation will be handled by the OAuth flow
+      // Don't reset loading state here as it will be handled by the OAuth flow
     } catch (error: any) {
       console.error('Google sign in error:', error);
       let errorMessage = error.message || 'Failed to authenticate with Google';
@@ -157,10 +158,11 @@ export default function AuthPage() {
       
       Alert.alert('Authentication Error', errorMessage);
     } finally {
-      // Ensure loading state is reset even if there's an error
+      // Only reset loading state on error, not on success as navigation is handled by OAuth flow
+      // Add a small delay to ensure the OAuth flow has started
       setTimeout(() => {
         setIsGoogleAuthLoading(false);
-      }, 1000);
+      }, 2000);
     }
   };
 

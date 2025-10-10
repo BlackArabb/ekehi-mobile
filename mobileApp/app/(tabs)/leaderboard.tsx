@@ -7,8 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import { Query } from 'appwrite';
 import { LeaderboardEntry } from '@/types';
-import { Trophy, Crown, Medal, Award, RefreshCw, Star, Zap, Flame } from 'lucide-react-native';
+import { Trophy, Crown, RefreshCw, Star, Zap, Flame } from 'lucide-react-native';
 import PulseLoader from '@/components/PulseLoader';
+import MemoizedLeaderboardEntry from '@/components/MemoizedLeaderboardEntry';
 
 // Import trophy images with correct relative paths
 import Trophy1 from '../../assets/trophy/trophy1.png';
@@ -234,66 +235,13 @@ export default function LeaderboardPage() {
               </View>
             ) : (
               <View style={styles.rankingsGrid}>
-                {leaderboard.map((entry, index) => {
-                  const tier = getTierIndicator(entry.rank);
-                  const TierIcon = tier.icon;
-                  
-                  return (
-                    <LinearGradient
-                      key={index}
-                      colors={
-                        entry.rank === 1 ? ['rgba(255, 215, 0, 0.15)', 'rgba(255, 215, 0, 0.05)'] :
-                        entry.rank <= 3 ? ['rgba(192, 192, 192, 0.15)', 'rgba(192, 192, 192, 0.05)'] :
-                        entry.rank <= 10 ? ['rgba(205, 127, 50, 0.15)', 'rgba(205, 127, 50, 0.05)'] :
-                        ['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.03)']
-                      }
-                      style={[
-                        styles.rankCard,
-                        entry.rank <= 3 && styles.topRankCard
-                      ]}
-                    >
-                      <View style={styles.rankCardContent}>
-                        {/* Left section - Rank & User */}
-                        <View style={styles.rankLeft}>
-                          <View style={styles.rankBadgeContainer}>
-                            {getCraftRankBadge(entry.rank)}
-                          </View><View style={[styles.tierBadge, { backgroundColor: tier.color + '20' }]}>
-                                <TierIcon size={12} color={tier.color} />
-                                <Text style={[styles.tierText, { color: tier.color }]}>
-                                  {tier.name}
-                                </Text>
-                              </View>
-                          
-                          <View style={styles.userDetails}>
-                            <View style={styles.userNameRow}>
-                              <Text style={styles.userName} numberOfLines={1}>
-                                {entry.username}
-                              </Text>
-                             
-                            </View>
-                            
-                            <View style={styles.userStats}>
-                              <Text style={styles.userStat}>
-                                Power: {entry.miningPower}
-                              </Text>
-                              <Text style={styles.userStat}>
-                                Streak: {entry.currentStreak}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                        
-                        {/* Right section - Earnings */}
-                        <View style={styles.rankRight}>
-                          <Text style={styles.earningsAmount}>
-                            {entry.totalCoins.toLocaleString()}
-                          </Text>
-                          <Text style={styles.earningsLabel}>EKH</Text>
-                        </View>
-                      </View>
-                    </LinearGradient>
-                  );
-                })}
+                {leaderboard.map((entry, index) => (
+                  <MemoizedLeaderboardEntry 
+                    key={entry.rank} 
+                    entry={entry} 
+                    index={index} 
+                  />
+                ))}
               </View>
             )}
           </LinearGradient>

@@ -16,8 +16,6 @@ import { useRouter } from 'expo-router';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import { useMining } from '@/contexts/MiningContext';
 
-const API_BASE_URL = ''; // Set to your Ekehi Network API endpoint
-
 interface AutoMiningStatusProps {
   profile: UserProfile;
   onRefresh?: () => void;

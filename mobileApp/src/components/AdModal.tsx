@@ -151,6 +151,7 @@ const AdModal: React.FC<AdModalProps> = ({
   // Test controls (only visible in development for testing purposes)
   const renderTestControls = () => {
     // Only show test controls in development
+    // @ts-ignore - __DEV__ is a React Native global
     if (!__DEV__) return null;
     
     return (

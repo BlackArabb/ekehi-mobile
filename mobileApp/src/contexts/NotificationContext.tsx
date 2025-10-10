@@ -6,6 +6,7 @@ interface Notification {
   title: string;
   message?: string;
   duration?: number;
+  onRetry?: () => void;
 }
 
 interface NotificationContextType {
@@ -25,10 +26,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     
     setNotifications(prev => [...prev, newNotification]);
 
-    // Auto remove after duration (default 3 seconds)
-    setTimeout(() => {
-      removeNotification(id);
-    }, notification.duration || 3000);
+    // Auto remove after duration (default 5 seconds if not specified)
+    if (notification.duration !== 0) { // 0 means no auto-remove
+      setTimeout(() => {
+        removeNotification(id);
+      }, notification.duration || 5000);
+    }
   };
 
   const removeNotification = (id: string) => {

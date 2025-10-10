@@ -84,17 +84,17 @@ class AdMobService {
     // Don't set up listeners on web
     if (Platform.OS === 'web' || !this.rewardedAd || !RewardedAdEventType || !AdEventType) return;
 
-    this.rewardedAd.addAdEventListener(RewardedAdEventType.LOADED, () => {
+    this.rewardedAd.addAdEventListener(RewardedAdEventType?.LOADED, () => {
       console.log('[AdMobService] Rewarded ad loaded');
       this.isAdLoaded = true;
     });
 
-    this.rewardedAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, (reward: any) => {
+    this.rewardedAd.addAdEventListener(RewardedAdEventType?.EARNED_REWARD, (reward: any) => {
       console.log('[AdMobService] User earned reward:', reward);
     });
-    
+  
     // Add error listener
-    this.rewardedAd.addAdEventListener(AdEventType.ERROR, (error: any) => {
+    this.rewardedAd.addAdEventListener(AdEventType?.ERROR, (error: any) => {
       console.error('[AdMobService] Ad error:', error);
       this.isAdLoaded = false;
     });
@@ -195,7 +195,7 @@ class AdMobService {
 
         // Create temporary event listeners
         const unsubscribeEarned = this.rewardedAd!.addAdEventListener(
-          RewardedAdEventType.EARNED_REWARD,
+          RewardedAdEventType?.EARNED_REWARD,
           (reward: any) => {
             console.log('[AdMobService] User earned reward:', reward);
             rewardEarned = true;
@@ -204,7 +204,7 @@ class AdMobService {
         );
 
         const unsubscribeDismissed = this.rewardedAd!.addAdEventListener(
-          AdEventType.CLOSED,
+          AdEventType?.CLOSED,
           () => {
             console.log('[AdMobService] Ad closed');
             this.isAdLoaded = false;

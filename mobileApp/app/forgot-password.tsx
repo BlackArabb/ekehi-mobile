@@ -6,6 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { validateEmail } from '@/utils/validation';
 import LoadingDots from '@/components/LoadingDots';
 
+// Type declaration for window object on web platform
+declare const window: any;
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -39,9 +42,8 @@ export default function ForgotPasswordPage() {
     try {
       // For web, we'll use the current origin
       let recoveryUrl = '';
-      // @ts-ignore - window object only exists on web
+      // Only access window object on web
       if (typeof window !== 'undefined' && window?.location?.origin) {
-        // @ts-ignore
         recoveryUrl = `${window.location.origin}/reset-password`;
       } else {
         // Fallback for mobile platforms
