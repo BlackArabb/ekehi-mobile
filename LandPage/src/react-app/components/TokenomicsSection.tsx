@@ -124,7 +124,7 @@ export default function TokenomicsSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-16">
-          {/* Chart Section */}
+          {/* Chart Sectionn */}
           <div className="flex flex-col items-center">
             <div className="relative w-64 h-64 md:w-80 md:h-80 mb-6 md:mb-8">
               <Doughnut ref={chartRef} data={chartData} options={chartOptions} />
