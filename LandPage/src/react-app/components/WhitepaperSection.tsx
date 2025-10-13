@@ -455,7 +455,7 @@ export default function WhitepaperSection() {
             Download our whitepaper today and discover how Ekehi is building the future of sustainable finance.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-            <a href="/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
+            <a href="https://ia601000.us.archive.org/8/items/whitepaperv-2.0/Whitepaperv2.0.pdf" target="_blank" rel="noopener noreferrer" className="btn-primary py-3 px-6 md:py-4 md:px-8 text-sm md:text-base">
               <Download size={18} className="md:size-20 mr-2" />
               Download PDF
             </a>
