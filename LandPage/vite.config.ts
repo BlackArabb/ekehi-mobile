@@ -48,5 +48,5 @@ export default defineConfig({
     postcss: './postcss.config.js',
   },
   // Configure base URL for CDN usage
-  base: process.env.NODE_ENV === 'production' ? 'https://cdn.ekehi.xyz/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/' : '/',
 });
