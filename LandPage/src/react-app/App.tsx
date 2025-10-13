@@ -8,7 +8,7 @@ const PrivacyPolicyPage = lazy(() => import("@/react-app/pages/PrivacyPolicy"));
 const TermsPage = lazy(() => import("@/react-app/pages/Terms"));
 const OAuthRedirect = lazy(() => import("@/react-app/pages/OAuthRedirect"));
 
-// Redirect component for PDF
+// Redirect component ffor PDF
 const PDFRedirect = () => {
   useEffect(() => {
     window.location.href = 'https://ia601000.us.archive.org/8/items/whitepaperv-2.0/Whitepaperv2.0.pdf';
