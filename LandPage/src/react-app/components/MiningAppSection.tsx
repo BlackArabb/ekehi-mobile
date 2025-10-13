@@ -35,10 +35,10 @@ const appFeatures = [
 ];
 
 const appStats = [
-  { label: 'Active Users', value: '50K+' },
-  { label: 'EKH Distributed', value: '10M+' },
-  { label: 'Daily Mining', value: '100K+' },
-  { label: 'App Rating', value: '4.8★' },
+  { label: 'Status', value: 'Coming Soon' },
+  { label: 'EKH Distribution', value: 'Pre-Sale' },
+  { label: 'Mining Type', value: '24/7 Auto' },
+  { label: 'Release', value: 'Q1 2026' },
 ];
 
 export default function MiningAppSection() {
@@ -67,7 +67,7 @@ export default function MiningAppSection() {
             Ekehi Mining App
           </h2>
           <p className="text-body text-soft-white max-w-3xl mx-auto px-4 md:px-0">
-            Download our mobile app to start mining EKH tokens right from your smartphone. 
+            Mobile app coming soon! Be among the first to mine EKH tokens right from your smartphone. 
             Simple, secure, and rewarding way to participate in the Ekehi ecosystem.
           </p>
         </div>
@@ -95,27 +95,31 @@ export default function MiningAppSection() {
 
             {/* Download CTA */}
             <div className="text-center mt-10">
-              <p className="text-yellow-500 font-bold mb-2 text-center">Start Claiming Now</p>
               {isAppReady ? (
-                <a 
-                  href="#"
-                  className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
-                >
-                  <Download size={20} />
-                  Download Mining App
-                </a>
+                <>
+                  <p className="text-yellow-500 font-bold mb-2 text-center">Start Claiming Now</p>
+                  <a 
+                    href="#"
+                    className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
+                  >
+                    <Download size={20} />
+                    Download Mining App
+                  </a>
+                  <div className="mt-4 text-sm text-medium-gray">
+                    <p>Not available on app stores yet. Direct download only.</p>
+                  </div>
+                </>
               ) : (
-                <button 
-                  className="btn-secondary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button cursor-not-allowed opacity-75"
-                  disabled
-                >
-                  <span className="animate-pulse">COMING SOON</span>
-                </button>
+                <div className="bg-dark-slate rounded-xl p-6 border border-charcoal-gray max-w-md mx-auto">
+                  <div className="flex flex-col items-center text-center">
+                    <Smartphone size={48} className="text-yellow-500 mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">Mining App Coming Soon</h3>
+                    <p className="text-soft-white mb-4">
+                      Mobile app currently in development. Be among the first to mine EKH tokens right from your smartphon, Stay tuned.
+                    </p>
+                  </div>
+                </div>
               )}
-              
-              <div className="mt-4 text-sm text-medium-gray">
-                <p>{isAppReady ? "Not available on app stores yet. Direct download only." : "App is currently in development. Check back soon!"}</p>
-              </div>
             </div>
           </div>
 
