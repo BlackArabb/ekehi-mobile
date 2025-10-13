@@ -206,7 +206,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userId: [userData.$id],
           username: userData.name || `user_${userData.$id.substring(0, 8)}`,
           totalCoins: 0,
-          coinsPerClick: 1,
           coinsPerSecond: 0,
           miningPower: 1,
           currentStreak: 0,
@@ -216,7 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           referredBy: referredByCode,
           totalReferrals: 0,
           lifetimeEarnings: 0,
-          dailyMiningRate: 2, // Standard user daily mining rate (2 EKH per day)
+          dailyMiningRate: 2, // Standard user daily mining rate (2 EKH per day = 0.0833 EKH/hour)
           maxDailyEarnings: 10000,
           todayEarnings: 0,
           lastMiningDate: '',

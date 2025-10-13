@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { memo, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Coins } from 'lucide-react-native';
+import { Coins, Pickaxe } from 'lucide-react-native';
 import CircularProgressBar from '@/components/CircularProgressBar';
 
 interface MemoizedMiningButtonProps {
@@ -23,6 +23,42 @@ const MemoizedMiningButton: React.FC<MemoizedMiningButtonProps> = ({
   formatTime,
   sessionReward
 }) => {
+  // Create animated value for the pulsating effect
+  const pulseAnimation = useRef(new Animated.Value(1)).current;
+
+  // Start the pulsating animation when mining is active
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation | null = null;
+    
+    if (is24HourMiningActive && remainingTime > 0) {
+      animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnimation, {
+            toValue: 1.5,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animation.start();
+    } else {
+      // Reset animation when not mining
+      pulseAnimation.setValue(1);
+    }
+
+    // Cleanup animation on unmount or when conditions change
+    return () => {
+      if (animation) {
+        animation.stop();
+      }
+    };
+  }, [is24HourMiningActive, remainingTime, pulseAnimation]);
+
   return (
     <View style={styles.miningContainer}>
       <View style={styles.miningButtonWrapper}>
@@ -33,9 +69,9 @@ const MemoizedMiningButton: React.FC<MemoizedMiningButtonProps> = ({
               size={BUTTON_SIZE + 20} 
               strokeWidth={10} 
               progress={progressPercentage}
-              strokeColor="#ffa000"
+              strokeColor="#rgba(9, 155, 106, 0.66)"
               backgroundColor="rgba(255, 255, 255, 0.1)"
-              showStars={true}
+              showStars={false}
               pulsate={true}
             />
           </View>
@@ -66,18 +102,29 @@ const MemoizedMiningButton: React.FC<MemoizedMiningButtonProps> = ({
               </View>
             ) : is24HourMiningActive && remainingTime <= 0 ? (
               <Coins size={60} color="#ffffff" />
-            ) : null}
+            ) : (
+              <Pickaxe size={60} color="#ffffff" />
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.miningRate}>
-        {is24HourMiningActive
-          ? remainingTime > 0
-            ? `Mining in progress...`
-            : `Claim ${sessionReward} EKH Reward`
-          : `Start Extended Session (+${sessionReward} EKH)`}
-      </Text>
+      <View style={styles.miningRateContainer}>
+        {is24HourMiningActive && remainingTime > 0 ? (
+          <View style={styles.statusIndicator}>
+            <Animated.View style={[styles.statusDot, { backgroundColor: '#10b981', transform: [{ scale: pulseAnimation }] }]} />
+            <Text style={[styles.statusText, { color: '#10b981' }]}>
+              Mining
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.miningRateText}>
+            {is24HourMiningActive
+              ? `Claim ${sessionReward} EKH Reward`
+              : `Start Mining`}
+          </Text>
+        )}
+      </View>
     </View>
   );
 };
@@ -142,11 +189,33 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 2,
   },
-  miningRate: {
+  miningRateContainer: {
+    marginTop: 16,
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    gap: 8,
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  miningRateText: {
     fontSize: 16,
     color: '#ffffff',
     fontWeight: '600',
-    marginTop: 16,
     textAlign: 'center',
   },
 });

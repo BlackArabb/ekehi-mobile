@@ -4,6 +4,9 @@
 
 This document details the enhancements made to the presale page to improve user experience, visual design, and functionality.
 
+For information about error handling improvements made to this page, see:
+[Presale Error Handling Improvements](./PRESALE_ERROR_HANDLING_IMPROVEMENTS.md)
+
 ## Key Improvements
 
 ### 1. Visual Design Enhancements
@@ -125,6 +128,12 @@ All enhancements have been tested for:
 - Error handling
 - Performance
 - Accessibility
+
+## Related Documentation
+
+- [Presale Error Handling Improvements](./PRESALE_ERROR_HANDLING_IMPROVEMENTS.md) - Details about stability and crash prevention improvements
+- [Mining Session Recording Implementation](./MINING_SESSION_RECORDING.md) - Information about mining data tracking
+- [Mining Button UI Enhancements](./MINING_BUTTON_UI_ENHANCEMENTS.md) - Details about mining button visual improvements
 
 ## Future Improvements
 

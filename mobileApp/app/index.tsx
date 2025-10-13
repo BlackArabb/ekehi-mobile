@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pickaxe, Coins, Users, TrendingUp, Gift, Shield } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Import the logo
+import Logo from '../assets/icon.png';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -171,7 +174,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <View style={styles.iconContainer}>
-              <Pickaxe size={60} color="#ffa000" />
+              <Image source={Logo} style={styles.logo} />
             </View>
             <Text style={styles.title}>Ekehi Network</Text>
             <Text style={styles.subtitle}>
@@ -324,6 +327,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  logo: {
+    width: 60,
+    height: 60,
   },
   title: {
     fontSize: 36,

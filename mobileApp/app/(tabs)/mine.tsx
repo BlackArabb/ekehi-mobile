@@ -504,7 +504,7 @@ export default function MinePage() {
                     <View style={styles.statCard}>
                         <TrendingUp size={20} color="#10b981" />
                         <Text style={styles.statValue}>
-                            {profile ? (profile.dailyMiningRate / 24).toFixed(4) : '0.0000'}
+                            0.0833
                         </Text>
                         <Text style={styles.statLabel}>EKH/hour</Text>
                     </View>

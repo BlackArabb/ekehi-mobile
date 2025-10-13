@@ -5,7 +5,7 @@ const userProfileStructure = {
   userId: ['user-id-string'], // Should be array
   username: 'Test User',
   totalCoins: 0,
-  coinsPerClick: 1,
+  // coinsPerClick: 1, // REMOVED: Manual mining now works on a 24-hour session basis
   coinsPerSecond: 0,
   miningPower: 1,
   currentStreak: 0,
@@ -15,7 +15,7 @@ const userProfileStructure = {
   referredBy: '',
   totalReferrals: 0,
   lifetimeEarnings: 0,
-  dailyMiningRate: 1000,
+  dailyMiningRate: 2, // UPDATED: Now represents 2 EKH per 24-hour session
   maxDailyEarnings: 10000,
   todayEarnings: 0,
   lastMiningDate: '',

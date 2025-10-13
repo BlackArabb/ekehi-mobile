@@ -3,7 +3,6 @@ export interface UserProfile {
   userId: string;
   username?: string;
   totalCoins: number;
-  coinsPerClick: number;
   coinsPerSecond: number;
   miningPower: number;
   currentStreak: number;

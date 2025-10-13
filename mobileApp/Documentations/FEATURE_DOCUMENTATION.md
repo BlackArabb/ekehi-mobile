@@ -18,32 +18,32 @@ The Ekehi Network Mobile App is a cryptocurrency mining platform that allows use
 
 ## 3.0 Core Features
 
-### 3.1 Tap-to-Mine System
-**Description**: The core mining feature that allows users to earn EKH tokens by tapping on a mining button.
+### 3.1 Core Mining System
+**Description**: An interactive tap-to-mine system that allows users to earn EKH tokens through a 24-hour session-based mining model.
 
 **Key Features**:
-- Animated mining button with electric effects
-- Haptic feedback on each tap
-- Visual click effects with EKH amount shown
-- Mining rate based on user level and power
-- Daily mining limit with progress bar
-- **Dynamic hourly mining rate display**
+- **24-Hour Session Mining**: Users start a 24-hour mining session with a single tap
+- **Fixed Reward System**: Earn a guaranteed 2 EKH reward for completing a 24-hour session
+- **Visual Progress Tracking**: Real-time countdown and progress indicators
+- **Haptic Feedback**: Tactile response for mining interactions
+- **Streak Bonuses**: Consecutive day mining rewards
+- **Achievement Integration**: Milestone-based rewards system
 
 **Technical Implementation**:
 - Implemented in `app/(tabs)/mine.tsx`
 - Uses [react-native-reanimated](file://c:\Users\ARQAM%20TV\Downloads\mobile\node_modules\react-native-reanimated) for button animation
 - Haptics feedback with [expo-haptics](file://c:\Users\ARQAM%20TV\Downloads\mobile\node_modules\expo-haptics)
-- Tracks session coins and clicks
+- Tracks session progress and clicks
 - Visual effects with `LinearGradient` and position animation
-- **Dynamic mining rate calculation based on user profile data**
+- Fixed hourly mining rate display (0.0833 EKH/hour)
 
 **UI/UX**:
 - Large circular mining button with pickaxe icon
 - Electric effects around the button
 - Glow effect on interaction
-- Session stats showing earned coins and taps
-- Progress bar for daily mining limit
-- **Personalized hourly mining rate display (EKH/hour)**
+- Session stats showing remaining time
+- Progress bar for session completion
+- Fixed hourly mining rate display (0.0833 EKH/hour)
 
 ### 3.2 Social Task Engine
 **Description**: A system that allows users to complete platform-specific tasks (Twitter, YouTube, Telegram, Discord) for bonus rewards.

@@ -58,7 +58,6 @@ const COLLECTIONS_SCHEMA = {
       { key: 'userId', type: 'string', size: 255, required: true, unique: true },
       { key: 'username', type: 'string', size: 255, required: false },
       { key: 'totalCoins', type: 'double', required: true, default: 0 },
-      { key: 'coinsPerClick', type: 'integer', required: true, default: 1 },
       { key: 'coinsPerSecond', type: 'double', required: true, default: 0 },
       { key: 'miningPower', type: 'double', required: true, default: 1 },
       { key: 'currentStreak', type: 'integer', required: true, default: 0 },
@@ -68,7 +67,7 @@ const COLLECTIONS_SCHEMA = {
       { key: 'referredBy', type: 'string', size: 255, required: false },
       { key: 'totalReferrals', type: 'integer', required: true, default: 0 },
       { key: 'lifetimeEarnings', type: 'double', required: true, default: 0 },
-      { key: 'dailyMiningRate', type: 'double', required: true, default: 1000 },
+      { key: 'dailyMiningRate', type: 'double', required: true, default: 2 }, // UPDATED: Now represents 2 EKH per 24-hour session
       { key: 'maxDailyEarnings', type: 'double', required: true, default: 10000 },
       { key: 'todayEarnings', type: 'double', required: true, default: 0 },
       { key: 'lastMiningDate', type: 'datetime', required: false },

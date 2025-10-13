@@ -151,7 +151,7 @@ export default function RoadmapSection() {
                         <h3 className="text-h4 md:text-h3 text-white mb-1">{phase.phase}</h3>
                         <div className="flex items-center gap-2">
                           {getStatusIcon(phase.status)}
-                          <span className="text-medium-gray text-xs md:text-sm">{phase.period}</span>
+                          
                         </div>
                       </div>
                       <div className="text-right">

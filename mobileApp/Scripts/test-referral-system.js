@@ -35,7 +35,6 @@ async function testReferralSystem() {
       userId: [user1Id],
       username: 'Test User 1',
       totalCoins: 0,
-      coinsPerClick: 1,
       coinsPerSecond: 0, // Starting mining rate
       miningPower: 1,
       currentStreak: 0,
@@ -45,7 +44,7 @@ async function testReferralSystem() {
       referredBy: '',
       totalReferrals: 0,
       lifetimeEarnings: 0,
-      dailyMiningRate: 1000,
+      dailyMiningRate: 2, // Now represents 2 EKH per 24-hour session
       maxDailyEarnings: 10000,
       todayEarnings: 0,
       lastMiningDate: '',
@@ -58,7 +57,6 @@ async function testReferralSystem() {
       userId: [user2Id],
       username: 'Test User 2',
       totalCoins: 0,
-      coinsPerClick: 1,
       coinsPerSecond: 0, // Starting mining rate
       miningPower: 1,
       currentStreak: 0,
@@ -68,7 +66,7 @@ async function testReferralSystem() {
       referredBy: '',
       totalReferrals: 0,
       lifetimeEarnings: 0,
-      dailyMiningRate: 1000,
+      dailyMiningRate: 2, // Now represents 2 EKH per 24-hour session
       maxDailyEarnings: 10000,
       todayEarnings: 0,
       lastMiningDate: '',

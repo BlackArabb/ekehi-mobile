@@ -76,8 +76,8 @@ export default function HeroSection() {
           style={{ animationDelay: '0.8s' }}
         >
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-gradient-gold">1M+</div>
-            <div className="text-medium-gray text-sm">Community</div>
+            <div className="text-2xl md:text-3xl font-bold text-gradient-gold">10M+</div>
+            <div className="text-medium-gray text-sm">Target Community</div>
           </div>
           <div className="text-center">
             <div className="text-2xl md:text-3xl font-bold text-gradient-gold">$50M</div>
@@ -85,7 +85,7 @@ export default function HeroSection() {
           </div>
           <div className="text-center">
             <div className="text-2xl md:text-3xl font-bold text-gradient-gold">100+</div>
-            <div className="text-medium-gray text-sm">Countries</div>
+            <div className="text-medium-gray text-sm">Target Countries</div>
           </div>
           <div className="text-center">
             <div className="text-2xl md:text-3xl font-bold text-gradient-gold">24/7</div>

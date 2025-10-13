@@ -31,7 +31,7 @@ export default function WalletPage() {
     if (!user) {
       // Add a small delay to ensure router is ready
       setTimeout(() => {
-        router.replace('/');
+        router.push('/');
       }, 100);
       return;
     }
@@ -217,14 +217,14 @@ export default function WalletPage() {
                 </View>
                 
                 <Text style={styles.balanceAmount}>
-                  {balance.toLocaleString()} EKH
+                  {typeof balance === 'number' ? balance.toLocaleString() : '0'} EKH
                 </Text>
                 <Text style={styles.balanceLabel}>Available Balance</Text>
                 
                 <View style={styles.addressContainer}>
                   <Text style={styles.addressLabel}>Address:</Text>
                   <Text style={styles.addressText} numberOfLines={1}>
-                    {address}
+                    {address || 'Not connected'}
                   </Text>
                 </View>
               </LinearGradient>
@@ -302,10 +302,10 @@ export default function WalletPage() {
                         </View>
                         <View style={styles.transactionInfo}>
                           <Text style={styles.transactionType}>
-                            {tx.type === 'send' ? 'Sent' : 'Received'} EKH
+                            {tx.type === 'send' ? 'Sent' : tx.type === 'receive' ? 'Received' : 'Unknown'} EKH
                           </Text>
                           <Text style={styles.transactionDate}>
-                            {new Date(tx.timestamp).toLocaleDateString()}
+                            {tx.timestamp ? new Date(tx.timestamp).toLocaleDateString() : 'N/A'}
                           </Text>
                         </View>
                       </View>
@@ -315,7 +315,7 @@ export default function WalletPage() {
                           styles.transactionAmount,
                           { color: tx.type === 'receive' ? '#10b981' : '#ef4444' }
                         ]}>
-                          {tx.type === 'receive' ? '+' : '-'}{tx.amount.toLocaleString()}
+                          {`${tx.type === 'receive' ? '+' : '-'}${typeof tx.amount === 'number' ? tx.amount.toLocaleString() : '0'}`}
                         </Text>
                         <View style={styles.transactionStatus}>
                           {getStatusIcon(tx.status)}
@@ -326,7 +326,7 @@ export default function WalletPage() {
                                      tx.status === 'pending' ? '#f59e0b' : '#ef4444'
                             }
                           ]}>
-                            {tx.status}
+                            {tx.status || 'unknown'}
                           </Text>
                         </View>
                       </View>

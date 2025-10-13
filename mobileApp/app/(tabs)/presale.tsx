@@ -20,25 +20,32 @@ export default function PresalePage() {
   const [selectedPayment, setSelectedPayment] = useState('crypto');
 
   useEffect(() => {
-    if (!user) {
-      // Add a small delay to ensure router is ready
-      setTimeout(() => {
-        router.replace('/');
-      }, 100);
-      return;
+    // Add error handling to prevent app crashes
+    try {
+      if (!user) {
+        // Add a small delay to ensure router is ready
+        setTimeout(() => {
+          // Use push instead of replace to avoid potential navigation stack issues
+          router.push('/');
+        }, 100);
+        return;
+      }
+      fetchPurchases();
+    } catch (error) {
+      console.error('Error in presale useEffect:', error);
+      // Don't redirect on error, just log it
     }
-    fetchPurchases();
   }, [user]);
 
   const handlePurchase = async () => {
-    const amount = parseFloat(purchaseAmount);
-    
-    if (!amount || amount < minPurchase) {
-      Alert.alert('Invalid Amount', `Minimum purchase is $${minPurchase}`);
-      return;
-    }
-
     try {
+      const amount = parseFloat(purchaseAmount);
+      
+      if (!amount || amount < minPurchase) {
+        Alert.alert('Invalid Amount', `Minimum purchase is $${minPurchase}`);
+        return;
+      }
+
       const result = await purchaseTokens(amount, selectedPayment);
       if (result.success) {
         Alert.alert('Success!', result.message);
@@ -47,33 +54,99 @@ export default function PresalePage() {
         Alert.alert('Error', result.message);
       }
     } catch (error) {
+      console.error('Error in handlePurchase:', error);
       Alert.alert('Error', 'Failed to process purchase. Please try again.');
     }
   };
 
   const calculateTokens = (usdAmount: number) => {
-    if (!tokenPrice || tokenPrice <= 0) return 0;
-    return usdAmount / tokenPrice;
+    try {
+      if (!tokenPrice || tokenPrice <= 0 || !usdAmount || usdAmount <= 0) return 0;
+      return usdAmount / tokenPrice;
+    } catch (error) {
+      console.error('Error calculating tokens:', error);
+      return 0;
+    }
   };
 
-  // Safe calculation of total purchased tokens
-  const totalPurchased = Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
-    purchase && purchase.status === 'completed' ? sum + (purchase.tokensAmount || 0) : sum, 0
-  ) : 0;
+  // Safe calculation of total purchased tokens with error handling
+  const totalPurchased = (() => {
+    try {
+      return Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
+        purchase && purchase.status === 'completed' ? sum + (purchase.tokensAmount || 0) : sum, 0
+      ) : 0;
+    } catch (error) {
+      console.error('Error calculating totalPurchased:', error);
+      return 0;
+    }
+  })();
 
-  // Safe calculation of total spent amount
-  const totalSpent = Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
-    purchase && purchase.status === 'completed' ? sum + (purchase.amountUsd || 0) : sum, 0
-  ) : 0;
+  // Safe calculation of total spent amount with error handling
+  const totalSpent = (() => {
+    try {
+      return Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
+        purchase && purchase.status === 'completed' ? sum + (purchase.amountUsd || 0) : sum, 0
+      ) : 0;
+    } catch (error) {
+      console.error('Error calculating totalSpent:', error);
+      return 0;
+    }
+  })();
 
-  const autoMiningRate = totalPurchased > 0 ? (totalPurchased / 10000) : 0;
-  
-  // Calculate progress percentage for presale with safety checks
-  const progressPercentage = totalPurchased > 0 && 100000 > 0 ? 
-    Math.min(100, (totalPurchased / 100000) * 100) : 0; // Assuming 100,000 token goal
-  
+  const autoMiningRate = (() => {
+    try {
+      return totalPurchased > 0 ? (totalPurchased / 10000) : 0;
+    } catch (error) {
+      console.error('Error calculating autoMiningRate:', error);
+      return 0;
+    }
+  })();
+
+  // Calculate progress percentage for presale with comprehensive safety checks
+  const progressPercentage = (() => {
+    try {
+      // Additional safety checks
+      if (isNaN(totalPurchased) || totalPurchased < 0) return 0;
+      const goal = 100000; // Assuming 100,000 token goal
+      if (isNaN(goal) || goal <= 0) return 0;
+      const percentage = (totalPurchased / goal) * 100;
+      return Math.min(100, Math.max(0, percentage)); // Clamp between 0 and 100
+    } catch (error) {
+      console.error('Error calculating progressPercentage:', error);
+      return 0;
+    }
+  })();
+
   // Pre-calculate the minimum purchase placeholder to avoid template literals in TextInput
-  const minPurchasePlaceholder = minPurchase > 0 ? `Min $${minPurchase}` : 'Min $10';
+  const minPurchasePlaceholder = (() => {
+    try {
+      return minPurchase > 0 ? `Min $${minPurchase}` : 'Min $10';
+    } catch (error) {
+      console.error('Error calculating minPurchasePlaceholder:', error);
+      return 'Min $10';
+    }
+  })();
+
+  // Safe formatting functions
+  const safeToFixed = (value: number, decimals: number): string => {
+    try {
+      if (isNaN(value) || value === undefined || value === null) return '0';
+      return value.toFixed(decimals);
+    } catch (error) {
+      console.error('Error in safeToFixed:', error);
+      return '0';
+    }
+  };
+
+  const safeToLocaleString = (value: number): string => {
+    try {
+      if (isNaN(value) || value === undefined || value === null) return '0';
+      return value.toLocaleString();
+    } catch (error) {
+      console.error('Error in safeToLocaleString:', error);
+      return '0';
+    }
+  };
 
   return (
     <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
@@ -102,7 +175,7 @@ export default function PresalePage() {
         <View style={styles.progressContainer}>
           <View style={styles.progressHeader}>
             <Text style={styles.progressTitle}>Presale Progress</Text>
-            <Text style={styles.progressText}>{isNaN(progressPercentage) ? '0.0' : progressPercentage.toFixed(1)}%</Text>
+            <Text style={styles.progressText}>{safeToFixed(progressPercentage, 1)}%</Text>
           </View>
           <View style={styles.progressBar}>
             <View 
@@ -115,7 +188,7 @@ export default function PresalePage() {
             />
           </View>
           <View style={styles.progressStats}>
-            <Text style={styles.progressStat}>{isNaN(totalPurchased) ? '0' : totalPurchased.toLocaleString()} EKH</Text>
+            <Text style={styles.progressStat}>{safeToLocaleString(totalPurchased)} EKH</Text>
             <Text style={styles.progressStat}>100,000 EKH Goal</Text>
           </View>
         </View>
@@ -125,7 +198,7 @@ export default function PresalePage() {
           <View style={styles.tokenInfoCard}>
             <DollarSign size={24} color="#ffa000" />
             <View style={styles.tokenInfoText}>
-              <Text style={styles.tokenInfoValue}>${isNaN(tokenPrice) ? '0.1000' : tokenPrice.toFixed(4)}</Text>
+              <Text style={styles.tokenInfoValue}>${safeToFixed(tokenPrice || 0, 4)}</Text>
               <Text style={styles.tokenInfoLabel}>per EKH</Text>
             </View>
           </View>
@@ -133,7 +206,7 @@ export default function PresalePage() {
           <View style={styles.tokenInfoCard}>
             <Store size={24} color="#3b82f6" />
             <View style={styles.tokenInfoText}>
-              <Text style={styles.tokenInfoValue}>${isNaN(minPurchase) ? '10' : minPurchase}</Text>
+              <Text style={styles.tokenInfoValue}>${minPurchase || 0}</Text>
               <Text style={styles.tokenInfoLabel}>min purchase</Text>
             </View>
           </View>
@@ -151,9 +224,9 @@ export default function PresalePage() {
               <Text style={styles.benefitText}>
                 Purchasing tokens unlocks passive income generation at 1 EKH/second per 10,000 tokens
               </Text>
-              {profile && profile.coinsPerSecond && profile.coinsPerSecond > 0 && (
+              {profile && profile.coinsPerSecond && typeof profile.coinsPerSecond === 'number' && profile.coinsPerSecond > 0 && (
                 <Text style={styles.currentRate}>
-                  Current rate: {isNaN(profile.coinsPerSecond) ? '0.00' : profile.coinsPerSecond.toFixed(2)} EKH/second
+                  Current rate: {safeToFixed(profile.coinsPerSecond, 2)} EKH/second
                 </Text>
               )}
             </View>
@@ -171,13 +244,13 @@ export default function PresalePage() {
                 style={styles.input}
                 value={purchaseAmount}
                 onChangeText={setPurchaseAmount}
-                placeholder={minPurchasePlaceholder}
+                placeholder={minPurchasePlaceholder || 'Min $10'}
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 keyboardType="numeric"
               />
               {purchaseAmount && (
                 <Text style={styles.tokenCalculation}>
-                  ≈ {calculateTokens(parseFloat(purchaseAmount) || 0).toLocaleString()} EKH
+                  ≈ {safeToLocaleString(calculateTokens(parseFloat(purchaseAmount) || 0))} EKH
                 </Text>
               )}
             </View>
@@ -263,17 +336,17 @@ export default function PresalePage() {
             
             <View style={styles.purchaseStats}>
               <View style={styles.purchaseStatCard}>
-                <Text style={styles.purchaseStatValue}>{isNaN(totalPurchased) ? '0' : totalPurchased.toLocaleString()}</Text>
+                <Text style={styles.purchaseStatValue}>{safeToLocaleString(totalPurchased)}</Text>
                 <Text style={styles.purchaseStatLabel}>EKH Tokens</Text>
               </View>
               
               <View style={styles.purchaseStatCard}>
-                <Text style={styles.purchaseStatValue}>${isNaN(totalSpent) ? '0.00' : totalSpent.toFixed(2)}</Text>
+                <Text style={styles.purchaseStatValue}>${safeToFixed(totalSpent, 2)}</Text>
                 <Text style={styles.purchaseStatLabel}>Total Spent</Text>
               </View>
               
               <View style={styles.purchaseStatCard}>
-                <Text style={styles.purchaseStatValue}>{isNaN(autoMiningRate) ? '0.00' : autoMiningRate.toFixed(2)}/s</Text>
+                <Text style={styles.purchaseStatValue}>{safeToFixed(autoMiningRate, 2)}/s</Text>
                 <Text style={styles.purchaseStatLabel}>Auto Mining</Text>
               </View>
             </View>
@@ -284,7 +357,7 @@ export default function PresalePage() {
                 <View key={index} style={styles.purchaseItem}>
                   <View style={styles.purchaseItemLeft}>
                     <Text style={styles.purchaseItemTokens}>
-                      {purchase && purchase.tokensAmount ? purchase.tokensAmount.toLocaleString() : '0'} EKH
+                      {purchase && purchase.tokensAmount ? safeToLocaleString(purchase.tokensAmount) : '0'} EKH
                     </Text>
                     <Text style={styles.purchaseItemDate}>
                       {purchase && purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : 'N/A'}
@@ -293,7 +366,7 @@ export default function PresalePage() {
                   
                   <View style={styles.purchaseItemRight}>
                     <Text style={styles.purchaseItemAmount}>
-                      ${purchase && purchase.amountUsd ? purchase.amountUsd.toFixed(2) : '0.00'}
+                      ${purchase && purchase.amountUsd ? safeToFixed(purchase.amountUsd, 2) : '0.00'}
                     </Text>
                     <View style={styles.purchaseItemStatus}>
                       {purchase && purchase.status === 'completed' ? (

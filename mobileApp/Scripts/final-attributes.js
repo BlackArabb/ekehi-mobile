@@ -21,7 +21,6 @@ const databases = new Databases(client);
 // Final missing attributes (without default values for required fields)
 const FINAL_ATTRIBUTES = {
   user_profiles: [
-    { key: 'coinsPerClick', type: 'integer', required: false }, // Changed to optional
     { key: 'miningPower', type: 'double', required: false },   // Changed to optional
     { key: 'dailyMiningRate', type: 'double', required: false }, // Changed to optional
     { key: 'maxDailyEarnings', type: 'double', required: false } // Changed to optional

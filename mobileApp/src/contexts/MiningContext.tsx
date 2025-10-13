@@ -164,7 +164,6 @@ export function MiningProvider({ children }: { children: ReactNode }) {
             userId: doc.userId?.[0] || doc.userId, // Handle both array and string formats
             username: doc.username,
             totalCoins: doc.totalCoins,
-            coinsPerClick: doc.coinsPerClick,
             coinsPerSecond: doc.coinsPerSecond,
             miningPower: doc.miningPower,
             currentStreak: doc.currentStreak,
@@ -288,7 +287,6 @@ export function MiningProvider({ children }: { children: ReactNode }) {
             userId: doc.userId?.[0] || doc.userId, // Handle both array and string formats
             username: doc.username,
             totalCoins: doc.totalCoins,
-            coinsPerClick: doc.coinsPerClick,
             coinsPerSecond: doc.coinsPerSecond,
             miningPower: doc.miningPower,
             currentStreak: doc.currentStreak,
@@ -420,28 +418,11 @@ export function MiningProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const newTotalCoins = profile.totalCoins + profile.coinsPerClick;
-      const newTodayEarnings = profile.todayEarnings + profile.coinsPerClick;
+      // For the new 24-hour session mining, we don't add coins immediately
+      // Instead, we track the session and add the reward at the end
+      // The 2 EKH reward is added when the 24-hour session completes
       
-      // Update user profile with new mining data
-      const updatedProfile = {
-        ...profile,
-        totalCoins: newTotalCoins,
-        todayEarnings: newTodayEarnings,
-        updatedAt: new Date().toISOString()
-      };
-
-      // Update document in Appwrite database
-      await databases.updateDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userProfiles,
-        profile.id,
-        updatedProfile
-      );
-
-      // Update local states efficiently
-      setProfile(updatedProfile as UserProfile);
-      setSessionCoins(prev => prev + profile.coinsPerClick);
+      // Update local states efficiently to track the mining session
       setSessionClicks(prev => prev + 1);
       
       // Notify listeners of coin update without full profile refresh
@@ -594,3 +575,42 @@ export function useMining() {
   }
   return context;
 }
+
+export const createNewUserProfile = async (userData: any, referralCode: string, referredByCode?: string) => {
+  const userProfile = {
+    userId: [userData.$id],
+    username: userData.name || `user_${userData.$id.substring(0, 8)}`,
+    totalCoins: 0,
+    coinsPerSecond: 0,
+    miningPower: 1,
+    currentStreak: 0,
+    longestStreak: 0,
+    lastLoginDate: new Date().toISOString(),
+    referralCode: [referralCode],
+    referredBy: referredByCode,
+    totalReferrals: 0,
+    lifetimeEarnings: 0,
+    dailyMiningRate: 2, // Standard user daily mining rate (2 EKH per day = 0.0833 EKH/hour)
+    maxDailyEarnings: 10000,
+    todayEarnings: 0,
+    lastMiningDate: '',
+    streakBonusClaimed: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    const response = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.collections.userProfiles,
+      ID.unique(),
+      userProfile
+    );
+
+    console.log('✅ New user profile created:', response);
+    return response;
+  } catch (error: any) {
+    console.error('Failed to create new user profile:', error);
+    throw error;
+  }
+};

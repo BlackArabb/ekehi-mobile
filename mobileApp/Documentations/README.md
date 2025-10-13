@@ -123,6 +123,7 @@ A React Native mobile application for the Ekehi Network cryptocurrency mining pl
 - [Testing](#-testing)
 - [Migration from Cloudflare to Appwrite](#-migration-from-cloudflare-to-appwrite)
 - [Mining Session Recording](#-mining-session-recording)
+- [Manual Mining System Update](#-manual-mining-system-update)
 - [Data Operations](#-data-operations)
 - [Presale Page](#-presale-page)
 - [Troubleshooting](#-troubleshooting)
@@ -292,7 +293,6 @@ A React Native mobile application for the Ekehi Network cryptocurrency mining pl
    - userId (String, 255, Required, Unique)
    - username (String, 255, Optional)
    - totalCoins (Double, Required, Default: 0)
-   - coinsPerClick (Integer, Required, Default: 1)
    - coinsPerSecond (Double, Required, Default: 0)
    - miningPower (Double, Required, Default: 1)
    - currentStreak (Integer, Required, Default: 0)
@@ -302,7 +302,7 @@ A React Native mobile application for the Ekehi Network cryptocurrency mining pl
    - referredBy (String, 255, Optional)
    - totalReferrals (Integer, Required, Default: 0)
    - lifetimeEarnings (Double, Required, Default: 0)
-   - dailyMiningRate (Double, Required, Default: 1000)
+   - dailyMiningRate (Double, Required, Default: 2) // Updated: Now represents 2 EKH per 24-hour session
    - maxDailyEarnings (Double, Required, Default: 10000)
    - todayEarnings (Double, Required, Default: 0)
    - lastMiningDate (DateTime, Optional)
@@ -418,7 +418,7 @@ collections: {
 
 ### Step 6: Test Configuration
 
-```bash
+```
 # Test Appwrite connection
 pnpm run test-appwrite
 
@@ -647,7 +647,7 @@ See [`EMAIL_VALIDATION.md`](EMAIL_VALIDATION.md) for implementation details.
 - **Profile**: User account and settings
 
 ### Route Configuration
-```typescript
+``typescript
 // File-based routing with Expo Router
 app/
 ├── (tabs)/           # Tab navigator
@@ -947,44 +947,32 @@ To verify that mining sessions are being recorded:
 
 For detailed implementation information, see [Mining Session Recording Documentation](./docs/MINING_SESSION_RECORDING.md).
 
-## 🗄 Data Operations
+## 🛠 Manual Mining System Update
 
-The Ekehi Network app uses Appwrite for all data storage and retrieval operations. The app implements comprehensive real-time communication with robust error handling to ensure 0 errors in normal operation.
+> **⚠️ IMPORTANT**: The manual mining system has been updated from a per-click model to a 24-hour session model. See [Manual Mining System Update Documentation](Documentations/MANUAL_MINING_SYSTEM_UPDATE.md) for details.
 
 ### Overview
+The manual mining system has been updated to provide a simpler, more predictable user experience. Instead of earning coins per click, users now start a 24-hour mining session with a single tap and earn a fixed 2 EKH reward upon completion.
 
-All data operations in the app are handled through React Context providers that encapsulate Appwrite database operations. Each context manages a specific domain of functionality:
+### Key Changes
+1. **24-Hour Session Model**: Single tap starts a 24-hour mining session
+2. **Fixed Reward**: 2 EKH reward for completing 24-hour session
+3. **Fixed Rate Display**: 0.0833 EKH/hour shown to all users
+4. **Removed Per-Click Earnings**: Eliminated `coinsPerClick` property from user profiles
 
-- **[MiningContext](file:///c:/Users/ARQAM%20TV/Downloads/mobile/src/contexts/MiningContext.tsx#L15-L32)** - Mining operations and session tracking
-- **[PresaleContext](file:///c:/Users/ARQAM%20TV/Downloads/mobile/src/contexts/PresaleContext.tsx#L12-L40)** - Token purchases and transaction history
-- **[WalletContext](file:///c:/Users/ARQAM%20TV/Downloads/mobile/src/contexts/WalletContext.tsx#L11-L42)** - Wallet management and token transfers
-- **[ReferralContext](file:///c:/Users/ARQAM%20TV/Downloads/mobile/src/contexts/ReferralContext.tsx#L12-L41)** - Referral system and rewards
-- **Page Components** - Direct database operations for specific features
+### Benefits
+- **Simplicity**: Single tap to start mining instead of continuous interaction
+- **Predictability**: Fixed reward system that's easy to understand
+- **Engagement**: Encourages daily app interaction to check progress
+- **Consistency**: All users see the same hourly rate
 
-### Real-time Communication
+### Technical Details
+- Removed `coinsPerClick` from `UserProfile` interface
+- Updated `performMine` function to track session clicks without immediate rewards
+- Modified user profile creation to exclude `coinsPerClick`
+- Updated mining rate display to fixed 0.0833 EKH/hour
 
-The app implements several real-time communication features:
-
-1. **Immediate Feedback**: UI updates instantly when operations begin
-2. **State Synchronization**: Local state mirrors database state across all components
-3. **Background Operations**: Non-critical operations run in the background
-4. **Error Resilience**: Comprehensive error handling with automatic retries
-
-### Error Handling
-
-All database operations include:
-- Try/catch error handling
-- User-friendly error messages
-- Automatic retry mechanisms where appropriate
-- Graceful degradation when services are unavailable
-
-### Performance Optimization
-
-- Queries are optimized with appropriate filters
-- Pagination is used for large data sets
-- Caching mechanisms prevent unnecessary requests
-
-For detailed information about all data operations, see [Data Operations Summary](./DATA_OPERATIONS_SUMMARY.md).
+For complete implementation details, see [MANUAL_MINING_SYSTEM_UPDATE.md](Documentations/MANUAL_MINING_SYSTEM_UPDATE.md).
 
 ## 💰 Presale Page
 

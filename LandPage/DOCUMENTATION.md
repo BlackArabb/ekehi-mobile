@@ -12,6 +12,8 @@ This is the landing page for the Ekehi Network cryptocurrency project. The site 
 4. [Styling](#styling)
 5. [Deployment](#deployment)
 6. [Mobile App OAuth](#mobile-app-oauth)
+7. [Performance Optimizations](#performance-optimizations)
+8. [CDN Setup](#cdn-setup)
 
 ## Project Structure
 
@@ -115,3 +117,22 @@ For detailed information about the OAuth callback handler for mobile app users, 
 [Mobile App OAuth Documentation](./src/react-app/docs/MOBILE_APP_OAUTH.md)
 
 This handler is specifically designed for users who authenticate through the mobile app's "Continue with Google" button and is accessed via deep linking rather than direct website navigation.
+
+## Performance Optimizations
+
+The Vite configuration has been optimized for performance with code splitting and CDN support:
+
+- Code splitting for better caching and reduced initial bundle size
+- Cache-busting with content-based hashes
+- CDN-ready configuration for production deployment
+- Mobile-specific optimizations
+
+For detailed information about Vite optimizations, see:
+[Vite Optimization Documentation](./docs/VITE_OPTIMIZATION.md)
+
+## CDN Setup
+
+The project is configured to work with a Content Delivery Network (CDN) at cdn.ekehi.xyz. For instructions on how to set up and configure your CDN, see:
+[CDN Setup Guide](./docs/CDN_SETUP_GUIDE.md)
+
+This guide provides detailed instructions for setting up CDN with various providers including Cloudflare, AWS CloudFront, and Azure CDN.

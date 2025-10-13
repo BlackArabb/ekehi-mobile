@@ -128,14 +128,16 @@ The most complex screen with multiple real-time updating components.
 - Referral system integration
 - Account settings management
 
-### Mining Screen (`app/(tabs)/index.tsx`)
+### Mining Screen (`app/(tabs)/mine.tsx`)
 Core mining interface with interactive elements.
 
 **Features:**
-- Tap-to-mine functionality with haptic feedback
-- Real-time coin balance updates
-- Mining power visualization
-- Session tracking and statistics
+- 24-hour session mining with single tap start
+- Fixed 2 EKH reward for completing 24-hour session
+- Real-time countdown timer and progress tracking
+- Visual feedback with circular progress indicator
+- Haptic response on mining interactions
+- Fixed hourly mining rate display (0.0833 EKH/hour)
 
 ### Task System (`app/(tabs)/tasks.tsx`)
 Social task completion interface.

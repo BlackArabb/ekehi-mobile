@@ -18,7 +18,7 @@ The mobile application serves as the core platform for users to:
 - **Cross-platform Development**: Built with React Native and Expo
 - **Authentication**: Google OAuth and email/password support
 - **Backend Integration**: Appwrite for database, authentication, and storage
-- **Real-time Updates**: Dynamic mining rate calculation (2 EKH per day, 0.083 EKH per hour)
+- **Real-time Updates**: Dynamic mining rate calculation (2 EKH per 24-hour session, 0.083 EKH per hour)
 - **Performance Optimized**: Memoization, debouncing, and selective rendering
 
 ### Documentation

@@ -4,6 +4,9 @@
 
 This document explains how mining sessions are recorded in the Ekehi Network mobile app. Mining sessions track user mining activity and store this data in the Appwrite database for analytics and rewards purposes.
 
+For information about UI enhancements to the mining button, see:
+[Mining Button UI Enhancements](./MINING_BUTTON_UI_ENHANCEMENTS.md)
+
 ## Implementation Details
 
 ### 1. Mining Context Updates
@@ -70,6 +73,12 @@ To verify that mining sessions are being recorded:
 2. Navigate away from the mining page or background the app
 3. Check the Appwrite dashboard for new documents in the `mining_sessions` collection
 4. Verify that the session data matches the user's mining activity
+
+## Related Documentation
+
+- [Mining Button UI Enhancements](./MINING_BUTTON_UI_ENHANCEMENTS.md) - Details about visual improvements to the mining button
+- [Presale Page Enhancements](./PRESALE_PAGE_ENHANCEMENTS.md) - Information about presale page improvements
+- [Presale Error Handling Improvements](./PRESALE_ERROR_HANDLING_IMPROVEMENTS.md) - Details about stability improvements in the presale section
 
 ## Benefits
 

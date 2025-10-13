@@ -32,7 +32,6 @@ const userData = {
       userId: '111503823123987272638',
       username: null,
       totalCoins: 0,
-      coinsPerClick: 1,
       coinsPerSecond: 0,
       miningPower: 1,
       currentStreak: 0,
@@ -42,7 +41,7 @@ const userData = {
       referredBy: null,
       totalReferrals: 0,
       lifetimeEarnings: 0,
-      dailyMiningRate: 1000,
+      dailyMiningRate: 2, // UPDATED: Now represents 2 EKH per 24-hour session
       maxDailyEarnings: 10000,
       todayEarnings: 0,
       lastMiningDate: null,
@@ -54,7 +53,6 @@ const userData = {
       userId: '100918368155980132753',
       username: null,
       totalCoins: 0,
-      coinsPerClick: 1,
       coinsPerSecond: 0,
       miningPower: 1,
       currentStreak: 0,
@@ -64,7 +62,7 @@ const userData = {
       referredBy: null,
       totalReferrals: 0,
       lifetimeEarnings: 0,
-      dailyMiningRate: 1000,
+      dailyMiningRate: 2, // UPDATED: Now represents 2 EKH per 24-hour session
       maxDailyEarnings: 10000,
       todayEarnings: 0,
       lastMiningDate: null,
