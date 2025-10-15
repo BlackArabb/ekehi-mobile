@@ -177,11 +177,11 @@ export default function RoadmapSection() {
                       
                       <div className="text-right">
                         <div className="text-lg md:text-xl font-bold text-green-500">{Math.round(phase.completedPercentage)}%</div>
-                        <div className="text-xs text-medium-gray capitalize">{phase.status}</div>
+                        <div className="text-xs text-medium-gray capitalize">Completed</div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg md:text-xl font-bold text-gradient-gold">{Math.round(phase.inProgressPercentage)}%</div>
-                        <div className="text-xs text-medium-gray capitalize">{phase.status}</div>
+                        <div className="text-xs text-medium-gray capitalize">In Progress</div>
                       </div>
                       </div>
                     </div>
