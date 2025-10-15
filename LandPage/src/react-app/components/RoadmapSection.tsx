@@ -110,6 +110,25 @@ const getMilestoneIcon = (milestone: any) => {
 };
 
 export default function RoadmapSection() {
+  // Calculate dynamic progress for each phase
+  const phasesWithDynamicProgress = roadmapPhases.map(phase => {
+    const totalMilestones = phase.milestones.length;
+    const completedMilestones = phase.milestones.filter(m => m.completed).length;
+    const inProgressMilestones = phase.milestones.filter(m => m.inProgress).length;
+    
+    // Calculate percentages
+    const completedPercentage = totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0;
+    const inProgressPercentage = totalMilestones > 0 ? (inProgressMilestones / totalMilestones) * 100 : 0;
+    
+    return {
+      ...phase,
+      completedPercentage,
+      inProgressPercentage,
+      // Recalculate overall progress based on completed + inProgress
+      dynamicProgress: completedPercentage + inProgressPercentage
+    };
+  });
+
   return (
     <section id="roadmap" className="section-padding bg-black">
       <div className="container">
@@ -130,7 +149,7 @@ export default function RoadmapSection() {
 
           {/* Timeline Items */}
           <div className="space-y-8 md:space-y-12">
-            {roadmapPhases.map((phase, index) => (
+            {phasesWithDynamicProgress.map((phase, index) => (
               <div
                 key={index}
                 className="relative flex items-start"
@@ -154,21 +173,49 @@ export default function RoadmapSection() {
                           
                         </div>
                       </div>
+                      <div className="flex flex-row space-x-4"> 
+                      
                       <div className="text-right">
-                        <div className="text-xl md:text-2xl font-bold text-gradient-gold">{phase.progress}%</div>
+                        <div className="text-lg md:text-xl font-bold text-green-500">{Math.round(phase.completedPercentage)}%</div>
                         <div className="text-xs text-medium-gray capitalize">{phase.status}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg md:text-xl font-bold text-gradient-gold">{Math.round(phase.inProgressPercentage)}%</div>
+                        <div className="text-xs text-medium-gray capitalize">{phase.status}</div>
+                      </div>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="relative h-1.5 md:h-2 bg-charcoal-gray rounded-full mb-4 md:mb-6 overflow-hidden">
-                      <div 
-                        className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-amber-glow rounded-full transition-all duration-1000 ease-out"
-                        style={{ width: `${phase.progress}%` }}
-                      >
-                        {phase.status === 'in-progress' && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
-                        )}
+                      <div className="absolute inset-0 rounded-full flex">
+                        {/* Completed portion (green) */}
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-1000 ease-out"
+                          style={{ width: `${phase.completedPercentage}%` }}
+                        ></div>
+                        
+                        {/* In-progress portion (yellow) */}
+                        <div 
+                          className="h-full bg-gradient-to-r from-yellow-500 to-amber-glow rounded-full transition-all duration-1000 ease-out"
+                          style={{ width: `${phase.inProgressPercentage}%` }}
+                        >
+                          {phase.status === 'in-progress' && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Progress Details */}
+                    <div className="flex justify-between text-xs text-medium-gray mb-4">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span>Completed: {Math.round(phase.completedPercentage)}%</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                        <span>In Progress: {Math.round(phase.inProgressPercentage)}%</span>
                       </div>
                     </div>
 
