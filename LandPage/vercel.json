@@ -1,34 +1,35 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "vercel-build.sh",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "dist"
       }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/assets/(.*)",
-      "destination": "/assets/$1"
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
-      "source": "/_expo/(.*)",
-      "destination": "/_expo/$1"
+      "src": "/_expo/(.*)",
+      "dest": "/_expo/$1"
     },
     {
-      "source": "/favicon.ico",
-      "destination": "/assets/favicon.ico"
+      "src": "/favicon.ico",
+      "dest": "/assets/favicon.ico"
     },
     {
-      "source": "/static/(.*)",
-      "destination": "/assets/$1"
+      "src": "/static/(.*)",
+      "dest": "/assets/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
-  ]
+  ],
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist"
 }
