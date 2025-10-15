@@ -4,33 +4,33 @@ const roadmapPhases = [
   {
     phase: 'Phase 1: Foundation',
     period: 'Q4 2024',
-    status: 'completed',
+    status: 'in-progress',
     progress: 100,
     milestones: [
-      { text: 'Marketing and Promotions', completed: true },
-      { text: 'Listing on Tracking Platforms (CMC, CG etc)', completed: true },
-      { text: 'Partnership and Collaborations', completed: true },
-      { text: 'Mining App release', completed: true },
-      { text: 'Website and branding launch', completed: true },
-      { text: 'Legal structure and compliance framework', completed: true },
-      { text: 'Tokenomics finalization', completed: true },
-      { text: 'Security audit partners selected', completed: true }
+      { text: 'Tokenomics Finalization', completed: true },
+      { text: 'Marketing and Promotions', completed: false, inProgress: true},
+      { text: 'Listing on Tracking Platforms (CMC, CG etc)', completed: false, inProgress: true },
+      { text: 'Partnership and Collaborations', completed: false, inProgress: true },
+      { text: 'Website and branding launch', completed: false, inProgress: true },
+      { text: 'Mining App release', completed: false, inProgress: true },
+      //{ text: 'Launch new version for Ekehi Network app and test initial layer 1 blockchain solution', completed: false, inProgress: true },
+      { text: 'Legal structure and compliance framework', completed: false, inProgress: true },
+      { text: 'Security audit partners selected', completed: false, inProgress: true }
     ]
   },
   {
     phase: 'Phase 2: Development',
     period: 'Q1-Q2 2025',
-    status: 'in-progress',
+    status: 'upcoming',
     progress: 65,
     milestones: [
-      { text: 'Staking and lockup Events', completed: true },
-      { text: 'Launch new version for Ekehi Network app and test initial layer 1 blockchain solution', completed: true },
-      { text: 'Roll out Ekehi Swap with integrated privacy features', completed: true },
-      { text: 'Initiate pilot for RWA tokenization', completed: false, inProgress: true },
-      { text: 'Trading Events/ DEX/CEX promotion/ Listing', completed: false, inProgress: true },
+      { text: 'Staking and lockup Events', completed: false },
       { text: 'Marketing campaign phase 1', completed: false },
-      { text: 'Exchange integration negotiations', completed: false, inProgress: true },
-      { text: 'DEX listing preparations', completed: false }
+      { text: 'Exchange integration negotiations', completed: false },
+      { text: 'DEX listing preparations', completed: false },
+      { text: 'Trading Events/ DEX/CEX promotion/ Listing', completed: false},
+      { text: 'Roll out Ekehi Swap with integrated privacy features', completed: false },
+      { text: 'Initiate pilot for RWA tokenization', completed: false},
     ]
   },
   {
@@ -43,8 +43,9 @@ const roadmapPhases = [
       { text: 'Partnership with De-Fi projects', completed: false },
       { text: 'Continuation of blockchain Updates and development', completed: false },
       { text: 'RWA tokenization public offering phase 2', completed: false },
-      { text: 'DEX listings (Uniswap, PancakeSwap)', completed: false },
-      { text: 'CEX listings (Tier 2 exchanges)', completed: false },
+       { text: 'Tier 1 CEX listings (Binance, Coinbase target)', completed: false },
+      //{ text: 'DEX listings (Uniswap, PancakeSwap)', completed: false },
+      //{ text: 'CEX listings (Tier 2 exchanges)', completed: false },
       { text: 'Strategic partnerships announcements', completed: false },
       { text: 'Staking rewards program expansion', completed: false }
     ]
@@ -57,7 +58,6 @@ const roadmapPhases = [
     milestones: [
       { text: 'Achieve 10 million active users', completed: false },
       { text: 'Secure RWA partnership for assets backed solutions across the world', completed: false },
-      { text: 'Tier 1 CEX listings (Binance, Coinbase target)', completed: false },
       { text: 'Ekehi DeFi Hub launch', completed: false },
       { text: 'NFT Marketplace public launch', completed: false },
       { text: 'Mobile app enhancements', completed: false },
@@ -225,7 +225,7 @@ export default function RoadmapSection() {
               <Download size={20} className="mr-2" />
               Download Whitepaper
             </a>
-            <a href="#" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8 centered-button inline-flex items-center justify-center">
+            <a href="#mining-app" className="btn-secondary text-sm md:text-base py-3 px-6 md:py-4 md:px-8 centered-button inline-flex items-center justify-center">
               <Download size={20} className="mr-2" />
               Download App
             </a>

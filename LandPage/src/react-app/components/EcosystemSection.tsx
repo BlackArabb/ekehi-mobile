@@ -14,7 +14,7 @@ const ecosystemProducts = [
       'Hardware wallet compatible',
       'Mobile & desktop apps'
     ],
-    cta: 'Download Wallet',
+    cta: 'Learn More',
     position: { x: 20, y: 20 }
   },
   {
@@ -74,7 +74,7 @@ const ecosystemProducts = [
       'Fractional ownership',
       'Asset-backed lending'
     ],
-    cta: 'Coming Q3 2025',
+    cta: 'Learn More',
     position: { x: 25, y: 85 }
   },
   {
@@ -89,7 +89,7 @@ const ecosystemProducts = [
       'Community development',
       'Open-source research'
     ],
-    cta: 'Coming Q4 2025',
+    cta: 'Coming Soon',
     position: { x: 65, y: 85 }
   }
 ];
@@ -325,7 +325,7 @@ export default function EcosystemSection() {
             </div>
             <div className="group">
               <div className="text-2xl md:text-3xl font-bold text-gradient-gold mb-2 group-hover:scale-110 transition-transform">2</div>
-              <div className="text-medium-gray text-xs md:text-sm">Currently Live</div>
+              <div className="text-medium-gray text-xs md:text-sm">Under Development</div>
             </div>
             <div className="group">
               <div className="text-2xl md:text-3xl font-bold text-gradient-gold mb-2 group-hover:scale-110 transition-transform">100%</div>

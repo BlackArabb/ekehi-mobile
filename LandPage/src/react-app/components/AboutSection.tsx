@@ -117,9 +117,7 @@ export default function AboutSection() {
           >
             <Users size={20} />
             Join Our Telegram Community
-            <span className="text-xs opacity-70 group-hover:opacity-100 transition-opacity">
-              10K+ Members
-            </span>
+            
           </a>
         </div>
       </div>

@@ -80,7 +80,7 @@ export default function HeroSection() {
             <div className="text-medium-gray text-sm">Target Community</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-gradient-gold">$50M</div>
+            <div className="text-2xl md:text-3xl font-bold text-gradient-gold">$60M</div>
             <div className="text-medium-gray text-sm">Target Cap</div>
           </div>
           <div className="text-center">

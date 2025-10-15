@@ -187,7 +187,7 @@ const highlights = [
 const statistics = [
   { label: '1B Total Supply', value: '1B EKH' },
   { label: 'Ecosystem Focus', value: '6 Products' },
-  { label: '150+ Validators', value: '150+' },
+ // { label: '150+ Validators', value: '150+' },
   { label: '0.5% Burn Rate', value: '0.5%' }
 ];
 

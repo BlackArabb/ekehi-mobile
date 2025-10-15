@@ -16,9 +16,9 @@ const tokenDistribution = [
 
 const tokenStats = [
   { icon: DollarSign, label: 'Total Supply', value: '1B EKH', subtext: '1,000,000,000 tokens' },
-  { icon: TrendingUp, label: 'Initial Market Cap', value: '$60M', subtext: 'At $0.1 initial price' },
-  { icon: Shield, label: 'Circulating Supply', value: '750M', subtext: '20% at launch' },
-  { icon: Globe, label: 'Fully Diluted Value', value: '$50M', subtext: 'At $0.1 price' }
+  { icon: TrendingUp, label: 'Initial Market Cap', value: '$60M', subtext: 'At $0.3 initial price' },
+  { icon: Shield, label: 'Circulating Supply', value: '200M', subtext: '20% at launch' },
+  { icon: Globe, label: 'Fully Diluted Value', value: '$300M', subtext: 'At $0.3 price' }
 ];
 
 const tokenUtilities = [
@@ -129,7 +129,7 @@ export default function TokenomicsSection() {
             <div className="relative w-64 h-64 md:w-80 md:h-80 mb-6 md:mb-8">
               <Doughnut ref={chartRef} data={chartData} options={chartOptions} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center align-middle">
+                <div className="text-center">
                   <div className="text-2xl md:text-3xl font-bold text-gradient-gold">{tokenDistribution[activeDistribution].percentage}%</div>
                   <div className="text-medium-gray text-xs md:text-sm">{tokenDistribution[activeDistribution].label}</div>
                 </div>
@@ -231,10 +231,7 @@ export default function TokenomicsSection() {
                       </div>
                       <h4 className="font-semibold text-white">{utility.title}</h4>
                     </div>
-                    <ChevronDown 
-                      size={20} 
-                      className={`text-yellow-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
-                    />
+                    
                   </div>
                   <p className={`text-soft-white text-sm transition-all duration-300 ${isExpanded ? 'line-clamp-none' : 'line-clamp-2'}`}>
                     {utility.description}
