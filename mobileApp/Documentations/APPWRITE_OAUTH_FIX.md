@@ -16,7 +16,7 @@ The issue is not with your code implementation but with the Appwrite project con
 2. Select your project
 3. Navigate to the "Platforms" section (see detailed instructions below if you can't find it)
 4. Click "Add Platform" 
-5. Select "Mobile" as the platform type
+5. Select "Flutter/React Native" as the platform type (IMPORTANT: Use Flutter/React Native, not separate Android and iOS platforms)
 6. Fill in the platform details:
    - **Platform Name**: Ekehi Mobile App
    - **App ID/Bundle ID**: com.ekehi.network
@@ -58,6 +58,7 @@ For step-by-step visual guidance on finding and configuring the platform setting
 2. Verify your App ID/Bundle ID matches what's in your app.json
 3. Make sure you've enabled the Google OAuth provider
 4. Confirm your Google OAuth Client ID and Secret are correct
+5. IMPORTANT: Ensure you've selected "Flutter/React Native" as the platform type, not separate Android and iOS platforms
 
 ### If you can't find the Platforms section:
 Different versions of Appwrite may have the platform settings in different locations:

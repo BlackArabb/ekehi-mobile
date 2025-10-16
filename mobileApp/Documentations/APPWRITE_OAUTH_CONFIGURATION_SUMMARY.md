@@ -26,9 +26,8 @@ Based on the test script output, these are the remaining steps needed:
 
 1. **Register Platforms in Appwrite Console**:
    - Go to Appwrite Console → Auth → Settings → Platforms
-   - Add Android platform with package: `com.ekehi.network`
-   - Add iOS platform with bundle ID: `com.ekehi.network`
-   - Add Web platform for testing
+   - Add Flutter/React Native platform (IMPORTANT: Use Flutter/React Native, not separate Android and iOS platforms)
+   - With package/bundle ID: `com.ekehi.network`
    - Add redirect URLs: `ekehi://oauth/return` and `ekehi://auth`
 
 2. **Verify OAuth Provider Configuration**:
@@ -59,5 +58,6 @@ All checks passed, confirming that the codebase is properly configured for OAuth
 ## Next Steps
 
 1. Follow the platform registration steps in the Appwrite Console
+   - IMPORTANT: Use "Flutter/React Native" as the platform type
 2. Test the OAuth flow in your development environment
 3. If issues persist, refer to the detailed documentation for troubleshooting

@@ -28,6 +28,9 @@
     "open-docs": "node Scripts/open-docs.js",
     "test-signout": "node Scripts/test-signout.js",
     "validate-appwrite": "node Scripts/validate-appwrite-config.js",
+    "test-env-vars": "node test-env-variables.js",
+    "verify-redirect-urls": "node Scripts/verify-redirect-urls.js",
+    "identify-appwrite-version": "node Scripts/identify-appwrite-version.js",
     "wrangler-export": "npx wrangler d1 export ekehi-network-db --remote --output ./cloudflare-data/ekehi-network-db.sql",
     "setup-cloudflare": "npx wrangler auth login && npx wrangler d1 list",
     "setup-collections": "node setup-appwrite-collections.js"

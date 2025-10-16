@@ -23,7 +23,7 @@ Depending on your Appwrite version, the platform settings can be found in one of
 
 ### 3. Add a New Mobile Platform
 1. Click the "Add Platform" or "+ New Platform" button
-2. Select "Mobile" or "Android/iOS" as the platform type
+2. Select "Flutter/React Native" as the platform type (IMPORTANT: Do not use separate Android and iOS platforms)
 3. Fill in the required information:
    - **Platform Name**: Ekehi Mobile App
    - **App ID/Bundle ID**: com.ekehi.network
@@ -87,6 +87,7 @@ Depending on your Appwrite version, the platform settings can be found in one of
 
 ### Issue: Platform not found
 **Solution**: Double-check that you've added the platform with the correct bundle ID and redirect URLs.
+**IMPORTANT**: Use "Flutter/React Native" as the platform type, not separate Android and iOS platforms.
 
 ## Need Help?
 

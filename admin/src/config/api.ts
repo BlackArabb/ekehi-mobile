@@ -14,15 +14,15 @@ export const API_CONFIG = {
   
   // Collection IDs (matching the mobile app)
   COLLECTIONS: {
-    USERS: 'users',
-    USER_PROFILES: 'user_profiles',
-    MINING_SESSIONS: 'mining_sessions',
-    SOCIAL_TASKS: 'social_tasks',
-    USER_SOCIAL_TASKS: 'user_social_tasks',
-    ACHIEVEMENTS: 'achievements',
-    USER_ACHIEVEMENTS: 'user_achievements',
-    PRESALE_PURCHASES: 'presale_purchases',
-    AD_VIEWS: 'ad_views'
+    USERS: process.env.COLLECTION_USERS || 'users',
+    USER_PROFILES: process.env.COLLECTION_USER_PROFILES || 'user_profiles',
+    MINING_SESSIONS: process.env.COLLECTION_MINING_SESSIONS || 'mining_sessions',
+    SOCIAL_TASKS: process.env.COLLECTION_SOCIAL_TASKS || 'social_tasks',
+    USER_SOCIAL_TASKS: process.env.COLLECTION_USER_SOCIAL_TASKS || 'user_social_tasks',
+    ACHIEVEMENTS: process.env.COLLECTION_ACHIEVEMENTS || 'achievements',
+    USER_ACHIEVEMENTS: process.env.COLLECTION_USER_ACHIEVEMENTS || 'user_achievements',
+    PRESALE_PURCHASES: process.env.COLLECTION_PRESALE_PURCHASES || 'presale_purchases',
+    AD_VIEWS: process.env.COLLECTION_AD_VIEWS || 'ad_views'
   },
   
   // Authentication Methods

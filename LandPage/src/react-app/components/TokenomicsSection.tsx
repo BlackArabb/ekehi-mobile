@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { TrendingUp, Users, Shield, Zap, DollarSign, Globe, ChevronDown } from 'lucide-react';
@@ -73,7 +73,7 @@ export default function TokenomicsSection() {
         }
       },
       title: {
-        display: true,
+        display: false,
         text: 'EKEHI Token Distribution',
         color: '#ffffff',
         font: {
@@ -126,12 +126,23 @@ export default function TokenomicsSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-16">
           {/* Chart Section */}
           <div className="flex flex-col items-center">
+            <div className="w-full text-center mb-4">
+              <h3 className="text-lg md:text-xl font-semibold text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                EKEHI Token Distribution
+              </h3>
+            </div>
             <div className="relative w-64 h-64 md:w-80 md:h-80 mb-6 md:mb-8">
               <Doughnut ref={chartRef} data={chartData} options={chartOptions} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-gradient-gold">{tokenDistribution[activeDistribution].percentage}%</div>
-                  <div className="text-medium-gray text-xs md:text-sm">{tokenDistribution[activeDistribution].label}</div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-9">
+                <div className="text-center transition-all duration-300 transform hover:scale-105 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 md:px-6 md:py-3 border border-yellow-500/30 shadow-lg pointer-events-auto w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
+                  <div>
+                    <div className="text-xl md:text-3xl font-bold text-gradient-gold transition-all duration-500 ease-out">
+                      {tokenDistribution[activeDistribution].percentage}%
+                    </div>
+                    <div className="text-medium-gray text-xs md:text-sm mt-1 transition-all duration-500 ease-out">
+                      {tokenDistribution[activeDistribution].label}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

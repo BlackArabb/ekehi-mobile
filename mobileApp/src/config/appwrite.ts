@@ -5,24 +5,23 @@
 
 import { Client, Account, Databases } from 'appwrite';
 
-// ⚠️ IMPORTANT: Replace 'YOUR_PROJECT_ID' with your actual Appwrite project ID
-const PROJECT_ID = '68c2dd6e002112935ed2';
-
-// Project ID is configured correctly
+// Use environment variables for production, with fallbacks for development
+const PROJECT_ID = process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID || '68c2dd6e002112935ed2';
+const ENDPOINT = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1';
 
 const client = new Client();
 
 client
-  .setEndpoint('https://fra.cloud.appwrite.io/v1') // Frankfurt region endpoint
-  .setProject(PROJECT_ID);                        // Your project ID
+  .setEndpoint(ENDPOINT)     // Configurable endpoint for different environments
+  .setProject(PROJECT_ID);   // Configurable project ID
 
 export const account = new Account(client);
 export const databases = new Databases(client);
 
 export const appwriteConfig = {
-  endpoint: 'https://fra.cloud.appwrite.io/v1',
+  endpoint: ENDPOINT,
   projectId: PROJECT_ID,
-  databaseId: '68c336e7000f87296feb', // Your existing database ID
+  databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID || '68c336e7000f87296feb',
   collections: {
     // Collection IDs from automated setup
     users: 'users',
@@ -39,9 +38,9 @@ export const appwriteConfig = {
   oauth: {
     google: {
       // Your actual Google OAuth Client IDs from Google Cloud Console
-      webClientId: '842046112756-rk2jcdf9l7f4cbh136u4tm591qmtl6bq.apps.googleusercontent.com',
-      androidClientId: '842046112756-noh6rsvng9q3plh8snivdcqlmkmg3osk.apps.googleusercontent.com', 
-      iosClientId: '842046112756-qsd86lg9s040qg0g7m9rtfk65kugijcu.apps.googleusercontent.com'
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '842046112756-rk2jcdf9l7f4cbh136u4tm591qmtl6bq.apps.googleusercontent.com',
+      androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '842046112756-noh6rsvng9q3plh8snivdcqlmkmg3osk.apps.googleusercontent.com', 
+      iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || '842046112756-qsd86lg9s040qg0g7m9rtfk65kugijcu.apps.googleusercontent.com'
     }
   }
 };

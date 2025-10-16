@@ -33,6 +33,13 @@ function checkAppwriteEndpointConfig() {
     } else {
       console.log('❌ Project ID not found in configuration');
     }
+    
+    // Check for environment variables
+    if (configContent.includes('process.env')) {
+      console.log('✅ Environment variables support configured');
+    } else {
+      console.log('⚠️  Environment variables support not found (recommended for production)');
+    }
   } else {
     console.log('❌ Appwrite configuration file not found');
   }
@@ -150,6 +157,30 @@ function checkOAuthConfig() {
   console.log('');
 }
 
+// Function to check environment variable files
+function checkEnvironmentFiles() {
+  console.log('⚙️  Checking Environment Variable Files...\n');
+  
+  const envFiles = ['.env', '.env.local', '.env.production'];
+  let foundFiles = 0;
+  
+  envFiles.forEach(envFile => {
+    const envPath = path.join(__dirname, '..', envFile);
+    if (fs.existsSync(envPath)) {
+      console.log(`✅ ${envFile} found`);
+      foundFiles++;
+    } else {
+      console.log(`ℹ️  ${envFile} not found (optional)`);
+    }
+  });
+  
+  if (foundFiles > 0) {
+    console.log(`✅ Found ${foundFiles}/${envFiles.length} environment files`);
+  }
+  
+  console.log('');
+}
+
 // Function to check security considerations
 function checkSecurityConsiderations() {
   console.log('🔒 Checking Security Considerations...\n');
@@ -183,6 +214,13 @@ function checkProductionReadiness() {
     } else {
       console.log('ℹ️  Manual review of error handling recommended');
     }
+    
+    // Check for environment variable usage
+    if (configContent.includes('process.env')) {
+      console.log('✅ Environment variable support detected');
+    } else {
+      console.log('⚠️  Consider adding environment variable support for production deployment');
+    }
   }
   
   console.log('');
@@ -209,7 +247,12 @@ function provideRecommendations() {
   console.log('   - Implement proper indexing on frequently queried fields');
   console.log('   - Consider caching strategies for non-critical data');
   
-  console.log('\n4. Monitoring and Logging:');
+  console.log('\n4. Environment Variables:');
+  console.log('   - Create .env.production file with production values');
+  console.log('   - Ensure sensitive values are not committed to version control');
+  console.log('   - Use different environment files for different deployments');
+  
+  console.log('\n5. Monitoring and Logging:');
   console.log('   - Set up Appwrite audit logs');
   console.log('   - Implement proper error tracking');
   console.log('   - Monitor API usage and performance metrics');
@@ -221,6 +264,7 @@ function provideRecommendations() {
 checkAppwriteEndpointConfig();
 checkDatabaseConfig();
 checkOAuthConfig();
+checkEnvironmentFiles();
 checkSecurityConsiderations();
 checkProductionReadiness();
 provideRecommendations();

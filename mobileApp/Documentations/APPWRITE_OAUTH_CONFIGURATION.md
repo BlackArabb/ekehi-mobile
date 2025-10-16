@@ -17,7 +17,7 @@ You need to configure platforms in your Appwrite Console. Here's exactly what yo
 3. Navigate to **Auth** > **Settings**
 4. Scroll down to **Platforms** section
 5. Click **Add Platform**
-6. Select **Flutter/React Native** platform type
+6. Select **Flutter/React Native** platform type (IMPORTANT: Use Flutter/React Native, not separate Android and iOS platforms)
 7. Fill in the details:
    - **Name**: Ekehi OAuth
    - **App ID/Bundle ID**: `com.ekehi.network`
@@ -67,6 +67,7 @@ After completing these steps:
 2. Ensure all redirect URLs are exactly as specified (no extra spaces or characters)
 3. Verify Google OAuth provider is enabled
 4. Make sure you clicked "Update" after entering Google OAuth credentials
+5. IMPORTANT: Ensure you've selected "Flutter/React Native" as the platform type
 
 ### If OAuth opens but doesn't complete:
 
@@ -80,3 +81,4 @@ After completing these steps:
 - The redirect URLs must match exactly what the app expects
 - Your hosted OAuth system at `ekehi-oauth.netlify.app` should be correctly implemented
 - No changes are needed to your mobile app code
+- IMPORTANT: Use "Flutter/React Native" as the platform type, not separate Android and iOS platforms
