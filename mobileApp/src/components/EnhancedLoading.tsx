@@ -11,7 +11,7 @@ interface EnhancedLoadingProps {
 }
 
 const EnhancedLoading: React.FC<EnhancedLoadingProps> = ({ 
-  message = 'Loading...', 
+  message = '', 
   showDots = true,
   size = 'large',
   color = '#ffa000'
