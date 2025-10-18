@@ -111,7 +111,7 @@ export default function MiningAppSection() {
                 <>
                   <p className="text-yellow-500 font-bold mb-2 text-center">Start Mining Now</p>
                   <a 
-                    href="https://archive.org/embed/ekehi"
+                    href="https://archive.org/download/ekehi/ekehi.apk"
                     className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
                     target="_blank"
                     rel="noopener noreferrer"
