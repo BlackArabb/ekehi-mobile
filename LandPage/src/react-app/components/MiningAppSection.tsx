@@ -53,7 +53,7 @@ export default function MiningAppSection() {
     
     const savedStatus = localStorage.getItem('ekehiAppReady');
     if (savedStatus !== null) {
-      setIsAppReady(savedStatus === 'true');
+      setIsAppReady(savedStatus === 'false');
     }
   }, []);
 
