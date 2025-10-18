@@ -1,5 +1,4 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     ext {
         buildToolsVersion = findProperty("android.buildToolsVersion") ?: "34.0.0"
@@ -34,10 +33,14 @@ allprojects {
             }
         }
     }
-
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
         kotlinOptions {
             jvmTarget = "17"
+            allWarningsAsErrors = false
+            freeCompilerArgs += [
+                "-Xsuppress-version-warnings",
+                "-Xlint:deprecation=ignore"
+            ]
         }
     }
 }
@@ -49,8 +52,7 @@ gradle.projectsEvaluated {
     }
 }
 
-// Ensure Java 11 compatibility for Android subprojects
-//Changed to Java 17
+// Ensure Java 17 compatibility for Android subprojects
 subprojects {
     plugins.withId("com.android.application") {
         android {
@@ -68,5 +70,17 @@ subprojects {
             }
         }
     }
+    
+    // Suppress deprecation warnings for react-native-google-mobile-ads
+    if (project.name == "react-native-google-mobile-ads") {
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                freeCompilerArgs += [
+                    "-Xsuppress-version-warnings",
+                    "-nowarn",
+                    "-Xlint:deprecation=off"
+                ]
+            }
+        }
+    }
 }
-

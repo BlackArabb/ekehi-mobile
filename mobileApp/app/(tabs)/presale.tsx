@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput 
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // @ts-ignore - TypeScript declaration issue with lucide-react-native
-import { Store, DollarSign, Zap, Clock, CheckCircle, TrendingUp, Lock, Gift, BarChart3, Users, Award } from 'lucide-react-native';
+import { Store, Zap, Clock4 as Clock, CheckCircle, TrendingUp, Lock, Gift, BarChart2 as BarChart3, DollarSign, Users, Award } from 'lucide-react-native';
 import { usePresale } from '@/contexts/PresaleContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';

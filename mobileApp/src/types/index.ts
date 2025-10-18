@@ -3,8 +3,10 @@ export interface UserProfile {
   userId: string;
   username?: string;
   totalCoins: number;
-  coinsPerSecond: number;
+  coinsPerSecond: number; // Deprecated - will be replaced with autoMiningRate
+  autoMiningRate: number; // New field for auto mining rate
   miningPower: number;
+  referralBonusRate: number; // New field for referral bonus
   currentStreak: number;
   longestStreak: number;
   lastLoginDate?: string;

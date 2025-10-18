@@ -117,7 +117,16 @@ android {
 
     kotlinOptions {
         jvmTarget = '17'
+        freeCompilerArgs += [
+            "-Xjvm-default=all",
+            "-opt-in=kotlin.RequiresOptIn"
+        ]
     }
+    
+    kotlin {
+        jvmToolchain(17)
+    }
+    
     defaultConfig {
         applicationId 'com.ekehi.network'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -201,6 +210,10 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+    
+    // Explicitly add kotlin-stdlib for react-native-google-mobile-ads compatibility
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 }
 
 if (rnVersion < versionToNumber(0, 75, 0)) {

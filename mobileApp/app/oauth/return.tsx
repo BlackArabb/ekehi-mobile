@@ -54,7 +54,7 @@ export default function OAuthReturnPage() {
         console.log('Current URL:', currentUrl);
         
         // Check if we have OAuth success parameters in the URL
-        const urlObj = new URL(currentUrl, 'http://localhost'); // Provide base URL to avoid errors
+        const urlObj = new URL(currentUrl, 'ekehi://oauth/return'); // Provide base URL to avoid errors
         const secret = urlObj.searchParams.get('secret') || (params.secret as string);
         const userId = urlObj.searchParams.get('userId') || (params.userId as string);
         

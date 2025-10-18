@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Easing, Text } from 'react-native';
+import { View, StyleSheet, Animated, Easing } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 interface CircularProgressBarProps {
@@ -217,7 +217,7 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
     };
   }, [showStars, radius, starAnimations]);
 
-  // Star SVG path
+  // Star SVG path - Fixed by ensuring it's properly defined as a string
   const starPath = "M12 2 L15.09 8.26 L22 9.27 L17 14.14 L18.18 21.02 L12 17.77 L5.82 21.02 L7 14.14 L2 9.27 L8.91 8.26 Z";
 
   return (

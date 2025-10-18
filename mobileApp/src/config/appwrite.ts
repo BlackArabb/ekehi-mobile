@@ -41,6 +41,11 @@ export const appwriteConfig = {
       webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '842046112756-rk2jcdf9l7f4cbh136u4tm591qmtl6bq.apps.googleusercontent.com',
       androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '842046112756-noh6rsvng9q3plh8snivdcqlmkmg3osk.apps.googleusercontent.com', 
       iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || '842046112756-qsd86lg9s040qg0g7m9rtfk65kugijcu.apps.googleusercontent.com'
+    },
+    // OAuth redirect URLs
+    redirectUrls: {
+      success: process.env.EXPO_PUBLIC_OAUTH_SUCCESS_URL || 'ekehi://oauth/return',
+      failure: process.env.EXPO_PUBLIC_OAUTH_FAILURE_URL || 'ekehi://auth'
     }
   }
 };

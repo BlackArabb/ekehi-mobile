@@ -4,8 +4,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Play, X, Gift, Coins } from 'lucide-react-native';
 // Conditional import for AdMobService - only import on native platforms
 let AdMobService: any = null;
+let isAdMobAvailable = false;
 if (Platform.OS !== 'web') {
-  AdMobService = require('@/services/AdMobService').default;
+  try {
+    AdMobService = require('@/services/AdMobService').default;
+    isAdMobAvailable = AdMobService.isAdMobAvailable && AdMobService.isAdMobAvailable();
+  } catch (error) {
+    console.error('[AdModal] Failed to import AdMobService:', error);
+    isAdMobAvailable = false;
+  }
 }
 
 interface AdModalProps {
@@ -33,6 +40,7 @@ const AdModal: React.FC<AdModalProps> = ({
   const [canSkip, setCanSkip] = useState(false);
   const [isAdLoading, setIsAdLoading] = useState(false);
   const [isWebPlatform] = useState(Platform.OS === 'web');
+  const [isAdAvailable, setIsAdAvailable] = useState(isAdMobAvailable && Platform.OS !== 'web');
 
   // Notify test system of events
   const notifyTestEvent = (event: string, data?: any) => {
@@ -78,8 +86,8 @@ const AdModal: React.FC<AdModalProps> = ({
 
   const handleStartAd = async () => {
     // Don't start ads on web platform
-    if (isWebPlatform) {
-      console.log('[AdModal] Ads not supported on web platform');
+    if (isWebPlatform || !isAdAvailable) {
+      console.log('[AdModal] Ads not supported on this platform');
       onClose();
       return;
     }
@@ -196,6 +204,19 @@ const AdModal: React.FC<AdModalProps> = ({
     );
   };
 
+  // Ad not available message
+  const renderAdNotAvailableMessage = () => {
+    if (isAdAvailable || isWebPlatform) return null;
+    
+    return (
+      <View style={styles.webMessageContainer}>
+        <Text style={styles.webMessageText}>
+          Ads are temporarily unavailable. Please try again later.
+        </Text>
+      </View>
+    );
+  };
+
   if (isWatching || isAdLoading) {
     return (
       <Modal visible={isVisible} transparent animationType="fade">
@@ -304,8 +325,9 @@ const AdModal: React.FC<AdModalProps> = ({
               </LinearGradient>
             </View>
             
-            {/* Web Platform Message */}
+            {/* Platform Messages */}
             {renderWebPlatformMessage()}
+            {renderAdNotAvailableMessage()}
             
             {/* Action Buttons */}
             <View style={styles.buttonContainer}>
@@ -316,15 +338,15 @@ const AdModal: React.FC<AdModalProps> = ({
               <TouchableOpacity 
                 style={styles.watchButton} 
                 onPress={handleStartAd}
-                disabled={isAdLoading || isWebPlatform}
+                disabled={isAdLoading || isWebPlatform || !isAdAvailable}
               >
                 <LinearGradient
-                  colors={isWebPlatform ? ['#6b7280', '#4b5563'] : ['#ffa000', '#ff8f00']}
+                  colors={(isWebPlatform || !isAdAvailable) ? ['#6b7280', '#4b5563'] : ['#ffa000', '#ff8f00']}
                   style={styles.watchButtonGradient}
                 >
                   <Play size={16} color="#ffffff" />
                   <Text style={styles.watchButtonText}>
-                    {isWebPlatform ? 'Not Available' : (isAdLoading ? 'Loading...' : 'Watch Ad')}
+                    {isWebPlatform ? 'Not Available' : (!isAdAvailable ? 'Not Available' : (isAdLoading ? 'Loading...' : 'Watch Ad'))}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>

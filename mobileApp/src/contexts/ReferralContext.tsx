@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMining } from '@/contexts/MiningContext';
 import { databases, appwriteConfig } from '@/config/appwrite';
 import { Query } from 'appwrite';
+import { MiningRateService } from '@/services/MiningRateService';
 
 interface ReferralContextType {
   referralCode: string | null;
@@ -147,20 +148,25 @@ export function ReferralProvider({ children }: { children: ReactNode }) {
         return { success: false, message: 'You have already been referred' };
       }
       
-      // Calculate new mining rate for referrer (increase by 0.2 EKH per referral)
-      const newMiningRate = (referrerDoc.coinsPerSecond || 0) + 0.2;
-      
-      // Update referrer's profile with increased mining rate and referral count
-      await databases.updateDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userProfiles,
-        referrerDoc.$id,
-        {
-          totalReferrals: (referrerDoc.totalReferrals || 0) + 1,
-          coinsPerSecond: newMiningRate, // Increase mining rate by 0.2 EKH
-          updatedAt: new Date().toISOString()
-        }
+      // Update referrer's profile with increased referral bonus rate and referral count
+      // Using the dedicated MiningRateService endpoint
+      const updatedProfile = await MiningRateService.updateReferralBonusRate(
+        referrerDoc.userId, 
+        0.0083 // Increase referral bonus rate by 0.0083 EKH/hour per referral
       );
+      
+      // Also update the total referrals count
+      if (updatedProfile) {
+        await databases.updateDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.collections.userProfiles,
+          referrerDoc.$id,
+          {
+            totalReferrals: (referrerDoc.totalReferrals || 0) + 1,
+            updatedAt: new Date().toISOString()
+          }
+        );
+      }
       
       // Update the current user's referredBy field and give them 2 EKH
       await databases.updateDocument(

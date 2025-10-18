@@ -164,8 +164,10 @@ export function MiningProvider({ children }: { children: ReactNode }) {
             userId: doc.userId?.[0] || doc.userId, // Handle both array and string formats
             username: doc.username,
             totalCoins: doc.totalCoins,
-            coinsPerSecond: doc.coinsPerSecond,
+            coinsPerSecond: doc.coinsPerSecond || 0, // Deprecated - will be replaced with autoMiningRate
+            autoMiningRate: doc.autoMiningRate || 0,
             miningPower: doc.miningPower,
+            referralBonusRate: doc.referralBonusRate || 0, // New field for referral bonus
             currentStreak: doc.currentStreak,
             longestStreak: doc.longestStreak,
             lastLoginDate: doc.lastLoginDate,
@@ -287,8 +289,10 @@ export function MiningProvider({ children }: { children: ReactNode }) {
             userId: doc.userId?.[0] || doc.userId, // Handle both array and string formats
             username: doc.username,
             totalCoins: doc.totalCoins,
-            coinsPerSecond: doc.coinsPerSecond,
+            coinsPerSecond: doc.coinsPerSecond || 0, // Deprecated - will be replaced with autoMiningRate
+            autoMiningRate: doc.autoMiningRate || 0,
             miningPower: doc.miningPower,
+            referralBonusRate: doc.referralBonusRate || 0, // New field for referral bonus
             currentStreak: doc.currentStreak,
             longestStreak: doc.longestStreak,
             lastLoginDate: doc.lastLoginDate,
@@ -435,13 +439,8 @@ export function MiningProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Create a separate state for coins to avoid full profile re-renders
-  const [totalCoins, setTotalCoins] = useState<number>(0);
-
   // Function to update only coins for better performance
   const updateCoinsOnly = useCallback((newTotalCoins: number) => {
-    setTotalCoins(newTotalCoins);
-    
     // Update profile with new coin value if it exists
     setProfile(prevProfile => {
       if (!prevProfile) return null;
@@ -509,17 +508,20 @@ export function MiningProvider({ children }: { children: ReactNode }) {
     if (!user || !profile) return;
 
     try {
-      // Calculate the new auto mining rate
+      // Calculate the new auto mining rate (in EKH/second)
       const newCoinsPerSecond = calculateAutoMiningRate();
       
+      // Convert to EKH/hour for storage
+      const newAutoMiningRate = newCoinsPerSecond * 3600;
+      
       // Only update if the rate has changed
-      if (profile.coinsPerSecond !== newCoinsPerSecond) {
-        console.log(`Updating auto mining rate from ${profile.coinsPerSecond} to ${newCoinsPerSecond}`);
+      if (profile.autoMiningRate !== newAutoMiningRate) {
+        console.log(`Updating auto mining rate from ${profile.autoMiningRate} to ${newAutoMiningRate} EKH/hour`);
         
         // Update user profile with new mining rate
         const updatedProfile = {
           ...profile,
-          coinsPerSecond: newCoinsPerSecond,
+          autoMiningRate: newAutoMiningRate,
           updatedAt: new Date().toISOString()
         };
 
@@ -529,7 +531,7 @@ export function MiningProvider({ children }: { children: ReactNode }) {
           appwriteConfig.collections.userProfiles,
           profile.id,
           {
-            coinsPerSecond: updatedProfile.coinsPerSecond,
+            autoMiningRate: updatedProfile.autoMiningRate,
             updatedAt: updatedProfile.updatedAt
           }
         );
@@ -540,7 +542,7 @@ export function MiningProvider({ children }: { children: ReactNode }) {
         // Notify subscribers of profile updates
         notifyProfileSubscribers();
         
-        console.log(`✅ Auto mining rate updated to ${newCoinsPerSecond} EKH/second`);
+        console.log(`✅ Auto mining rate updated to ${newAutoMiningRate} EKH/hour`);
       }
     } catch (error: any) {
       console.error('Failed to update auto mining rate:', error);
@@ -581,8 +583,9 @@ export const createNewUserProfile = async (userData: any, referralCode: string, 
     userId: [userData.$id],
     username: userData.name || `user_${userData.$id.substring(0, 8)}`,
     totalCoins: 0,
-    coinsPerSecond: 0,
-    miningPower: 1,
+    coinsPerSecond: 0, // Deprecated - will be replaced with autoMiningRate
+    autoMiningRate: 0, // New field for auto mining rate
+    referralBonusRate: 0, // New field for referral bonus
     currentStreak: 0,
     longestStreak: 0,
     lastLoginDate: new Date().toISOString(),

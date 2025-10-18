@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -20,6 +20,19 @@ import { ID } from 'appwrite';
 import CircularProgressBar from '@/components/CircularProgressBar';
 import EnhancedLoading from '@/components/EnhancedLoading';
 import MemoizedMiningButton from '@/components/MemoizedMiningButton';
+
+// Conditional import for AdMobService - only import on native platforms
+let AdMobService: any = null;
+let isAdMobAvailable = false;
+try {
+  if (Platform.OS !== 'web') {
+    AdMobService = require('@/services/AdMobService').default;
+    isAdMobAvailable = AdMobService.isAdMobAvailable && AdMobService.isAdMobAvailable();
+  }
+} catch (error) {
+  console.error('[MinePage] Failed to import AdMobService:', error);
+  isAdMobAvailable = false;
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BUTTON_SIZE = Math.min(150, SCREEN_WIDTH * 0.4);
@@ -341,7 +354,17 @@ export default function MinePage() {
     };
 
     const handleWatchAd = () => {
-        setShowAdModal(true);
+        // Only show ad modal if AdMob is available
+        if (isAdMobAvailable && Platform.OS !== 'web') {
+            setShowAdModal(true);
+        } else {
+            showNotification({
+                type: 'info',
+                title: 'Ads Unavailable',
+                message: 'Ads are temporarily unavailable. Please try again later.',
+                duration: 3000,
+            });
+        }
     };
 
     const handleAdReward = async (result: { success: boolean; reward?: number; error?: string }) => {
@@ -1050,6 +1073,7 @@ const styles = StyleSheet.create({
     },
     adBonusContainer: {
         marginBottom: 30,
+        marginTop: 30,
     },
     adBonusButton: {
         borderRadius: 16,

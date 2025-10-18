@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Zap, Calendar, Users, Trophy } from 'lucide-react-native';
+import { usePresale } from '@/contexts/PresaleContext';
 
 interface MemoizedProfileStatsProps {
   profile: any;
@@ -15,6 +16,21 @@ const MemoizedProfileStats: React.FC<MemoizedProfileStatsProps> = ({ profile, to
     return num.toLocaleString();
   };
 
+  // Get auto mining eligibility from presale context
+  const { isAutoMiningEligible } = usePresale();
+  
+  // Calculate individual mining rates
+  const manualMiningRate = profile ? (profile.dailyMiningRate || 2) / 24 : 0.0833;
+  const autoMiningRate = profile ? profile.autoMiningRate || 0 : 0;
+  const referralBonusRate = profile ? profile.referralBonusRate || 0 : 0;
+  
+  // Only show auto mining rate if user is eligible
+  const showAutoMiningRate = profile && isAutoMiningEligible();
+  const showReferralRate = profile && profile.totalReferrals > 0 && profile.totalReferrals <= 50;
+  
+  // Calculate total mining rate
+  const totalMiningRate = manualMiningRate + (showAutoMiningRate ? autoMiningRate : 0) + (showReferralRate ? referralBonusRate : 0);
+
   return (
     <View style={styles.statsGrid}>
       {/* Total EKH */}
@@ -24,13 +40,47 @@ const MemoizedProfileStats: React.FC<MemoizedProfileStatsProps> = ({ profile, to
         <Text style={styles.statLabel}>Total EKH</Text>
       </View>
       
-      {/* Mining Rate */}
+      {/* Manual Mining Rate */}
       <View style={styles.statCard}>
         <Zap size={24} color="#8b5cf6" />
         <Text style={styles.statValue}>
-          {profile?.dailyMiningRate ? (profile.dailyMiningRate / 24).toFixed(4) : '0.0000'}
+          {manualMiningRate.toFixed(4)}
         </Text>
-        <Text style={styles.statLabel}>Mining Rate</Text>
+        <Text style={styles.statLabel}>Manual Rate</Text>
+        <Text style={styles.statSubLabel}>EKH/hour</Text>
+      </View>
+      
+      {/* Auto Mining Rate - Only shown if user is eligible */}
+      {showAutoMiningRate && (
+        <View style={styles.statCard}>
+          <Zap size={24} color="#10b981" />
+          <Text style={styles.statValue}>
+            {autoMiningRate.toFixed(4)}
+          </Text>
+          <Text style={styles.statLabel}>Auto Rate</Text>
+          <Text style={styles.statSubLabel}>EKH/hour</Text>
+        </View>
+      )}
+      
+      {/* Referral Bonus Rate - Only shown if user has referrals */}
+      {showReferralRate && (
+        <View style={styles.statCard}>
+          <Users size={24} color="#f59e0b" />
+          <Text style={styles.statValue}>
+            {referralBonusRate.toFixed(4)}
+          </Text>
+          <Text style={styles.statLabel}>Referral Bonus</Text>
+          <Text style={styles.statSubLabel}>EKH/hour</Text>
+        </View>
+      )}
+      
+      {/* Total Mining Rate */}
+      <View style={styles.statCard}>
+        <Zap size={24} color="#6366f1" />
+        <Text style={styles.statValue}>
+          {totalMiningRate.toFixed(4)}
+        </Text>
+        <Text style={styles.statLabel}>Total Mining Rate</Text>
         <Text style={styles.statSubLabel}>EKH/hour</Text>
       </View>
       
@@ -47,18 +97,6 @@ const MemoizedProfileStats: React.FC<MemoizedProfileStatsProps> = ({ profile, to
         <Text style={styles.statValue}>{profile?.totalReferrals || '0'}</Text>
         <Text style={styles.statLabel}>Referrals</Text>
       </View>
-      
-      {/* Efficiency */}
-      <View style={styles.statCard}>
-        <Trophy size={24} color="#6366f1" />
-        <Text style={styles.statValue}>
-          {profile?.miningPower && profile?.dailyMiningRate 
-            ? ((profile.dailyMiningRate / profile.miningPower) * 100).toFixed(1) 
-            : '0'}
-          %
-        </Text>
-        <Text style={styles.statLabel}>Efficiency</Text>
-      </View>
     </View>
   );
 };
@@ -69,6 +107,8 @@ export default memo(MemoizedProfileStats, (prevProps, nextProps) => {
   return (
     prevProps.totalEKH === nextProps.totalEKH &&
     prevProps.profile?.dailyMiningRate === nextProps.profile?.dailyMiningRate &&
+    prevProps.profile?.autoMiningRate === nextProps.profile?.autoMiningRate &&
+    prevProps.profile?.referralBonusRate === nextProps.profile?.referralBonusRate &&
     prevProps.profile?.currentStreak === nextProps.profile?.currentStreak &&
     prevProps.profile?.totalReferrals === nextProps.profile?.totalReferrals &&
     prevProps.profile?.miningPower === nextProps.profile?.miningPower

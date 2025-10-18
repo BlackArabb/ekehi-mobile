@@ -35,12 +35,12 @@ const MemoizedMiningButton: React.FC<MemoizedMiningButtonProps> = ({
         Animated.sequence([
           Animated.timing(pulseAnimation, {
             toValue: 1.5,
-            duration: 1000,
+            duration: 2000,
             useNativeDriver: true,
           }),
           Animated.timing(pulseAnimation, {
             toValue: 1,
-            duration: 1000,
+            duration: 2000,
             useNativeDriver: true,
           }),
         ])
@@ -64,12 +64,12 @@ const MemoizedMiningButton: React.FC<MemoizedMiningButtonProps> = ({
       <View style={styles.miningButtonWrapper}>
         {/* Circular Progress Bar */}
         {is24HourMiningActive && remainingTime > 0 && (
-          <View style={[styles.circularProgressContainer, { width: BUTTON_SIZE + 20, height: BUTTON_SIZE + 20 }]} pointerEvents="none">
+          <View style={[styles.circularProgressContainer, { width: BUTTON_SIZE + 40, height: BUTTON_SIZE + 40 }]} pointerEvents="none">
             <CircularProgressBar 
-              size={BUTTON_SIZE + 20} 
+              size={BUTTON_SIZE + 40} 
               strokeWidth={10} 
               progress={progressPercentage}
-              strokeColor="#rgba(9, 155, 106, 0.66)"
+              strokeColor="#10b981" // Fixed: Removed rgba() format which might cause issues
               backgroundColor="rgba(255, 255, 255, 0.1)"
               showStars={false}
               pulsate={true}
@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
   miningContainer: {
     alignItems: 'center',
     marginVertical: 30,
+    marginBottom: 20,
   },
   miningButtonWrapper: {
     position: 'relative',
@@ -155,6 +156,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
+  
   },
   miningButton: {
     justifyContent: 'center',
@@ -199,6 +201,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
+    marginTop: 16,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     gap: 8,
     backgroundColor: 'rgba(16, 185, 129, 0.2)',

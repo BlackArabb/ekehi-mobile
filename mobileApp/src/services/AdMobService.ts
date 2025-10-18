@@ -7,11 +7,22 @@ let RewardedAd: typeof TRewardedAd | undefined,
     TestIds: typeof TTestIds | undefined, 
     AdEventType: typeof TAdEventType | undefined;
 
+let isModuleAvailable = false;
+let moduleLoadError: Error | null = null;
+
 if (Platform.OS !== 'web') {
   try {
-    ({ RewardedAd, RewardedAdEventType, TestIds, AdEventType } = require('react-native-google-mobile-ads'));
+    const admobModule = require('react-native-google-mobile-ads');
+    RewardedAd = admobModule.RewardedAd;
+    RewardedAdEventType = admobModule.RewardedAdEventType;
+    TestIds = admobModule.TestIds;
+    AdEventType = admobModule.AdEventType;
+    isModuleAvailable = true;
+    console.log('[AdMobService] AdMob module loaded successfully');
   } catch (error) {
     console.error('[AdMobService] Failed to import react-native-google-mobile-ads:', error);
+    moduleLoadError = error as Error;
+    isModuleAvailable = false;
   }
 }
 
@@ -50,8 +61,11 @@ class AdMobService {
     }
 
     // Check if required modules are available
-    if (!RewardedAd || !RewardedAdEventType || !AdEventType) {
-      console.error('[AdMobService] Required AdMob modules not available');
+    if (!isModuleAvailable || !RewardedAd || !RewardedAdEventType || !AdEventType) {
+      console.warn('[AdMobService] AdMob modules not available, ads will be disabled');
+      if (moduleLoadError) {
+        console.warn('[AdMobService] Module load error:', moduleLoadError.message);
+      }
       return;
     }
 
@@ -110,6 +124,12 @@ class AdMobService {
       return false;
     }
 
+    // Check if AdMob is available
+    if (!isModuleAvailable) {
+      console.warn('[AdMobService] AdMob not available, cannot load rewarded ad');
+      return false;
+    }
+
     try {
       await this.initialize();
 
@@ -155,6 +175,15 @@ class AdMobService {
       return {
         success: false,
         error: 'Ads not supported on web platform'
+      };
+    }
+
+    // Check if AdMob is available
+    if (!isModuleAvailable) {
+      console.warn('[AdMobService] AdMob not available, cannot show rewarded ad');
+      return {
+        success: false,
+        error: 'AdMob not available'
       };
     }
 
@@ -251,7 +280,21 @@ class AdMobService {
    * Check if AdMob is initialized
    */
   isAdMobInitialized(): boolean {
-    return this.isInitialized;
+    return this.isInitialized && isModuleAvailable;
+  }
+
+  /**
+   * Check if AdMob module is available
+   */
+  isAdMobAvailable(): boolean {
+    return isModuleAvailable;
+  }
+
+  /**
+   * Get the module load error if any
+   */
+  getModuleLoadError(): Error | null {
+    return moduleLoadError;
   }
 
   /**

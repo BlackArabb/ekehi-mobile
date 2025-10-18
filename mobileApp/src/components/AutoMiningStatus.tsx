@@ -5,7 +5,7 @@ import {
   Zap, 
   Coins, 
   Play, 
-  Pause, 
+  // Remove the problematic imports and use only the ones we know work
   TrendingUp,
   Timer,
   Gem,
@@ -213,7 +213,7 @@ export default function AutoMiningStatus({ profile, onRefresh }: AutoMiningStatu
             >
               {isActive ? (
                 <>
-                  <Pause size={16} color="#ffffff" />
+                  {/* Use a simple text instead of an icon that might not exist */}
                   <Text style={styles.toggleButtonText}>Stop</Text>
                 </>
               ) : (

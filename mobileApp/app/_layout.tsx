@@ -6,6 +6,7 @@ import { MiningProvider } from '@/contexts/MiningContext';
 import { ReferralProvider } from '@/contexts/ReferralContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { PresaleProvider } from '@/contexts/PresaleContext';
+import { WalletProvider } from '@/contexts/WalletContext'; // Added WalletProvider import
 import AutoMiningManager from '@/components/AutoMiningManager';
 
 export default function RootLayout() {
@@ -15,18 +16,20 @@ export default function RootLayout() {
         <MiningProvider>
           <ReferralProvider>
             <NotificationProvider>
-              <AutoMiningManager />
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="auth" options={{ headerShown: false }} />
-                <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
-                <Stack.Screen name="reset-password" options={{ headerShown: false }} />
-                <Stack.Screen name="verify-email" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="oauth/callback" options={{ headerShown: false }} />
-                <Stack.Screen name="oauth/return" options={{ headerShown: false }} />
-                <Stack.Screen name="referral/[code]" options={{ headerShown: false }} />
-              </Stack>
+              <WalletProvider>
+                <AutoMiningManager />
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="auth" options={{ headerShown: false }} />
+                  <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+                  <Stack.Screen name="reset-password" options={{ headerShown: false }} />
+                  <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="oauth/callback" options={{ headerShown: false }} />
+                  <Stack.Screen name="oauth/return" options={{ headerShown: false }} />
+                  <Stack.Screen name="referral/[code]" options={{ headerShown: false }} />
+                </Stack>
+              </WalletProvider>
             </NotificationProvider>
           </ReferralProvider>
         </MiningProvider>

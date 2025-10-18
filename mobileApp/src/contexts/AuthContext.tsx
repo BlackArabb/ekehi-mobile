@@ -457,10 +457,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const successUrl = Platform.OS === 'web' 
         ? `${baseUrl}/oauth/return` 
-        : 'ekehi://oauth/return';
+        : appwriteConfig.oauth.redirectUrls.success;
       const failureUrl = Platform.OS === 'web' 
         ? `${baseUrl}/auth` 
-        : 'ekehi://auth';
+        : appwriteConfig.oauth.redirectUrls.failure;
       
       console.log('OAuth URLs:');
       console.log('  - Success URL:', successUrl);
