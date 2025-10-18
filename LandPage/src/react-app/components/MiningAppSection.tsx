@@ -113,8 +113,7 @@ export default function MiningAppSection() {
                   <a 
                     href="https://archive.org/download/ekehi/ekehi.apk"
                     className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    download
                   >
                     <Download size={20} />
                     Download Mining App
