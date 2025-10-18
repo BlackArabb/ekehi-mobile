@@ -35,7 +35,7 @@ const appFeatures = [
 ];
 
 const appStats = [
-  { label: 'Status', value: 'Coming Soon' },
+  { label: 'Status', value: 'Available Now' },
   { label: 'EKH Distribution', value: 'Pre-Sale' },
   { label: 'Mining Type', value: '24/7 Auto' },
   { label: 'Release', value: 'Q1 2026' },
@@ -44,10 +44,13 @@ const appStats = [
 export default function MiningAppSection() {
   const [expandedFeature, setExpandedFeature] = useState<number | null>(null);
   // State to control whether the app is ready for download or coming soon
-  const [isAppReady, setIsAppReady] = useState(false); // Set to false initially for "COMING SOON"
+  const [isAppReady, setIsAppReady] = useState(true); // Set to true for "Available Now"
 
   // Load the app status from localStorage when component mounts
   useEffect(() => {
+    // Set the localStorage value to ensure persistence
+    localStorage.setItem('ekehiAppReady', 'true');
+    
     const savedStatus = localStorage.getItem('ekehiAppReady');
     if (savedStatus !== null) {
       setIsAppReady(savedStatus === 'true');
@@ -66,10 +69,19 @@ export default function MiningAppSection() {
           <h2 className="text-h2 font-display text-gradient-gold mb-4 md:mb-6">
             Ekehi Mining App
           </h2>
-          <p className="text-body text-soft-white max-w-3xl mx-auto px-4 md:px-0">
-            Mobile app coming soon! Be among the first to mine EKH tokens right from your smartphone. 
-            Simple, secure, and rewarding way to participate in the Ekehi ecosystem.
-          </p>
+          {/* Paragraph for when app is ready */}
+          {isAppReady ? (
+            <p className="text-body text-soft-white max-w-3xl mx-auto px-4 md:px-0">
+              Download our mobile app now and start mining EKH tokens right from your smartphone. 
+              Simple, secure, and rewarding way to participate in the Ekehi ecosystem.
+            </p>
+          ) : (
+            /* Paragraph for when app is coming soon */
+            <p className="text-body text-soft-white max-w-3xl mx-auto px-4 md:px-0">
+              Mobile app coming soon! Be among the first to mine EKH tokens right from your smartphone. 
+              Simple, secure, and rewarding way to participate in the Ekehi ecosystem.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-16">
@@ -97,16 +109,18 @@ export default function MiningAppSection() {
             <div className="text-center mt-10">
               {isAppReady ? (
                 <>
-                  <p className="text-yellow-500 font-bold mb-2 text-center">Start Claiming Now</p>
+                  <p className="text-yellow-500 font-bold mb-2 text-center">Start Mining Now</p>
                   <a 
-                    href="#"
+                    href="https://archive.org/embed/ekehi"
                     className="btn-primary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base centered-button"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <Download size={20} />
                     Download Mining App
                   </a>
                   <div className="mt-4 text-sm text-medium-gray">
-                    <p>Not available on app stores yet. Direct download only.</p>
+                    <p>Direct APK download. Not available on app stores yet.</p>
                   </div>
                 </>
               ) : (
