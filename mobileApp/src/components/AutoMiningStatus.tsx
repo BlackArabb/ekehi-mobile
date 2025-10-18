@@ -5,7 +5,6 @@ import {
   Zap, 
   Coins, 
   Play, 
-  // Remove the problematic imports and use only the ones we know work
   TrendingUp,
   Timer,
   Gem,
