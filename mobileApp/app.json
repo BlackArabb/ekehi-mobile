@@ -83,15 +83,6 @@
             "minSdkVersion": 21
           }
         }
-      ],
-      [
-        "@kastorcode/expo-startio",
-        {
-          "appId": "209257659",
-          "adNetworks": {
-            "startApp": true
-          }
-        }
       ]
     ],
     "scheme": "ekehi"

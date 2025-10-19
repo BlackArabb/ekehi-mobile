@@ -1,4 +1,7 @@
-import { Platform } from 'react-native';
+import { Platform, NativeModules } from 'react-native';
+
+console.log('[StartIoService] Platform:', Platform.OS);
+console.log('[StartIoService] Available native modules:', Object.keys(NativeModules));
 
 // Start.io module state
 let isModuleAvailable = false;
@@ -7,33 +10,70 @@ let startIoModule: any = null;
 
 // Load Start.io module only on Android
 if (Platform.OS === 'android') {
+  console.log('[StartIoService] Android platform detected, loading Start.io...');
+  
+  // Try NativeModules first (more reliable)
   try {
-    startIoModule = require('@kastorcode/expo-startio');
+    console.log('[StartIoService] Trying NativeModules.ExpoStartio...');
+    const nativeStartio = NativeModules.ExpoStartio;
+    console.log('[StartIoService] NativeModules.ExpoStartio available:', !!nativeStartio);
     
-    if (!startIoModule || typeof startIoModule !== 'object') {
-      throw new Error('Start.io module is not a valid object');
+    if (nativeStartio) {
+      console.log('[StartIoService] NativeModules.ExpoStartio methods:', Object.keys(nativeStartio));
+      startIoModule = nativeStartio;
+      isModuleAvailable = true;
+      console.log('[StartIoService] ✅ Loaded Start.io via NativeModules');
+    } else {
+      console.warn('[StartIoService] NativeModules.ExpoStartio is null');
     }
-
-    // Verify essential functions exist
-    const hasInit = typeof startIoModule.initStartio === 'function';
-    const hasShowAd = typeof startIoModule.showAdStartio === 'function';
-
-    if (!hasInit || !hasShowAd) {
-      const available = Object.keys(startIoModule).filter(
-        key => typeof startIoModule[key] === 'function'
-      );
-      throw new Error(
-        `Missing essential Start.io functions. Available: ${available.join(', ')}`
-      );
-    }
-
-    isModuleAvailable = true;
-    console.log('[StartIoService] Start.io module loaded successfully');
   } catch (error) {
-    console.error('[StartIoService] Failed to load Start.io module:', error);
-    moduleLoadError = error as Error;
-    isModuleAvailable = false;
-    startIoModule = null;
+    console.warn('[StartIoService] NativeModules approach failed:', error);
+  }
+
+  // Fallback to require if NativeModules didn't work
+  if (!isModuleAvailable) {
+    try {
+      console.log('[StartIoService] Attempting to load @kastorcode/expo-startio via require...');
+      startIoModule = require('@kastorcode/expo-startio');
+      
+      console.log('[StartIoService] Module loaded, type:', typeof startIoModule);
+      console.log('[StartIoService] Module contents:', Object.keys(startIoModule));
+
+      if (!startIoModule || typeof startIoModule !== 'object') {
+        throw new Error('Start.io module is not a valid object');
+      }
+
+      // Verify essential functions exist
+      const hasInit = typeof startIoModule.initStartio === 'function';
+      const hasShowAd = typeof startIoModule.showAdStartio === 'function';
+
+      console.log('[StartIoService] hasInit:', hasInit, 'hasShowAd:', hasShowAd);
+
+      if (!hasInit || !hasShowAd) {
+        const available = Object.keys(startIoModule).filter(
+          key => typeof startIoModule[key] === 'function'
+        );
+        throw new Error(
+          `Missing essential Start.io functions. Available: ${available.join(', ')}`
+        );
+      }
+
+      isModuleAvailable = true;
+      console.log('[StartIoService] ✅ Start.io module loaded successfully via require');
+    } catch (error) {
+      console.error('[StartIoService] ❌ Failed to load Start.io module:', error);
+      moduleLoadError = error as Error;
+      isModuleAvailable = false;
+      startIoModule = null;
+    }
+  }
+
+  if (!isModuleAvailable) {
+    console.error('[StartIoService] ❌ Start.io module is not available on this device');
+    console.warn('[StartIoService] This is likely because:');
+    console.warn('[StartIoService] 1. The app was not built with expo prebuild');
+    console.warn('[StartIoService] 2. The native module was not properly compiled');
+    console.warn('[StartIoService] 3. The @kastorcode/expo-startio package is not installed');
   }
 }
 
@@ -58,12 +98,13 @@ class StartIoService {
    */
   private getSafeFunction(functionName: string): ((...args: any[]) => Promise<any>) | null {
     if (!isModuleAvailable || !startIoModule) {
+      console.warn(`[StartIoService] Module not available, cannot get ${functionName}`);
       return null;
     }
 
     const fn = startIoModule[functionName];
     if (typeof fn !== 'function') {
-      console.warn(`[StartIoService] Function ${functionName} is not available`);
+      console.warn(`[StartIoService] Function ${functionName} is not available. Available functions: ${Object.keys(startIoModule).join(', ')}`);
       return null;
     }
 
@@ -99,9 +140,9 @@ class StartIoService {
     }
 
     try {
-      console.log('[StartIoService] Initializing with App ID:', this.appId);
+      console.log('[StartIoService] Initializing with App ID:', this.appId, 'Dev mode:', __DEV__);
       const initResult = await initStartio(this.appId, __DEV__);
-      console.log('[StartIoService] Initialization result:', initResult);
+      console.log('[StartIoService] ✅ Initialization result:', initResult);
 
       // Set user consent
       const setUserConsent = this.getSafeFunction('setUserConsentStartio');
@@ -136,9 +177,9 @@ class StartIoService {
       }
 
       this.isInitialized = true;
-      console.log('[StartIoService] Initialized successfully');
+      console.log('[StartIoService] ✅ Initialized successfully');
     } catch (error) {
-      console.error('[StartIoService] Initialization failed:', error);
+      console.error('[StartIoService] ❌ Initialization failed:', error);
       this.isInitialized = false;
     }
   }
@@ -148,6 +189,7 @@ class StartIoService {
    */
   async loadRewardedAd(): Promise<boolean> {
     if (Platform.OS !== 'android' || !isModuleAvailable) {
+      console.warn('[StartIoService] Cannot load ad on this platform');
       return false;
     }
 
@@ -166,6 +208,9 @@ class StartIoService {
    * Show a rewarded ad
    */
   async showRewardedAd(): Promise<{ success: boolean; reward?: number; error?: string }> {
+    console.log('[StartIoService] showRewardedAd called');
+    console.log('[StartIoService] Platform:', Platform.OS, 'isAvailable:', isModuleAvailable);
+
     if (Platform.OS !== 'android') {
       return { success: false, error: 'Ads not supported on this platform' };
     }
@@ -189,18 +234,18 @@ class StartIoService {
         }
       }
 
-      console.log('[StartIoService] Showing rewarded ad...');
+      console.log('[StartIoService] Calling showAdStartio...');
       const result = await showAd();
-      console.log('[StartIoService] Rewarded ad show result:', result);
+      console.log('[StartIoService] showAdStartio result:', result);
 
       if (result) {
-        console.log('[StartIoService] Rewarded ad shown successfully');
+        console.log('[StartIoService] ✅ Rewarded ad shown successfully');
         return { success: true, reward: 0.5 };
       }
 
       return { success: false, error: 'Ad failed to show' };
     } catch (error: any) {
-      console.error('[StartIoService] Failed to show rewarded ad:', error);
+      console.error('[StartIoService] ❌ Failed to show rewarded ad:', error);
       this.isAdLoaded = false;
       return { success: false, error: error?.message || 'Failed to show ad' };
     }
@@ -239,14 +284,14 @@ class StartIoService {
 
       if (result) {
         this.exitAdShown = true;
-        console.log('[StartIoService] Exit ad shown successfully');
+        console.log('[StartIoService] ✅ Exit ad shown successfully');
         return true;
       }
 
       console.warn('[StartIoService] Exit ad failed to show');
       return false;
     } catch (error) {
-      console.error('[StartIoService] Failed to show exit ad:', error);
+      console.error('[StartIoService] ❌ Failed to show exit ad:', error);
       return false;
     }
   }
@@ -261,6 +306,7 @@ class StartIoService {
   }
 
   isStartIoAvailable(): boolean {
+    console.log('[StartIoService] isStartIoAvailable called, returning:', isModuleAvailable);
     return isModuleAvailable;
   }
 
