@@ -21,17 +21,17 @@ import CircularProgressBar from '@/components/CircularProgressBar';
 import EnhancedLoading from '@/components/EnhancedLoading';
 import MemoizedMiningButton from '@/components/MemoizedMiningButton';
 
-// Conditional import for AdMobService - only import on native platforms
-let AdMobService: any = null;
-let isAdMobAvailable = false;
+// Conditional import for StartIoService - only import on Android platform
+let StartIoService: any = null;
+let isStartIoAvailable = false;
 try {
-  if (Platform.OS !== 'web') {
-    AdMobService = require('@/services/AdMobService').default;
-    isAdMobAvailable = AdMobService.isAdMobAvailable && AdMobService.isAdMobAvailable();
+  if (Platform.OS === 'android') {
+    StartIoService = require('@/services/StartIoService').default;
+    isStartIoAvailable = StartIoService.isStartIoAvailable && StartIoService.isStartIoAvailable();
   }
 } catch (error) {
-  console.error('[MinePage] Failed to import AdMobService:', error);
-  isAdMobAvailable = false;
+  console.error('[MinePage] Failed to import StartIoService:', error);
+  isStartIoAvailable = false;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -354,8 +354,8 @@ export default function MinePage() {
     };
 
     const handleWatchAd = () => {
-        // Only show ad modal if AdMob is available
-        if (isAdMobAvailable && Platform.OS !== 'web') {
+        // Only show ad modal if Start.io is available
+        if (isStartIoAvailable && Platform.OS === 'android') {
             setShowAdModal(true);
         } else {
             showNotification({
@@ -380,7 +380,7 @@ export default function MinePage() {
                     ID.unique(),
                     {
                         userId: user?.id,
-                        adType: 'bonus',
+                        adType: 'startio_bonus',
                         reward: result.reward,
                         createdAt: new Date().toISOString()
                     }

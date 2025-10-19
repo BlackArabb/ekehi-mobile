@@ -17,6 +17,19 @@ import MemoizedProfileStats from '@/components/MemoizedProfileStats';
 import PerformanceReport from '@/components/PerformanceReport';
 import AutoMiningInfo from '@/components/AutoMiningInfo';
 
+// Conditional import for StartIoService - only import on Android platform
+let StartIoService: any = null;
+let isStartIoAvailable = false;
+try {
+  if (Platform.OS === 'android') {
+    StartIoService = require('@/services/StartIoService').default;
+    isStartIoAvailable = StartIoService.isStartIoAvailable && StartIoService.isStartIoAvailable();
+  }
+} catch (error) {
+  console.warn('[ProfilePage] Failed to import StartIoService:', error);
+  isStartIoAvailable = false;
+}
+
 // Type declaration for window object on web platform
 // Type declaration for window object on web platform
 declare const window: any;
@@ -987,6 +1000,18 @@ export default function ProfilePage() {
               setIsSigningOut(true);
               console.log('Starting sign out process');
               
+              // Show exit ad on Android if available
+              if (Platform.OS === 'android' && isStartIoAvailable && StartIoService) {
+                console.log('Showing exit ad before sign out');
+                try {
+                  // Show exit ad and wait for it to complete
+                  await StartIoService.showExitAd();
+                  console.log('Exit ad shown successfully');
+                } catch (adError) {
+                  console.warn('Failed to show exit ad:', adError);
+                }
+              }
+              
               // Different approaches for web vs mobile platforms
               if (Platform.OS === 'web') {
                 // For web platforms, use window.location approach
@@ -1038,6 +1063,11 @@ export default function ProfilePage() {
               // For web, we don't reset the loading state as we're redirecting
               if (Platform.OS !== 'web') {
                 setIsSigningOut(false);
+              }
+              
+              // Reset exit ad shown flag for next time
+              if (Platform.OS === 'android' && StartIoService) {
+                StartIoService.resetExitAd();
               }
             }
           }

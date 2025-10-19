@@ -10,10 +10,10 @@ module.exports = async function (env, argv) {
     'react-native/Libraries/Utilities/Platform$': 'react-native-web/dist/exports/Platform',
   };
 
-  // Exclude react-native-google-mobile-ads from web build since it's native only
+  // Exclude @kastorcode/expo-startio from web build since it's native only
   if (config.module && config.module.rules) {
     config.module.rules.push({
-      test: /react-native-google-mobile-ads/,
+      test: /@kastorcode\/expo-startio/,
       use: 'null-loader',
     });
   }

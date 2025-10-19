@@ -17,9 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ekehi.network",
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-6750107449379811~7479135078"
-      }
+      "config": {}
     },
     "android": {
       "adaptiveIcon": {
@@ -69,22 +67,30 @@
           ]
         }
       ],
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-6750107449379811~7479135078"
-      }
+      "config": {}
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
-      "expo-build-properties",
       [
-        "react-native-google-mobile-ads",
+        "expo-build-properties",
         {
-          "androidAppId": "ca-app-pub-6750107449379811~7479135078",
-          "iosAppId": "ca-app-pub-6750107449379811~7479135078",
-          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 21
+          }
+        }
+      ],
+      [
+        "@kastorcode/expo-startio",
+        {
+          "appId": "209257659",
+          "adNetworks": {
+            "startApp": true
+          }
         }
       ]
     ],

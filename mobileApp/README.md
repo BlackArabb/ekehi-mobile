@@ -16,6 +16,7 @@ Ekehi Network is a mobile mining application built with React Native and Expo, u
 - **Token Presale**: Early access token purchase with benefits
 - **Wallet Management**: Secure token storage and transaction history
 - **Leaderboard**: Community ranking based on mining performance
+- **Advertising Rewards**: Earn bonus tokens by watching Start.io rewarded ads
 
 ### 🎯 Auto Mining System
 - **Eligibility**: Users must purchase a minimum amount during presale to unlock auto mining
@@ -143,6 +144,10 @@ npx expo build:web
 - [Appwrite OAuth Configuration Fix](./Documentations/APPWRITE_OAUTH_FIX.md)
 - [Appwrite Mobile Platform Setup Guide](./Documentations/APPWRITE_MOBILE_PLATFORM_SETUP.md)
 - [Auto Mining Improvements Summary](./Documentations/AUTO_MINING_IMPROVEMENTS_SUMMARY.md)
+- [Start.io Migration Guide](./Documentations/START_IO_MIGRATION_GUIDE.md)
+- [Start.io Exit Ads Implementation](./Documentations/START_IO_EXIT_ADS_IMPLEMENTATION.md)
+- [Start.io Package Update](./Documentations/START_IO_PACKAGE_UPDATE.md)
+- [Start.io App ID Configuration](./Documentations/START_IO_APP_ID.md)
 
 ## 🐛 Troubleshooting
 

@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Play, X, Gift, Coins } from 'lucide-react-native';
-// Conditional import for AdMobService - only import on native platforms
-let AdMobService: any = null;
-let isAdMobAvailable = false;
-if (Platform.OS !== 'web') {
+
+// Conditional import for StartIoService - only import on Android platform
+let StartIoService: any = null;
+let isStartIoAvailable = false;
+if (Platform.OS === 'android') {
   try {
-    AdMobService = require('@/services/AdMobService').default;
-    isAdMobAvailable = AdMobService.isAdMobAvailable && AdMobService.isAdMobAvailable();
+    StartIoService = require('@/services/StartIoService').default;
+    isStartIoAvailable = StartIoService.isStartIoAvailable && StartIoService.isStartIoAvailable();
   } catch (error) {
-    console.error('[AdModal] Failed to import AdMobService:', error);
-    isAdMobAvailable = false;
+    console.error('[AdModal] Failed to import StartIoService:', error);
+    isStartIoAvailable = false;
   }
 }
 
@@ -22,7 +23,6 @@ interface AdModalProps {
   title?: string;
   description?: string;
   reward?: number;
-  // Testing props
   onTestEvent?: (event: string, data?: any) => void;
 }
 
@@ -35,12 +35,12 @@ const AdModal: React.FC<AdModalProps> = ({
   reward = 0.5,
   onTestEvent
 }) => {
-  const [isWatching, setIsWatching] = useState(false);
+  const [adState, setAdState] = useState<'idle' | 'loading' | 'playing' | 'completing'>('idle');
   const [countdown, setCountdown] = useState(30);
   const [canSkip, setCanSkip] = useState(false);
-  const [isAdLoading, setIsAdLoading] = useState(false);
   const [isWebPlatform] = useState(Platform.OS === 'web');
-  const [isAdAvailable, setIsAdAvailable] = useState(isAdMobAvailable && Platform.OS !== 'web');
+  const [isAdAvailable] = useState(isStartIoAvailable && Platform.OS === 'android');
+  const [error, setError] = useState<string | null>(null);
 
   // Notify test system of events
   const notifyTestEvent = (event: string, data?: any) => {
@@ -49,20 +49,22 @@ const AdModal: React.FC<AdModalProps> = ({
     }
   };
 
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (isVisible) {
-      setIsWatching(false);
+      setAdState('idle');
       setCountdown(30);
       setCanSkip(false);
-      setIsAdLoading(false);
+      setError(null);
       notifyTestEvent('modal_opened', { title, reward });
     }
   }, [isVisible]);
 
+  // Countdown timer - only runs when ad is actually playing
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | null = null;
     
-    if (isWatching && countdown > 0) {
+    if (adState === 'playing' && countdown > 0) {
       timer = setInterval(() => {
         setCountdown(prev => {
           const newCount = prev - 1;
@@ -72,93 +74,97 @@ const AdModal: React.FC<AdModalProps> = ({
           return newCount;
         });
       }, 1000);
-    } else if (countdown === 0 && isWatching) {
-      // Only call handleAdComplete if we're actually watching (not loading)
-      if (!isAdLoading) {
-        handleAdComplete();
-      }
+    } else if (countdown === 0 && adState === 'playing') {
+      // Ad completed naturally via countdown
+      handleAdComplete(true);
     }
 
     return () => {
       if (timer) clearInterval(timer);
-    }
-  }, [isWatching, countdown, isAdLoading]);
+    };
+  }, [adState, countdown]);
 
   const handleStartAd = async () => {
-    // Don't start ads on web platform
-    if (isWebPlatform || !isAdAvailable) {
+    // Validate platform
+    if (isWebPlatform || !isAdAvailable || Platform.OS !== 'android') {
       console.log('[AdModal] Ads not supported on this platform');
+      await onComplete({ success: false, error: 'Ads not supported on this platform' });
       onClose();
       return;
     }
 
-    // Set watching state immediately when user clicks "Watch Ad"
-    setIsWatching(true);
-    setCountdown(30);
-    setCanSkip(false);
+    setAdState('loading');
+    setError(null);
     
-    // Always use real AdMob ads
     try {
-      setIsAdLoading(true);
-      notifyTestEvent('ad_loading', { adUnitId: AdMobService.getAdUnitId() });
+      notifyTestEvent('ad_loading', { appId: StartIoService.getAppId() });
+      console.log('[AdModal] Starting to load rewarded ad...');
 
-      const result = await AdMobService.showRewardedAd();
+      // Call Start.io to show the ad
+      const result = await StartIoService.showRewardedAd();
       
-      setIsAdLoading(false);
-      setIsWatching(false); // Reset watching state
-      
+      console.log('[AdModal] Ad result:', result);
+
       if (result.success) {
-        notifyTestEvent('ad_completed', { reward: result.reward });
-        // Call onComplete with the actual reward from AdMob
-        await onComplete({ success: true, reward: result.reward });
-        // Close after successful completion
-        onClose();
+        // Ad was shown successfully - now start the countdown
+        notifyTestEvent('ad_playing', { reward: result.reward });
+        setAdState('playing');
+        setCountdown(30);
+        setCanSkip(false);
       } else {
-        notifyTestEvent('ad_error', { error: result.error });
-        console.error('AdMob error:', result.error);
-        // Call onComplete with error
-        await onComplete({ success: false, error: result.error });
-        // Close on error
+        // Ad failed to show
+        const errorMsg = result.error || 'Failed to load advertisement';
+        notifyTestEvent('ad_error', { error: errorMsg });
+        console.error('[AdModal] Ad failed:', errorMsg);
+        setError(errorMsg);
+        setAdState('idle');
+        
+        // Notify parent of failure
+        await onComplete({ success: false, error: errorMsg });
         onClose();
       }
     } catch (error: any) {
-      setIsAdLoading(false);
-      setIsWatching(false); // Reset watching state on error
-      notifyTestEvent('ad_exception', { error: error.message || 'Unknown error' });
-      console.error('AdMob exception:', error);
-      // Call onComplete with error
-      await onComplete({ success: false, error: error.message || 'Ad failed to show' });
-      // Close on exception
+      const errorMsg = error.message || 'Unknown error occurred';
+      notifyTestEvent('ad_exception', { error: errorMsg });
+      console.error('[AdModal] Exception:', error);
+      setError(errorMsg);
+      setAdState('idle');
+      
+      // Notify parent of failure
+      await onComplete({ success: false, error: errorMsg });
       onClose();
     }
   };
 
-  const handleAdComplete = async () => {
+  const handleAdComplete = async (success: boolean) => {
+    if (adState === 'completing') return; // Prevent duplicate calls
+    
+    setAdState('completing');
+    
     try {
-      notifyTestEvent('ad_completed', { reward });
-      // Call onComplete for consistency
-      await onComplete({ success: true, reward });
-      
-      // Close the modal after ad completion
-      onClose();
+      if (success) {
+        notifyTestEvent('ad_completed', { reward });
+        await onComplete({ success: true, reward });
+      } else {
+        notifyTestEvent('ad_skipped', { timeRemaining: countdown });
+        await onComplete({ success: false, error: 'Ad was skipped' });
+      }
     } catch (error: any) {
-      notifyTestEvent('ad_error', { error: error.message });
-      console.error('Ad completion error:', error);
-      onClose();
+      notifyTestEvent('ad_completion_error', { error: error.message });
+      console.error('[AdModal] Completion error:', error);
     } finally {
-      setIsWatching(false);
+      setAdState('idle');
       setCountdown(30);
+      onClose();
     }
   };
 
   const handleSkip = () => {
-    notifyTestEvent('ad_skipped', { timeRemaining: countdown });
-    onClose();
+    handleAdComplete(false);
   };
 
-  // Test controls (only visible in development for testing purposes)
+  // Test controls - development only
   const renderTestControls = () => {
-    // Only show test controls in development
     // @ts-ignore - __DEV__ is a React Native global
     if (!__DEV__) return null;
     
@@ -169,8 +175,7 @@ const AdModal: React.FC<AdModalProps> = ({
           <TouchableOpacity 
             style={[styles.testButton, styles.testSuccessButton]}
             onPress={() => {
-              // Simulate successful ad completion
-              setIsWatching(false);
+              setAdState('playing');
               setCountdown(0);
             }}
           >
@@ -179,8 +184,8 @@ const AdModal: React.FC<AdModalProps> = ({
           <TouchableOpacity 
             style={[styles.testButton, styles.testErrorButton]}
             onPress={() => {
-              // Simulate ad error
-              setIsWatching(false);
+              setError('Test error');
+              setAdState('idle');
               onClose();
             }}
           >
@@ -191,33 +196,8 @@ const AdModal: React.FC<AdModalProps> = ({
     );
   };
 
-  // Web platform message
-  const renderWebPlatformMessage = () => {
-    if (!isWebPlatform) return null;
-    
-    return (
-      <View style={styles.webMessageContainer}>
-        <Text style={styles.webMessageText}>
-          Ads are not available on web platform. Please use the mobile app to watch ads and earn rewards.
-        </Text>
-      </View>
-    );
-  };
-
-  // Ad not available message
-  const renderAdNotAvailableMessage = () => {
-    if (isAdAvailable || isWebPlatform) return null;
-    
-    return (
-      <View style={styles.webMessageContainer}>
-        <Text style={styles.webMessageText}>
-          Ads are temporarily unavailable. Please try again later.
-        </Text>
-      </View>
-    );
-  };
-
-  if (isWatching || isAdLoading) {
+  // Show loading/playing state
+  if (adState === 'loading' || adState === 'playing' || adState === 'completing') {
     return (
       <Modal visible={isVisible} transparent animationType="fade">
         <View style={styles.overlay}>
@@ -238,45 +218,40 @@ const AdModal: React.FC<AdModalProps> = ({
               </View>
               
               <Text style={styles.watchingTitle}>
-                {isAdLoading ? 'Loading Advertisement...' : 'Advertisement Playing'}
+                {adState === 'loading' ? 'Loading Advertisement...' : 'Advertisement Playing'}
               </Text>
               <Text style={styles.watchingSubtitle}>
-                {isAdLoading 
+                {adState === 'loading' 
                   ? 'Preparing your ad...' 
                   : `Watch to earn ${reward} EKH reward!`}
               </Text>
               
-              {/* Countdown or Loading Indicator */}
-              {isAdLoading ? (
-                <View style={styles.loadingIndicator}>
-                  <Text style={styles.loadingText}>Loading...</Text>
-                </View>
-              ) : null}
-              
-              <Text style={styles.countdown}>{countdown}</Text>
+              {/* Countdown */}
+              {adState === 'playing' && <Text style={styles.countdown}>{countdown}</Text>}
               
               {/* Progress Bar */}
-              <View style={styles.progressContainer}>
-                <View style={styles.progressBar}>
-                  <LinearGradient
-                    colors={['#ffa000', '#ff8f00']}
-                    style={[styles.progressFill, { width: `${((30 - countdown) / 30) * 100}%` }]}
-                  />
+              {adState === 'playing' && (
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressBar}>
+                    <LinearGradient
+                      colors={['#ffa000', '#ff8f00']}
+                      style={[styles.progressFill, { width: `${((30 - countdown) / 30) * 100}%` }]}
+                    />
+                  </View>
                 </View>
-              </View>
+              )}
               
               {/* Skip Button */}
-              {canSkip ? (
+              {adState === 'playing' && canSkip ? (
                 <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
                   <Text style={styles.skipButtonText}>Skip Advertisement</Text>
                 </TouchableOpacity>
-              ) : (
+              ) : adState === 'playing' ? (
                 <Text style={styles.skipText}>
                   Skip available in {Math.max(0, countdown - 5)}s
                 </Text>
-              )}
+              ) : null}
               
-              {/* Test Controls */}
               {renderTestControls()}
             </LinearGradient>
           </View>
@@ -285,6 +260,7 @@ const AdModal: React.FC<AdModalProps> = ({
     );
   }
 
+  // Show initial prompt
   return (
     <Modal visible={isVisible} transparent animationType="slide">
       <View style={styles.overlay}>
@@ -325,9 +301,29 @@ const AdModal: React.FC<AdModalProps> = ({
               </LinearGradient>
             </View>
             
+            {/* Error Message */}
+            {error && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+            
             {/* Platform Messages */}
-            {renderWebPlatformMessage()}
-            {renderAdNotAvailableMessage()}
+            {isWebPlatform && (
+              <View style={styles.webMessageContainer}>
+                <Text style={styles.webMessageText}>
+                  Ads are not available on web platform. Please use the mobile app.
+                </Text>
+              </View>
+            )}
+            
+            {!isWebPlatform && !isAdAvailable && (
+              <View style={styles.webMessageContainer}>
+                <Text style={styles.webMessageText}>
+                  Ads are temporarily unavailable. Please try again later.
+                </Text>
+              </View>
+            )}
             
             {/* Action Buttons */}
             <View style={styles.buttonContainer}>
@@ -338,7 +334,7 @@ const AdModal: React.FC<AdModalProps> = ({
               <TouchableOpacity 
                 style={styles.watchButton} 
                 onPress={handleStartAd}
-                disabled={isAdLoading || isWebPlatform || !isAdAvailable}
+                disabled={adState !== 'idle' || isWebPlatform || !isAdAvailable}
               >
                 <LinearGradient
                   colors={(isWebPlatform || !isAdAvailable) ? ['#6b7280', '#4b5563'] : ['#ffa000', '#ff8f00']}
@@ -346,13 +342,12 @@ const AdModal: React.FC<AdModalProps> = ({
                 >
                   <Play size={16} color="#ffffff" />
                   <Text style={styles.watchButtonText}>
-                    {isWebPlatform ? 'Not Available' : (!isAdAvailable ? 'Not Available' : (isAdLoading ? 'Loading...' : 'Watch Ad'))}
+                    {isWebPlatform ? 'Not Available' : (!isAdAvailable ? 'Not Available' : 'Watch Ad')}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
             
-            {/* Test Controls */}
             {renderTestControls()}
           </LinearGradient>
         </View>
@@ -360,8 +355,6 @@ const AdModal: React.FC<AdModalProps> = ({
     </Modal>
   );
 };
-
-export default AdModal;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -448,6 +441,18 @@ const styles = StyleSheet.create({
   },
   webMessageText: {
     color: '#ffa000',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  errorContainer: {
+    width: '100%',
+    padding: 12,
+    backgroundColor: 'rgba(255, 0, 0, 0.2)',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  errorText: {
+    color: '#ff6b6b',
     fontSize: 12,
     textAlign: 'center',
   },
@@ -614,3 +619,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+export default AdModal;
