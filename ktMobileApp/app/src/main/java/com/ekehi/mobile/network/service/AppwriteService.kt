@@ -4,7 +4,6 @@ import io.appwrite.Client
 import io.appwrite.services.Account
 import io.appwrite.services.Databases
 import io.appwrite.services.Storage
-import io.appwrite.services.Realtime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,12 +14,11 @@ class AppwriteService @Inject constructor(
     val account: Account = Account(client)
     val databases: Databases = Databases(client)
     val storage: Storage = Storage(client)
-    val realtime: Realtime = Realtime(client)
     
     companion object {
         const val DATABASE_ID = "68c336e7000f87296feb"
         
-        // Collection IDs
+        // Collection IDs - matching React Native app
         const val USERS_COLLECTION = "users"
         const val USER_PROFILES_COLLECTION = "user_profiles"
         const val MINING_SESSIONS_COLLECTION = "mining_sessions"
