@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344114740804",
+    "project_id": "time-machine-50e5b",
+    "storage_bucket": "time-machine-50e5b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344114740804:android:258bb7615d1cccfaca4611",
+        "android_client_info": {
+          "package_name": "com.ekehi.network"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFXxjwwOG2hw3_7n_m6q6GBYO9ABAz7B8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
