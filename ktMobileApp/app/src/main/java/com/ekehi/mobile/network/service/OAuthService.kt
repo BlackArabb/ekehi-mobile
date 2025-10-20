@@ -23,7 +23,7 @@ class OAuthService @Inject constructor(
     }
     
     fun initiateGoogleOAuth(): String {
-        return account.createOAuth2Token(
+        return account.createOAuth2Session(
             provider = GOOGLE_PROVIDER,
             success = SUCCESS_URL,
             failure = FAILURE_URL

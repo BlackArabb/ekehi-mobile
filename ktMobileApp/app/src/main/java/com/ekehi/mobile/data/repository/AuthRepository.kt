@@ -2,6 +2,7 @@ package com.ekehi.mobile.data.repository
 
 import com.ekehi.mobile.data.model.User
 import com.ekehi.mobile.network.service.AppwriteService
+import io.appwrite.ID
 import io.appwrite.exceptions.AppwriteException
 import io.appwrite.models.Session
 import io.appwrite.models.User as AppwriteUser
@@ -29,8 +30,8 @@ class AuthRepository @Inject constructor(
     suspend fun register(email: String, password: String, name: String): Result<AppwriteUser<*>> {
         return withContext(Dispatchers.IO) {
             try {
-                val user = appwriteService.account.createUser(
-                    userId = "unique()",
+                val user = appwriteService.account.create(
+                    userId = ID.unique(),
                     email = email,
                     password = password,
                     name = name
