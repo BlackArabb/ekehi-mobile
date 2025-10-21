@@ -11,14 +11,14 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
-    private val appwriteService: AppwriteService
+        private val appwriteService: AppwriteService
 ) {
     suspend fun login(email: String, password: String): Result<Session> {
         return withContext(Dispatchers.IO) {
             try {
                 val session = appwriteService.account.createEmailPasswordSession(
-                    email = email,
-                    password = password
+                        email = email,
+                        password = password
                 )
                 Result.success(session)
             } catch (e: AppwriteException) {
@@ -27,14 +27,14 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun register(email: String, password: String, name: String): Result<AppwriteUser<*>> {
+    suspend fun register(email: String, password: String, name: String): Result<AppwriteUser<Map<String, Any>>> {
         return withContext(Dispatchers.IO) {
             try {
                 val user = appwriteService.account.create(
-                    userId = ID.unique(),
-                    email = email,
-                    password = password,
-                    name = name
+                        userId = ID.unique(),
+                        email = email,
+                        password = password,
+                        name = name
                 )
                 Result.success(user)
             } catch (e: AppwriteException) {
@@ -59,11 +59,11 @@ class AuthRepository @Inject constructor(
             try {
                 val account = appwriteService.account.get()
                 val user = User(
-                    id = account.id,
-                    name = account.name,
-                    email = account.email,
-                    createdAt = account.registration ?: "",
-                    updatedAt = account.updatedAt
+                        id = account.id,
+                        name = account.name,
+                        email = account.email,
+                        createdAt = account.registration ?: "",
+                        updatedAt = ""
                 )
                 Result.success(user)
             } catch (e: AppwriteException) {

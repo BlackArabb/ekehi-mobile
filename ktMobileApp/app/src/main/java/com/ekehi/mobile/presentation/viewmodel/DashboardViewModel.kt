@@ -3,11 +3,9 @@ package com.ekehi.mobile.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.mobile.data.model.UserProfile
-import com.ekehi.mobile.domain.usecase.RealtimeUseCase
 import com.ekehi.mobile.domain.model.Resource
 import com.ekehi.mobile.performance.PerformanceMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.appwrite.models.RealtimeResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,7 +13,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val realtimeUseCase: RealtimeUseCase,
     private val performanceMonitor: PerformanceMonitor
 ) : ViewModel() {
 
@@ -54,19 +51,6 @@ class DashboardViewModel @Inject constructor(
                 _userProfile.value = Resource.Success(profile)
             }, "loadUserProfile")
         }
-    }
-
-    private fun subscribeToUserProfileUpdates(userId: String) {
-        viewModelScope.launch {
-            realtimeUseCase.subscribeToUserUpdates(userId).collect { event ->
-                handleRealtimeEvent(event)
-            }
-        }
-    }
-
-    private fun handleRealtimeEvent(event: RealtimeResponse) {
-        // Handle real-time updates to the user profile
-        // In a real implementation, you would update the UI based on the event
     }
 
     override fun onCleared() {

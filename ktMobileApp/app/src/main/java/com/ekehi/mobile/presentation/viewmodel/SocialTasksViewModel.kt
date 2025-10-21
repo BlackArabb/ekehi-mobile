@@ -9,9 +9,7 @@ import com.ekehi.mobile.data.repository.offline.OfflineSocialTaskRepository
 import com.ekehi.mobile.data.sync.SyncManager
 import com.ekehi.mobile.domain.model.Resource
 import com.ekehi.mobile.domain.usecase.SocialTaskUseCase
-import com.ekehi.mobile.domain.usecase.RealtimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.appwrite.models.RealtimeResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,7 +19,6 @@ import javax.inject.Inject
 class SocialTasksViewModel @Inject constructor(
     private val socialTaskUseCase: SocialTaskUseCase,
     private val socialTaskRepository: SocialTaskRepository,
-    private val realtimeUseCase: RealtimeUseCase,
     private val syncManager: SyncManager,
     private val analyticsManager: AnalyticsManager
 ) : ViewModel() {
@@ -135,14 +132,11 @@ class SocialTasksViewModel @Inject constructor(
     }
 
     private fun subscribeToSocialTaskUpdates(userId: String) {
-        viewModelScope.launch {
-            realtimeUseCase.subscribeToUserUpdates(userId).collect { event ->
-                handleRealtimeEvent(event)
-            }
-        }
+        // Removed realtime functionality for now
+        // In a real implementation, you would subscribe to social task updates
     }
 
-    private fun handleRealtimeEvent(event: RealtimeResponse) {
+    private fun handleRealtimeEvent(event: Any) {
         // Handle real-time updates to social tasks
         // In a real implementation, you would update the UI based on the event
     }

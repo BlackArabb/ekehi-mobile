@@ -156,7 +156,9 @@ async function migrateUserProfiles() {
       username: profile.username || null,
       totalCoins: profile.total_coins || 0,
       coinsPerSecond: profile.coins_per_second || 0,
+      autoMiningRate: profile.auto_mining_rate || 0, // New field for auto mining rate
       miningPower: profile.mining_power || 1,
+      referralBonusRate: profile.referral_bonus_rate || 0, // New field for referral bonus
       currentStreak: profile.current_streak || 0,
       longestStreak: profile.longest_streak || 0,
       lastLoginDate: profile.last_login_date || null,
@@ -164,7 +166,7 @@ async function migrateUserProfiles() {
       referredBy: profile.referred_by || null,
       totalReferrals: profile.total_referrals || 0,
       lifetimeEarnings: profile.lifetime_earnings || 0,
-      dailyMiningRate: profile.daily_mining_rate || 2, // UPDATED: Now represents 2 EKH per 24-hour session
+      dailyMiningRate: profile.daily_mining_rate || 2, // Updated to 2 EKH per 24-hour session
       maxDailyEarnings: profile.max_daily_earnings || 10000,
       todayEarnings: profile.today_earnings || 0,
       lastMiningDate: profile.last_mining_date || null,

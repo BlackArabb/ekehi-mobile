@@ -65,20 +65,18 @@ class RegistrationViewModel @Inject constructor(
             // Track registration attempt
             analyticsManager.trackSignUp("email")
             
-            performanceMonitor.measureExecutionTime({
-                authUseCase.register(
-                    emailValidation.sanitizedInput, 
-                    passwordValidation.sanitizedInput, 
-                    nameValidation.sanitizedInput
-                ).collect { resource ->
-                    if (resource is Resource.Success) {
-                        // Registration successful
-                    } else if (resource is Resource.Error) {
-                        // Registration failed
-                    }
-                    _registrationState.value = resource
+            authUseCase.register(
+                emailValidation.sanitizedInput, 
+                passwordValidation.sanitizedInput, 
+                nameValidation.sanitizedInput
+            ).collect { resource ->
+                if (resource is Resource.Success) {
+                    // Registration successful
+                } else if (resource is Resource.Error) {
+                    // Registration failed
                 }
-            }, "register")
+                _registrationState.value = resource
+            }
         }
     }
 }

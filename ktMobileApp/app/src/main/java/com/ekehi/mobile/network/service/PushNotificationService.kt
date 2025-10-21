@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.ekehi.mobile.R
 import com.ekehi.mobile.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -50,7 +49,7 @@ class PushNotificationService @Inject constructor(
         )
         
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_notification) // Make sure this drawable exists
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // Use system icon
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

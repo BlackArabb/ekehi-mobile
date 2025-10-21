@@ -17,6 +17,8 @@
     "test-build": "node Scripts/test-production-build.js",
     "export-cloudflare-data": "node export-cloudflare-data.js",
     "migrate-data": "node migrate-data.js",
+    "update-collections": "node Scripts/update-appwrite-collections.js",
+    "generate-sample-data": "node Scripts/generate-sample-data.js",
     "auto-mining-limits-test": "node Scripts/test-auto-mining-limits.js",
     "auto-mining-summary": "node Scripts/auto-mining-feature-summary.js",
     "production-report": "node Scripts/production-readiness-report.js",

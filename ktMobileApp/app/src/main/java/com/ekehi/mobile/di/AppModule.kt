@@ -22,17 +22,13 @@ import com.ekehi.mobile.domain.usecase.UserUseCase
 import com.ekehi.mobile.domain.usecase.MiningUseCase
 import com.ekehi.mobile.domain.usecase.SocialTaskUseCase
 import com.ekehi.mobile.domain.usecase.LeaderboardUseCase
-import com.ekehi.mobile.domain.usecase.RealtimeUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineUserUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineMiningUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineSocialTaskUseCase
 import com.ekehi.mobile.network.service.AppwriteService
 import com.ekehi.mobile.network.service.OAuthService
-import com.ekehi.mobile.network.service.RealtimeService
 import com.ekehi.mobile.network.service.NotificationService
-import com.ekehi.mobile.network.service.RealtimeNotificationHandler
 import com.ekehi.mobile.network.service.PushNotificationService
-import com.ekehi.mobile.network.service.NotificationHandler
 import com.ekehi.mobile.analytics.AnalyticsService
 import com.ekehi.mobile.analytics.AnalyticsManager
 import com.ekehi.mobile.performance.PerformanceMonitor
@@ -71,23 +67,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRealtimeService(appwriteService: AppwriteService, notificationHandler: RealtimeNotificationHandler): RealtimeService {
-        return RealtimeService(appwriteService, notificationHandler)
-    }
-
-    @Provides
-    @Singleton
     fun provideNotificationService(@ApplicationContext context: Context): NotificationService {
         return NotificationService(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideRealtimeNotificationHandler(
-        notificationService: NotificationService,
-        notificationHandler: NotificationHandler
-    ): RealtimeNotificationHandler {
-        return RealtimeNotificationHandler(notificationService, notificationHandler)
     }
 
     @Provides
@@ -167,12 +148,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRealtimeUseCase(realtimeService: RealtimeService): RealtimeUseCase {
-        return RealtimeUseCase(realtimeService)
-    }
-
-    @Provides
-    @Singleton
     fun provideDatabase(@ApplicationContext context: Context): EkehiDatabase {
         return Room.databaseBuilder(
             context,
@@ -231,15 +206,6 @@ object AppModule {
     @Singleton
     fun providePushNotificationService(@ApplicationContext context: Context): PushNotificationService {
         return PushNotificationService(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideNotificationHandler(
-        @ApplicationContext context: Context,
-        pushNotificationService: PushNotificationService
-    ): NotificationHandler {
-        return NotificationHandler(context, pushNotificationService)
     }
 
     @Provides

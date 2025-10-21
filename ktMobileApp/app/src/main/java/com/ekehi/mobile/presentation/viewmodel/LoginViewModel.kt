@@ -51,21 +51,19 @@ class LoginViewModel @Inject constructor(
                 // Track login attempt
                 analyticsManager.trackLogin("email")
                 
-                performanceMonitor.measureExecutionTime({
-                    authUseCase.login(
-                        emailValidation.sanitizedInput, 
-                        passwordValidation.sanitizedInput
-                    ).collect { resource ->
-                        if (resource is Resource.Success) {
-                            // Login successful
-                            ErrorHandler.logAuthEvent(emailValidation.sanitizedInput, "login", true)
-                        } else if (resource is Resource.Error) {
-                            // Login failed
-                            ErrorHandler.logAuthEvent(emailValidation.sanitizedInput, "login", false)
-                        }
-                        _loginState.value = resource
+                authUseCase.login(
+                    emailValidation.sanitizedInput, 
+                    passwordValidation.sanitizedInput
+                ).collect { resource ->
+                    if (resource is Resource.Success) {
+                        // Login successful
+                        ErrorHandler.logAuthEvent(emailValidation.sanitizedInput, "login", true)
+                    } else if (resource is Resource.Error) {
+                        // Login failed
+                        ErrorHandler.logAuthEvent(emailValidation.sanitizedInput, "login", false)
                     }
-                }, "login")
+                    _loginState.value = resource
+                }
             } catch (e: Exception) {
                 val errorResult = ErrorHandler.handleException(e, "Failed to login")
                 _loginState.value = Resource.Error(errorResult.userMessage)

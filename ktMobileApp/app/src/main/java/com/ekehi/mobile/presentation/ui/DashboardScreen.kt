@@ -31,7 +31,7 @@ fun DashboardScreen(
     onNavigateToProfile: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    val userProfile by viewModel.userProfile.collectAsState()
+    val userProfileResource by viewModel.userProfile.collectAsState()
 
     Box(
         modifier = Modifier
@@ -66,8 +66,12 @@ fun DashboardScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         color = Color.White
                     )
+                    val username = when (val resource = userProfileResource) {
+                        is Resource.Success -> resource.data.username
+                        else -> null
+                    }
                     Text(
-                        text = userProfile?.username ?: "User",
+                        text = username ?: "User",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.White.copy(alpha = 0.8f)
                     )
@@ -182,7 +186,7 @@ fun QuickAccessSection(
             )
 
             QuickAccessCard(
-                icon = Icons.Default.EmojiEmotions,
+                icon = Icons.Default.Mood,
                 label = "Leaders",
                 iconColor = Color(0xFFf59e0b),
                 onClick = onNavigateToLeaderboard
@@ -212,6 +216,7 @@ fun QuickAccessSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)  // or ExperimentalMaterialApi
 @Composable
 fun QuickAccessCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,

@@ -1,5 +1,8 @@
 package com.ekehi.mobile.presentation.ui
 
+import com.ekehi.mobile.domain.model.Resource
+import com.ekehi.mobile.data.model.UserProfile
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -94,8 +97,14 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit
 ) {
-    val userProfile by viewModel.userProfile.collectAsState()
+    val userProfileResource by viewModel.userProfile.collectAsState()
     val scrollState = rememberScrollState()
+
+    // Extract the actual UserProfile from Resource
+    val userProfile = when (userProfileResource) {
+        is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
+        else -> null
+    }
 
     Box(
         modifier = Modifier
@@ -152,7 +161,7 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileHeader(
-    userProfile: com.ekehi.mobile.domain.UserProfile?,
+    userProfile: com.ekehi.mobile.data.model.UserProfile?,
     onNavigateToSettings: () -> Unit
 ) {
     Card(
@@ -236,7 +245,7 @@ fun ProfileHeader(
                 )
 
                 Text(
-                    text = userProfile?.balance ?: "1,250.50 EKH",
+                    text = userProfile?.totalCoins?.let { "${String.format("%,.2f", it)} EKH" } ?: "1,250.50 EKH",
                     color = Color(0xFFffa000),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold

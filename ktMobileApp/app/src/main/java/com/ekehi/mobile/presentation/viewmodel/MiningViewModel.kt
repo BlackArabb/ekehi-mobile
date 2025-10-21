@@ -9,9 +9,7 @@ import com.ekehi.mobile.data.repository.offline.OfflineMiningRepository
 import com.ekehi.mobile.data.sync.SyncManager
 import com.ekehi.mobile.domain.model.Resource
 import com.ekehi.mobile.domain.usecase.MiningUseCase
-import com.ekehi.mobile.domain.usecase.RealtimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.appwrite.models.RealtimeResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,7 +19,6 @@ import javax.inject.Inject
 class MiningViewModel @Inject constructor(
     private val miningUseCase: MiningUseCase,
     private val miningRepository: MiningRepository,
-    private val realtimeUseCase: RealtimeUseCase,
     private val syncManager: SyncManager,
     private val analyticsManager: AnalyticsManager
 ) : ViewModel() {
@@ -108,14 +105,11 @@ class MiningViewModel @Inject constructor(
     }
 
     private fun subscribeToMiningUpdates(userId: String) {
-        viewModelScope.launch {
-            realtimeUseCase.subscribeToUserUpdates(userId).collect { event ->
-                handleRealtimeEvent(event)
-            }
-        }
+        // Removed realtime functionality for now
+        // In a real implementation, you would subscribe to mining updates
     }
 
-    private fun handleRealtimeEvent(event: RealtimeResponse) {
+    private fun handleRealtimeEvent(event: Any) {
         // Handle real-time updates to mining sessions
         // In a real implementation, you would update the UI based on the event
     }
