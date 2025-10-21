@@ -1,5 +1,6 @@
 package com.ekehi.mobile.presentation.viewmodel
 
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.mobile.domain.model.Resource
@@ -12,19 +13,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OAuthViewModel @Inject constructor(
-    private val oAuthService: OAuthService
+        private val oAuthService: OAuthService
 ) : ViewModel() {
 
-    private val _oauthState = MutableStateFlow<Resource<String>>(Resource.Loading)
-    val oauthState: StateFlow<Resource<String>> = _oauthState
+    private val _oauthState = MutableStateFlow<Resource<Boolean>>(Resource.Loading)
+    val oauthState: StateFlow<Resource<Boolean>> = _oauthState
 
-    fun initiateGoogleOAuth() {
+    fun initiateGoogleOAuth(activity: ComponentActivity) {
         viewModelScope.launch {
-            try {
-                val oauthUrl = oAuthService.initiateGoogleOAuth()
-                _oauthState.value = Resource.Success(oauthUrl)
-            } catch (e: Exception) {
-                _oauthState.value = Resource.Error("Failed to initiate Google OAuth: ${e.message}")
+            _oauthState.value = Resource.Loading
+            val success = oAuthService.initiateGoogleOAuth(activity)
+            _oauthState.value = if (success) {
+                Resource.Success(true)
+            } else {
+                Resource.Error("OAuth authentication failed")
             }
         }
     }

@@ -26,7 +26,6 @@ import com.ekehi.mobile.domain.usecase.offline.OfflineUserUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineMiningUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineSocialTaskUseCase
 import com.ekehi.mobile.network.service.AppwriteService
-import com.ekehi.mobile.network.service.OAuthService
 import com.ekehi.mobile.network.service.NotificationService
 import com.ekehi.mobile.network.service.PushNotificationService
 import com.ekehi.mobile.analytics.AnalyticsService
@@ -49,8 +48,8 @@ object AppModule {
     @Singleton
     fun provideAppwriteClient(): Client {
         return Client()
-            .setEndpoint("https://fra.cloud.appwrite.io/v1")
-            .setProject("68c2dd6e002112935ed2")
+                .setEndpoint("https://fra.cloud.appwrite.io/v1")
+                .setProject("68c2dd6e002112935ed2")
     }
 
     @Provides
@@ -59,11 +58,7 @@ object AppModule {
         return AppwriteService(client)
     }
 
-    @Provides
-    @Singleton
-    fun provideOAuthService(client: Client, @ApplicationContext context: Context): OAuthService {
-        return OAuthService(client, context)
-    }
+    // REMOVED: provideOAuthService - OAuthService has @Inject constructor, so Hilt handles it automatically
 
     @Provides
     @Singleton
@@ -80,10 +75,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideUserRepository(
-        appwriteService: AppwriteService,
-        performanceMonitor: PerformanceMonitor,
-        userProfileDao: UserProfileDao,
-        cacheManager: CacheManager
+            appwriteService: AppwriteService,
+            performanceMonitor: PerformanceMonitor,
+            userProfileDao: UserProfileDao,
+            cacheManager: CacheManager
     ): UserRepository {
         return OfflineUserRepository(appwriteService, performanceMonitor, userProfileDao, cacheManager)
     }
@@ -91,10 +86,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMiningRepository(
-        appwriteService: AppwriteService,
-        performanceMonitor: PerformanceMonitor,
-        miningSessionDao: MiningSessionDao,
-        cacheManager: CacheManager
+            appwriteService: AppwriteService,
+            performanceMonitor: PerformanceMonitor,
+            miningSessionDao: MiningSessionDao,
+            cacheManager: CacheManager
     ): MiningRepository {
         return OfflineMiningRepository(appwriteService, performanceMonitor, miningSessionDao, cacheManager)
     }
@@ -102,10 +97,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSocialTaskRepository(
-        appwriteService: AppwriteService,
-        performanceMonitor: PerformanceMonitor,
-        socialTaskDao: SocialTaskDao,
-        cacheManager: CacheManager
+            appwriteService: AppwriteService,
+            performanceMonitor: PerformanceMonitor,
+            socialTaskDao: SocialTaskDao,
+            cacheManager: CacheManager
     ): SocialTaskRepository {
         return OfflineSocialTaskRepository(appwriteService, performanceMonitor, socialTaskDao, cacheManager)
     }
@@ -150,9 +145,9 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): EkehiDatabase {
         return Room.databaseBuilder(
-            context,
-            EkehiDatabase::class.java,
-            EkehiDatabase.DATABASE_NAME
+                context,
+                EkehiDatabase::class.java,
+                EkehiDatabase.DATABASE_NAME
         ).build()
     }
 
@@ -183,22 +178,22 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSyncManager(
-        @ApplicationContext context: Context,
-        userProfileDao: UserProfileDao,
-        miningSessionDao: MiningSessionDao,
-        socialTaskDao: SocialTaskDao,
-        userRepository: UserRepository,
-        miningRepository: MiningRepository,
-        socialTaskRepository: SocialTaskRepository
+            @ApplicationContext context: Context,
+            userProfileDao: UserProfileDao,
+            miningSessionDao: MiningSessionDao,
+            socialTaskDao: SocialTaskDao,
+            userRepository: UserRepository,
+            miningRepository: MiningRepository,
+            socialTaskRepository: SocialTaskRepository
     ): SyncManager {
         return SyncManager(
-            context,
-            userProfileDao,
-            miningSessionDao,
-            socialTaskDao,
-            userRepository,
-            miningRepository,
-            socialTaskRepository
+                context,
+                userProfileDao,
+                miningSessionDao,
+                socialTaskDao,
+                userRepository,
+                miningRepository,
+                socialTaskRepository
         )
     }
 
