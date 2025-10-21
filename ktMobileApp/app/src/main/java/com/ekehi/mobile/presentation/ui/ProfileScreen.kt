@@ -2,7 +2,6 @@ package com.ekehi.mobile.presentation.ui
 
 import com.ekehi.mobile.domain.model.Resource
 import com.ekehi.mobile.data.model.UserProfile
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -101,7 +100,7 @@ fun ProfileScreen(
     val scrollState = rememberScrollState()
 
     // Extract the actual UserProfile from Resource
-    val userProfile = when (userProfileResource) {
+    val userProfile: UserProfile? = when (userProfileResource) {
         is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
         else -> null
     }
