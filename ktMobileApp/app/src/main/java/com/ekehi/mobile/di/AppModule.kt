@@ -2,7 +2,6 @@ package com.ekehi.mobile.di
 
 import android.content.Context
 import androidx.room.Room
-import com.ekehi.mobile.MainApplication
 import com.ekehi.mobile.data.local.CacheManager
 import com.ekehi.mobile.data.local.EkehiDatabase
 import com.ekehi.mobile.data.local.dao.MiningSessionDao
@@ -26,9 +25,6 @@ import com.ekehi.mobile.domain.usecase.offline.OfflineUserUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineMiningUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineSocialTaskUseCase
 import com.ekehi.mobile.network.service.AppwriteService
-import com.ekehi.mobile.network.service.NotificationService
-import com.ekehi.mobile.network.service.PushNotificationService
-import com.ekehi.mobile.analytics.AnalyticsService
 import com.ekehi.mobile.analytics.AnalyticsManager
 import com.ekehi.mobile.performance.PerformanceMonitor
 
@@ -54,16 +50,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAppwriteService(client: Client): AppwriteService {
-        return AppwriteService(client)
-    }
-
-    // REMOVED: provideOAuthService - OAuthService has @Inject constructor, so Hilt handles it automatically
-
-    @Provides
-    @Singleton
-    fun provideNotificationService(@ApplicationContext context: Context): NotificationService {
-        return NotificationService(context)
+    fun provideAppwriteService(
+            client: Client,
+            @ApplicationContext context: Context
+    ): AppwriteService {
+        return AppwriteService(client, context)
     }
 
     @Provides
@@ -199,20 +190,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePushNotificationService(@ApplicationContext context: Context): PushNotificationService {
-        return PushNotificationService(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAnalyticsService(@ApplicationContext context: Context): AnalyticsService {
-        return AnalyticsService(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAnalyticsManager(analyticsService: AnalyticsService): AnalyticsManager {
-        return AnalyticsManager(analyticsService)
+    fun provideAnalyticsManager(analyticsService: AnalyticsManager): AnalyticsManager {
+        return analyticsService
     }
 
     @Provides

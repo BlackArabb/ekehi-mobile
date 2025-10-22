@@ -1,5 +1,6 @@
 package com.ekehi.mobile.network.service
 
+import android.content.Context
 import io.appwrite.Client
 import io.appwrite.services.Account
 import io.appwrite.services.Databases
@@ -9,7 +10,8 @@ import javax.inject.Singleton
 
 @Singleton
 class AppwriteService @Inject constructor(
-    private val client: Client
+    private val client: Client,
+    private val context: Context
 ) {
     val account: Account = Account(client)
     val databases: Databases = Databases(client)

@@ -101,6 +101,22 @@ If you encounter the error "Unsupported class file major version 68":
 ./gradlew installDebug
 ```
 
+## Common Build Issues
+
+### Compilation Error: "No value passed for parameter 'context'"
+This error typically occurs due to:
+1. Caching issues - Try cleaning the build environment
+2. Incorrect dependency injection setup - Check DI modules
+3. Corrupted compiled files - Delete build directories
+
+### Resource Merge Error: "java.io.EOFException: End of input at line 1 column 1"
+This error typically occurs due to:
+1. Corrupted or empty resource files - Check all XML files in res/ directory
+2. Line ending issues - Ensure consistent line endings
+3. Hidden characters in files - Check for invisible characters
+
+See [BUILD_ISSUES.md](BUILD_ISSUES.md) for detailed troubleshooting steps.
+
 ## Security Implementation
 
 This project implements all 13 OWASP Secure Coding Practices. See [SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md) for details.
@@ -124,6 +140,7 @@ This Kotlin implementation is a work in progress, migrated from the React Native
 - [Security Implementation](SECURITY_IMPLEMENTATION.md)
 - [Build Instructions](BUILD_INSTRUCTIONS.md)
 - [JVM Configuration Fix](JVM_FIX.md)
+- [Build Issues Troubleshooting](BUILD_ISSUES.md)
 
 ## Contributing
 
