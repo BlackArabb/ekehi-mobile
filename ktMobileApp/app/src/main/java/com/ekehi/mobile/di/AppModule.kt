@@ -7,27 +7,22 @@ import com.ekehi.mobile.data.local.EkehiDatabase
 import com.ekehi.mobile.data.local.dao.MiningSessionDao
 import com.ekehi.mobile.data.local.dao.SocialTaskDao
 import com.ekehi.mobile.data.local.dao.UserProfileDao
-import com.ekehi.mobile.data.repository.AuthRepository
-import com.ekehi.mobile.data.repository.UserRepository
+import com.ekehi.mobile.data.repository.LeaderboardRepository
 import com.ekehi.mobile.data.repository.MiningRepository
 import com.ekehi.mobile.data.repository.SocialTaskRepository
-import com.ekehi.mobile.data.repository.LeaderboardRepository
-import com.ekehi.mobile.data.repository.offline.OfflineUserRepository
+import com.ekehi.mobile.data.repository.UserRepository
 import com.ekehi.mobile.data.repository.offline.OfflineMiningRepository
 import com.ekehi.mobile.data.repository.offline.OfflineSocialTaskRepository
+import com.ekehi.mobile.data.repository.offline.OfflineUserRepository
 import com.ekehi.mobile.data.sync.SyncManager
-import com.ekehi.mobile.domain.usecase.AuthUseCase
-import com.ekehi.mobile.domain.usecase.UserUseCase
+import com.ekehi.mobile.domain.usecase.LeaderboardUseCase
 import com.ekehi.mobile.domain.usecase.MiningUseCase
 import com.ekehi.mobile.domain.usecase.SocialTaskUseCase
-import com.ekehi.mobile.domain.usecase.LeaderboardUseCase
-import com.ekehi.mobile.domain.usecase.offline.OfflineUserUseCase
+import com.ekehi.mobile.domain.usecase.UserUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineMiningUseCase
 import com.ekehi.mobile.domain.usecase.offline.OfflineSocialTaskUseCase
-import com.ekehi.mobile.network.service.AppwriteService
-import com.ekehi.mobile.analytics.AnalyticsManager
+import com.ekehi.mobile.domain.usecase.offline.OfflineUserUseCase
 import com.ekehi.mobile.performance.PerformanceMonitor
-
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,42 +37,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAppwriteClient(): Client {
-        return Client()
+    fun provideContext(@ApplicationContext context: Context): Context {
+        return context
+    }
+
+    @Provides
+    @Singleton
+    fun provideAppwriteClient(@ApplicationContext context: Context): Client {
+        return Client(context)
                 .setEndpoint("https://fra.cloud.appwrite.io/v1")
                 .setProject("68c2dd6e002112935ed2")
     }
 
     @Provides
     @Singleton
-    fun provideAppwriteService(
-            client: Client,
-            @ApplicationContext context: Context
-    ): AppwriteService {
-        return AppwriteService(client, context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(appwriteService: AppwriteService): AuthRepository {
-        return AuthRepository(appwriteService)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserRepository(
-            appwriteService: AppwriteService,
-            performanceMonitor: PerformanceMonitor,
-            userProfileDao: UserProfileDao,
-            cacheManager: CacheManager
-    ): UserRepository {
-        return OfflineUserRepository(appwriteService, performanceMonitor, userProfileDao, cacheManager)
-    }
-
-    @Provides
-    @Singleton
     fun provideMiningRepository(
-            appwriteService: AppwriteService,
+            appwriteService: com.ekehi.mobile.network.service.AppwriteService,
             performanceMonitor: PerformanceMonitor,
             miningSessionDao: MiningSessionDao,
             cacheManager: CacheManager
@@ -88,7 +63,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSocialTaskRepository(
-            appwriteService: AppwriteService,
+            appwriteService: com.ekehi.mobile.network.service.AppwriteService,
             performanceMonitor: PerformanceMonitor,
             socialTaskDao: SocialTaskDao,
             cacheManager: CacheManager
@@ -98,20 +73,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideLeaderboardRepository(appwriteService: AppwriteService): LeaderboardRepository {
+    fun provideLeaderboardRepository(appwriteService: com.ekehi.mobile.network.service.AppwriteService): LeaderboardRepository {
         return LeaderboardRepository(appwriteService)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAuthUseCase(authRepository: AuthRepository): AuthUseCase {
-        return AuthUseCase(authRepository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserUseCase(userRepository: UserRepository): UserUseCase {
-        return OfflineUserUseCase(userRepository)
     }
 
     @Provides
@@ -186,12 +149,6 @@ object AppModule {
                 miningRepository,
                 socialTaskRepository
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideAnalyticsManager(analyticsService: AnalyticsManager): AnalyticsManager {
-        return analyticsService
     }
 
     @Provides

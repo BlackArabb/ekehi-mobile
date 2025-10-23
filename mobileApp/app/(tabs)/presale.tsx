@@ -40,7 +40,7 @@ export default function PresalePage() {
   const handlePurchase = async () => {
     try {
       const amount = parseFloat(purchaseAmount);
-      
+
       if (!amount || amount < minPurchase) {
         Alert.alert('Invalid Amount', `Minimum purchase is $${minPurchase}`);
         return;
@@ -72,7 +72,7 @@ export default function PresalePage() {
   // Safe calculation of total purchased tokens with error handling
   const totalPurchased = (() => {
     try {
-      return Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
+      return Array.isArray(purchases) ? purchases.reduce((sum, purchase) =>
         purchase && purchase.status === 'completed' ? sum + (purchase.tokensAmount || 0) : sum, 0
       ) : 0;
     } catch (error) {
@@ -84,7 +84,7 @@ export default function PresalePage() {
   // Safe calculation of total spent amount with error handling
   const totalSpent = (() => {
     try {
-      return Array.isArray(purchases) ? purchases.reduce((sum, purchase) => 
+      return Array.isArray(purchases) ? purchases.reduce((sum, purchase) =>
         purchase && purchase.status === 'completed' ? sum + (purchase.amountUsd || 0) : sum, 0
       ) : 0;
     } catch (error) {
@@ -150,7 +150,7 @@ export default function PresalePage() {
 
   return (
     <LinearGradient colors={['#1a1a2e', '#16213e', '#0f3460']} style={styles.container}>
-      <ScrollView 
+      <ScrollView
         style={[styles.scrollView, { paddingTop: insets.top }]}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -178,13 +178,13 @@ export default function PresalePage() {
             <Text style={styles.progressText}>{safeToFixed(progressPercentage, 1)}%</Text>
           </View>
           <View style={styles.progressBar}>
-            <View 
+            <View
               style={[
-                styles.progressFill, 
+                styles.progressFill,
                 {
                   width: `${isNaN(progressPercentage) ? 0 : progressPercentage}%`
                 }
-              ]} 
+              ]}
             />
           </View>
           <View style={styles.progressStats}>
@@ -202,7 +202,7 @@ export default function PresalePage() {
               <Text style={styles.tokenInfoLabel}>per EKH</Text>
             </View>
           </View>
-          
+
           <View style={styles.tokenInfoCard}>
             <Store size={24} color="#3b82f6" />
             <View style={styles.tokenInfoText}>
@@ -237,7 +237,7 @@ export default function PresalePage() {
         {isActive && (
           <View style={styles.purchaseContainer}>
             <Text style={styles.purchaseTitle}>Purchase Tokens</Text>
-            
+
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Amount (USD)</Text>
               <TextInput
@@ -289,7 +289,7 @@ export default function PresalePage() {
                     Cryptocurrency
                   </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[
                     styles.paymentOption,
@@ -333,18 +333,18 @@ export default function PresalePage() {
         {totalPurchased > 0 && (
           <View style={styles.purchasesContainer}>
             <Text style={styles.purchasesTitle}>Your Purchases</Text>
-            
+
             <View style={styles.purchaseStats}>
               <View style={styles.purchaseStatCard}>
                 <Text style={styles.purchaseStatValue}>{safeToLocaleString(totalPurchased)}</Text>
                 <Text style={styles.purchaseStatLabel}>EKH Tokens</Text>
               </View>
-              
+
               <View style={styles.purchaseStatCard}>
                 <Text style={styles.purchaseStatValue}>${safeToFixed(totalSpent, 2)}</Text>
                 <Text style={styles.purchaseStatLabel}>Total Spent</Text>
               </View>
-              
+
               <View style={styles.purchaseStatCard}>
                 <Text style={styles.purchaseStatValue}>{safeToFixed(autoMiningRate, 2)}/s</Text>
                 <Text style={styles.purchaseStatLabel}>Auto Mining</Text>
@@ -363,7 +363,7 @@ export default function PresalePage() {
                       {purchase && purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : 'N/A'}
                     </Text>
                   </View>
-                  
+
                   <View style={styles.purchaseItemRight}>
                     <Text style={styles.purchaseItemAmount}>
                       ${purchase && purchase.amountUsd ? safeToFixed(purchase.amountUsd, 2) : '0.00'}
@@ -391,7 +391,7 @@ export default function PresalePage() {
         {/* Benefits */}
         <View style={styles.benefitsContainer}>
           <Text style={styles.benefitsTitle}>Presale Benefits</Text>
-          
+
           <View style={styles.benefitsList}>
             <View style={styles.benefitItem}>
               <TrendingUp size={20} color="#10b981" />
@@ -400,7 +400,7 @@ export default function PresalePage() {
                 <Text style={styles.benefitItemSubtext}>Save up to 40% compared to public sale</Text>
               </View>
             </View>
-            
+
             <View style={styles.benefitItem}>
               <Zap size={20} color="#ffa000" />
               <View>
@@ -408,7 +408,7 @@ export default function PresalePage() {
                 <Text style={styles.benefitItemSubtext}>Generate passive income 24/7</Text>
               </View>
             </View>
-            
+
             <View style={styles.benefitItem}>
               <Gift size={20} color="#3b82f6" />
               <View>
@@ -416,7 +416,7 @@ export default function PresalePage() {
                 <Text style={styles.benefitItemSubtext}>Special rewards for early supporters</Text>
               </View>
             </View>
-            
+
             <View style={styles.benefitItem}>
               <BarChart3 size={20} color="#8b5cf6" />
               <View>
@@ -424,7 +424,7 @@ export default function PresalePage() {
                 <Text style={styles.benefitItemSubtext}>First access to new platform features</Text>
               </View>
             </View>
-            
+
             <View style={styles.benefitItem}>
               <Users size={20} color="#ec4899" />
               <View>
@@ -432,7 +432,7 @@ export default function PresalePage() {
                 <Text style={styles.benefitItemSubtext}>Join our exclusive presale community</Text>
               </View>
             </View>
-            
+
             <View style={styles.benefitItem}>
               <Award size={20} color="#f59e0b" />
               <View>
@@ -442,7 +442,7 @@ export default function PresalePage() {
             </View>
           </View>
         </View>
-        
+
         {/* Presale Info */}
         <View style={styles.infoContainer}>
           <View style={styles.infoCard}>
