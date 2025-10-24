@@ -176,7 +176,7 @@ export default function Navigation() {
                     <a
                       key={link.label}
                       href={link.href}
-                      className={`text-2xl transition-colors flex items-center gap-3 py-3 border-b border-charcoal-gray ${
+                      className={`text-base transition-colors flex items-center gap-3 py-2 border-b border-charcoal-gray ${
                         isActive 
                           ? 'text-white' // White color for active state
                           : 'text-white hover:text-yellow-500'

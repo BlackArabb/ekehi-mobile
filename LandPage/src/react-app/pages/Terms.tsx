@@ -120,7 +120,7 @@ export default function TermsPage() {
           <p className="text-medium-gray mb-6">
             If you have any questions about these Terms, please contact us at:
             <br /><br />
-            Email: legal@ekehi.xyz
+            Email: support@ekehi.xyz
           </p>
         </div>
       </div>

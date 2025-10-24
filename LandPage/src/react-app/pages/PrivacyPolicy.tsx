@@ -124,7 +124,7 @@ export default function PrivacyPolicyPage() {
               <p className="text-medium-gray mb-6">
                 If you have questions or comments about this Privacy Policy, please contact us at:
                 <br /><br />
-                Email: privacy@ekehi.xyz
+                Email: contact@ekehi.xyz
               </p>
             </div>
           </div>

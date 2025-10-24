@@ -9,13 +9,7 @@ const contactMethods = [
     contact: 'contact@ekehi.xyz',
     link: 'mailto:contact@ekehi.xyz'
   },
-  {
-    icon: MessageSquare,
-    title: 'Telegram',
-    description: 'Join our community discussion',
-    contact: '@ekehi_official',
-    link: 'https://t.me/ekehi_official'
-  },
+ 
   {
     icon: Phone,
     title: 'Business Inquiries',
@@ -26,10 +20,10 @@ const contactMethods = [
 ];
 
 const socialLinks = [
-  { name: 'Telegram', url: 'https://t.me/ekehi_official', users: '10K+', icon: 'T' },
-  { name: 'Twitter', url: 'https://twitter.com/ekehi_official', users: '25K+', icon: <Twitter size={16} /> },
-  { name: 'YouTube', url: 'https://youtube.com/ekehi_official', users: '5K+', icon: <Youtube size={16} /> },
-  { name: 'Facebook', url: 'https://facebook.com/ekehi_official', users: '15K+', icon: <Facebook size={16} /> }
+  { name: 'Telegram', url: 'https://t.me/EkehiOfficial', users: '', icon: 'T' },
+  { name: 'Twitter', url: 'https://x.com/ekehiofficial', users: '', icon: <Twitter size={16} /> },
+  { name: 'YouTube', url: 'https://youtube.com/@ekehiofficial?feature=shared', users: '', icon: <Youtube size={16} /> },
+  { name: 'Facebook', url: 'https://www.facebook.com/profile.php?id=61573055728514', users: '', icon: <Facebook size={16} /> }
 ];
 
 export default function ContactSection() {

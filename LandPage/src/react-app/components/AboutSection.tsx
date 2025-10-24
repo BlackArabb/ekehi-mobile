@@ -110,7 +110,7 @@ export default function AboutSection() {
         {/* Community CTA */}
         <div className="text-center">
           <a 
-            href="https://t.me/ekehi_official" 
+            href="https://t.me/EkehiOfficial" 
             target="_blank" 
             rel="noopener noreferrer"
             className="btn-secondary inline-flex items-center gap-2 group py-3 px-6 md:py-4 md:px-8 text-sm md:text-base"

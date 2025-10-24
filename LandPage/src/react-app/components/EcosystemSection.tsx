@@ -29,7 +29,7 @@ const ecosystemProducts = [
       'Zero-knowledge privacy',
       'Cross-chain bridges'
     ],
-    cta: 'Join Waitlist',
+    cta: 'Learn More',
     position: { x: 70, y: 15 }
   },
   {
