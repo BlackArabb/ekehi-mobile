@@ -79,32 +79,32 @@
 -dontwarn androidx.browser.**
 
 # Keep data classes
--keep class com.ekehi.mobile.data.model.** { *; }
--keep class com.ekehi.mobile.domain.model.** { *; }
+-keep class com.ekehi.network.data.model.** { *; }
+-keep class com.ekehi.network.domain.model.** { *; }
 
 # Keep repository classes
--keep class com.ekehi.mobile.data.repository.** { *; }
+-keep class com.ekehi.network.data.repository.** { *; }
 
 # Keep use case classes
--keep class com.ekehi.mobile.domain.usecase.** { *; }
+-keep class com.ekehi.network.domain.usecase.** { *; }
 
 # Keep view model classes
--keep class com.ekehi.mobile.presentation.viewmodel.** { *; }
+-keep class com.ekehi.network.presentation.viewmodel.** { *; }
 
 # Keep service classes
--keep class com.ekehi.mobile.network.service.** { *; }
+-keep class com.ekehi.network.network.service.** { *; }
 
 # Keep analytics classes
--keep class com.ekehi.mobile.analytics.** { *; }
+-keep class com.ekehi.network.analytics.** { *; }
 
 # Keep performance classes
--keep class com.ekehi.mobile.performance.** { *; }
+-keep class com.ekehi.network.performance.** { *; }
 
 # Keep sync classes
--keep class com.ekehi.mobile.data.sync.** { *; }
+-keep class com.ekehi.network.data.sync.** { *; }
 
 # Keep local data classes
--keep class com.ekehi.mobile.data.local.** { *; }
+-keep class com.ekehi.network.data.local.** { *; }
 
 # Keep DI classes
--keep class com.ekehi.mobile.di.** { *; }
+-keep class com.ekehi.network.di.** { *; }

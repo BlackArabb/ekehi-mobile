@@ -15,7 +15,8 @@ open class SocialTaskUseCase @Inject constructor(
         emit(Resource.Loading)
         val result = socialTaskRepository.getSocialTasks()
         if (result.isSuccess) {
-            emit(Resource.Success<List<SocialTask>>(result.getOrNull() ?: emptyList()))
+            val data = result.getOrNull() ?: emptyList()
+            emit(Resource.Success(data))
         } else {
             emit(Resource.Error("Failed to get social tasks: ${result.exceptionOrNull()?.message}"))
         }
@@ -27,7 +28,8 @@ open class SocialTaskUseCase @Inject constructor(
         emit(Resource.Loading)
         val result = socialTaskRepository.getUserSocialTasks(userId)
         if (result.isSuccess) {
-            emit(Resource.Success<List<SocialTask>>(result.getOrNull() ?: emptyList()))
+            val data = result.getOrNull() ?: emptyList()
+            emit(Resource.Success(data))
         } else {
             emit(Resource.Error("Failed to get user social tasks: ${result.exceptionOrNull()?.message}"))
         }
@@ -39,7 +41,7 @@ open class SocialTaskUseCase @Inject constructor(
         emit(Resource.Loading)
         val result = socialTaskRepository.completeSocialTask(userId, taskId)
         if (result.isSuccess) {
-            emit(Resource.Success<Unit>(Unit))
+            emit(Resource.Success(Unit))
         } else {
             emit(Resource.Error("Failed to complete social task: ${result.exceptionOrNull()?.message}"))
         }

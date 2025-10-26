@@ -50,7 +50,7 @@ android {
 
 1. Download `google-services.json` from Firebase Console
 2. Place it in `app/` directory
-3. Ensure the package name matches `com.ekehi.mobile`
+3. Ensure the package name matches `com.ekehi.network`
 
 ## Appwrite Configuration
 

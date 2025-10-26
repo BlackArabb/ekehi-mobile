@@ -12,8 +12,23 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "splash"
     ) {
+        composable("splash") {
+            SplashScreen(navController = navController)
+        }
+        
+        composable("landing") {
+            LandingScreen(
+                onNavigateToLogin = {
+                    navController.navigate("login")
+                },
+                onNavigateToRegister = {
+                    navController.navigate("register")
+                }
+            )
+        }
+
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {

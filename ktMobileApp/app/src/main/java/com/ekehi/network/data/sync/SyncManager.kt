@@ -183,6 +183,7 @@ fun com.ekehi.network.data.model.UserProfile.toEntity() = com.ekehi.network.data
     id = this.id,
     userId = this.userId,
     username = this.username,
+    email = this.email,
     totalCoins = this.totalCoins,
     coinsPerSecond = this.coinsPerSecond,
     autoMiningRate = this.autoMiningRate,

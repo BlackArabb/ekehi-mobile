@@ -18,7 +18,7 @@ class OfflineSocialTaskUseCase @Inject constructor(
         emit(Resource.Loading)
         if (socialTaskRepository is OfflineSocialTaskRepository) {
             socialTaskRepository.getOfflineSocialTasks(userId).collect { tasks ->
-                emit(Resource.Success<List<SocialTask>>(tasks))
+                emit(Resource.Success(tasks))
             }
         } else {
             emit(Resource.Error("Offline repository not available"))
@@ -33,14 +33,15 @@ class OfflineSocialTaskUseCase @Inject constructor(
             val result = socialTaskRepository.syncSocialTasks()
             if (result.isSuccess) {
                 // Return empty list as sync doesn't return tasks directly
-                emit(Resource.Success<List<SocialTask>>(emptyList()))
+                emit(Resource.Success(emptyList()))
             } else {
                 emit(Resource.Error("Failed to sync social tasks: ${result.exceptionOrNull()?.message}"))
             }
         } else {
             val result = socialTaskRepository.getSocialTasks()
             if (result.isSuccess) {
-                emit(Resource.Success<List<SocialTask>>(result.getOrNull() ?: emptyList()))
+                val data = result.getOrNull() ?: emptyList()
+                emit(Resource.Success(data))
             } else {
                 emit(Resource.Error("Failed to get social tasks: ${result.exceptionOrNull()?.message}"))
             }

@@ -1,6 +1,7 @@
 package com.ekehi.network.service
 
 import android.content.Context
+import android.util.Log
 import io.appwrite.Client
 import io.appwrite.services.Account
 import io.appwrite.services.Databases
@@ -16,6 +17,11 @@ class AppwriteService @Inject constructor(
     val account: Account = Account(client)
     val databases: Databases = Databases(client)
     val storage: Storage = Storage(client)
+    
+    init {
+        Log.d("AppwriteService", "AppwriteService initialized with endpoint: ${client.endpoint}")
+        // Removed invalid reference to client.project
+    }
     
     companion object {
         const val DATABASE_ID = "68c336e7000f87296feb"

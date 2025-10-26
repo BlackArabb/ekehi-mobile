@@ -1,5 +1,6 @@
 package com.ekehi.network.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.analytics.AnalyticsManager
@@ -20,63 +21,107 @@ class RegistrationViewModel @Inject constructor(
     private val performanceMonitor: PerformanceMonitor
 ) : ViewModel() {
 
-    private val _registrationState = MutableStateFlow<Resource<Unit>>(Resource.Loading)
+    private val _registrationState = MutableStateFlow<Resource<Unit>>(Resource.Idle)
     val registrationState: StateFlow<Resource<Unit>> = _registrationState
 
     fun register(name: String, email: String, password: String) {
+        Log.d("RegistrationViewModel", "Registration attempt started with email: $email")
+        
         viewModelScope.launch {
-            // Validate inputs before proceeding
-            val nameValidation = InputValidator.validateAndSanitizeText(name, 50)
-            val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
-            val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
-            
-            // Check if all validations pass
-            if (!nameValidation.isValid) {
-                _registrationState.value = Resource.Error("Invalid name: ${nameValidation.errorMessage}")
-                return@launch
-            }
-            
-            if (!emailValidation.isValid) {
-                _registrationState.value = Resource.Error("Invalid email: ${emailValidation.errorMessage}")
-                return@launch
-            }
-            
-            if (!passwordValidation.isValid) {
-                _registrationState.value = Resource.Error("Invalid password: ${passwordValidation.errorMessage}")
-                return@launch
-            }
-            
-            // Additional specific validations
-            if (!InputValidator.isValidName(nameValidation.sanitizedInput)) {
-                _registrationState.value = Resource.Error("Name contains invalid characters")
-                return@launch
-            }
-            
-            if (!InputValidator.isValidEmail(emailValidation.sanitizedInput)) {
-                _registrationState.value = Resource.Error("Please enter a valid email address")
-                return@launch
-            }
-            
-            if (!InputValidator.isValidPassword(passwordValidation.sanitizedInput)) {
-                _registrationState.value = Resource.Error("Password must be at least 8 characters long and contain uppercase, lowercase, and numeric characters")
-                return@launch
-            }
-            
-            // Track registration attempt
-            analyticsManager.trackSignUp("email")
-            
-            authUseCase.register(
-                emailValidation.sanitizedInput, 
-                passwordValidation.sanitizedInput, 
-                nameValidation.sanitizedInput
-            ).collect { resource ->
-                if (resource is Resource.Success) {
-                    // Registration successful
-                } else if (resource is Resource.Error) {
-                    // Registration failed
+            try {
+                // Validate inputs before proceeding
+                val nameValidation = InputValidator.validateAndSanitizeText(name, 50)
+                val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
+                val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
+                
+                Log.d("RegistrationViewModel", "Input validation completed")
+                
+                // Check if all validations pass
+                if (!nameValidation.isValid) {
+                    val errorMessage = "Invalid name: ${nameValidation.errorMessage}"
+                    Log.e("RegistrationViewModel", errorMessage)
+                    _registrationState.value = Resource.Error(errorMessage)
+                    return@launch
                 }
-                _registrationState.value = resource
+                
+                if (!emailValidation.isValid) {
+                    val errorMessage = "Invalid email: ${emailValidation.errorMessage}"
+                    Log.e("RegistrationViewModel", errorMessage)
+                    _registrationState.value = Resource.Error(errorMessage)
+                    return@launch
+                }
+                
+                if (!passwordValidation.isValid) {
+                    val errorMessage = "Invalid password: ${passwordValidation.errorMessage}"
+                    Log.e("RegistrationViewModel", errorMessage)
+                    _registrationState.value = Resource.Error(errorMessage)
+                    return@launch
+                }
+                
+                // Additional specific validations
+                if (!InputValidator.isValidName(nameValidation.sanitizedInput)) {
+                    val errorMessage = "Name contains invalid characters"
+                    Log.e("RegistrationViewModel", errorMessage)
+                    _registrationState.value = Resource.Error(errorMessage)
+                    return@launch
+                }
+                
+                if (!InputValidator.isValidEmail(emailValidation.sanitizedInput)) {
+                    val errorMessage = "Please enter a valid email address"
+                    Log.e("RegistrationViewModel", errorMessage)
+                    _registrationState.value = Resource.Error(errorMessage)
+                    return@launch
+                }
+                
+                if (!InputValidator.isValidPassword(passwordValidation.sanitizedInput)) {
+                    val errorMessage = "Password must be at least 8 characters long and contain uppercase, lowercase, and numeric characters"
+                    Log.e("RegistrationViewModel", errorMessage)
+                    _registrationState.value = Resource.Error(errorMessage)
+                    return@launch
+                }
+                
+                // Track registration attempt
+                analyticsManager.trackSignUp("email")
+                Log.d("RegistrationViewModel", "Registration attempt tracked in analytics")
+                
+                // Set loading state
+                _registrationState.value = Resource.Loading
+                Log.d("RegistrationViewModel", "Set loading state")
+                
+                // Perform registration
+                Log.d("RegistrationViewModel", "Starting registration request")
+                authUseCase.register(
+                    emailValidation.sanitizedInput, 
+                    passwordValidation.sanitizedInput, 
+                    nameValidation.sanitizedInput
+                ).collect { resource ->
+                    Log.d("RegistrationViewModel", "Received registration response: ${resource.javaClass.simpleName}")
+                    _registrationState.value = resource
+                    
+                    when (resource) {
+                        is Resource.Success -> {
+                            Log.d("RegistrationViewModel", "Registration successful")
+                        }
+                        is Resource.Error -> {
+                            Log.e("RegistrationViewModel", "Registration failed: ${resource.message}")
+                        }
+                        is Resource.Loading -> {
+                            Log.d("RegistrationViewModel", "Registration in progress")
+                        }
+                        is Resource.Idle -> {
+                            // Do nothing for Idle state
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorMessage = "Registration failed: ${e.message}"
+                Log.e("RegistrationViewModel", errorMessage, e)
+                _registrationState.value = Resource.Error(errorMessage)
             }
         }
+    }
+    
+    fun resetState() {
+        _registrationState.value = Resource.Idle
     }
 }

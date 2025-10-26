@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.ekehi.network.network.service.StartIoService
+import com.ekehi.network.service.StartIoService
 import com.ekehi.network.presentation.navigation.AppNavigation
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import dagger.hilt.android.AndroidEntryPoint

@@ -6,7 +6,7 @@ import com.ekehi.network.data.local.entities.MiningSessionEntity
 import com.ekehi.network.data.model.MiningSession
 import com.ekehi.network.data.repository.CachingRepository
 import com.ekehi.network.data.repository.MiningRepository
-import com.ekehi.network.network.service.AppwriteService
+import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.performance.PerformanceMonitor
 import io.appwrite.exceptions.AppwriteException
 import kotlinx.coroutines.flow.Flow

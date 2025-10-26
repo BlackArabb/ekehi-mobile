@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.ekehi.network.network.service.AppwriteService
+import com.ekehi.network.service.AppwriteService
 import dagger.hilt.android.AndroidEntryPoint
 import io.appwrite.exceptions.AppwriteException
 import kotlinx.coroutines.launch

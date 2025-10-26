@@ -1,5 +1,6 @@
 package com.ekehi.network.presentation.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,22 +23,37 @@ fun LoginScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(viewModel.loginState) {
+        Log.d("LoginScreen", "Observing login state changes")
         viewModel.loginState.collect { resource ->
+            Log.d("LoginScreen", "Login state changed: ${resource.javaClass.simpleName}")
             when (resource) {
                 is Resource.Loading -> {
+                    Log.d("LoginScreen", "Setting loading state to true")
                     isLoading = true
                     errorMessage = null
                 }
                 is Resource.Success -> {
+                    Log.d("LoginScreen", "Login successful, navigating to dashboard")
                     isLoading = false
                     onLoginSuccess()
                 }
                 is Resource.Error -> {
+                    Log.e("LoginScreen", "Login error: ${resource.message}")
                     isLoading = false
                     errorMessage = resource.message
                 }
+                is Resource.Idle -> {
+                    Log.d("LoginScreen", "Login state is idle")
+                    isLoading = false
+                    errorMessage = null
+                }
             }
         }
+    }
+
+    // Reset the state when the screen is first displayed
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
     }
 
     Column(
@@ -55,7 +71,13 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { 
+                email = it
+                // Clear error when user starts typing
+                if (errorMessage != null) {
+                    errorMessage = null
+                }
+            },
             label = { Text("Email") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -64,7 +86,13 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { 
+                password = it
+                // Clear error when user starts typing
+                if (errorMessage != null) {
+                    errorMessage = null
+                }
+            },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
@@ -74,6 +102,7 @@ fun LoginScreen(
 
         Button(
             onClick = {
+                Log.d("LoginScreen", "Login button clicked with email: $email")
                 viewModel.login(email, password)
             },
             enabled = !isLoading,
@@ -89,6 +118,7 @@ fun LoginScreen(
         }
 
         errorMessage?.let {
+            Log.e("LoginScreen", "Displaying error message: $it")
             Text(
                 text = it,
                 color = MaterialTheme.colorScheme.error,

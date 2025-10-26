@@ -1,5 +1,6 @@
 package com.ekehi.network.presentation.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -41,8 +42,18 @@ fun RegistrationScreen(
                     isLoading = false
                     errorMessage = resource.message
                 }
+                is Resource.Idle -> {
+                    isLoading = false
+                    errorMessage = null
+                    showPasswordMismatch = false
+                }
             }
         }
+    }
+
+    // Reset the state when the screen is first displayed
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
     }
 
     Column(

@@ -101,6 +101,20 @@ If you encounter the error "Unsupported class file major version 68":
 ./gradlew installDebug
 ```
 
+## Backend Integration
+
+This Kotlin implementation now has full Appwrite backend integration matching the React Native version:
+
+- **Authentication**: Email/Password and Google OAuth
+- **User Management**: Profile creation and updates
+- **Mining**: Session tracking and earnings
+- **Social Tasks**: Task completion and rewards
+- **Leaderboard**: Real-time ranking system
+- **Achievements**: Progress tracking and rewards
+- **Offline Support**: Local caching with sync capabilities
+
+See [BACKEND_INTEGRATION_FIX.md](BACKEND_INTEGRATION_FIX.md) for details on the backend integration implementation.
+
 ## Common Build Issues
 
 ### Compilation Error: "No value passed for parameter 'context'"
@@ -141,6 +155,7 @@ This Kotlin implementation is a work in progress, migrated from the React Native
 - [Build Instructions](BUILD_INSTRUCTIONS.md)
 - [JVM Configuration Fix](JVM_FIX.md)
 - [Build Issues Troubleshooting](BUILD_ISSUES.md)
+- [Backend Integration Fix](BACKEND_INTEGRATION_FIX.md)
 
 ## Contributing
 

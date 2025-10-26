@@ -1,6 +1,7 @@
 package com.ekehi.network.di
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import com.ekehi.network.data.local.CacheManager
 import com.ekehi.network.data.local.EkehiDatabase
@@ -24,7 +25,8 @@ import com.ekehi.network.domain.usecase.LeaderboardUseCase
 import com.ekehi.network.domain.usecase.offline.OfflineUserUseCase
 import com.ekehi.network.domain.usecase.offline.OfflineMiningUseCase
 import com.ekehi.network.domain.usecase.offline.OfflineSocialTaskUseCase
-import com.ekehi.network.network.service.StartIoService
+import com.ekehi.network.service.StartIoService
+import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.performance.PerformanceMonitor
 
 import dagger.Module
@@ -48,6 +50,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAppwriteClient(@ApplicationContext context: Context): Client {
+        Log.d("AppModule", "Initializing Appwrite client with endpoint: https://fra.cloud.appwrite.io/v1")
+        Log.d("AppModule", "Initializing Appwrite client with project ID: 68c2dd6e002112935ed2")
+        
         return Client(context)
                 .setEndpoint("https://fra.cloud.appwrite.io/v1")
                 .setProject("68c2dd6e002112935ed2")
@@ -55,14 +60,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(appwriteService: com.ekehi.network.network.service.AppwriteService): AuthRepository {
+    fun provideAuthRepository(appwriteService: AppwriteService): AuthRepository {
         return AuthRepository(appwriteService)
     }
 
     @Provides
     @Singleton
     fun provideUserRepository(
-            appwriteService: com.ekehi.network.network.service.AppwriteService,
+            appwriteService: AppwriteService,
             performanceMonitor: PerformanceMonitor,
             userProfileDao: UserProfileDao,
             cacheManager: CacheManager
@@ -73,7 +78,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMiningRepository(
-            appwriteService: com.ekehi.network.network.service.AppwriteService,
+            appwriteService: AppwriteService,
             performanceMonitor: PerformanceMonitor,
             miningSessionDao: MiningSessionDao,
             cacheManager: CacheManager
@@ -84,7 +89,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSocialTaskRepository(
-            appwriteService: com.ekehi.network.network.service.AppwriteService,
+            appwriteService: AppwriteService,
             performanceMonitor: PerformanceMonitor,
             socialTaskDao: SocialTaskDao,
             cacheManager: CacheManager
@@ -94,7 +99,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideLeaderboardRepository(appwriteService: com.ekehi.network.network.service.AppwriteService): LeaderboardRepository {
+    fun provideLeaderboardRepository(appwriteService: AppwriteService): LeaderboardRepository {
         return LeaderboardRepository(appwriteService)
     }
 

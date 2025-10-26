@@ -6,7 +6,7 @@ import com.ekehi.network.data.local.entities.UserProfileEntity
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.data.repository.CachingRepository
 import com.ekehi.network.data.repository.UserRepository
-import com.ekehi.network.network.service.AppwriteService
+import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.performance.PerformanceMonitor
 import io.appwrite.exceptions.AppwriteException
 import kotlinx.coroutines.flow.Flow
@@ -90,6 +90,7 @@ fun UserProfile.toEntity(): UserProfileEntity {
         id = this.id,
         userId = this.userId,
         username = this.username,
+        email = this.email,
         totalCoins = this.totalCoins,
         coinsPerSecond = this.coinsPerSecond,
         autoMiningRate = this.autoMiningRate,

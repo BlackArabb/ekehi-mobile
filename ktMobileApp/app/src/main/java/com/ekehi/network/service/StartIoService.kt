@@ -27,15 +27,8 @@ class StartIoService(private val context: Context) {
 
         try {
             Log.d(TAG, "Initializing with App ID: $appId")
-            StartAppSDK.init(context, appId)
-            
-            // Set user consent
-            StartAppSDK.setUserConsent(true)
-            
-            // Set ad frequency - don't call these methods
-            // StartAppAd.setSecondsBetweenAds(60)
-            // StartAppAd.setActivitiesBetweenAds(3)
-            
+            // Simple initialization
+            StartAppSDK.init(context, appId, false)
             isInitialized = true
             Log.d(TAG, "✅ Start.io initialized successfully")
         } catch (e: Exception) {

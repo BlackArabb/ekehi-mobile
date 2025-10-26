@@ -9,6 +9,7 @@ data class UserProfileEntity(
     val id: String,
     val userId: String,
     val username: String? = null,
+    val email: String? = null,
     val totalCoins: Double = 0.0,
     val coinsPerSecond: Double = 0.0,
     val autoMiningRate: Double = 0.0,

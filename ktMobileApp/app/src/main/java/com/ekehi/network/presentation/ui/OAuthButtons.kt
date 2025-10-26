@@ -43,6 +43,10 @@ fun OAuthButtons(
                 isLoading = false
                 errorMessage = (oauthState as Resource.Error).message
             }
+            is Resource.Idle -> {
+                isLoading = false
+                errorMessage = null
+            }
         }
     }
 

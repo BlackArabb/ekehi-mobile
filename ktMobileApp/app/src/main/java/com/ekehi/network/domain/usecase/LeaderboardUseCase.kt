@@ -14,7 +14,8 @@ class LeaderboardUseCase @Inject constructor(
         emit(Resource.Loading)
         val result = leaderboardRepository.getLeaderboard()
         if (result.isSuccess) {
-            emit(Resource.Success<List<Map<String, Any>>>(result.getOrNull() ?: emptyList()))
+            val data = result.getOrNull() ?: emptyList()
+            emit(Resource.Success(data))
         } else {
             emit(Resource.Error("Failed to get leaderboard: ${result.exceptionOrNull()?.message}"))
         }
@@ -26,7 +27,8 @@ class LeaderboardUseCase @Inject constructor(
         emit(Resource.Loading)
         val result = leaderboardRepository.getUserRank(userId)
         if (result.isSuccess) {
-            emit(Resource.Success<Int>(result.getOrNull() ?: 0))
+            val data = result.getOrNull() ?: 0
+            emit(Resource.Success(data))
         } else {
             emit(Resource.Error("Failed to get user rank: ${result.exceptionOrNull()?.message}"))
         }

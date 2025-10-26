@@ -1,6 +1,6 @@
 package com.ekehi.network.data.repository
 
-import com.ekehi.network.network.service.AppwriteService
+import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.data.model.MiningSession
 import com.ekehi.network.performance.PerformanceMonitor
 import io.appwrite.models.Document

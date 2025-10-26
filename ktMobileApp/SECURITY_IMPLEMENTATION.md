@@ -191,7 +191,7 @@ To run tests:
 ./gradlew test
 
 # Run specific test class
-./gradlew test --tests "com.ekehi.mobile.security.InputValidatorTest"
+./gradlew test --tests "com.ekehi.network.security.InputValidatorTest"
 ```
 
 ## Security Best Practices Implemented
