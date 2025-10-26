@@ -1,5 +1,6 @@
 package com.ekehi.network.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.analytics.AnalyticsManager
@@ -21,44 +22,85 @@ class LoginViewModel @Inject constructor(
     private val performanceMonitor: PerformanceMonitor
 ) : ViewModel() {
 
-    private val _loginState = MutableStateFlow<Resource<Unit>>(Resource.Loading)
+    private val _loginState = MutableStateFlow<Resource<Unit>>(Resource.Idle)
     val loginState: StateFlow<Resource<Unit>> = _loginState
 
     fun login(email: String, password: String) {
+        Log.d("LoginViewModel", "Login attempt started with email: $email")
+        
         viewModelScope.launch {
             try {
                 // Validate inputs before proceeding
                 val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
                 val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
                 
+                Log.d("LoginViewModel", "Input validation completed")
+                
                 // Check if all validations pass
                 if (!emailValidation.isValid) {
-                    _loginState.value = Resource.Error("Invalid email: ${emailValidation.errorMessage}")
+                    val errorMessage = "Invalid email: ${emailValidation.errorMessage}"
+                    Log.e("LoginViewModel", errorMessage)
+                    _loginState.value = Resource.Error(errorMessage)
                     return@launch
                 }
                 
                 if (!passwordValidation.isValid) {
-                    _loginState.value = Resource.Error("Invalid password: ${passwordValidation.errorMessage}")
+                    val errorMessage = "Invalid password: ${passwordValidation.errorMessage}"
+                    Log.e("LoginViewModel", errorMessage)
+                    _loginState.value = Resource.Error(errorMessage)
                     return@launch
                 }
                 
                 // Additional specific validations
                 if (!InputValidator.isValidEmail(emailValidation.sanitizedInput)) {
-                    _loginState.value = Resource.Error("Please enter a valid email address")
+                    val errorMessage = "Please enter a valid email address"
+                    Log.e("LoginViewModel", errorMessage)
+                    _loginState.value = Resource.Error(errorMessage)
                     return@launch
                 }
                 
                 // Track login attempt
                 analyticsManager.trackLogin("email")
+                Log.d("LoginViewModel", "Login attempt tracked in analytics")
                 
+                // Set loading state
+                _loginState.value = Resource.Loading
+                Log.d("LoginViewModel", "Set loading state")
+                
+                // Perform login
+                Log.d("LoginViewModel", "Starting login request")
                 authUseCase.login(
                     emailValidation.sanitizedInput, 
                     passwordValidation.sanitizedInput
-                ).collect { resource -> _loginState.value = resource }
+                ).collect { resource -> 
+                    Log.d("LoginViewModel", "Received login response: ${resource.javaClass.simpleName}")
+                    _loginState.value = resource
+                    
+                    when (resource) {
+                        is Resource.Success -> {
+                            Log.d("LoginViewModel", "Login successful")
+                        }
+                        is Resource.Error -> {
+                            Log.e("LoginViewModel", "Login failed: ${resource.message}")
+                        }
+                        is Resource.Loading -> {
+                            Log.d("LoginViewModel", "Login in progress")
+                        }
+                        is Resource.Idle -> {
+                            // Do nothing for Idle state
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 val errorResult = ErrorHandler.handleException(e, "Failed to login")
-                _loginState.value = Resource.Error(errorResult.userMessage)
+                val errorMessage = errorResult.userMessage
+                Log.e("LoginViewModel", "Login exception: ${e.message}", e)
+                _loginState.value = Resource.Error(errorMessage)
             }
         }
+    }
+    
+    fun resetState() {
+        _loginState.value = Resource.Idle
     }
 }

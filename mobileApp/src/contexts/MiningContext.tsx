@@ -492,8 +492,7 @@ export function MiningProvider({ children }: { children: ReactNode }) {
           coinsEarned: miningSession.coinsEarned,
           clicksMade: miningSession.clicksMade,
           sessionDuration: miningSession.sessionDuration,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date().toISOString()
         }
       );
 
