@@ -10,6 +10,7 @@ import com.ekehi.network.data.sync.SyncManager
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.domain.usecase.MiningUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -31,6 +32,62 @@ class MiningViewModel @Inject constructor(
 
     private val _remainingTime = MutableStateFlow(24 * 60 * 60) // 24 hours in seconds
     val remainingTime: StateFlow<Int> = _remainingTime
+
+    private val _isMining = MutableStateFlow(false)
+    val isMining: StateFlow<Boolean> = _isMining
+
+    private val _totalMined = MutableStateFlow(0.0)
+    val totalMined: StateFlow<Double> = _totalMined
+
+    private val _sessionEarnings = MutableStateFlow(0.0)
+    val sessionEarnings: StateFlow<Double> = _sessionEarnings
+
+    fun startMining() {
+        if (_isMining.value) return
+        
+        _isMining.value = true
+        _sessionEarnings.value = 0.0
+        _miningProgress.value = 0.0
+        _remainingTime.value = 24 * 60 * 60 // Reset to 24 hours
+        
+        viewModelScope.launch {
+            // Simulate mining process
+            val totalTime = 24 * 60 * 60 // 24 hours in seconds
+            var elapsed = 0
+            
+            while (elapsed < totalTime && _isMining.value) {
+                delay(1000) // Update every second
+                elapsed++
+                
+                // Update progress (0.0 to 1.0)
+                _miningProgress.value = elapsed.toDouble() / totalTime.toDouble()
+                
+                // Update remaining time
+                _remainingTime.value = totalTime - elapsed
+                
+                // Update session earnings (2 EKH over 24 hours)
+                _sessionEarnings.value = 2.0 * (elapsed.toDouble() / totalTime.toDouble())
+            }
+            
+            if (_isMining.value) {
+                // Mining completed
+                _sessionEarnings.value = 2.0
+                _totalMined.value += 2.0
+                
+                // In a real implementation, you would:
+                // 1. Save the mining session to the database
+                // 2. Update user balance in Appwrite
+                // 3. Show completion notification
+                
+                // For now, we'll just stop mining
+                _isMining.value = false
+            }
+        }
+    }
+
+    fun stopMining() {
+        _isMining.value = false
+    }
 
     fun startMiningSession(userId: String) {
         viewModelScope.launch {

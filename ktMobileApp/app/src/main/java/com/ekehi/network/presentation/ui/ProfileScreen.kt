@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -21,75 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.viewmodel.ProfileViewModel
-
-@Composable
-fun ProfileScreenStats() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        StatCard(
-            value = "12",
-            label = "Streak",
-            icon = Icons.Default.LocalFireDepartment,
-            iconColor = Color(0xFFef4444)
-        )
-
-        StatCard(
-            value = "5",
-            label = "Referrals",
-            icon = Icons.Default.People,
-            iconColor = Color(0xFF3b82f6)
-        )
-
-        StatCard(
-            value = "0.0833",
-            label = "EKH/hour",
-            icon = Icons.Default.TrendingUp,
-            iconColor = Color(0xFF10b981)
-        )
-    }
-}
-
-@Composable
-fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, iconColor: Color) {
-    Card(
-        modifier = Modifier
-            .width(100.dp)
-            .height(100.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = value,
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            Text(
-                text = label,
-                color = Color(0xB3FFFFFF), // 70% opacity white
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
-    }
-}
 
 @Composable
 fun ProfileScreen(
@@ -122,9 +55,9 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(20.dp)
+                .padding(16.dp)
         ) {
-            // Header
+            // Header Section (30% of screen)
             ProfileHeader(
                 userProfile = userProfile,
                 onNavigateToSettings = onNavigateToSettings
@@ -132,53 +65,49 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Mining Stats
-            ProfileScreenStats()
+            // Stats Section (horizontal cards)
+            ProfileStatsSection(userProfile = userProfile)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Auto Mining Status
-            ProfileAutoMiningStatus()
+            // Main Content Section (scrollable)
+            ProfileContentSection(userProfile = userProfile)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Referral Stats
-            ReferralStats()
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Achievements
-            AchievementsSection()
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Settings Section
-            SettingsSection(onNavigateToSettings = onNavigateToSettings)
+            // Actions Section
+            ProfileActionsSection(
+                onEditProfile = { /* Handle edit profile */ },
+                onSettings = onNavigateToSettings,
+                onReferralCode = { /* Handle referral code */ },
+                onLogout = { /* Handle logout */ }
+            )
         }
     }
 }
 
 @Composable
 fun ProfileHeader(
-    userProfile: com.ekehi.network.data.model.UserProfile?,
+    userProfile: UserProfile?,
     onNavigateToSettings: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // User Avatar
             Box(
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(80.dp)
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
@@ -186,7 +115,7 @@ fun ProfileHeader(
                                 Color(0xFFa855f7)
                             )
                         ),
-                        shape = androidx.compose.foundation.shape.CircleShape
+                        shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -194,402 +123,310 @@ fun ProfileHeader(
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Avatar",
                     tint = Color.White,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(40.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // User Info
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = userProfile?.username ?: "User Name",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    // Verification Badge
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF3b82f6), shape = androidx.compose.foundation.shape.CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .background(Color.White, shape = androidx.compose.foundation.shape.CircleShape)
-                        )
-                    }
-                }
+            Text(
+                text = userProfile?.username ?: "User Name",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-                Text(
-                    text = userProfile?.email ?: "user@example.com",
-                    color = Color(0xB3FFFFFF), // 70% opacity white
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+            Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = "Total Balance",
-                    color = Color(0xB3FFFFFF), // 70% opacity white
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+            Text(
+                text = userProfile?.email ?: "user@example.com",
+                color = Color(0xB3FFFFFF), // 70% opacity white
+                fontSize = 16.sp
+            )
 
-                Text(
-                    text = userProfile?.totalCoins?.let { "${String.format("%,.2f", it)} EKH" } ?: "1,250.50 EKH",
-                    color = Color(0xFFffa000),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Edit Button
-            IconButton(
-                onClick = onNavigateToSettings
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit Profile",
-                    tint = Color(0xFFffa000)
-                )
-            }
-        }
-    }
-}
+            // Join Date
+            Text(
+                text = "Joined: ${userProfile?.createdAt?.substring(0, 10) ?: "N/A"}",
+                color = Color(0xB3FFFFFF), // 70% opacity white
+                fontSize = 14.sp
+            )
 
-@Composable
-fun MiningStats() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        StatCard(
-            value = "12",
-            label = "Streak",
-            icon = Icons.Default.LocalFireDepartment,
-            iconColor = Color(0xFFef4444)
-        )
+            Spacer(modifier = Modifier.height(8.dp))
 
-        StatCard(
-            value = "5",
-            label = "Referrals",
-            icon = Icons.Default.People,
-            iconColor = Color(0xFF3b82f6)
-        )
-
-        StatCard(
-            value = "0.0833",
-            label = "EKH/hour",
-            icon = Icons.Default.TrendingUp,
-            iconColor = Color(0xFF10b981)
-        )
-    }
-}
-
-@Composable
-fun ProfileAutoMiningStatus() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+            // Verification Badge
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Auto Mining",
-                    tint = Color(0xFF10b981),
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(
-                    text = "Auto Mining Status",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Not Active",
-                        color = Color(0xFFffa000),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Status",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "0.0000 EKH/sec",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Current Rate",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "$0.00 / $50.00",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Spent / Required",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ReferralStats() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.People,
-                    contentDescription = "Referrals",
+                    imageVector = Icons.Default.Verified,
+                    contentDescription = "Verified",
                     tint = Color(0xFF3b82f6),
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(16.dp)
                 )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Referral Statistics",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "5",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Total Referrals",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "2.5 EKH",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Earned from Referrals",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "1.0 EKH",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Per Referral",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "ekehi://referral/ABC123",
-                    color = Color(0xB3FFFFFF), // 70% opacity white
+                    text = "Verified Account",
+                    color = Color(0xFF3b82f6),
                     fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
+                    fontWeight = FontWeight.Medium
                 )
-                IconButton(
-                    onClick = { /* Handle copy referral link */ }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy",
-                        tint = Color(0xFFffa000)
-                    )
-                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Edit Profile Button
+            Button(
+                onClick = onNavigateToSettings,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFffa000)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Edit Profile",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
 }
 
 @Composable
-fun AchievementsSection() {
+fun ProfileStatsSection(userProfile: UserProfile?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.EmojiEvents,
-                    contentDescription = "Achievements",
-                    tint = Color(0xFFf6ad55),
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(
-                    text = "Achievements",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
+            Text(
+                text = "Statistics",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AchievementBadge(awardCount = "5", category = "Mining Prolificity", label = "5 Mining Attempts Today!")
+                StatCard(
+                    value = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
+                    label = "Total Mined",
+                    icon = Icons.Default.AccountBalance,
+                    iconColor = Color(0xFFffa000)
+                )
 
-                AchievementBadge(awardCount = "10", category = "Mining Mastery", label = "10 Mining Sessions Over All Times")
-                // Spacer here only appears visible while editing preview content as achievement is smaller than the container
-                Spacer(modifier = Modifier.width(8.dp))
-                AchievementBadge(awardCount = "3", category = "Mining Efficiency", label = "3 Mining Attempts Within 10 Minutes")
+                StatCard(
+                    value = (userProfile?.totalReferrals ?: 0).toString(),
+                    label = "Tasks Completed",
+                    icon = Icons.Default.Task,
+                    iconColor = Color(0xFF3b82f6)
+                )
+
+                StatCard(
+                    value = "#${userProfile?.miningPower?.toInt() ?: 0}",
+                    label = "Current Rank",
+                    icon = Icons.Default.Leaderboard,
+                    iconColor = Color(0xFF10b981)
+                )
+
+                StatCard(
+                    value = (userProfile?.totalReferrals ?: 0).toString(),
+                    label = "Referral Count",
+                    icon = Icons.Default.People,
+                    iconColor = Color(0xFF8b5cf6)
+                )
             }
         }
     }
 }
 
 @Composable
-fun AchievementBadge(awardCount: String, category: String, label: String) {
+fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, iconColor: Color) {
     Card(
         modifier = Modifier
-            .width(100.dp)
-            .height(100.dp),
+            .width(80.dp)
+            .height(80.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = awardCount,
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 8.dp)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(20.dp)
             )
             Text(
-                text = category,
-                color = Color(0xB3FFFFFF), // 70% opacity white
-                fontSize = 12.sp,
+                text = value,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 4.dp)
             )
             Text(
                 text = label,
                 color = Color(0xB3FFFFFF), // 70% opacity white
                 fontSize = 10.sp,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 2.dp)
             )
         }
     }
 }
 
 @Composable
-fun SettingsSection(onNavigateToSettings: () -> Unit) {
+fun ProfileContentSection(userProfile: UserProfile?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Account Information
+            Text(
+                text = "Account Information",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            ProfileDetailItem(
+                label = "Email",
+                value = userProfile?.email ?: "N/A"
+            )
+
+            ProfileDetailItem(
+                label = "Phone",
+                value = "Not provided"
+            )
+
+            ProfileDetailItem(
+                label = "Account Created",
+                value = userProfile?.createdAt?.substring(0, 10) ?: "N/A"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Mining Statistics
+            Text(
+                text = "Mining Statistics",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            ProfileDetailItem(
+                label = "Total Mined",
+                value = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0)
+            )
+
+            ProfileDetailItem(
+                label = "Mining Rate",
+                value = "%.4f EKH/hour".format(userProfile?.autoMiningRate ?: 0.0)
+            )
+
+            ProfileDetailItem(
+                label = "Best Mining Day",
+                value = "%.2f EKH".format(userProfile?.maxDailyEarnings ?: 0.0)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Activity
+            Text(
+                text = "Recent Activity",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            // Placeholder for recent mining sessions
+            Text(
+                text = "No recent mining sessions",
+                color = Color(0xB3FFFFFF),
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Placeholder for recent tasks
+            Text(
+                text = "No recent tasks completed",
+                color = Color(0xB3FFFFFF),
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileDetailItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            color = Color(0xB3FFFFFF), // 70% opacity white
+            fontSize = 14.sp
         )
+        Text(
+            text = value,
+            color = Color.White,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun ProfileActionsSection(
+    onEditProfile: () -> Unit,
+    onSettings: () -> Unit,
+    onReferralCode: () -> Unit,
+    onLogout: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0x1AFFFFFF) // 10% opacity white
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -597,75 +434,72 @@ fun SettingsSection(onNavigateToSettings: () -> Unit) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Account Settings",
+                text = "Actions",
                 color = Color.White,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SettingItem(
+            ActionButton(
                 text = "Edit Profile",
                 icon = Icons.Default.Edit,
-                onClick = onNavigateToSettings
+                onClick = onEditProfile
             )
 
-            SettingItem(
-                text = "Security",
-                icon = Icons.Default.Security,
-                onClick = { /* Handle security */ }
+            ActionButton(
+                text = "Settings",
+                icon = Icons.Default.Settings,
+                onClick = onSettings
             )
 
-            SettingItem(
-                text = "Notifications",
-                icon = Icons.Default.Notifications,
-                onClick = { /* Handle notifications */ }
+            ActionButton(
+                text = "Referral Code",
+                icon = Icons.Default.Share,
+                onClick = onReferralCode
             )
 
-            SettingItem(
-                text = "Privacy Policy",
-                icon = Icons.Default.Policy,
-                onClick = { /* Handle privacy policy */ }
-            )
+            Spacer(modifier = Modifier.height(8.dp))
 
-            SettingItem(
-                text = "Terms of Service",
-                icon = Icons.Default.Description,
-                onClick = { /* Handle terms of service */ }
-            )
-
-            SettingItem(
-                text = "Sign Out",
-                icon = Icons.Default.ExitToApp,
-                onClick = { /* Handle sign out */ },
-                textColor = Color(0xFFef4444) // Red for sign out
+            ActionButton(
+                text = "Logout",
+                icon = Icons.Default.Logout,
+                onClick = onLogout,
+                isDanger = true
             )
         }
     }
 }
 
 @Composable
-fun SettingItem(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit, textColor: Color = Color.White) {
+fun ActionButton(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    isDanger: Boolean = false
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
-            .clickable { onClick() },
+            .padding(vertical = 8.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
             contentDescription = text,
-            tint = textColor,
+            tint = if (isDanger) Color(0xFFef4444) else Color(0xFFffa000),
             modifier = Modifier.size(24.dp)
         )
         Text(
             text = text,
-            color = textColor,
+            color = if (isDanger) Color(0xFFef4444) else Color.White,
             fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier
-                .padding(start = 16.dp)
+                .padding(start = 12.dp)
                 .weight(1f)
         )
         Icon(

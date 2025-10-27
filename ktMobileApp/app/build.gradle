@@ -92,6 +92,9 @@ dependencies {
     // Chrome Custom Tabs for OAuth
     implementation 'androidx.browser:browser:1.7.0'
     
+    // Google Auth for OAuth
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    
     // Room database
     implementation 'androidx.room:room-runtime:2.6.1'
     implementation 'androidx.room:room-ktx:2.6.1'

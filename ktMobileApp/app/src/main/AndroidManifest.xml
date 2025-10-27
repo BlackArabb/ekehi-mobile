@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.ekehi.network">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Internet permission for Appwrite -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -41,16 +40,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
-            <!-- OAuth callback intent filter -->
-            <intent-filter android:autoVerify="true">
+        </activity>
+        
+        <!-- OAuth Callback Activity -->
+        <activity
+            android:name=".OAuthCallbackActivity"
+            android:exported="true"
+            android:theme="@style/Theme.EkehiMobile">
+            <!-- OAuth success callback -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="ekehi" android:host="oauth" android:path="/return" />
             </intent-filter>
             
-            <!-- OAuth failure intent filter -->
+            <!-- OAuth failure callback -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

@@ -100,6 +100,92 @@ class LoginViewModel @Inject constructor(
         }
     }
     
+    fun loginWithGoogle(idToken: String) {
+        Log.d("LoginViewModel", "Google login attempt started")
+        
+        viewModelScope.launch {
+            try {
+                // Track Google login attempt
+                analyticsManager.trackLogin("google")
+                Log.d("LoginViewModel", "Google login attempt tracked in analytics")
+                
+                // Set loading state
+                _loginState.value = Resource.Loading
+                Log.d("LoginViewModel", "Set loading state for Google login")
+                
+                // Perform Google login
+                Log.d("LoginViewModel", "Starting Google login request")
+                authUseCase.loginWithGoogle(idToken).collect { resource -> 
+                    Log.d("LoginViewModel", "Received Google login response: ${resource.javaClass.simpleName}")
+                    _loginState.value = resource
+                    
+                    when (resource) {
+                        is Resource.Success -> {
+                            Log.d("LoginViewModel", "Google login successful")
+                        }
+                        is Resource.Error -> {
+                            Log.e("LoginViewModel", "Google login failed: ${resource.message}")
+                        }
+                        is Resource.Loading -> {
+                            Log.d("LoginViewModel", "Google login in progress")
+                        }
+                        is Resource.Idle -> {
+                            // Do nothing for Idle state
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorResult = ErrorHandler.handleException(e, "Failed to login with Google")
+                val errorMessage = errorResult.userMessage
+                Log.e("LoginViewModel", "Google login exception: ${e.message}", e)
+                _loginState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
+    fun checkCurrentUser() {
+        Log.d("LoginViewModel", "Checking current user status")
+        
+        viewModelScope.launch {
+            try {
+                // Set loading state
+                _loginState.value = Resource.Loading
+                Log.d("LoginViewModel", "Set loading state for user check")
+                
+                // Check if we have a valid current user
+                // This will verify if the OAuth session was created successfully
+                authUseCase.getCurrentUser().collect { resource ->
+                    Log.d("LoginViewModel", "Received current user response: ${resource.javaClass.simpleName}")
+                    when (resource) {
+                        is Resource.Success -> {
+                            Log.d("LoginViewModel", "Current user verified successfully")
+                            // User is authenticated, navigate to dashboard
+                            _loginState.value = Resource.Success(Unit)
+                        }
+                        is Resource.Error -> {
+                            Log.e("LoginViewModel", "Failed to verify current user: ${resource.message}")
+                            // User is not authenticated, show error
+                            _loginState.value = Resource.Error("Authentication failed. Please try again.")
+                        }
+                        is Resource.Loading -> {
+                            Log.d("LoginViewModel", "User verification in progress")
+                            _loginState.value = resource
+                        }
+                        is Resource.Idle -> {
+                            // Do nothing for Idle state
+                            _loginState.value = resource
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorResult = ErrorHandler.handleException(e, "Failed to verify user")
+                val errorMessage = errorResult.userMessage
+                Log.e("LoginViewModel", "User verification exception: ${e.message}", e)
+                _loginState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
     fun resetState() {
         _loginState.value = Resource.Idle
     }

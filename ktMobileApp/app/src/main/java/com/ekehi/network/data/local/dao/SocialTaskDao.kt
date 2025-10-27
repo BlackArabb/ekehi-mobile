@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 interface SocialTaskDao {
     @Query("SELECT * FROM social_tasks")
     fun getAllSocialTasks(): Flow<List<SocialTaskEntity>>
+    
+    @Query("SELECT * FROM social_tasks")
+    suspend fun getAllSocialTasksSync(): List<SocialTaskEntity>
 
     @Query("SELECT * FROM social_tasks WHERE id = :taskId LIMIT 1")
     fun getSocialTaskById(taskId: String): Flow<SocialTaskEntity?>

@@ -29,22 +29,12 @@ class OfflineSocialTaskUseCase @Inject constructor(
     
     fun syncSocialTasks(): Flow<Resource<List<SocialTask>>> = flow {
         emit(Resource.Loading)
-        if (socialTaskRepository is OfflineSocialTaskRepository) {
-            val result = socialTaskRepository.syncSocialTasks()
-            if (result.isSuccess) {
-                // Return empty list as sync doesn't return tasks directly
-                emit(Resource.Success(emptyList()))
-            } else {
-                emit(Resource.Error("Failed to sync social tasks: ${result.exceptionOrNull()?.message}"))
-            }
+        val result = socialTaskRepository.getAllSocialTasks()
+        if (result.isSuccess) {
+            val data = result.getOrNull() ?: emptyList<SocialTask>()
+            emit(Resource.Success(data))
         } else {
-            val result = socialTaskRepository.getSocialTasks()
-            if (result.isSuccess) {
-                val data = result.getOrNull() ?: emptyList()
-                emit(Resource.Success(data))
-            } else {
-                emit(Resource.Error("Failed to get social tasks: ${result.exceptionOrNull()?.message}"))
-            }
+            emit(Resource.Error("Failed to sync social tasks: ${result.exceptionOrNull()?.message}"))
         }
     }.catch { e ->
         emit(Resource.Error("Error syncing social tasks: ${e.message}"))

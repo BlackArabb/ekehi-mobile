@@ -40,9 +40,10 @@ open class MiningRepository @Inject constructor(
                     documentId = "unique()",
                     data = mapOf(
                         "userId" to userId,
-                        "coinsEarned" to 0.0,
-                        "clicksMade" to 0,
-                        "sessionDuration" to 0
+                        "amount" to 2.0, // 2 EKH reward
+                        "timestamp" to System.currentTimeMillis().toString(),
+                        "status" to "pending",
+                        "duration" to 30 // 30 seconds
                     )
                 )
                 
@@ -72,6 +73,29 @@ open class MiningRepository @Inject constructor(
         }
     }
 
+    suspend fun completeMiningSession(sessionId: String, userId: String): Result<MiningSession> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val updates = mapOf(
+                    "status" to "completed",
+                    "timestamp" to System.currentTimeMillis().toString()
+                )
+                
+                val document = appwriteService.databases.updateDocument(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.MINING_SESSIONS_COLLECTION,
+                    documentId = sessionId,
+                    data = updates
+                )
+                
+                val session = documentToMiningSession(document)
+                Result.success(session)
+            } catch (e: AppwriteException) {
+                Result.failure(e)
+            }
+        }
+    }
+
     private fun documentToMiningSession(document: Document<*>): MiningSession {
         @Suppress("UNCHECKED_CAST")
         val data = document.data as Map<String, Any>
@@ -79,9 +103,10 @@ open class MiningRepository @Inject constructor(
         return MiningSession(
             id = document.id,
             userId = data["userId"] as String,
-            coinsEarned = (data["coinsEarned"] as? Number)?.toDouble() ?: 0.0,
-            clicksMade = (data["clicksMade"] as? Number)?.toInt() ?: 0,
-            sessionDuration = (data["sessionDuration"] as? Number)?.toInt() ?: 0,
+            amount = (data["amount"] as? Number)?.toDouble() ?: 2.0,
+            timestamp = data["timestamp"] as? String ?: System.currentTimeMillis().toString(),
+            status = data["status"] as? String ?: "pending",
+            duration = (data["duration"] as? Number)?.toInt() ?: 30,
             createdAt = document.createdAt,
             updatedAt = document.updatedAt
         )

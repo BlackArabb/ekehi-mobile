@@ -3,6 +3,7 @@ package com.ekehi.network.presentation.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -10,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.viewmodel.MiningViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun MiningScreen(
@@ -27,6 +30,9 @@ fun MiningScreen(
     val scrollState = rememberScrollState()
     val miningProgress by viewModel.miningProgress.collectAsState()
     val remainingTime by viewModel.remainingTime.collectAsState()
+    val isMining by viewModel.isMining.collectAsState()
+    val totalMined by viewModel.totalMined.collectAsState()
+    val sessionEarnings by viewModel.sessionEarnings.collectAsState()
 
     Box(
         modifier = Modifier
@@ -61,20 +67,25 @@ fun MiningScreen(
             // Circular Progress Bar
             MiningProgressBar(
                 progress = miningProgress.toFloat(),
-                remainingTime = viewModel.formatTime(remainingTime)
+                remainingTime = viewModel.formatTime(remainingTime),
+                isMining = isMining
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             // Mining Stats
-            MiningScreenStats()
+            MiningScreenStats(totalMined = totalMined, sessionEarnings = sessionEarnings)
 
             Spacer(modifier = Modifier.height(32.dp))
 
             // Mining Button
             MiningButton(
-                onClick = { /* Handle mining */ },
-                enabled = remainingTime > 0
+                onClick = { 
+                    if (!isMining) {
+                        viewModel.startMining()
+                    }
+                },
+                isMining = isMining
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -96,7 +107,7 @@ fun MiningScreen(
 }
 
 @Composable
-fun MiningProgressBar(progress: Float, remainingTime: String) {
+fun MiningProgressBar(progress: Float, remainingTime: String, isMining: Boolean) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -105,7 +116,7 @@ fun MiningProgressBar(progress: Float, remainingTime: String) {
             modifier = Modifier.size(200.dp)
         ) {
             CircularProgressIndicator(
-                progress = progress,
+                progress = if (isMining) progress else 0f,
                 modifier = Modifier.size(200.dp),
                 color = Color(0xFFffa000),
                 strokeWidth = 12.dp,
@@ -116,13 +127,13 @@ fun MiningProgressBar(progress: Float, remainingTime: String) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "24 Hour Mining",
+                    text = if (isMining) "Mining in Progress" else "Ready to Mine",
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = remainingTime,
+                    text = if (isMining) remainingTime else "24:00:00",
                     color = Color(0xFFffa000),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
@@ -141,28 +152,49 @@ fun MiningProgressBar(progress: Float, remainingTime: String) {
 }
 
 @Composable
-fun MiningScreenStats() {
-    Row(
+fun MiningScreenStats(totalMined: Double, sessionEarnings: Double) {
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0x1AFFFFFF) // 10% opacity white
+        )
     ) {
-        StatCard(
-            value = "0.0833",
-            label = "EKH/hour",
-            icon = Icons.Default.Speed
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Mining Statistics",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                StatCard(
+                    value = "0.0833",
+                    label = "EKH/hour",
+                    icon = Icons.Default.Speed
+                )
 
-        StatCard(
-            value = "0.0000",
-            label = "EKH/sec",
-            icon = Icons.Default.TrendingUp
-        )
+                StatCard(
+                    value = "%.4f".format(totalMined),
+                    label = "Total Mined",
+                    icon = Icons.Default.AccountBalance
+                )
 
-        StatCard(
-            value = "0",
-            label = "Clicks",
-            icon = Icons.Default.TouchApp
-        )
+                StatCard(
+                    value = "%.4f".format(sessionEarnings),
+                    label = "This Session",
+                    icon = Icons.Default.TrendingUp
+                )
+            }
+        }
     }
 }
 
@@ -207,25 +239,37 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
 }
 
 @Composable
-fun MiningButton(onClick: () -> Unit, enabled: Boolean) {
+fun MiningButton(onClick: () -> Unit, isMining: Boolean) {
     Button(
         onClick = onClick,
-        enabled = enabled,
+        enabled = !isMining,
         modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp),
+            .size(200.dp)
+            .clip(CircleShape),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (enabled) Color(0xFFffa000) else Color(0xFF6b7280),
+            containerColor = if (!isMining) Color(0xFFffa000) else Color(0xFF6b7280),
             disabledContainerColor = Color(0xFF4b5563)
         ),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+        shape = CircleShape,
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
     ) {
-        Text(
-            text = if (enabled) "Start Mining Session" else "Mining in Progress",
-            color = Color.White,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.Build,
+                contentDescription = "Mine",
+                tint = Color.White,
+                modifier = Modifier.size(48.dp)
+            )
+            Text(
+                text = if (!isMining) "TAP TO MINE" else "MINING...",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
     }
 }
 

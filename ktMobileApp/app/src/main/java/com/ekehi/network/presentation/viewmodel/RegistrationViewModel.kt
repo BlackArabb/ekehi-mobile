@@ -121,6 +121,48 @@ class RegistrationViewModel @Inject constructor(
         }
     }
     
+    fun registerWithGoogle(idToken: String, name: String, email: String) {
+        Log.d("RegistrationViewModel", "Google registration attempt started with email: $email")
+        
+        viewModelScope.launch {
+            try {
+                // Track Google registration attempt
+                analyticsManager.trackSignUp("google")
+                Log.d("RegistrationViewModel", "Google registration attempt tracked in analytics")
+                
+                // Set loading state
+                _registrationState.value = Resource.Loading
+                Log.d("RegistrationViewModel", "Set loading state for Google registration")
+                
+                // Perform Google registration
+                Log.d("RegistrationViewModel", "Starting Google registration request")
+                authUseCase.registerWithGoogle(idToken, name, email).collect { resource ->
+                    Log.d("RegistrationViewModel", "Received Google registration response: ${resource.javaClass.simpleName}")
+                    _registrationState.value = resource
+                    
+                    when (resource) {
+                        is Resource.Success -> {
+                            Log.d("RegistrationViewModel", "Google registration successful")
+                        }
+                        is Resource.Error -> {
+                            Log.e("RegistrationViewModel", "Google registration failed: ${resource.message}")
+                        }
+                        is Resource.Loading -> {
+                            Log.d("RegistrationViewModel", "Google registration in progress")
+                        }
+                        is Resource.Idle -> {
+                            // Do nothing for Idle state
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorMessage = "Google registration failed: ${e.message}"
+                Log.e("RegistrationViewModel", errorMessage, e)
+                _registrationState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
     fun resetState() {
         _registrationState.value = Resource.Idle
     }

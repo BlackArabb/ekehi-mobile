@@ -1,6 +1,8 @@
 package com.ekehi.network.presentation.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +18,8 @@ import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 @Composable
 fun OAuthButtons(
         viewModel: OAuthViewModel = hiltViewModel(),
-        onOAuthSuccess: () -> Unit = {}
+        onOAuthSuccess: () -> Unit = {},
+        isRegistration: Boolean = false // Flag to determine if this is for registration
 ) {
     val context = LocalContext.current
     val activity = context as? ComponentActivity
@@ -77,10 +80,21 @@ fun OAuthButtons(
                         color = Color.White
                 )
             } else {
-                Text(
-                        text = "Continue with Google",
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Google",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (isRegistration) "Sign up with Google" else "Sign in with Google",
                         color = Color.White
-                )
+                    )
+                }
             }
         }
 

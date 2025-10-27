@@ -1,8 +1,12 @@
 package com.ekehi.network
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,6 +23,8 @@ class MainActivity : ComponentActivity() {
     
     @Inject
     lateinit var startIoService: StartIoService
+    
+    private lateinit var oauthResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +34,29 @@ class MainActivity : ComponentActivity() {
             startIoService.initialize()
         } catch (e: Exception) {
             // Log the error but don't crash the app
-            e.printStackTrace()
+            Log.e("MainActivity", "Error initializing Start.io", e)
+        }
+        
+        // Register for OAuth activity result
+        oauthResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            Log.d("MainActivity", "Received OAuth activity result: ${result.resultCode}")
+            try {
+                if (result.resultCode == RESULT_OK) {
+                    val data = result.data
+                    val success = data?.getBooleanExtra("oauth_success", false) ?: false
+                    if (success) {
+                        Log.d("MainActivity", "OAuth successful, user authenticated")
+                        // The OAuthCallbackActivity will handle updating the app state
+                    } else {
+                        val errorMessage = data?.getStringExtra("error_message") ?: "OAuth failed"
+                        Log.e("MainActivity", "OAuth failed: $errorMessage")
+                    }
+                } else {
+                    Log.e("MainActivity", "OAuth activity cancelled or failed")
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error handling OAuth result", e)
+            }
         }
         
         setContent {

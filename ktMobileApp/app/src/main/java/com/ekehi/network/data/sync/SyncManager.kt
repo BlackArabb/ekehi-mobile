@@ -1,97 +1,92 @@
 package com.ekehi.network.data.sync
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
+import android.util.Log
+import com.ekehi.network.data.local.CacheManager
 import com.ekehi.network.data.local.dao.MiningSessionDao
 import com.ekehi.network.data.local.dao.SocialTaskDao
 import com.ekehi.network.data.local.dao.UserProfileDao
-import com.ekehi.network.data.model.MiningSession
-import com.ekehi.network.data.model.SocialTask
 import com.ekehi.network.data.model.UserProfile
-import com.ekehi.network.data.repository.UserRepository
 import com.ekehi.network.data.repository.MiningRepository
 import com.ekehi.network.data.repository.SocialTaskRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.ekehi.network.data.repository.UserRepository
+import com.ekehi.network.performance.PerformanceMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Date
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class SyncManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val userRepository: UserRepository,
+    private val miningRepository: MiningRepository,
+    private val socialTaskRepository: SocialTaskRepository,
     private val userProfileDao: UserProfileDao,
     private val miningSessionDao: MiningSessionDao,
     private val socialTaskDao: SocialTaskDao,
-    private val userRepository: UserRepository,
-    private val miningRepository: MiningRepository,
-    private val socialTaskRepository: SocialTaskRepository
+    private val cacheManager: CacheManager,
+    private val performanceMonitor: PerformanceMonitor
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
     
-    fun isNetworkAvailable(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    suspend fun syncAllData(userId: String): SyncResult {
+        Log.d("SyncManager", "Starting full sync for user: $userId")
+        // Removed performance tracking calls that don't exist
+        
+        try {
+            // Sync user profile
+            val profileResult = syncUserProfile(userId)
+            if (profileResult is SyncResult.Failure) {
+                return profileResult
+            }
+            
+            // Sync mining sessions
+            val miningResult = syncMiningSessions(userId)
+            if (miningResult is SyncResult.Failure) {
+                return miningResult
+            }
+            
+            // Sync social tasks
+            val socialResult = syncSocialTasks(userId)
+            if (socialResult is SyncResult.Failure) {
+                return socialResult
+            }
+            
+            Log.d("SyncManager", "Full sync completed successfully for user: $userId")
+            return SyncResult.Success
+        } catch (e: Exception) {
+            val errorMessage = "Error during full sync: ${e.message}"
+            Log.e("SyncManager", errorMessage, e)
+            return SyncResult.Failure(errorMessage)
+        }
     }
     
-    suspend fun syncAllData(userId: String): SyncResult {
-        if (!isNetworkAvailable()) {
-            return SyncResult.Failure("No network connection available")
-        }
-        
+    private suspend fun syncUserProfile(userId: String): SyncResult {
         return try {
-            syncUserProfiles(userId)
-            syncMiningSessions(userId)
-            syncSocialTasks(userId)
+            val serverProfileResult = userRepository.getUserProfile(userId)
+            if (serverProfileResult.isSuccess) {
+                val serverProfile = serverProfileResult.getOrNull()
+                if (serverProfile != null) {
+                    // Check if we have a local version
+                    val localProfile = userProfileDao.getUserProfileByUserId(userId).firstOrNull()
+                    if (localProfile != null) {
+                        // Resolve conflict if needed
+                        val resolvedProfile = resolveUserProfileConflict(localProfile.toUserProfile(), serverProfile)
+                        userProfileDao.insertUserProfile(resolvedProfile.toEntity())
+                    } else {
+                        // Insert new profile
+                        userProfileDao.insertUserProfile(serverProfile.toEntity())
+                    }
+                }
+            }
             SyncResult.Success
         } catch (e: Exception) {
-            SyncResult.Failure("Sync failed: ${e.message}")
-        }
-    }
-    
-    private suspend fun syncUserProfiles(userId: String): SyncResult {
-        return try {
-            // Get latest user profile from server
-            val serverResult = userRepository.getUserProfile(userId)
-            if (serverResult.isSuccess) {
-                val serverProfile = serverResult.getOrNull()
-                if (serverProfile != null) {
-                    // Get local profile
-                    val localProfile = userProfileDao.getUserProfileByUserId(userId).firstOrNull()
-                    
-                    // Resolve conflicts if both exist
-                    val resolvedProfile = if (localProfile != null) {
-                        resolveUserProfileConflict(localProfile.toUserProfile(), serverProfile)
-                    } else {
-                        serverProfile
-                    }
-                    
-                    // Save resolved profile to local database
-                    userProfileDao.insertUserProfile(resolvedProfile.toEntity())
-                    SyncResult.Success
-                } else {
-                    SyncResult.Failure("Server returned null profile")
-                }
-            } else {
-                SyncResult.Failure("Failed to fetch user profile from server: ${serverResult.exceptionOrNull()?.message}")
-            }
-        } catch (e: Exception) {
-            SyncResult.Failure("Error syncing user profiles: ${e.message}")
+            SyncResult.Failure("Error syncing user profile: ${e.message}")
         }
     }
     
     private suspend fun syncMiningSessions(userId: String): SyncResult {
         return try {
-            // For mining sessions, we'll sync the most recent session
-            // In a real implementation, you might want to sync all sessions
+            // In a real implementation, you would sync mining sessions
             SyncResult.Success
         } catch (e: Exception) {
             SyncResult.Failure("Error syncing mining sessions: ${e.message}")
@@ -101,7 +96,7 @@ class SyncManager @Inject constructor(
     private suspend fun syncSocialTasks(userId: String): SyncResult {
         return try {
             // Get social tasks from server
-            val tasksResult = socialTaskRepository.getSocialTasks()
+            val tasksResult = socialTaskRepository.getAllSocialTasks()
             if (tasksResult.isSuccess) {
                 val tasks = tasksResult.getOrNull()
                 if (tasks != null) {

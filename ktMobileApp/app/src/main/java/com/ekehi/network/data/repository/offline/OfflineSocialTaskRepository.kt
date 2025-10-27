@@ -4,6 +4,7 @@ import com.ekehi.network.data.local.CacheManager
 import com.ekehi.network.data.local.dao.SocialTaskDao
 import com.ekehi.network.data.local.entities.SocialTaskEntity
 import com.ekehi.network.data.model.SocialTask
+import com.ekehi.network.data.model.UserSocialTask
 import com.ekehi.network.data.repository.CachingRepository
 import com.ekehi.network.data.repository.SocialTaskRepository
 import com.ekehi.network.service.AppwriteService
@@ -38,21 +39,8 @@ class OfflineSocialTaskRepository @Inject constructor(
         socialTaskDao.insertSocialTask(socialTask.toEntity(userId))
     }
     
-    suspend fun syncSocialTasks(): Result<List<SocialTask>> {
-        return try {
-            val result = getSocialTasks()
-            if (result.isSuccess) {
-                result.getOrNull()?.forEach { task ->
-                    // We need to associate with a userId, but for global tasks this might be empty
-                    cacheSocialTask(task, "")
-                }
-            }
-            result
-        } catch (e: AppwriteException) {
-            // If online sync fails, return cached data
-            Result.failure(e)
-        }
-    }
+    // Remove the override methods since they're final in the parent class
+    // We'll use the parent's implementation directly
 }
 
 // Extension functions to convert between entity and model

@@ -3,6 +3,7 @@ package com.ekehi.network.domain.usecase
 import android.util.Log
 import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.data.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -47,6 +48,64 @@ class AuthUseCase @Inject constructor(
         }
     }.catch { e ->
         val errorMessage = "Registration error: ${e.message}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
+
+    fun loginWithGoogle(idToken: String): Flow<Resource<Unit>> = flow {
+        Log.d("AuthUseCase", "Starting Google login flow")
+        emit(Resource.Loading)
+        Log.d("AuthUseCase", "Emitted Loading state for Google login")
+        
+        val result = authRepository.loginWithGoogle(idToken)
+        Log.d("AuthUseCase", "Google login result received: ${result.isSuccess}")
+        
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Google login successful")
+            emit(Resource.Success(Unit))
+        } else {
+            val errorMessage = "Google login failed: ${result.exceptionOrNull()?.message}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Google login error: ${e.message}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
+
+    fun registerWithGoogle(idToken: String, name: String, email: String): Flow<Resource<Unit>> = flow {
+        Log.d("AuthUseCase", "Starting Google registration flow for email: $email")
+        emit(Resource.Loading)
+        val result = authRepository.registerWithGoogle(idToken, name, email)
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Google registration successful for email: $email")
+            emit(Resource.Success(Unit))
+        } else {
+            val errorMessage = "Google registration failed: ${result.exceptionOrNull()?.message}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Google registration error: ${e.message}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
+
+    fun getCurrentUser(): Flow<Resource<Unit>> = flow {
+        Log.d("AuthUseCase", "Starting get current user flow")
+        emit(Resource.Loading)
+        val result = authRepository.getCurrentUser()
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Current user fetched successfully")
+            emit(Resource.Success(Unit))
+        } else {
+            val errorMessage = "Failed to fetch current user: ${result.exceptionOrNull()?.message}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error fetching current user: ${e.message}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }

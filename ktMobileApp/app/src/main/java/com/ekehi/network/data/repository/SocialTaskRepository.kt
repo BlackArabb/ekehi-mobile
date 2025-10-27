@@ -2,6 +2,7 @@ package com.ekehi.network.data.repository
 
 import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.data.model.SocialTask
+import com.ekehi.network.data.model.UserSocialTask
 import com.ekehi.network.performance.PerformanceMonitor
 import io.appwrite.models.Document
 import io.appwrite.exceptions.AppwriteException
@@ -14,7 +15,7 @@ open class SocialTaskRepository @Inject constructor(
     private val performanceMonitor: PerformanceMonitor
 ) {
 
-    suspend fun getSocialTasks(): Result<List<SocialTask>> {
+    suspend fun getAllSocialTasks(): Result<List<SocialTask>> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = appwriteService.databases.listDocuments(
@@ -30,7 +31,7 @@ open class SocialTaskRepository @Inject constructor(
         }
     }
 
-    suspend fun getUserSocialTasks(userId: String): Result<List<SocialTask>> {
+    suspend fun getUserSocialTasks(userId: String): Result<List<UserSocialTask>> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = appwriteService.databases.listDocuments(
@@ -39,49 +40,70 @@ open class SocialTaskRepository @Inject constructor(
                     queries = listOf("equal(\"userId\", \"$userId\")")
                 )
                 
-                val userTaskIds = response.documents.map { 
-                    @Suppress("UNCHECKED_CAST")
-                    val data = it.data as Map<String, Any>
-                    data["taskId"] as String 
-                }
-                
-                // Get the full task details
-                val tasks = userTaskIds.mapNotNull { taskId ->
-                    try {
-                        val taskDoc = appwriteService.databases.getDocument(
-                            databaseId = AppwriteService.DATABASE_ID,
-                            collectionId = AppwriteService.SOCIAL_TASKS_COLLECTION,
-                            documentId = taskId
-                        )
-                        documentToSocialTask(taskDoc).copy(
-                            isCompleted = true // Mark as completed since it's in user_social_tasks
-                        )
-                    } catch (e: AppwriteException) {
-                        null
-                    }
-                }
-                
-                Result.success(tasks)
+                val userTasks = response.documents.map { documentToUserSocialTask(it) }
+                Result.success(userTasks)
             } catch (e: AppwriteException) {
                 Result.failure(e)
             }
         }
     }
 
-    suspend fun completeSocialTask(userId: String, taskId: String): Result<Unit> {
+    suspend fun completeSocialTask(userId: String, taskId: String): Result<UserSocialTask> {
         return withContext(Dispatchers.IO) {
             try {
-                appwriteService.databases.createDocument(
+                val document = appwriteService.databases.createDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
                     documentId = "unique()",
                     data = mapOf(
                         "userId" to userId,
-                        "taskId" to taskId
+                        "taskId" to taskId,
+                        "status" to "pending",
+                        "completedAt" to System.currentTimeMillis().toString(),
+                        "verifiedAt" to null
                     )
                 )
                 
-                Result.success(Unit)
+                val userSocialTask = documentToUserSocialTask(document)
+                Result.success(userSocialTask)
+            } catch (e: AppwriteException) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun verifySocialTask(userId: String, taskId: String): Result<UserSocialTask> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // First, find the user social task document
+                val response = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
+                    queries = listOf(
+                        "equal(\"userId\", \"$userId\")",
+                        "equal(\"taskId\", \"$taskId\")"
+                    )
+                )
+                
+                if (response.documents.isNotEmpty()) {
+                    val documentId = response.documents[0].id
+                    
+                    // Update the document to mark as verified
+                    val document = appwriteService.databases.updateDocument(
+                        databaseId = AppwriteService.DATABASE_ID,
+                        collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
+                        documentId = documentId,
+                        data = mapOf(
+                            "status" to "verified",
+                            "verifiedAt" to System.currentTimeMillis().toString()
+                        )
+                    )
+                    
+                    val userSocialTask = documentToUserSocialTask(document)
+                    Result.success(userSocialTask)
+                } else {
+                    Result.failure(Exception("User social task not found"))
+                }
             } catch (e: AppwriteException) {
                 Result.failure(e)
             }
@@ -105,6 +127,19 @@ open class SocialTaskRepository @Inject constructor(
             sortOrder = (data["sortOrder"] as? Number)?.toInt() ?: 0,
             createdAt = document.createdAt,
             updatedAt = document.updatedAt
+        )
+    }
+
+    private fun documentToUserSocialTask(document: Document<*>): UserSocialTask {
+        @Suppress("UNCHECKED_CAST")
+        val data = document.data as Map<String, Any>
+        
+        return UserSocialTask(
+            userId = data["userId"] as String,
+            taskId = data["taskId"] as String,
+            status = data["status"] as? String ?: "pending",
+            completedAt = data["completedAt"] as? String,
+            verifiedAt = data["verifiedAt"] as? String
         )
     }
 }

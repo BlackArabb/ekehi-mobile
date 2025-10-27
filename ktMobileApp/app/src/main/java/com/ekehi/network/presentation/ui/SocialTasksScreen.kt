@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SocialTasksScreen(
     viewModel: SocialTasksViewModel = hiltViewModel()
@@ -57,43 +58,108 @@ fun SocialTasksScreen(
                     .padding(top = 20.dp, bottom = 24.dp)
             )
 
+            // Filter Tabs
+            SocialTaskFilterTabs()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Social Tasks List
             SocialTasksList(
                 onTaskComplete = { taskId ->
                     viewModel.completeSocialTask(userId, taskId, "", 0.0) // Add missing parameters
+                },
+                onTaskVerify = { taskId ->
+                    viewModel.verifySocialTask(userId, taskId)
                 }
             )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SocialTasksList(onTaskComplete: (String) -> Unit) {
-    // In a real implementation, this would be populated with actual data
+fun SocialTaskFilterTabs() {
+    val filterOptions = listOf("All", "Pending", "Completed", "Verified")
+    var selectedFilter by remember { mutableStateOf("All") }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        filterOptions.forEach { option ->
+            FilterChip(
+                selected = selectedFilter == option,
+                onClick = { selectedFilter = option },
+                label = { 
+                    Text(
+                        text = option, 
+                        color = if (selectedFilter == option) Color.Black else Color.White
+                    ) 
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color(0xFFffa000)
+                )
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+    }
+}
+
+@Composable
+fun SocialTasksList(onTaskComplete: (String) -> Unit, onTaskVerify: (String) -> Unit) {
+    // In a real implementation, this would be populated with actual data from viewModel
     val socialTasks = listOf(
         SocialTaskItem(
             id = "1",
             title = "Follow us on Twitter",
             description = "Follow our official Twitter account for updates",
             platform = "Twitter",
+            link = "https://twitter.com/ekehi_network",
             reward = 0.5,
-            isCompleted = false
+            isCompleted = false,
+            isVerified = false
         ),
         SocialTaskItem(
             id = "2",
             title = "Join our Telegram",
             description = "Join our Telegram community for exclusive updates",
             platform = "Telegram",
+            link = "https://t.me/ekehi_network",
             reward = 0.5,
-            isCompleted = true
+            isCompleted = true,
+            isVerified = false
         ),
         SocialTaskItem(
             id = "3",
             title = "Share on Facebook",
             description = "Share our app on Facebook with your friends",
             platform = "Facebook",
+            link = "https://facebook.com/ekehi.network",
             reward = 1.0,
-            isCompleted = false
+            isCompleted = true,
+            isVerified = true
+        ),
+        SocialTaskItem(
+            id = "4",
+            title = "Follow on Instagram",
+            description = "Follow our Instagram account for visual updates",
+            platform = "Instagram",
+            link = "https://instagram.com/ekehi_network",
+            reward = 0.5,
+            isCompleted = false,
+            isVerified = false
+        ),
+        SocialTaskItem(
+            id = "5",
+            title = "Subscribe on YouTube",
+            description = "Subscribe to our YouTube channel for tutorials",
+            platform = "YouTube",
+            link = "https://youtube.com/ekehi_network",
+            reward = 0.75,
+            isCompleted = false,
+            isVerified = false
         )
     )
 
@@ -101,7 +167,8 @@ fun SocialTasksList(onTaskComplete: (String) -> Unit) {
         items(socialTasks) { task ->
             SocialTaskCard(
                 task = task,
-                onTaskComplete = onTaskComplete
+                onTaskComplete = onTaskComplete,
+                onTaskVerify = onTaskVerify
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -111,7 +178,8 @@ fun SocialTasksList(onTaskComplete: (String) -> Unit) {
 @Composable
 fun SocialTaskCard(
     task: SocialTaskItem,
-    onTaskComplete: (String) -> Unit
+    onTaskComplete: (String) -> Unit,
+    onTaskVerify: (String) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -130,23 +198,13 @@ fun SocialTaskCard(
                 modifier = Modifier
                     .size(40.dp)
                     .background(
-                        color = when (task.platform) {
-                            "Twitter" -> Color(0xFF1DA1F2)
-                            "Telegram" -> Color(0xFF0088CC)
-                            "Facebook" -> Color(0xFF4267B2)
-                            else -> Color(0xFFffa000)
-                        },
+                        color = getPlatformColor(task.platform),
                         shape = androidx.compose.foundation.shape.CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = when (task.platform) {
-                        "Twitter" -> Icons.Default.Message
-                        "Telegram" -> Icons.Default.Send
-                        "Facebook" -> Icons.Default.ThumbUp
-                        else -> Icons.Default.Public
-                    },
+                    imageVector = getPlatformIcon(task.platform),
                     contentDescription = task.platform,
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
@@ -178,18 +236,49 @@ fun SocialTaskCard(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 4.dp)
                 )
+                
+                // Status badge
+                if (task.isVerified) {
+                    Text(
+                        text = "Verified",
+                        color = Color(0xFF10b981),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                } else if (task.isCompleted) {
+                    Text(
+                        text = "Completed - Awaiting Verification",
+                        color = Color(0xFFf59e0b),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Complete Button or Checkmark
-            if (task.isCompleted) {
+            // Action Button
+            if (task.isVerified) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Completed",
+                    contentDescription = "Verified",
                     tint = Color(0xFF10b981), // green
                     modifier = Modifier.size(24.dp)
                 )
+            } else if (task.isCompleted) {
+                Button(
+                    onClick = { onTaskVerify(task.id) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFf59e0b)
+                    ),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(
+                        text = "Verify",
+                        color = Color.White,
+                        fontSize = 12.sp
+                    )
+                }
             } else {
                 Button(
                     onClick = { onTaskComplete(task.id) },
@@ -209,11 +298,41 @@ fun SocialTaskCard(
     }
 }
 
+fun getPlatformColor(platform: String): Color {
+    return when (platform.lowercase()) {
+        "twitter", "x" -> Color(0xFF1DA1F2)
+        "telegram" -> Color(0xFF0088CC)
+        "facebook" -> Color(0xFF4267B2)
+        "instagram" -> Color(0xFFE1306C)
+        "youtube" -> Color(0xFFFF0000)
+        "tiktok" -> Color(0xFF69C9D0)
+        "linkedin" -> Color(0xFF0077B5)
+        "ekehi" -> Color(0xFFffa000)
+        else -> Color(0xFFffa000)
+    }
+}
+
+fun getPlatformIcon(platform: String): androidx.compose.ui.graphics.vector.ImageVector {
+    return when (platform.lowercase()) {
+        "twitter", "x" -> Icons.Default.Message
+        "telegram" -> Icons.Default.Send
+        "facebook" -> Icons.Default.ThumbUp
+        "instagram" -> Icons.Default.Camera
+        "youtube" -> Icons.Default.PlayArrow
+        "tiktok" -> Icons.Default.MusicNote
+        "linkedin" -> Icons.Default.Work
+        "ekehi" -> Icons.Default.Public
+        else -> Icons.Default.Public
+    }
+}
+
 data class SocialTaskItem(
     val id: String,
     val title: String,
     val description: String,
     val platform: String,
+    val link: String,
     val reward: Double,
-    val isCompleted: Boolean
+    val isCompleted: Boolean,
+    val isVerified: Boolean
 )

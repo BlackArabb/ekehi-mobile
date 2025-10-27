@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,7 +92,7 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Mining Stats
-            ProfileScreenStats() // Using the same stats component
+            DashboardStatsSection()
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -107,6 +108,75 @@ fun DashboardScreen(
                 onNavigateToPresale = onNavigateToPresale,
                 onNavigateToWallet = onNavigateToWallet,
                 onNavigateToProfile = onNavigateToProfile
+            )
+        }
+    }
+}
+
+@Composable
+fun DashboardStatsSection() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        DashboardStatCard(
+            value = "0.0833",
+            label = "EKH/hour",
+            icon = Icons.Default.Speed,
+            iconColor = Color(0xFF10b981)
+        )
+
+        DashboardStatCard(
+            value = "0.0000",
+            label = "EKH/sec",
+            icon = Icons.Default.TrendingUp,
+            iconColor = Color(0xFF3b82f6)
+        )
+
+        DashboardStatCard(
+            value = "0",
+            label = "Clicks",
+            icon = Icons.Default.TouchApp,
+            iconColor = Color(0xFFf59e0b)
+        )
+    }
+}
+
+@Composable
+fun DashboardStatCard(value: String, label: String, icon: ImageVector, iconColor: Color) {
+    Card(
+        modifier = Modifier
+            .width(100.dp)
+            .height(100.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0x1AFFFFFF) // 10% opacity white
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = value,
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            Text(
+                text = label,
+                color = Color(0xB3FFFFFF), // 70% opacity white
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
@@ -216,10 +286,10 @@ fun QuickAccessSection(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)  // or ExperimentalMaterialApi
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickAccessCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     iconColor: Color,
     onClick: () -> Unit
