@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ekehi.network.service.StartIoService
 import com.ekehi.network.presentation.navigation.AppNavigation
 import com.ekehi.network.ui.theme.EkehiMobileTheme
@@ -27,6 +28,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var oauthResultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install splash screen
+        val splashScreen = installSplashScreen()
+        
         super.onCreate(savedInstanceState)
         
         try {

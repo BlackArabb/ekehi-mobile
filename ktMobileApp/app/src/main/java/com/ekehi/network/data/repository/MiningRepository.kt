@@ -11,6 +11,7 @@ import io.appwrite.ID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import org.json.JSONObject
 
 open class MiningRepository @Inject constructor(
         private val appwriteService: AppwriteService,
@@ -89,7 +90,7 @@ open class MiningRepository @Inject constructor(
                         finalRewardClaimed = savedSession.finalRewardClaimed
                 )
 
-                Log.d(TAG, "Mining session status: remaining=${remainingSeconds}s, progress=${progress}")
+                Log.d(TAG, "Mining session status: remaining=${remainingSeconds}s, progress=${progress}, isComplete=$isComplete")
                 Result.success(status)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to check mining session", e)
@@ -129,7 +130,7 @@ open class MiningRepository @Inject constructor(
                 val todayEarnings = (profileData["todayEarnings"] as? Number)?.toDouble() ?: 0.0
 
                 // Update user profile with reward
-                appwriteService.databases.updateDocument(
+                val updatedProfile = appwriteService.databases.updateDocument(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         documentId = profile.id,
@@ -208,15 +209,13 @@ open class MiningRepository @Inject constructor(
      * Saves mining session to SharedPreferences (like AsyncStorage)
      */
     private fun saveMiningSession(sessionData: MiningSessionData) {
-        val json = """
-            {
-                "userId": "${sessionData.userId}",
-                "startTime": ${sessionData.startTime},
-                "duration": ${sessionData.duration},
-                "reward": ${sessionData.reward},
-                "finalRewardClaimed": ${sessionData.finalRewardClaimed}
-            }
-        """.trimIndent()
+        val json = JSONObject().apply {
+            put("userId", sessionData.userId)
+            put("startTime", sessionData.startTime)
+            put("duration", sessionData.duration)
+            put("reward", sessionData.reward)
+            put("finalRewardClaimed", sessionData.finalRewardClaimed)
+        }.toString()
 
         prefs.edit().putString(KEY_MINING_SESSION, json).apply()
         Log.d(TAG, "Mining session saved to local storage")
@@ -229,14 +228,14 @@ open class MiningRepository @Inject constructor(
         val json = prefs.getString(KEY_MINING_SESSION, null) ?: return null
 
         return try {
-            // Parse JSON manually (or use Gson if available)
-            val userId = json.substringAfter("\"userId\": \"").substringBefore("\",")
-            val startTime = json.substringAfter("\"startTime\": ").substringBefore(",").toLong()
-            val duration = json.substringAfter("\"duration\": ").substringBefore(",").toLong()
-            val reward = json.substringAfter("\"reward\": ").substringBefore(",").toDouble()
-            val claimed = json.substringAfter("\"finalRewardClaimed\": ").substringBefore("}").toBoolean()
-
-            MiningSessionData(userId, startTime, duration, reward, claimed)
+            val jsonObject = JSONObject(json)
+            MiningSessionData(
+                userId = jsonObject.getString("userId"),
+                startTime = jsonObject.getLong("startTime"),
+                duration = jsonObject.getLong("duration"),
+                reward = jsonObject.getDouble("reward"),
+                finalRewardClaimed = jsonObject.getBoolean("finalRewardClaimed")
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse mining session", e)
             null

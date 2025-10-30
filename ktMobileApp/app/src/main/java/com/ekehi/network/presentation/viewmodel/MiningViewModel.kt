@@ -72,7 +72,7 @@ class MiningViewModel @Inject constructor(
         viewModelScope.launch {
             val result = miningRepository.checkOngoingMiningSession()
 
-            result.onSuccess { status ->
+            result.onSuccess { status -> 
                 if (status != null) {
                     if (!status.finalRewardClaimed) {
                         if (status.isComplete) {
@@ -94,9 +94,13 @@ class MiningViewModel @Inject constructor(
                             startUIUpdateLoop()
                         }
                     } else {
-                        // Reward already claimed, clear session
+                        // Reward already claimed, clear session and reset UI
                         miningRepository.clearMiningSession()
+                        resetMiningState()
                     }
+                } else {
+                    // No ongoing session
+                    resetMiningState()
                 }
             }
         }
@@ -121,13 +125,30 @@ class MiningViewModel @Inject constructor(
                 return@launch
             }
 
-            // If mining is already active and not complete, do nothing
+            // If mining is already active and not complete, stop it
             if (_is24HourMiningActive.value && _remainingTime.value > 0) {
+                stopMining()
                 return@launch
             }
 
             // Start a new mining session
             startMining(userId)
+        }
+    }
+
+    /**
+     * Stops the current mining session
+     */
+    private fun stopMining() {
+        viewModelScope.launch {
+            _is24HourMiningActive.value = false
+            updateJob?.cancel()
+            
+            // Clear the mining session
+            miningRepository.clearMiningSession()
+            
+            // Reset UI state
+            resetMiningState()
         }
     }
 
@@ -191,6 +212,12 @@ class MiningViewModel @Inject constructor(
                     EventBus.sendEvent(Event.RefreshUserProfile)
                 }
 
+                // Reset UI state after a short delay
+                viewModelScope.launch {
+                    delay(2000) // Wait 2 seconds to show success
+                    resetMiningState()
+                }
+
                 _isLoading.value = false
             }.onFailure { error ->
                 _errorMessage.value = error.message ?: "Failed to claim reward"
@@ -224,8 +251,10 @@ class MiningViewModel @Inject constructor(
                         _remainingTime.value = status.remainingSeconds
                         _progressPercentage.value = status.progress * 100
 
-                        // If completed, stop the loop
+                        // If completed, stop the loop and update UI
                         if (status.isComplete) {
+                            _remainingTime.value = 0
+                            _progressPercentage.value = 100.0
                             updateJob?.cancel()
                         }
                     }
@@ -235,6 +264,17 @@ class MiningViewModel @Inject constructor(
                 delay(1000)
             }
         }
+    }
+
+    /**
+     * Resets mining state to initial values
+     */
+    private fun resetMiningState() {
+        _is24HourMiningActive.value = false
+        _remainingTime.value = 24 * 60 * 60
+        _progressPercentage.value = 0.0
+        _sessionReward.value = 2.0
+        _finalRewardClaimed.value = false
     }
 
     /**
@@ -259,6 +299,15 @@ class MiningViewModel @Inject constructor(
                     _remainingTime.value = status.remainingSeconds
                     _progressPercentage.value = status.progress * 100
                     _finalRewardClaimed.value = status.finalRewardClaimed
+                    
+                    // If session is complete, update UI accordingly
+                    if (status.isComplete) {
+                        _remainingTime.value = 0
+                        _progressPercentage.value = 100.0
+                    }
+                } else {
+                    // No session, reset UI
+                    resetMiningState()
                 }
             }
         }

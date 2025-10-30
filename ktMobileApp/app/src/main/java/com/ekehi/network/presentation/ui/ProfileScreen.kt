@@ -25,6 +25,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.viewmodel.ProfileViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.ekehi.network.util.EventBus
+import com.ekehi.network.util.Event
+import kotlinx.coroutines.flow.collect
+import android.util.Log
 
 @Composable
 fun ProfileScreen(
@@ -38,6 +42,30 @@ fun ProfileScreen(
     val userProfile: UserProfile? = when (userProfileResource) {
         is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
         else -> null
+    }
+
+    // Listen for profile refresh events
+    LaunchedEffect(Unit) {
+        EventBus.events.collect { event ->
+            when (event) {
+                is Event.RefreshUserProfile -> {
+                    // Get current user ID from the existing profile or some other source
+                    // For now, we'll just log that we received the event
+                    Log.d("ProfileScreen", "Received RefreshUserProfile event")
+                }
+                else -> {
+                    // Handle other events if needed
+                }
+            }
+        }
+    }
+
+    // Load user profile when screen is first displayed
+    LaunchedEffect(Unit) {
+        // In a real implementation, you would get the current user ID from authentication
+        // For now, we'll use a placeholder
+        val currentUserId = "user_id_placeholder"
+        viewModel.loadUserProfile(currentUserId)
     }
 
     Box(

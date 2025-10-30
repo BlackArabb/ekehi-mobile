@@ -50,6 +50,11 @@ fun MiningScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
+    // Refresh mining status when screen appears
+    LaunchedEffect(Unit) {
+        viewModel.refreshMiningStatus()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -89,7 +94,7 @@ fun MiningScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Mining Stats
+            // Mining Stats - Pass the actual session earnings
             MiningScreenStats(totalMined = 0.0, sessionEarnings = sessionReward)
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -116,6 +121,28 @@ fun MiningScreen(
 
             // Referral Card
             ReferralCard()
+        }
+        
+        // Show error message if there is one
+        if (errorMessage != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Red
+                    )
+                ) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.White,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
         }
     }
 }

@@ -83,7 +83,6 @@ dependencies {
     // Appwrite SDK
     implementation("io.appwrite:sdk-for-android:8.1.0")
 
-
     // Image Loading
     implementation 'io.coil-kt:coil-compose:2.5.0'
     
@@ -111,6 +110,9 @@ dependencies {
     // Security and Biometric
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     implementation 'androidx.biometric:biometric:1.1.0'
+    
+    // Splash Screen
+    implementation 'androidx.core:core-splashscreen:1.0.1'
     
     // Gson for JSON serialization
     implementation 'com.google.code.gson:gson:2.10.1'

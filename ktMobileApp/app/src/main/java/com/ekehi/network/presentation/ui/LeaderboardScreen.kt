@@ -18,12 +18,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.LeaderboardViewModel
 
 @Composable
 fun LeaderboardScreen(
     viewModel: LeaderboardViewModel = hiltViewModel()
 ) {
+    val leaderboardResource by viewModel.leaderboard.collectAsState()
+    
     LaunchedEffect(Unit) {
         viewModel.loadLeaderboard()
     }
@@ -56,46 +59,102 @@ fun LeaderboardScreen(
                     .padding(top = 20.dp, bottom = 24.dp)
             )
 
-            // Podium for top 3 users
-            LeaderboardPodium()
+            // Handle different states
+            when (leaderboardResource) {
+                is Resource.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFFffa000))
+                    }
+                }
+                is Resource.Success -> {
+                    val leaderboardData = (leaderboardResource as Resource.Success<List<Map<String, Any>>>).data
+                    val topUsers = leaderboardData.take(3).map { userMap ->
+                        LeaderboardEntry(
+                            rank = (userMap["rank"] as Number).toInt(),
+                            username = userMap["username"] as String,
+                            totalCoins = (userMap["totalCoins"] as Number).toDouble(),
+                            miningPower = (userMap["miningPower"] as Number).toDouble(),
+                            streak = (userMap["currentStreak"] as Number).toInt(),
+                            referrals = (userMap["totalReferrals"] as Number).toInt()
+                        )
+                    }
+                    
+                    val remainingUsers = leaderboardData.drop(3).map { userMap ->
+                        LeaderboardEntry(
+                            rank = (userMap["rank"] as Number).toInt(),
+                            username = userMap["username"] as String,
+                            totalCoins = (userMap["totalCoins"] as Number).toDouble(),
+                            miningPower = (userMap["miningPower"] as Number).toDouble(),
+                            streak = (userMap["currentStreak"] as Number).toInt(),
+                            referrals = (userMap["totalReferrals"] as Number).toInt()
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                    // Podium for top 3 users
+                    if (topUsers.isNotEmpty()) {
+                        LeaderboardPodium(topUsers)
+                    }
 
-            // Leaderboard List
-            LeaderboardList()
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Leaderboard List
+                    if (remainingUsers.isNotEmpty()) {
+                        LeaderboardList(remainingUsers)
+                    }
+                }
+                is Resource.Error -> {
+                    val error = (leaderboardResource as Resource.Error).message
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Error: $error",
+                            color = Color.Red
+                        )
+                    }
+                }
+                else -> {
+                    // Idle state
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No data available",
+                            color = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun LeaderboardPodium() {
-    // In a real implementation, this would be populated with actual data from viewModel
-    val topUsers = listOf(
-        LeaderboardEntry(
-            rank = 1,
-            username = "CryptoMinerPro",
-            totalCoins = 15000.0,
-            miningPower = 10.0,
-            streak = 45,
-            referrals = 25
-        ),
-        LeaderboardEntry(
-            rank = 2,
-            username = "EKHMaster",
-            totalCoins = 12500.0,
-            miningPower = 8.5,
-            streak = 38,
-            referrals = 22
-        ),
-        LeaderboardEntry(
-            rank = 3,
-            username = "DigitalGold",
-            totalCoins = 11000.0,
-            miningPower = 7.8,
-            streak = 35,
-            referrals = 18
+fun LeaderboardPodium(topUsers: List<LeaderboardEntry>) {
+    // Pad the list to ensure we have at least 3 users
+    val paddedUsers = when (topUsers.size) {
+        0 -> listOf(
+            LeaderboardEntry(1, "No users", 0.0, 0.0, 0, 0),
+            LeaderboardEntry(2, "No users", 0.0, 0.0, 0, 0),
+            LeaderboardEntry(3, "No users", 0.0, 0.0, 0, 0)
         )
-    )
+        1 -> listOf(
+            topUsers[0],
+            LeaderboardEntry(2, "No users", 0.0, 0.0, 0, 0),
+            LeaderboardEntry(3, "No users", 0.0, 0.0, 0, 0)
+        )
+        2 -> listOf(
+            topUsers[0],
+            topUsers[1],
+            LeaderboardEntry(3, "No users", 0.0, 0.0, 0, 0)
+        )
+        else -> topUsers.take(3)
+    }
 
     Row(
         modifier = Modifier
@@ -106,13 +165,13 @@ fun LeaderboardPodium() {
     ) {
         // 2nd place (left)
         PodiumItem(
-            user = topUsers[1],
+            user = paddedUsers[1],
             modifier = Modifier.weight(1f)
         )
 
         // 1st place (center, tallest)
         PodiumItem(
-            user = topUsers[0],
+            user = paddedUsers[0],
             modifier = Modifier
                 .weight(1.2f)
                 .padding(bottom = 16.dp)
@@ -120,7 +179,7 @@ fun LeaderboardPodium() {
 
         // 3rd place (right)
         PodiumItem(
-            user = topUsers[2],
+            user = paddedUsers[2],
             modifier = Modifier.weight(1f)
         )
     }
@@ -301,52 +360,7 @@ fun UserRankCard() {
 }
 
 @Composable
-fun LeaderboardList() {
-    // In a real implementation, this would be populated with actual data from viewModel
-    // Excluding top 3 users who are shown in the podium
-    val leaderboardEntries = listOf(
-        LeaderboardEntry(
-            rank = 4,
-            username = "EKHEnthusiast",
-            totalCoins = 9500.0,
-            miningPower = 6.5,
-            streak = 30,
-            referrals = 15
-        ),
-        LeaderboardEntry(
-            rank = 5,
-            username = "BlockchainFan",
-            totalCoins = 8750.0,
-            miningPower = 5.8,
-            streak = 28,
-            referrals = 12
-        ),
-        LeaderboardEntry(
-            rank = 6,
-            username = "CryptoNewbie",
-            totalCoins = 7200.0,
-            miningPower = 4.2,
-            streak = 22,
-            referrals = 8
-        ),
-        LeaderboardEntry(
-            rank = 7,
-            username = "TokenCollector",
-            totalCoins = 6800.0,
-            miningPower = 3.9,
-            streak = 20,
-            referrals = 6
-        ),
-        LeaderboardEntry(
-            rank = 8,
-            username = "DigitalMiner",
-            totalCoins = 6200.0,
-            miningPower = 3.5,
-            streak = 18,
-            referrals = 5
-        )
-    )
-
+fun LeaderboardList(leaderboardEntries: List<LeaderboardEntry>) {
     LazyColumn {
         items(leaderboardEntries) { entry ->
             LeaderboardEntryCard(entry = entry)
