@@ -82,7 +82,7 @@ class MiningService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Ekehi Mining")
             .setContentText("Mining EKH tokens in background")
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with your icon
+            .setSmallIcon(R.drawable.ic_notification) // Replace with your icon
             .build()
     }
     

@@ -148,13 +148,45 @@ class LoginViewModel @Inject constructor(
         
         viewModelScope.launch {
             try {
-                // Set loading state
-                _loginState.value = Resource.Loading
-                Log.d("LoginViewModel", "Set loading state for user check")
+                // First check if we have valid stored credentials
+                Log.d("LoginViewModel", "Checking stored credentials")
                 
-                // Check if we have a valid current user
-                // This will verify if the OAuth session was created successfully
-                authUseCase.getCurrentUser().collect { resource ->
+                authUseCase.checkStoredCredentials().collect { resource ->
+                    when (resource) {
+                        is Resource.Success -> {
+                            if (resource.data) {
+                                Log.d("LoginViewModel", "Valid stored credentials found, verifying with Appwrite")
+                                // If we have valid stored credentials, check if the session is still valid
+                                verifyCurrentUser()
+                            } else {
+                                Log.d("LoginViewModel", "No valid stored credentials found, user needs to login")
+                                // No valid stored credentials, user needs to login
+                                _loginState.value = Resource.Error("No valid stored credentials")
+                            }
+                        }
+                        is Resource.Error -> {
+                            Log.e("LoginViewModel", "Error checking stored credentials: ${resource.message}")
+                            // Error checking credentials, navigate to login
+                            _loginState.value = Resource.Error(resource.message)
+                        }
+                        else -> {
+                            // For Loading or Idle states, do nothing
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorResult = ErrorHandler.handleException(e, "Failed to verify user")
+                val errorMessage = errorResult.userMessage
+                Log.e("LoginViewModel", "User verification exception: ${e.message}", e)
+                _loginState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
+    private fun verifyCurrentUser() {
+        viewModelScope.launch {
+            try {
+                authUseCase.getCurrentUser().collect { resource -> 
                     Log.d("LoginViewModel", "Received current user response: ${resource.javaClass.simpleName}")
                     when (resource) {
                         is Resource.Success -> {
@@ -165,7 +197,7 @@ class LoginViewModel @Inject constructor(
                         is Resource.Error -> {
                             Log.e("LoginViewModel", "Failed to verify current user: ${resource.message}")
                             // User is not authenticated, show error
-                            _loginState.value = Resource.Error("Authentication failed. Please try again.")
+                            _loginState.value = Resource.Error(resource.message)
                         }
                         is Resource.Loading -> {
                             Log.d("LoginViewModel", "User verification in progress")

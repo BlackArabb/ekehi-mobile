@@ -11,9 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
 import kotlinx.coroutines.delay
 
 @Composable
@@ -73,7 +75,7 @@ fun SplashScreen(
     // Observe the login state to navigate appropriately
     LaunchedEffect(Unit) {
         try {
-            viewModel.loginState.collect { resource ->
+            viewModel.loginState.collect { resource -> 
                 try {
                     when (resource) {
                         is com.ekehi.network.domain.model.Resource.Success -> {
@@ -116,6 +118,41 @@ fun SplashScreen(
                 }
             } catch (navException: Exception) {
                 Log.e("SplashScreen", "Error navigating to landing screen", navException)
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SplashScreenPreview() {
+    EkehiMobileTheme {
+        // For preview, we can't use NavController, so we'll just show the UI
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Ekehi Logo
+                Icon(
+                    imageVector = Icons.Default.AccountBalance,
+                    contentDescription = "Ekehi Logo",
+                    tint = Color(0xFFffa000), // Orange color
+                    modifier = Modifier
+                        .size(120.dp)
+                        .padding(bottom = 32.dp)
+                )
+
+                // Loading Indicator
+                CircularProgressIndicator(
+                    color = Color(0xFFffa000), // Orange color
+                    strokeWidth = 4.dp,
+                    modifier = Modifier.size(40.dp)
+                )
             }
         }
     }

@@ -453,6 +453,7 @@ fun LeaderboardEntryCard(entry: LeaderboardEntry) {
     }
 }
 
+
 data class LeaderboardEntry(
     val rank: Int,
     val username: String,

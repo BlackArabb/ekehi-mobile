@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.domain.usecase.LeaderboardUseCase
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.util.EventBus
+import com.ekehi.network.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,31 @@ class LeaderboardViewModel @Inject constructor(
     private val _userRank = MutableStateFlow<Resource<Int>>(Resource.Loading)
     val userRank: StateFlow<Resource<Int>> = _userRank
 
+    private var currentUserId: String? = null
+
+    init {
+        // Listen for refresh events
+        viewModelScope.launch {
+            EventBus.events.collect { event ->
+                when (event) {
+                    is Event.RefreshLeaderboard -> {
+                        loadLeaderboard()
+                    }
+                    is Event.RefreshUserProfile -> {
+                        // Also refresh leaderboard when user profile changes
+                        loadLeaderboard()
+                        currentUserId?.let { userId ->
+                            loadUserRank(userId)
+                        }
+                    }
+                    else -> {
+                        // Handle other events if needed
+                    }
+                }
+            }
+        }
+    }
+
     fun loadLeaderboard() {
         viewModelScope.launch {
             leaderboardUseCase.getLeaderboard().collect { resource ->
@@ -30,6 +57,7 @@ class LeaderboardViewModel @Inject constructor(
     }
 
     fun loadUserRank(userId: String) {
+        currentUserId = userId
         viewModelScope.launch {
             leaderboardUseCase.getUserRank(userId).collect { resource ->
                 _userRank.value = resource

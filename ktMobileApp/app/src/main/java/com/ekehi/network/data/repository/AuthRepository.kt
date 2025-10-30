@@ -2,6 +2,7 @@ package com.ekehi.network.data.repository
 
 import android.util.Log
 import com.ekehi.network.data.model.User
+import com.ekehi.network.security.SecurePreferences
 import com.ekehi.network.service.AppwriteService
 import io.appwrite.ID
 import io.appwrite.exceptions.AppwriteException
@@ -12,8 +13,16 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
-        private val appwriteService: AppwriteService
+        private val appwriteService: AppwriteService,
+        private val securePreferences: SecurePreferences
 ) {
+    companion object {
+        private const val PREF_USER_ID = "user_id"
+        private const val PREF_USER_EMAIL = "user_email"
+        private const val PREF_USER_NAME = "user_name"
+        private const val PREF_LOGIN_TIMESTAMP = "login_timestamp"
+    }
+
     suspend fun login(email: String, password: String): Result<Session> {
         Log.d("AuthRepository", "Attempting login for email: $email")
         return withContext(Dispatchers.IO) {
@@ -31,16 +40,24 @@ class AuthRepository @Inject constructor(
                         Log.w("AuthRepository", "Failed to delete existing session: ${e.message}", e)
                     }
                 }
-                
+
                 Log.d("AuthRepository", "Calling Appwrite login API")
                 val session = appwriteService.account.createEmailPasswordSession(
                         email = email,
                         password = password
                 )
                 Log.d("AuthRepository", "Login successful for email: $email")
+
+                // Store user info securely after successful login
+                storeUserInfo(email)
+
                 Result.success(session)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite login failed: ${e.message}"
+                Log.e("AuthRepository", errorMessage, e)
+                Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Login failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
                 Result.failure(e)
             }
@@ -64,6 +81,10 @@ class AuthRepository @Inject constructor(
                 val errorMessage = "Appwrite registration failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
                 Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Registration failed: ${e.message}"
+                Log.e("AuthRepository", errorMessage, e)
+                Result.failure(e)
             }
         }
     }
@@ -85,9 +106,9 @@ class AuthRepository @Inject constructor(
                         Log.w("AuthRepository", "Failed to delete existing session: ${e.message}", e)
                     }
                 }
-                
+
                 Log.d("AuthRepository", "Calling Appwrite Google OAuth login API")
-                // This is a placeholder - in a real implementation, 
+                // This is a placeholder - in a real implementation,
                 // you would need to handle the OAuth callback properly
                 // The actual OAuth flow is handled through the OAuthService
                 // and OAuthCallbackActivity
@@ -133,9 +154,17 @@ class AuthRepository @Inject constructor(
                 Log.d("AuthRepository", "Calling Appwrite logout API")
                 appwriteService.account.deleteSession("current")
                 Log.d("AuthRepository", "Logout successful")
+
+                // Clear stored user info
+                clearUserInfo()
+
                 Result.success(Unit)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite logout failed: ${e.message}"
+                Log.e("AuthRepository", errorMessage, e)
+                Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Logout failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
                 Result.failure(e)
             }
@@ -161,10 +190,29 @@ class AuthRepository @Inject constructor(
                 val errorMessage = "Failed to fetch current user: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
                 Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Failed to fetch current user: ${e.message}"
+                Log.e("AuthRepository", errorMessage, e)
+                Result.failure(e)
             }
         }
     }
-    
+
+    // Check if user has valid stored credentials without making network call
+    suspend fun checkStoredCredentials(): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("AuthRepository", "Checking stored credentials")
+                val hasValidCredentials = hasValidStoredCredentials()
+                Log.d("AuthRepository", "Stored credentials valid: $hasValidCredentials")
+                Result.success(hasValidCredentials)
+            } catch (e: Exception) {
+                Log.e("AuthRepository", "Error checking stored credentials: ${e.message}", e)
+                Result.failure(e)
+            }
+        }
+    }
+
     // New method to check if there's a current session
     private suspend fun getCurrentSession(): Result<Session> {
         return withContext(Dispatchers.IO) {
@@ -176,7 +224,51 @@ class AuthRepository @Inject constructor(
             } catch (e: AppwriteException) {
                 Log.d("AuthRepository", "No current session found: ${e.message}")
                 Result.failure(e)
+            } catch (e: Exception) {
+                Log.d("AuthRepository", "No current session found: ${e.message}")
+                Result.failure(e)
             }
+        }
+    }
+
+    // Store user info securely after successful login
+    private fun storeUserInfo(email: String) {
+        try {
+            Log.d("AuthRepository", "Storing user info for email: $email")
+            securePreferences.putString(PREF_USER_EMAIL, email)
+            securePreferences.putLong(PREF_LOGIN_TIMESTAMP, System.currentTimeMillis())
+            Log.d("AuthRepository", "User info stored successfully")
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Failed to store user info: ${e.message}", e)
+        }
+    }
+
+    // Clear stored user info on logout
+    private fun clearUserInfo() {
+        try {
+            Log.d("AuthRepository", "Clearing stored user info")
+            securePreferences.remove(PREF_USER_EMAIL)
+            securePreferences.remove(PREF_USER_ID)
+            securePreferences.remove(PREF_USER_NAME)
+            securePreferences.remove(PREF_LOGIN_TIMESTAMP)
+            Log.d("AuthRepository", "Stored user info cleared successfully")
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Failed to clear user info: ${e.message}", e)
+        }
+    }
+
+    // Check if user has valid stored credentials
+    fun hasValidStoredCredentials(): Boolean {
+        return try {
+            val email = securePreferences.getString(PREF_USER_EMAIL, null)
+            val timestamp = securePreferences.getLong(PREF_LOGIN_TIMESTAMP, 0)
+
+            // Check if we have stored credentials and they're not too old (e.g., 30 days)
+            email != null && timestamp > 0 &&
+                (System.currentTimeMillis() - timestamp) < (30 * 24 * 60 * 60 * 1000L)
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Error checking stored credentials: ${e.message}", e)
+            false
         }
     }
 }

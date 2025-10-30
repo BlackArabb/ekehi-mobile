@@ -12,7 +12,7 @@ class LeaderboardUseCase @Inject constructor(
 ) {
     fun getLeaderboard(): Flow<Resource<List<Map<String, Any>>>> = flow {
         emit(Resource.Loading)
-        val result = leaderboardRepository.getLeaderboard()
+        val result = leaderboardRepository.getVerifiedLeaderboard()
         if (result.isSuccess) {
             val data = result.getOrNull() ?: emptyList()
             emit(Resource.Success(data))

@@ -37,11 +37,54 @@ open class SocialTaskRepository @Inject constructor(
                 val response = appwriteService.databases.listDocuments(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
-                    queries = listOf("equal(\"userId\", \"$userId\")")
+                    queries = listOf(
+                        io.appwrite.Query.equal("userId", userId)
+                    )
                 )
                 
                 val userTasks = response.documents.map { documentToUserSocialTask(it) }
                 Result.success(userTasks)
+            } catch (e: AppwriteException) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun getSocialTasksWithUserStatus(userId: String): Result<List<SocialTask>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Get all social tasks
+                val allTasksResult = getAllSocialTasks()
+                if (allTasksResult.isFailure) {
+                    return@withContext Result.failure(allTasksResult.exceptionOrNull() ?: Exception("Failed to get social tasks"))
+                }
+                
+                val allTasks = allTasksResult.getOrNull() ?: emptyList()
+                
+                // Get user's completed tasks
+                val userTasksResult = getUserSocialTasks(userId)
+                if (userTasksResult.isFailure) {
+                    // Return all tasks without user status if we can't get user tasks
+                    return@withContext Result.success(allTasks)
+                }
+                
+                val userTasks = userTasksResult.getOrNull() ?: emptyList()
+                
+                // Create a map of user tasks by task ID for quick lookup
+                val userTaskMap = userTasks.associateBy { it.taskId }
+                
+                // Combine all tasks with user status
+                val tasksWithStatus = allTasks.map { task ->
+                    val userTask = userTaskMap[task.id]
+                    task.copy(
+                        isCompleted = userTask != null,
+                        isVerified = userTask?.status == "verified",
+                        completedAt = userTask?.completedAt,
+                        verifiedAt = userTask?.verifiedAt
+                    )
+                }
+                
+                Result.success(tasksWithStatus)
             } catch (e: AppwriteException) {
                 Result.failure(e)
             }
@@ -58,7 +101,7 @@ open class SocialTaskRepository @Inject constructor(
                     data = mapOf(
                         "userId" to userId,
                         "taskId" to taskId,
-                        "status" to "pending",
+                        "status" to "completed",
                         "completedAt" to System.currentTimeMillis().toString(),
                         "verifiedAt" to null
                     )
@@ -80,8 +123,8 @@ open class SocialTaskRepository @Inject constructor(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
                     queries = listOf(
-                        "equal(\"userId\", \"$userId\")",
-                        "equal(\"taskId\", \"$taskId\")"
+                        io.appwrite.Query.equal("userId", userId),
+                        io.appwrite.Query.equal("taskId", taskId)
                     )
                 )
                 

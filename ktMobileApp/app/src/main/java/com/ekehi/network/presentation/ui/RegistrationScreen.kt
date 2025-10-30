@@ -18,10 +18,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.RegistrationViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
 
 @Composable
 fun RegistrationScreen(
@@ -399,6 +401,17 @@ fun PasswordStrengthIndicator(password: String) {
             color = color,
             fontSize = 12.sp,
             modifier = Modifier.padding(top = 4.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegistrationScreenPreview() {
+    EkehiMobileTheme {
+        RegistrationScreen(
+            onRegistrationSuccess = {},
+            onNavigateToLogin = {}
         )
     }
 }

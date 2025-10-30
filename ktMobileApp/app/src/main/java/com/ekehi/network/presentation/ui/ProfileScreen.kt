@@ -21,8 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.viewmodel.ProfileViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
 
 @Composable
 fun ProfileScreen(
@@ -507,6 +509,61 @@ fun ActionButton(
             contentDescription = "Navigate",
             tint = Color(0xB3FFFFFF), // 70% opacity white
             modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    EkehiMobileTheme {
+        ProfileScreen(
+            onNavigateToSettings = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileHeaderPreview() {
+    EkehiMobileTheme {
+        ProfileHeader(
+            userProfile = UserProfile(
+                id = "1",
+                userId = "user1",
+                username = "John Doe",
+                email = "john@example.com",
+                totalCoins = 125.50,
+                miningPower = 2.5,
+                autoMiningRate = 0.005,
+                totalReferrals = 3,
+                maxDailyEarnings = 12.75,
+                createdAt = "2023-01-15T10:30:00Z",
+                updatedAt = "2023-01-15T10:30:00Z"
+            ),
+            onNavigateToSettings = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileStatsSectionPreview() {
+    EkehiMobileTheme {
+        ProfileStatsSection(
+            userProfile = UserProfile(
+                id = "1",
+                userId = "user1",
+                username = "John Doe",
+                email = "john@example.com",
+                totalCoins = 125.50,
+                miningPower = 2.5,
+                autoMiningRate = 0.005,
+                totalReferrals = 3,
+                maxDailyEarnings = 12.75,
+                createdAt = "2023-01-15T10:30:00Z",
+                updatedAt = "2023-01-15T10:30:00Z"
+            )
         )
     }
 }

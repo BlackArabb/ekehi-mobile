@@ -16,23 +16,39 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.viewmodel.MiningViewModel
+import com.ekehi.network.service.MiningManager
+import com.ekehi.network.ui.theme.EkehiMobileTheme
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.delay
 
 @Composable
 fun MiningScreen(
     viewModel: MiningViewModel = hiltViewModel()
 ) {
+    // Get MiningManager through DI
+    val miningManager = EntryPointAccessors.fromApplication(
+        LocalContext.current.applicationContext,
+        MiningManagerEntryPoint::class.java
+    ).getMiningManager()
+    
     val scrollState = rememberScrollState()
-    val miningProgress by viewModel.miningProgress.collectAsState()
+    val isMining by viewModel.is24HourMiningActive.collectAsState()
     val remainingTime by viewModel.remainingTime.collectAsState()
-    val isMining by viewModel.isMining.collectAsState()
-    val totalMined by viewModel.totalMined.collectAsState()
-    val sessionEarnings by viewModel.sessionEarnings.collectAsState()
+    val progressPercentage by viewModel.progressPercentage.collectAsState()
+    val sessionReward by viewModel.sessionReward.collectAsState()
+    val finalRewardClaimed by viewModel.finalRewardClaimed.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     Box(
         modifier = Modifier
@@ -66,7 +82,7 @@ fun MiningScreen(
 
             // Circular Progress Bar
             MiningProgressBar(
-                progress = miningProgress.toFloat(),
+                progress = (progressPercentage / 100).toFloat(),
                 remainingTime = viewModel.formatTime(remainingTime),
                 isMining = isMining
             )
@@ -74,16 +90,14 @@ fun MiningScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Mining Stats
-            MiningScreenStats(totalMined = totalMined, sessionEarnings = sessionEarnings)
+            MiningScreenStats(totalMined = 0.0, sessionEarnings = sessionReward)
 
             Spacer(modifier = Modifier.height(32.dp))
 
             // Mining Button
             MiningButton(
                 onClick = { 
-                    if (!isMining) {
-                        viewModel.startMining()
-                    }
+                    viewModel.handleMine()
                 },
                 isMining = isMining
             )
@@ -221,18 +235,18 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
                 tint = Color(0xFFffa000),
                 modifier = Modifier.size(24.dp)
             )
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = value,
                 color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 8.dp)
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = label,
-                color = Color(0xB3FFFFFF), // 70% opacity white
+                color = Color.Gray,
                 fontSize = 12.sp,
-                modifier = Modifier.padding(top = 4.dp)
+                maxLines = 1
             )
         }
     }
@@ -242,78 +256,48 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
 fun MiningButton(onClick: () -> Unit, isMining: Boolean) {
     Button(
         onClick = onClick,
-        enabled = !isMining,
         modifier = Modifier
-            .size(200.dp)
-            .clip(CircleShape),
+            .fillMaxWidth()
+            .height(60.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (!isMining) Color(0xFFffa000) else Color(0xFF6b7280),
-            disabledContainerColor = Color(0xFF4b5563)
+            containerColor = if (isMining) Color(0xFFff6b6b) else Color(0xFFffa000)
         ),
         shape = CircleShape,
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = Icons.Default.Build,
-                contentDescription = "Mine",
-                tint = Color.White,
-                modifier = Modifier.size(48.dp)
-            )
-            Text(
-                text = if (!isMining) "TAP TO MINE" else "MINING...",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        Text(
+            text = if (isMining) "Stop Mining" else "Start Mining",
+            color = Color.Black,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
 @Composable
 fun MiningAdBonusButton() {
-    Column(
-        modifier = Modifier.fillMaxWidth()
+    Button(
+        onClick = { /* Handle ad bonus */ },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        ),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
-        Button(
-            onClick = { /* Handle ad watch */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF8b5cf6)
-            ),
-            enabled = true // In a real implementation, this would be based on cooldown
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.PlayArrow,
-                    contentDescription = "Watch Ad",
-                    tint = Color.White
-                )
-                Text(
-                    text = "Watch Ad for +0.5 EKH",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-        }
-
+        Icon(
+            imageVector = Icons.Default.PlayArrow,
+            contentDescription = "Watch Ad",
+            tint = Color(0xFF4ecdc4),
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Watch a short ad to earn bonus EKH tokens",
-            color = Color(0xB3FFFFFF), // 70% opacity white
-            fontSize = 12.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            text = "Watch Ad for Bonus",
+            color = Color(0xFF4ecdc4),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -326,83 +310,44 @@ fun MiningAutoMiningStatus() {
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
         )
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Icon(
+                imageVector = Icons.Default.Autorenew,
+                contentDescription = "Auto Mining",
+                tint = Color(0xFF4ecdc4),
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Auto Mining",
-                    tint = Color(0xFF10b981),
-                    modifier = Modifier.size(24.dp)
+                Text(
+                    text = "Auto Mining",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Auto Mining Status",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 8.dp)
+                    text = "Keep app in background to continue mining",
+                    color = Color.Gray,
+                    fontSize = 12.sp
                 )
             }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Not Active",
-                        color = Color(0xFFffa000),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Status",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "0.0000 EKH/sec",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Current Rate",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "$0.00 / $50.00",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Spent / Required",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-            }
+            Switch(
+                checked = true,
+                onCheckedChange = { /* Handle toggle */ },
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = Color(0xFF4ecdc4),
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = Color.Gray
+                )
+            )
         }
     }
 }
@@ -420,80 +365,64 @@ fun ReferralCard() {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Invite Friends",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Share your referral link and earn rewards",
-                color = Color(0xB3FFFFFF), // 70% opacity white
-                fontSize = 14.sp,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "1.0 EKH",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Per Referral",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "0.5 EKH",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "For You",
-                        color = Color(0xB3FFFFFF), // 70% opacity white
-                        fontSize = 12.sp
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "ekehi://referral/ABC123",
-                    color = Color(0xB3FFFFFF), // 70% opacity white
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Referral",
+                    tint = Color(0xFFffa000),
+                    modifier = Modifier.size(24.dp)
                 )
-                IconButton(
-                    onClick = { /* Handle copy referral link */ }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy",
-                        tint = Color(0xFFffa000)
-                    )
-                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "Invite Friends",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Text(
+                text = "Earn 0.5 EKH for each friend who joins",
+                color = Color.Gray,
+                fontSize = 14.sp
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Button(
+                onClick = { /* Handle share */ },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFffa000)
+                )
+            ) {
+                Text(
+                    text = "Share Referral Link",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MiningScreenPreview() {
+    EkehiMobileTheme {
+        MiningScreen()
+    }
+}
+
+// Entry point for accessing MiningManager through DI
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface MiningManagerEntryPoint {
+    fun getMiningManager(): MiningManager
 }

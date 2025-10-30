@@ -8,9 +8,12 @@ import com.ekehi.network.data.repository.offline.OfflineUserRepository
 import com.ekehi.network.data.sync.SyncManager
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.performance.PerformanceMonitor
+import com.ekehi.network.util.EventBus
+import com.ekehi.network.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,7 +27,29 @@ class ProfileViewModel @Inject constructor(
     private val _userProfile = MutableStateFlow<Resource<UserProfile>>(Resource.Loading)
     val userProfile: StateFlow<Resource<UserProfile>> = _userProfile
 
+    private var currentUserId: String? = null
+
+    init {
+        // Listen for refresh events
+        viewModelScope.launch {
+            EventBus.events.collect { event ->
+                when (event) {
+                    is Event.RefreshUserProfile -> {
+                        currentUserId?.let { userId ->
+                            loadUserProfile(userId)
+                        }
+                    }
+                    else -> {
+                        // Handle other events if needed
+                    }
+                }
+            }
+        }
+    }
+
     fun loadUserProfile(userId: String) {
+        currentUserId = userId
+        
         viewModelScope.launch {
             // Try to get offline data first
             if (userRepository is OfflineUserRepository) {

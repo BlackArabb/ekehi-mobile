@@ -15,15 +15,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SocialTasksScreen(
     viewModel: SocialTasksViewModel = hiltViewModel()
 ) {
-    var userId by remember { mutableStateOf("user_id_placeholder") } // In a real app, get from auth context
+    // In a real app, get the user ID from the authentication context
+    // For now, we'll use a placeholder
+    var userId by remember { mutableStateOf("user_id_placeholder") }
+    val socialTasksResource by viewModel.socialTasks.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadSocialTasks()
@@ -64,14 +70,52 @@ fun SocialTasksScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Social Tasks List
-            SocialTasksList(
-                onTaskComplete = { taskId ->
-                    viewModel.completeSocialTask(userId, taskId, "", 0.0) // Add missing parameters
-                },
-                onTaskVerify = { taskId ->
-                    viewModel.verifySocialTask(userId, taskId)
+            when (socialTasksResource) {
+                is Resource.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFFffa000))
+                    }
                 }
-            )
+                is Resource.Success -> {
+                    val tasks = (socialTasksResource as Resource.Success).data
+                    SocialTasksList(
+                        tasks = tasks,
+                        onTaskComplete = { taskId ->
+                            viewModel.completeSocialTask(userId, taskId, "", 0.0)
+                        },
+                        onTaskVerify = { taskId ->
+                            viewModel.verifySocialTask(userId, taskId)
+                        }
+                    )
+                }
+                is Resource.Error -> {
+                    val error = (socialTasksResource as Resource.Error).message
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Error: $error",
+                            color = Color.Red
+                        )
+                    }
+                }
+                else -> {
+                    // Idle state
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No tasks available",
+                            color = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -108,65 +152,27 @@ fun SocialTaskFilterTabs() {
 }
 
 @Composable
-fun SocialTasksList(onTaskComplete: (String) -> Unit, onTaskVerify: (String) -> Unit) {
-    // In a real implementation, this would be populated with actual data from viewModel
-    val socialTasks = listOf(
-        SocialTaskItem(
-            id = "1",
-            title = "Follow us on Twitter",
-            description = "Follow our official Twitter account for updates",
-            platform = "Twitter",
-            link = "https://twitter.com/ekehi_network",
-            reward = 0.5,
-            isCompleted = false,
-            isVerified = false
-        ),
-        SocialTaskItem(
-            id = "2",
-            title = "Join our Telegram",
-            description = "Join our Telegram community for exclusive updates",
-            platform = "Telegram",
-            link = "https://t.me/ekehi_network",
-            reward = 0.5,
-            isCompleted = true,
-            isVerified = false
-        ),
-        SocialTaskItem(
-            id = "3",
-            title = "Share on Facebook",
-            description = "Share our app on Facebook with your friends",
-            platform = "Facebook",
-            link = "https://facebook.com/ekehi.network",
-            reward = 1.0,
-            isCompleted = true,
-            isVerified = true
-        ),
-        SocialTaskItem(
-            id = "4",
-            title = "Follow on Instagram",
-            description = "Follow our Instagram account for visual updates",
-            platform = "Instagram",
-            link = "https://instagram.com/ekehi_network",
-            reward = 0.5,
-            isCompleted = false,
-            isVerified = false
-        ),
-        SocialTaskItem(
-            id = "5",
-            title = "Subscribe on YouTube",
-            description = "Subscribe to our YouTube channel for tutorials",
-            platform = "YouTube",
-            link = "https://youtube.com/ekehi_network",
-            reward = 0.75,
-            isCompleted = false,
-            isVerified = false
-        )
-    )
-
+fun SocialTasksList(
+    tasks: List<com.ekehi.network.data.model.SocialTask>,
+    onTaskComplete: (String) -> Unit,
+    onTaskVerify: (String) -> Unit
+) {
     LazyColumn {
-        items(socialTasks) { task ->
+        items(tasks) { task ->
+            // Create a SocialTaskItem from the SocialTask model
+            val taskItem = SocialTaskItem(
+                id = task.id,
+                title = task.title,
+                description = task.description,
+                platform = task.platform,
+                link = task.actionUrl ?: "",
+                reward = task.rewardCoins,
+                isCompleted = task.isCompleted,
+                isVerified = task.isVerified
+            )
+            
             SocialTaskCard(
-                task = task,
+                task = taskItem,
                 onTaskComplete = onTaskComplete,
                 onTaskVerify = onTaskVerify
             )
@@ -336,3 +342,40 @@ data class SocialTaskItem(
     val isCompleted: Boolean,
     val isVerified: Boolean
 )
+
+@Preview(showBackground = true)
+@Composable
+fun SocialTasksScreenPreview() {
+    EkehiMobileTheme {
+        SocialTasksScreen()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SocialTaskCardPreview() {
+    EkehiMobileTheme {
+        SocialTaskCard(
+            task = SocialTaskItem(
+                id = "1",
+                title = "Follow us on Twitter",
+                description = "Follow our official Twitter account for updates",
+                platform = "Twitter",
+                link = "https://twitter.com/ekehi_network",
+                reward = 0.5,
+                isCompleted = false,
+                isVerified = false
+            ),
+            onTaskComplete = {},
+            onTaskVerify = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SocialTaskFilterTabsPreview() {
+    EkehiMobileTheme {
+        SocialTaskFilterTabs()
+    }
+}

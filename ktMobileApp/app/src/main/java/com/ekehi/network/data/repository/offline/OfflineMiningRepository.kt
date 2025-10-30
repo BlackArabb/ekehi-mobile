@@ -1,5 +1,6 @@
 package com.ekehi.network.data.repository.offline
 
+import android.content.Context
 import com.ekehi.network.data.local.CacheManager
 import com.ekehi.network.data.local.dao.MiningSessionDao
 import com.ekehi.network.data.local.entities.MiningSessionEntity
@@ -16,9 +17,10 @@ import javax.inject.Inject
 class OfflineMiningRepository @Inject constructor(
     appwriteService: AppwriteService,
     performanceMonitor: PerformanceMonitor,
+    context: Context,
     private val miningSessionDao: MiningSessionDao,
     private val cacheManager: CacheManager
-) : MiningRepository(appwriteService, performanceMonitor) {
+) : MiningRepository(appwriteService, performanceMonitor, context) {
     
     private val cachingRepository = object : CachingRepository(cacheManager) {}
     

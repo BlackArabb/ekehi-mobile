@@ -18,10 +18,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -41,32 +44,36 @@ fun LoginScreen(
     // Separate states for OAuth
     var isOAuthLoading by remember { mutableStateOf(false) }
     var oAuthError by remember { mutableStateOf<String?>(null) }
+    
+    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(viewModel.loginState) {
-        Log.d("LoginScreen", "Observing login state changes")
-        viewModel.loginState.collect { resource ->
-            Log.d("LoginScreen", "Login state changed: ${resource.javaClass.simpleName}")
-            when (resource) {
-                is Resource.Loading -> {
-                    Log.d("LoginScreen", "Setting email login loading state to true")
-                    isEmailLoginLoading = true
-                    emailLoginError = null
-                }
-                is Resource.Success -> {
-                    Log.d("LoginScreen", "Email login successful, navigating to dashboard")
-                    isEmailLoginLoading = false
+    // Handle login state changes
+    val loginState by viewModel.loginState.collectAsState()
+    LaunchedEffect(loginState) {
+        Log.d("LoginScreen", "Login state changed: ${loginState.javaClass.simpleName}")
+        when (loginState) {
+            is Resource.Loading -> {
+                Log.d("LoginScreen", "Setting email login loading state to true")
+                isEmailLoginLoading = true
+                emailLoginError = null
+            }
+            is Resource.Success -> {
+                Log.d("LoginScreen", "Email login successful, navigating to dashboard")
+                isEmailLoginLoading = false
+                // Use coroutineScope to safely call onLoginSuccess
+                coroutineScope.launch {
                     onLoginSuccess()
                 }
-                is Resource.Error -> {
-                    Log.e("LoginScreen", "Email login error: ${resource.message}")
-                    isEmailLoginLoading = false
-                    emailLoginError = resource.message
-                }
-                is Resource.Idle -> {
-                    Log.d("LoginScreen", "Email login state is idle")
-                    isEmailLoginLoading = false
-                    emailLoginError = null
-                }
+            }
+            is Resource.Error -> {
+                Log.e("LoginScreen", "Email login error: ${(loginState as Resource.Error).message}")
+                isEmailLoginLoading = false
+                emailLoginError = (loginState as Resource.Error).message
+            }
+            is Resource.Idle -> {
+                Log.d("LoginScreen", "Email login state is idle")
+                isEmailLoginLoading = false
+                emailLoginError = null
             }
         }
     }
@@ -332,5 +339,15 @@ fun LoginScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    EkehiMobileTheme {
+        LoginScreen(
+            onLoginSuccess = {}
+        )
     }
 }

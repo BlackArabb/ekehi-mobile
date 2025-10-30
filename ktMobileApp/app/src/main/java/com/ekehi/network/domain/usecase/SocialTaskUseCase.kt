@@ -26,11 +26,10 @@ open class SocialTaskUseCase @Inject constructor(
 
     fun getUserSocialTasks(userId: String): Flow<Resource<List<SocialTask>>> = flow {
         emit(Resource.Loading)
-        val result = socialTaskRepository.getUserSocialTasks(userId)
+        val result = socialTaskRepository.getSocialTasksWithUserStatus(userId)
         if (result.isSuccess) {
-            // Convert UserSocialTask to SocialTask for display
-            // This is a simplified implementation - in a real app you'd join the data
-            emit(Resource.Success(emptyList<SocialTask>()))
+            val data = result.getOrNull() ?: emptyList()
+            emit(Resource.Success(data))
         } else {
             emit(Resource.Error("Failed to get user social tasks: ${result.exceptionOrNull()?.message}"))
         }

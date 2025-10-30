@@ -10,10 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
 
 @Composable
 fun OAuthButtons(
@@ -105,5 +107,27 @@ fun OAuthButtons(
                     modifier = Modifier.padding(top = 16.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun OAuthButtonsPreview() {
+    EkehiMobileTheme {
+        OAuthButtons(
+            onOAuthSuccess = {},
+            isRegistration = false
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun OAuthButtonsRegistrationPreview() {
+    EkehiMobileTheme {
+        OAuthButtons(
+            onOAuthSuccess = {},
+            isRegistration = true
+        )
     }
 }

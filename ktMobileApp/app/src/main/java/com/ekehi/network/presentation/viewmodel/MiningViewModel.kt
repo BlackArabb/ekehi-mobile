@@ -3,13 +3,14 @@ package com.ekehi.network.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.analytics.AnalyticsManager
-import com.ekehi.network.data.model.MiningSession
 import com.ekehi.network.data.repository.MiningRepository
-import com.ekehi.network.data.repository.offline.OfflineMiningRepository
-import com.ekehi.network.data.sync.SyncManager
+import com.ekehi.network.data.repository.AuthRepository
+import com.ekehi.network.data.repository.UserRepository
 import com.ekehi.network.domain.model.Resource
-import com.ekehi.network.domain.usecase.MiningUseCase
+import com.ekehi.network.util.EventBus
+import com.ekehi.network.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,172 +19,227 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MiningViewModel @Inject constructor(
-    private val miningUseCase: MiningUseCase,
-    private val miningRepository: MiningRepository,
-    private val syncManager: SyncManager,
-    private val analyticsManager: AnalyticsManager
+        private val miningRepository: MiningRepository,
+        private val authRepository: AuthRepository,
+        private val userRepository: UserRepository,
+        private val analyticsManager: AnalyticsManager
 ) : ViewModel() {
 
-    private val _miningSession = MutableStateFlow<Resource<MiningSession>>(Resource.Loading)
-    val miningSession: StateFlow<Resource<MiningSession>> = _miningSession
-
-    private val _miningProgress = MutableStateFlow(0.0)
-    val miningProgress: StateFlow<Double> = _miningProgress
+    private val _is24HourMiningActive = MutableStateFlow(false)
+    val is24HourMiningActive: StateFlow<Boolean> = _is24HourMiningActive
 
     private val _remainingTime = MutableStateFlow(24 * 60 * 60) // 24 hours in seconds
     val remainingTime: StateFlow<Int> = _remainingTime
 
-    private val _isMining = MutableStateFlow(false)
-    val isMining: StateFlow<Boolean> = _isMining
+    private val _progressPercentage = MutableStateFlow(0.0)
+    val progressPercentage: StateFlow<Double> = _progressPercentage
 
-    private val _totalMined = MutableStateFlow(0.0)
-    val totalMined: StateFlow<Double> = _totalMined
+    private val _sessionReward = MutableStateFlow(2.0)
+    val sessionReward: StateFlow<Double> = _sessionReward
 
-    private val _sessionEarnings = MutableStateFlow(0.0)
-    val sessionEarnings: StateFlow<Double> = _sessionEarnings
+    private val _finalRewardClaimed = MutableStateFlow(false)
+    val finalRewardClaimed: StateFlow<Boolean> = _finalRewardClaimed
 
-    fun startMining() {
-        if (_isMining.value) return
-        
-        _isMining.value = true
-        _sessionEarnings.value = 0.0
-        _miningProgress.value = 0.0
-        _remainingTime.value = 24 * 60 * 60 // Reset to 24 hours
-        
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+    private var currentUserId: String? = null
+    private var updateJob: Job? = null
+
+    init {
+        // Get current user ID and check for ongoing mining session
         viewModelScope.launch {
-            // Simulate mining process
-            val totalTime = 24 * 60 * 60 // 24 hours in seconds
-            var elapsed = 0
-            
-            while (elapsed < totalTime && _isMining.value) {
-                delay(1000) // Update every second
-                elapsed++
-                
-                // Update progress (0.0 to 1.0)
-                _miningProgress.value = elapsed.toDouble() / totalTime.toDouble()
-                
-                // Update remaining time
-                _remainingTime.value = totalTime - elapsed
-                
-                // Update session earnings (2 EKH over 24 hours)
-                _sessionEarnings.value = 2.0 * (elapsed.toDouble() / totalTime.toDouble())
-            }
-            
-            if (_isMining.value) {
-                // Mining completed
-                _sessionEarnings.value = 2.0
-                _totalMined.value += 2.0
-                
-                // In a real implementation, you would:
-                // 1. Save the mining session to the database
-                // 2. Update user balance in Appwrite
-                // 3. Show completion notification
-                
-                // For now, we'll just stop mining
-                _isMining.value = false
+            try {
+                val result = authRepository.getCurrentUser()
+                result.onSuccess { user ->
+                    currentUserId = user.id
+                    checkOngoingMiningSession()
+                }
+            } catch (e: Exception) {
+                // User not logged in yet
             }
         }
     }
 
-    fun stopMining() {
-        _isMining.value = false
-    }
-
-    fun startMiningSession(userId: String) {
+    /**
+     * Checks if there's an ongoing mining session
+     * (Like checkOngoingMiningSession in React Native)
+     */
+    private fun checkOngoingMiningSession() {
         viewModelScope.launch {
-            miningUseCase.startMiningSession(userId).collect { resource ->
-                // Handle the result of starting the mining session
-                if (resource is Resource.Success) {
-                    // We need to get the actual mining session, not just Unit
-                    // In a real implementation, you would get the session from the repository
-                    // For now, we'll create a placeholder
-                    val placeholderSession = MiningSession(
-                        id = "session_id",
-                        userId = userId,
-                        coinsEarned = 0.0,
-                        clicksMade = 0,
-                        sessionDuration = 0,
-                        createdAt = "",
-                        updatedAt = ""
-                    )
-                    _miningSession.value = Resource.Success(placeholderSession)
-                    // Cache the mining session if we're using offline repository
-                    if (miningRepository is OfflineMiningRepository) {
-                        miningRepository.cacheMiningSession(placeholderSession)
+            val result = miningRepository.checkOngoingMiningSession()
+
+            result.onSuccess { status ->
+                if (status != null) {
+                    if (!status.finalRewardClaimed) {
+                        if (status.isComplete) {
+                            // Session completed but reward not claimed
+                            _is24HourMiningActive.value = true
+                            _remainingTime.value = 0
+                            _progressPercentage.value = 100.0
+                            _sessionReward.value = status.reward
+                            _finalRewardClaimed.value = false
+                        } else {
+                            // Session still in progress
+                            _is24HourMiningActive.value = true
+                            _remainingTime.value = status.remainingSeconds
+                            _progressPercentage.value = status.progress * 100
+                            _sessionReward.value = status.reward
+                            _finalRewardClaimed.value = false
+
+                            // Start UI update loop
+                            startUIUpdateLoop()
+                        }
+                    } else {
+                        // Reward already claimed, clear session
+                        miningRepository.clearMiningSession()
                     }
-                    // Track mining session start
-                    analyticsManager.trackMiningSessionStart(userId, placeholderSession.id)
-                } else {
-                    _miningSession.value = resource as Resource<MiningSession>
                 }
             }
         }
     }
 
-    fun endMiningSession(userId: String, sessionId: String, coinsEarned: Double, duration: Int) {
+    /**
+     * Handles mining button press
+     * (Like handleMine in React Native)
+     */
+    fun handleMine() {
         viewModelScope.launch {
-            // Track mining session end
-            analyticsManager.trackMiningSessionEnd(userId, sessionId, coinsEarned, duration)
+            val userId = currentUserId
+
+            if (userId == null) {
+                _errorMessage.value = "User not logged in"
+                return@launch
+            }
+
+            // If mining is complete and reward not claimed, claim it
+            if (_is24HourMiningActive.value && _remainingTime.value <= 0 && !_finalRewardClaimed.value) {
+                claimFinalReward(userId)
+                return@launch
+            }
+
+            // If mining is already active and not complete, do nothing
+            if (_is24HourMiningActive.value && _remainingTime.value > 0) {
+                return@launch
+            }
+
+            // Start a new mining session
+            startMining(userId)
         }
     }
 
-    fun loadMiningSessions(userId: String) {
+    /**
+     * Starts a new 24-hour mining session
+     */
+    private fun startMining(userId: String) {
         viewModelScope.launch {
-            // Try to get offline data first for immediate UI
-            if (miningRepository is OfflineMiningRepository) {
-                miningRepository.getOfflineMiningSessions(userId).collect { sessions ->
-                    if (sessions.isNotEmpty()) {
-                        // Show the most recent session
-                        sessions.firstOrNull()?.let { session ->
-                            _miningSession.value = Resource.Success(session)
+            _isLoading.value = true
+
+            val result = miningRepository.startMining(userId)
+
+            result.onSuccess { sessionData ->
+                _is24HourMiningActive.value = true
+                _remainingTime.value = 24 * 60 * 60
+                _progressPercentage.value = 0.0
+                _sessionReward.value = sessionData.reward
+                _finalRewardClaimed.value = false
+
+                // Track analytics
+                analyticsManager.trackMiningSessionStart(userId, "24hour_session")
+
+                // Start UI update loop
+                startUIUpdateLoop()
+
+                _isLoading.value = false
+            }.onFailure { error ->
+                _errorMessage.value = error.message ?: "Failed to start mining"
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /**
+     * Claims the final 2 EKH reward
+     * (Like claimFinalReward in React Native)
+     */
+    private fun claimFinalReward(userId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            val result = miningRepository.claimFinalReward(userId, _sessionReward.value)
+
+            result.onSuccess {
+                _finalRewardClaimed.value = true
+                _is24HourMiningActive.value = false
+
+                // Track analytics
+                analyticsManager.trackMiningSessionEnd(
+                        userId,
+                        "24hour_session",
+                        _sessionReward.value,
+                        24 * 60 * 60
+                )
+
+                // Clear session after successful claim
+                miningRepository.clearMiningSession()
+
+                // Send event to refresh user profile
+                viewModelScope.launch {
+                    EventBus.sendEvent(Event.RefreshUserProfile)
+                }
+
+                _isLoading.value = false
+            }.onFailure { error ->
+                _errorMessage.value = error.message ?: "Failed to claim reward"
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /**
+     * Refreshes the user profile after claiming rewards
+     */
+    private fun refreshUserProfile(userId: String) {
+        // This method would typically send an event to refresh the profile
+        // In a real implementation, you might use a shared event bus or callback
+    }
+
+    /**
+     * Updates UI every second while mining is active
+     * Recalculates remaining time and progress
+     */
+    private fun startUIUpdateLoop() {
+        updateJob?.cancel()
+
+        updateJob = viewModelScope.launch {
+            while (_is24HourMiningActive.value && _remainingTime.value > 0) {
+                // Check session status from repository
+                val result = miningRepository.checkOngoingMiningSession()
+
+                result.onSuccess { status ->
+                    if (status != null) {
+                        _remainingTime.value = status.remainingSeconds
+                        _progressPercentage.value = status.progress * 100
+
+                        // If completed, stop the loop
+                        if (status.isComplete) {
+                            updateJob?.cancel()
                         }
                     }
                 }
-            }
-            
-            // Try to get the current mining session from server
-            // In a real implementation, you would have logic to determine the current session
-        }
-    }
 
-    fun syncMiningData(userId: String) {
-        viewModelScope.launch {
-            val result = syncManager.syncAllData(userId)
-            when (result) {
-                is SyncManager.SyncResult.Success -> {
-                    // Reload the mining sessions after successful sync
-                    loadMiningSessions(userId)
-                }
-                is SyncManager.SyncResult.Failure -> {
-                    // Handle sync failure
-                }
+                // Update every second
+                delay(1000)
             }
         }
     }
 
-    private fun subscribeToMiningUpdates(userId: String) {
-        // Removed realtime functionality for now
-        // In a real implementation, you would subscribe to mining updates
-    }
-
-    private fun handleRealtimeEvent(event: Any) {
-        // Handle real-time updates to mining sessions
-        // In a real implementation, you would update the UI based on the event
-    }
-
-    private fun getUserIdFromCurrentState(): String? {
-        // In a real implementation, you would get the user ID from auth state
-        return "user_id_placeholder"
-    }
-
-    fun updateMiningProgress(progress: Double) {
-        _miningProgress.value = progress
-    }
-
-    fun updateRemainingTime(time: Int) {
-        _remainingTime.value = time
-    }
-
+    /**
+     * Formats time in HH:MM:SS format
+     */
     fun formatTime(seconds: Int): String {
         val hrs = seconds / 3600
         val mins = (seconds % 3600) / 60
@@ -191,8 +247,34 @@ class MiningViewModel @Inject constructor(
         return String.format("%02d:%02d:%02d", hrs, mins, secs)
     }
 
+    /**
+     * Manually refreshes mining status
+     */
+    fun refreshMiningStatus() {
+        viewModelScope.launch {
+            val result = miningRepository.checkOngoingMiningSession()
+
+            result.onSuccess { status ->
+                if (status != null) {
+                    _remainingTime.value = status.remainingSeconds
+                    _progressPercentage.value = status.progress * 100
+                    _finalRewardClaimed.value = status.finalRewardClaimed
+                }
+            }
+        }
+    }
+
+    /**
+     * Clears error message
+     */
+    fun clearError() {
+        _errorMessage.value = null
+    }
+
     override fun onCleared() {
         super.onCleared()
-        // Clean up any ongoing subscriptions
+        // Stop UI updates when ViewModel is destroyed
+        updateJob?.cancel()
+        // Note: Mining continues - session data is in SharedPreferences!
     }
 }

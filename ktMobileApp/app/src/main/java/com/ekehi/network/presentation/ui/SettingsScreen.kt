@@ -16,9 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.ui.components.NotificationSettings
 import com.ekehi.network.presentation.viewmodel.SettingsViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
 
 @Composable
 fun SettingsScreen(
@@ -390,6 +392,16 @@ fun SignOutButton(onClick: () -> Unit) {
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+    EkehiMobileTheme {
+        SettingsScreen(
+            onSignOut = {}
         )
     }
 }

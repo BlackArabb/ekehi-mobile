@@ -24,12 +24,12 @@ class AuthUseCase @Inject constructor(
             Log.d("AuthUseCase", "Login successful for email: $email")
             emit(Resource.Success(Unit))
         } else {
-            val errorMessage = "Login failed: ${result.exceptionOrNull()?.message}"
+            val errorMessage = "Login failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
             Log.e("AuthUseCase", errorMessage)
             emit(Resource.Error(errorMessage))
         }
     }.catch { e ->
-        val errorMessage = "Login error: ${e.message}"
+        val errorMessage = "Login error: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
@@ -42,12 +42,12 @@ class AuthUseCase @Inject constructor(
             Log.d("AuthUseCase", "Registration successful for email: $email")
             emit(Resource.Success(Unit))
         } else {
-            val errorMessage = "Registration failed: ${result.exceptionOrNull()?.message}"
+            val errorMessage = "Registration failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
             Log.e("AuthUseCase", errorMessage)
             emit(Resource.Error(errorMessage))
         }
     }.catch { e ->
-        val errorMessage = "Registration error: ${e.message}"
+        val errorMessage = "Registration error: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
@@ -64,12 +64,12 @@ class AuthUseCase @Inject constructor(
             Log.d("AuthUseCase", "Google login successful")
             emit(Resource.Success(Unit))
         } else {
-            val errorMessage = "Google login failed: ${result.exceptionOrNull()?.message}"
+            val errorMessage = "Google login failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
             Log.e("AuthUseCase", errorMessage)
             emit(Resource.Error(errorMessage))
         }
     }.catch { e ->
-        val errorMessage = "Google login error: ${e.message}"
+        val errorMessage = "Google login error: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
@@ -82,12 +82,12 @@ class AuthUseCase @Inject constructor(
             Log.d("AuthUseCase", "Google registration successful for email: $email")
             emit(Resource.Success(Unit))
         } else {
-            val errorMessage = "Google registration failed: ${result.exceptionOrNull()?.message}"
+            val errorMessage = "Google registration failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
             Log.e("AuthUseCase", errorMessage)
             emit(Resource.Error(errorMessage))
         }
     }.catch { e ->
-        val errorMessage = "Google registration error: ${e.message}"
+        val errorMessage = "Google registration error: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
@@ -100,12 +100,30 @@ class AuthUseCase @Inject constructor(
             Log.d("AuthUseCase", "Current user fetched successfully")
             emit(Resource.Success(Unit))
         } else {
-            val errorMessage = "Failed to fetch current user: ${result.exceptionOrNull()?.message}"
+            val errorMessage = "Failed to fetch current user: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
             Log.e("AuthUseCase", errorMessage)
             emit(Resource.Error(errorMessage))
         }
     }.catch { e ->
-        val errorMessage = "Error fetching current user: ${e.message}"
+        val errorMessage = "Error fetching current user: ${e.message ?: "Unknown error"}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
+    
+    fun checkStoredCredentials(): Flow<Resource<Boolean>> = flow {
+        Log.d("AuthUseCase", "Starting check stored credentials flow")
+        emit(Resource.Loading)
+        val result = authRepository.checkStoredCredentials()
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Stored credentials check completed: ${result.getOrNull()}")
+            emit(Resource.Success(result.getOrNull() ?: false))
+        } else {
+            val errorMessage = "Failed to check stored credentials: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error checking stored credentials: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
@@ -118,12 +136,12 @@ class AuthUseCase @Inject constructor(
             Log.d("AuthUseCase", "Logout successful")
             emit(Resource.Success(Unit))
         } else {
-            val errorMessage = "Logout failed: ${result.exceptionOrNull()?.message}"
+            val errorMessage = "Logout failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
             Log.e("AuthUseCase", errorMessage)
             emit(Resource.Error(errorMessage))
         }
     }.catch { e ->
-        val errorMessage = "Logout error: ${e.message}"
+        val errorMessage = "Logout error: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }

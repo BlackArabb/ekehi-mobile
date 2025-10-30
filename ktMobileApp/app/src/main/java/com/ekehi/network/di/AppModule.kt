@@ -14,6 +14,7 @@ import com.ekehi.network.domain.usecase.*
 import com.ekehi.network.performance.PerformanceMonitor
 import com.ekehi.network.security.SecurePreferences
 import com.ekehi.network.service.AppwriteService
+import com.ekehi.network.service.MiningManager
 import com.ekehi.network.service.OAuthService
 import com.ekehi.network.service.StartIoService
 import dagger.Module
@@ -32,9 +33,9 @@ object AppModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): EkehiDatabase {
         return Room.databaseBuilder(
-            context,
-            EkehiDatabase::class.java,
-            "ekehi_database"
+                context,
+                EkehiDatabase::class.java,
+                "ekehi_database"
         ).build()
     }
 
@@ -57,8 +58,8 @@ object AppModule {
     @Singleton
     fun provideAppwriteClient(@ApplicationContext context: Context): Client {
         return Client(context)
-            .setEndpoint("https://cloud.appwrite.io/v1")
-            .setProject("68c2dd6e002112935ed2") // Actual project ID
+                .setEndpoint("https://cloud.appwrite.io/v1")
+                .setProject("68c2dd6e002112935ed2") // Actual project ID
     }
 
     @Provides
@@ -76,16 +77,16 @@ object AppModule {
     @Provides
     @Singleton
     fun provideOAuthService(
-        @ApplicationContext context: Context,
-        client: Client
+            @ApplicationContext context: Context,
+            client: Client
     ): OAuthService {
         return OAuthService(context, client)
     }
 
     @Provides
     @Singleton
-    fun provideAuthRepository(appwriteService: AppwriteService): AuthRepository {
-        return AuthRepository(appwriteService)
+    fun provideAuthRepository(appwriteService: AppwriteService, securePreferences: SecurePreferences): AuthRepository {
+        return AuthRepository(appwriteService, securePreferences)
     }
 
     @Provides
@@ -96,8 +97,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMiningRepository(appwriteService: AppwriteService, performanceMonitor: PerformanceMonitor): MiningRepository {
-        return MiningRepository(appwriteService, performanceMonitor)
+    fun provideMiningRepository(
+            appwriteService: AppwriteService,
+            performanceMonitor: PerformanceMonitor,
+            @ApplicationContext context: Context
+    ): MiningRepository {
+        return MiningRepository(appwriteService, performanceMonitor, context)
     }
 
     @Provides
@@ -139,50 +144,50 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSyncService(
-        @ApplicationContext context: Context,
-        userRepository: UserRepository,
-        miningRepository: MiningRepository,
-        socialTaskRepository: SocialTaskRepository,
-        userProfileDao: UserProfileDao,
-        miningSessionDao: MiningSessionDao,
-        socialTaskDao: SocialTaskDao,
-        cacheManager: CacheManager,
-        performanceMonitor: PerformanceMonitor
+            @ApplicationContext context: Context,
+            userRepository: UserRepository,
+            miningRepository: MiningRepository,
+            socialTaskRepository: SocialTaskRepository,
+            userProfileDao: UserProfileDao,
+            miningSessionDao: MiningSessionDao,
+            socialTaskDao: SocialTaskDao,
+            cacheManager: CacheManager,
+            performanceMonitor: PerformanceMonitor
     ): SyncService {
         return SyncService(
-            context,
-            userRepository,
-            miningRepository,
-            socialTaskRepository,
-            userProfileDao,
-            miningSessionDao,
-            socialTaskDao,
-            cacheManager,
-            performanceMonitor
+                context,
+                userRepository,
+                miningRepository,
+                socialTaskRepository,
+                userProfileDao,
+                miningSessionDao,
+                socialTaskDao,
+                cacheManager,
+                performanceMonitor
         )
     }
 
     @Provides
     @Singleton
     fun provideSyncManager(
-        userRepository: UserRepository,
-        miningRepository: MiningRepository,
-        socialTaskRepository: SocialTaskRepository,
-        userProfileDao: UserProfileDao,
-        miningSessionDao: MiningSessionDao,
-        socialTaskDao: SocialTaskDao,
-        cacheManager: CacheManager,
-        performanceMonitor: PerformanceMonitor
+            userRepository: UserRepository,
+            miningRepository: MiningRepository,
+            socialTaskRepository: SocialTaskRepository,
+            userProfileDao: UserProfileDao,
+            miningSessionDao: MiningSessionDao,
+            socialTaskDao: SocialTaskDao,
+            cacheManager: CacheManager,
+            performanceMonitor: PerformanceMonitor
     ): SyncManager {
         return SyncManager(
-            userRepository,
-            miningRepository,
-            socialTaskRepository,
-            userProfileDao,
-            miningSessionDao,
-            socialTaskDao,
-            cacheManager,
-            performanceMonitor
+                userRepository,
+                miningRepository,
+                socialTaskRepository,
+                userProfileDao,
+                miningSessionDao,
+                socialTaskDao,
+                cacheManager,
+                performanceMonitor
         )
     }
 
@@ -191,10 +196,17 @@ object AppModule {
     fun provideStartIoService(@ApplicationContext context: Context): StartIoService {
         return StartIoService(context)
     }
-    
+
+    // SecurePreferences is provided in SecurityModule
+    // @Provides
+    // @Singleton
+    // fun provideSecurePreferences(@ApplicationContext context: Context): SecurePreferences {
+    //     return SecurePreferences(context)
+    // }
+
     @Provides
     @Singleton
-    fun provideSecurePreferences(@ApplicationContext context: Context): SecurePreferences {
-        return SecurePreferences(context)
+    fun provideMiningManager(@ApplicationContext context: Context): MiningManager {
+        return MiningManager(context)
     }
 }
