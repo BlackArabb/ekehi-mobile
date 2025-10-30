@@ -31,10 +31,16 @@ fun AppNavigation() {
         composable("landing") {
             LandingScreen(
                 onNavigateToLogin = {
-                    navController.navigate("login")
+                    navController.navigate("login") {
+                        // Clear the back stack up to splash when navigating to login
+                        popUpTo("splash") { inclusive = true }
+                    }
                 },
                 onNavigateToRegister = {
-                    navController.navigate("register")
+                    navController.navigate("register") {
+                        // Clear the back stack up to splash when navigating to register
+                        popUpTo("splash") { inclusive = true }
+                    }
                 }
             )
         }
@@ -44,7 +50,8 @@ fun AppNavigation() {
                 onLoginSuccess = {
                     try {
                         navController.navigate("main") {
-                            popUpTo("login") { inclusive = true }
+                            // Clear the entire back stack when navigating to main
+                            popUpTo("splash") { inclusive = true }
                         }
                     } catch (e: Exception) {
                         // Handle navigation error
@@ -58,7 +65,8 @@ fun AppNavigation() {
                 onRegistrationSuccess = {
                     try {
                         navController.navigate("main") {
-                            popUpTo("register") { inclusive = true }
+                            // Clear the entire back stack when navigating to main
+                            popUpTo("splash") { inclusive = true }
                         }
                     } catch (e: Exception) {
                         // Handle navigation error
@@ -67,7 +75,8 @@ fun AppNavigation() {
                 onNavigateToLogin = {
                     try {
                         navController.navigate("login") {
-                            popUpTo("register") { inclusive = true }
+                            // Clear the back stack up to splash when navigating to login
+                            popUpTo("splash") { inclusive = true }
                         }
                     } catch (e: Exception) {
                         // Handle navigation error
@@ -84,8 +93,9 @@ fun AppNavigation() {
             SettingsScreen(
                 onSignOut = {
                     try {
-                        navController.navigate("login") {
-                            popUpTo("main") { inclusive = false }
+                        navController.navigate("landing") {
+                            // Clear the back stack when signing out
+                            popUpTo("splash") { inclusive = true }
                         }
                     } catch (e: Exception) {
                         // Handle navigation error
