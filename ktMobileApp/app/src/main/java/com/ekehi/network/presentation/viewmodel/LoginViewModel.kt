@@ -148,7 +148,45 @@ class LoginViewModel @Inject constructor(
         
         viewModelScope.launch {
             try {
-                // First check if we have valid stored credentials
+                // First check if there's an active session
+                Log.d("LoginViewModel", "Checking for active session")
+                
+                authUseCase.hasActiveSession().collect { resource ->
+                    when (resource) {
+                        is Resource.Success -> {
+                            if (resource.data) {
+                                Log.d("LoginViewModel", "Active session found, user is logged in")
+                                // If we have an active session, user is authenticated
+                                _loginState.value = Resource.Success(Unit)
+                            } else {
+                                Log.d("LoginViewModel", "No active session found, checking stored credentials")
+                                // No active session, check stored credentials
+                                checkStoredCredentials()
+                            }
+                        }
+                        is Resource.Error -> {
+                            Log.e("LoginViewModel", "Error checking active session: ${resource.message}")
+                            // Error checking session, fall back to stored credentials
+                            checkStoredCredentials()
+                        }
+                        else -> {
+                            // For Loading or Idle states, do nothing
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorResult = ErrorHandler.handleException(e, "Failed to verify user")
+                val errorMessage = errorResult.userMessage
+                Log.e("LoginViewModel", "User verification exception: ${e.message}", e)
+                _loginState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
+    private fun checkStoredCredentials() {
+        viewModelScope.launch {
+            try {
+                // Check if we have valid stored credentials
                 Log.d("LoginViewModel", "Checking stored credentials")
                 
                 authUseCase.checkStoredCredentials().collect { resource ->
@@ -175,9 +213,9 @@ class LoginViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                val errorResult = ErrorHandler.handleException(e, "Failed to verify user")
+                val errorResult = ErrorHandler.handleException(e, "Failed to check stored credentials")
                 val errorMessage = errorResult.userMessage
-                Log.e("LoginViewModel", "User verification exception: ${e.message}", e)
+                Log.e("LoginViewModel", "Stored credentials check exception: ${e.message}", e)
                 _loginState.value = Resource.Error(errorMessage)
             }
         }

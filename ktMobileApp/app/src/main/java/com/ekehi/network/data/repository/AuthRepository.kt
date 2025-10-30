@@ -213,6 +213,57 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /**
+     * Checks if there's a valid Appwrite session
+     */
+    suspend fun hasActiveSession(): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("AuthRepository", "Checking for active session")
+                // Try to get current session from Appwrite
+                val session = appwriteService.account.getSession("current")
+                Log.d("AuthRepository", "Active session found: ${session.userId}")
+                Result.success(true)
+            } catch (e: AppwriteException) {
+                Log.d("AuthRepository", "No active session: ${e.message}")
+                Result.success(false)
+            } catch (e: Exception) {
+                Log.d("AuthRepository", "Session check error: ${e.message}")
+                Result.success(false)
+            }
+        }
+    }
+
+    /**
+     * Gets current user if session exists
+     */
+    suspend fun getCurrentUserIfLoggedIn(): Result<User?> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // First check if session exists
+                val sessionCheck = hasActiveSession()
+                if (sessionCheck.getOrNull() == true) {
+                    // Session exists, get user
+                    val account = appwriteService.account.get()
+                    val user = User(
+                        id = account.id,
+                        name = account.name,
+                        email = account.email,
+                        createdAt = account.registration ?: "",
+                        updatedAt = ""
+                    )
+                    Result.success(user)
+                } else {
+                    // No session
+                    Result.success(null)
+                }
+            } catch (e: Exception) {
+                Log.e("AuthRepository", "Failed to get current user: ${e.message}")
+                Result.success(null)
+            }
+        }
+    }
+
     // New method to check if there's a current session
     private suspend fun getCurrentSession(): Result<Session> {
         return withContext(Dispatchers.IO) {

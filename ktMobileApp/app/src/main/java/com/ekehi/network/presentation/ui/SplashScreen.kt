@@ -23,6 +23,9 @@ fun SplashScreen(
     navController: NavController,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
+    var isChecking by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -43,11 +46,19 @@ fun SplashScreen(
             )
 
             // Loading Indicator
-            CircularProgressIndicator(
-                color = Color(0xFFffa000), // Orange color
-                strokeWidth = 4.dp,
-                modifier = Modifier.size(40.dp)
-            )
+            if (isChecking) {
+                CircularProgressIndicator(
+                    color = Color(0xFFffa000), // Orange color
+                    strokeWidth = 4.dp,
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Checking session...",
+                    fontSize = androidx.compose.ui.unit.sp(14f),
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
         }
     }
     

@@ -145,4 +145,46 @@ class AuthUseCase @Inject constructor(
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
+
+    /**
+     * Checks if there's a valid Appwrite session
+     */
+    fun hasActiveSession(): Flow<Resource<Boolean>> = flow {
+        Log.d("AuthUseCase", "Starting check for active session flow")
+        emit(Resource.Loading)
+        val result = authRepository.hasActiveSession()
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Active session check completed: ${result.getOrNull()}")
+            emit(Resource.Success(result.getOrNull() ?: false))
+        } else {
+            val errorMessage = "Failed to check for active session: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error checking for active session: ${e.message ?: "Unknown error"}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
+
+    /**
+     * Gets current user if session exists
+     */
+    fun getCurrentUserIfLoggedIn(): Flow<Resource<User?>> = flow {
+        Log.d("AuthUseCase", "Starting get current user if logged in flow")
+        emit(Resource.Loading)
+        val result = authRepository.getCurrentUserIfLoggedIn()
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Current user check completed")
+            emit(Resource.Success(result.getOrNull()))
+        } else {
+            val errorMessage = "Failed to check for current user: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error checking for current user: ${e.message ?: "Unknown error"}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
 }
