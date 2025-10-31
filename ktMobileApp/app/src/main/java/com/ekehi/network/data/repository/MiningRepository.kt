@@ -12,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
 
 open class MiningRepository @Inject constructor(
         private val appwriteService: AppwriteService,
@@ -129,6 +131,11 @@ open class MiningRepository @Inject constructor(
                 val currentBalance = (profileData["totalCoins"] as? Number)?.toDouble() ?: 0.0
                 val todayEarnings = (profileData["todayEarnings"] as? Number)?.toDouble() ?: 0.0
 
+                // Format date in ISO 8601 format for Appwrite
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+                val currentDate = dateFormat.format(Date())
+
                 // Update user profile with reward
                 val updatedProfile = appwriteService.databases.updateDocument(
                         databaseId = AppwriteService.DATABASE_ID,
@@ -137,7 +144,7 @@ open class MiningRepository @Inject constructor(
                         data = mapOf(
                                 "totalCoins" to (currentBalance + reward),
                                 "todayEarnings" to (todayEarnings + reward),
-                                "updatedAt" to System.currentTimeMillis().toString()
+                                "updatedAt" to currentDate
                         )
                 )
 
@@ -169,6 +176,11 @@ open class MiningRepository @Inject constructor(
      */
     private suspend fun recordMiningSession(userId: String, coinsEarned: Double, sessionDuration: Int) {
         try {
+            // Format date in ISO 8601 format for Appwrite
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val currentDate = dateFormat.format(Date())
+
             appwriteService.databases.createDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.MINING_SESSIONS_COLLECTION,
@@ -178,7 +190,7 @@ open class MiningRepository @Inject constructor(
                             "coinsEarned" to coinsEarned,
                             "clicksMade" to 0,
                             "sessionDuration" to sessionDuration,
-                            "createdAt" to System.currentTimeMillis().toString()
+                            "createdAt" to currentDate
                     )
             )
             Log.d(TAG, "Mining session recorded in database")
@@ -264,6 +276,11 @@ open class MiningRepository @Inject constructor(
     suspend fun createMiningSession(userId: String): Result<MiningSession> {
         return withContext(Dispatchers.IO) {
             try {
+                // Format date in ISO 8601 format for Appwrite
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+                val currentDate = dateFormat.format(Date())
+
                 val document = appwriteService.databases.createDocument(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.MINING_SESSIONS_COLLECTION,
@@ -271,7 +288,7 @@ open class MiningRepository @Inject constructor(
                         data = mapOf(
                                 "userId" to userId,
                                 "amount" to 2.0,
-                                "timestamp" to System.currentTimeMillis().toString(),
+                                "timestamp" to currentDate,
                                 "status" to "pending",
                                 "duration" to 30
                         )
@@ -288,9 +305,14 @@ open class MiningRepository @Inject constructor(
     suspend fun completeMiningSession(sessionId: String, userId: String): Result<MiningSession> {
         return withContext(Dispatchers.IO) {
             try {
+                // Format date in ISO 8601 format for Appwrite
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+                val currentDate = dateFormat.format(Date())
+
                 val updates = mapOf(
                         "status" to "completed",
-                        "timestamp" to System.currentTimeMillis().toString()
+                        "timestamp" to currentDate
                 )
 
                 val document = appwriteService.databases.updateDocument(

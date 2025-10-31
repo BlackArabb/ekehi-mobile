@@ -104,7 +104,8 @@ fun MiningScreen(
                 onClick = { 
                     viewModel.handleMine()
                 },
-                isMining = isMining
+                isMining = isMining,
+                isCompleted = remainingTime <= 0 && isMining
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -280,20 +281,32 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
 }
 
 @Composable
-fun MiningButton(onClick: () -> Unit, isMining: Boolean) {
+fun MiningButton(onClick: () -> Unit, isMining: Boolean, isCompleted: Boolean = false) {
+    val buttonText = when {
+        isCompleted -> "Claim Reward"
+        isMining -> "Stop Mining"
+        else -> "Start Mining"
+    }
+    
+    val buttonColor = when {
+        isCompleted -> Color(0xFF4ecdc4) // Teal for claim reward
+        isMining -> Color(0xFFff6b6b) // Red for stop mining
+        else -> Color(0xFFffa000) // Orange for start mining
+    }
+    
     Button(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isMining) Color(0xFFff6b6b) else Color(0xFFffa000)
+            containerColor = buttonColor
         ),
         shape = CircleShape,
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
     ) {
         Text(
-            text = if (isMining) "Stop Mining" else "Start Mining",
+            text = buttonText,
             color = Color.Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold

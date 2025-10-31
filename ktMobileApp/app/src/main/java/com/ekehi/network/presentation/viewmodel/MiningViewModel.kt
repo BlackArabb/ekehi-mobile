@@ -227,14 +227,6 @@ class MiningViewModel @Inject constructor(
     }
 
     /**
-     * Refreshes the user profile after claiming rewards
-     */
-    private fun refreshUserProfile(userId: String) {
-        // This method would typically send an event to refresh the profile
-        // In a real implementation, you might use a shared event bus or callback
-    }
-
-    /**
      * Updates UI every second while mining is active
      * Recalculates remaining time and progress
      */
@@ -304,6 +296,12 @@ class MiningViewModel @Inject constructor(
                     if (status.isComplete) {
                         _remainingTime.value = 0
                         _progressPercentage.value = 100.0
+                    }
+                    
+                    // If session is active, start UI update loop
+                    if (status.remainingSeconds > 0 && !status.isComplete) {
+                        _is24HourMiningActive.value = true
+                        startUIUpdateLoop()
                     }
                 } else {
                     // No session, reset UI
