@@ -7,6 +7,7 @@ import com.ekehi.network.data.repository.MiningRepository
 import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.data.repository.UserRepository
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +38,14 @@ class MiningViewModel @Inject constructor(
     private val _sessionReward = MutableStateFlow(2.0)
     val sessionReward: StateFlow<Double> = _sessionReward
 
+    // New state flow for real-time session earnings
+    private val _sessionEarnings = MutableStateFlow(0.0)
+    val sessionEarnings: StateFlow<Double> = _sessionEarnings
+
+    // New state flow for user profile
+    private val _userProfile = MutableStateFlow<Resource<UserProfile>>(Resource.Loading)
+    val userProfile: StateFlow<Resource<UserProfile>> = _userProfile
+
     private val _finalRewardClaimed = MutableStateFlow(false)
     val finalRewardClaimed: StateFlow<Boolean> = _finalRewardClaimed
 
@@ -48,6 +57,7 @@ class MiningViewModel @Inject constructor(
 
     private var currentUserId: String? = null
     private var updateJob: Job? = null
+    private var sessionStartTime: Long = 0 // Track when the session started
 
     init {
         // Get current user ID and check for ongoing mining session
@@ -56,10 +66,28 @@ class MiningViewModel @Inject constructor(
                 val result = authRepository.getCurrentUser()
                 result.onSuccess { user ->
                     currentUserId = user.id
+                    // Load user profile
+                    loadUserProfile(user.id)
                     checkOngoingMiningSession()
                 }
             } catch (e: Exception) {
                 // User not logged in yet
+            }
+        }
+    }
+
+    private fun loadUserProfile(userId: String) {
+        viewModelScope.launch {
+            val result = userRepository.getUserProfile(userId)
+            if (result.isSuccess) {
+                val profile = result.getOrNull()
+                if (profile != null) {
+                    _userProfile.value = Resource.Success(profile)
+                } else {
+                    _userProfile.value = Resource.Error("User profile not found")
+                }
+            } else {
+                _userProfile.value = Resource.Error("Failed to load user profile: ${result.exceptionOrNull()?.message}")
             }
         }
     }
@@ -81,6 +109,7 @@ class MiningViewModel @Inject constructor(
                             _remainingTime.value = 0
                             _progressPercentage.value = 100.0
                             _sessionReward.value = status.reward
+                            _sessionEarnings.value = status.reward // Set to full reward when complete
                             _finalRewardClaimed.value = false
                         } else {
                             // Session still in progress
@@ -88,6 +117,9 @@ class MiningViewModel @Inject constructor(
                             _remainingTime.value = status.remainingSeconds
                             _progressPercentage.value = status.progress * 100
                             _sessionReward.value = status.reward
+                            sessionStartTime = status.startTime
+                            // Calculate current earnings based on elapsed time
+                            _sessionEarnings.value = calculateCurrentEarnings(status.startTime, status.duration, status.reward)
                             _finalRewardClaimed.value = false
 
                             // Start UI update loop
@@ -104,6 +136,16 @@ class MiningViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Calculates current earnings based on elapsed time
+     */
+    private fun calculateCurrentEarnings(startTime: Long, duration: Long, totalReward: Double): Double {
+        val now = System.currentTimeMillis()
+        val elapsed = now - startTime
+        val progress = (elapsed.toDouble() / duration.toDouble()).coerceIn(0.0, 1.0)
+        return progress * totalReward
     }
 
     /**
@@ -161,11 +203,13 @@ class MiningViewModel @Inject constructor(
 
             val result = miningRepository.startMining(userId)
 
-            result.onSuccess { sessionData ->
+            result.onSuccess { sessionData -> 
                 _is24HourMiningActive.value = true
                 _remainingTime.value = 24 * 60 * 60
                 _progressPercentage.value = 0.0
                 _sessionReward.value = sessionData.reward
+                _sessionEarnings.value = 0.0 // Start with zero earnings
+                sessionStartTime = sessionData.startTime
                 _finalRewardClaimed.value = false
 
                 // Track analytics
@@ -195,6 +239,7 @@ class MiningViewModel @Inject constructor(
             result.onSuccess {
                 _finalRewardClaimed.value = true
                 _is24HourMiningActive.value = false
+                _sessionEarnings.value = _sessionReward.value // Set to full reward when claimed
 
                 // Track analytics
                 analyticsManager.trackMiningSessionEnd(
@@ -228,7 +273,7 @@ class MiningViewModel @Inject constructor(
 
     /**
      * Updates UI every second while mining is active
-     * Recalculates remaining time and progress
+     * Recalculates remaining time, progress, and earnings
      */
     private fun startUIUpdateLoop() {
         updateJob?.cancel()
@@ -242,11 +287,14 @@ class MiningViewModel @Inject constructor(
                     if (status != null) {
                         _remainingTime.value = status.remainingSeconds
                         _progressPercentage.value = status.progress * 100
+                        // Update real-time earnings
+                        _sessionEarnings.value = calculateCurrentEarnings(status.startTime, status.duration, status.reward)
 
                         // If completed, stop the loop and update UI
                         if (status.isComplete) {
                             _remainingTime.value = 0
                             _progressPercentage.value = 100.0
+                            _sessionEarnings.value = status.reward // Set to full reward when complete
                             updateJob?.cancel()
                         }
                     }
@@ -266,7 +314,9 @@ class MiningViewModel @Inject constructor(
         _remainingTime.value = 24 * 60 * 60
         _progressPercentage.value = 0.0
         _sessionReward.value = 2.0
+        _sessionEarnings.value = 0.0 // Reset earnings
         _finalRewardClaimed.value = false
+        sessionStartTime = 0
     }
 
     /**
@@ -292,6 +342,13 @@ class MiningViewModel @Inject constructor(
                     _progressPercentage.value = status.progress * 100
                     _finalRewardClaimed.value = status.finalRewardClaimed
                     
+                    // Update real-time earnings
+                    if (!status.finalRewardClaimed && !status.isComplete) {
+                        _sessionEarnings.value = calculateCurrentEarnings(status.startTime, status.duration, status.reward)
+                    } else if (status.isComplete) {
+                        _sessionEarnings.value = status.reward // Set to full reward when complete
+                    }
+                    
                     // If session is complete, update UI accordingly
                     if (status.isComplete) {
                         _remainingTime.value = 0
@@ -301,6 +358,7 @@ class MiningViewModel @Inject constructor(
                     // If session is active, start UI update loop
                     if (status.remainingSeconds > 0 && !status.isComplete) {
                         _is24HourMiningActive.value = true
+                        sessionStartTime = status.startTime
                         startUIUpdateLoop()
                     }
                 } else {

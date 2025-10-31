@@ -21,7 +21,7 @@ fun BottomNavigationBar(navController: NavController) {
     )
 
     NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = Color(0xFF1a1a2e), // Dark blue background matching the app theme
             tonalElevation = 0.dp
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -57,9 +57,9 @@ fun BottomNavigationBar(navController: NavController) {
                     colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color(0xFFffa000), // Ekehi orange
                             selectedTextColor = Color(0xFFffa000), // Ekehi orange
-                            indicatorColor = Color(0xFF1a1a2e), // Ekehi dark blue
-                            unselectedIconColor = Color.White.copy(alpha = 0.6f),
-                            unselectedTextColor = Color.White.copy(alpha = 0.6f)
+                            indicatorColor = Color(0xFF16213e), // Slightly lighter blue for indicator
+                            unselectedIconColor = Color(0xB3FFFFFF), // Light gray with opacity
+                            unselectedTextColor = Color(0xB3FFFFFF) // Light gray with opacity
                     )
             )
         }
