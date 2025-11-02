@@ -1,4 +1,4 @@
- descripackage com.ekehi.network.data.repository
+package com.ekehi.network.data.repository
 
 import android.content.Context
 import android.util.Log
