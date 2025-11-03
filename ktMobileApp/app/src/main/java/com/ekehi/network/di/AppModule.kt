@@ -58,7 +58,7 @@ object AppModule {
     @Singleton
     fun provideAppwriteClient(@ApplicationContext context: Context): Client {
         return Client(context)
-                .setEndpoint("https://cloud.appwrite.io/v1")
+                .setEndpoint("https://fra.cloud.appwrite.io/v1") // Frankfurt region endpoint to match React Native app
                 .setProject("68c2dd6e002112935ed2") // Actual project ID
     }
 

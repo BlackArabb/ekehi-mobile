@@ -17,14 +17,21 @@ open class UserRepository @Inject constructor(
     suspend fun getUserProfile(userId: String): Result<UserProfile> {
         return withContext(Dispatchers.IO) {
             try {
-                val document = appwriteService.databases.getDocument(
+                // Fetch user profile from Appwrite database using userId field (like React Native app)
+                val response = appwriteService.databases.listDocuments(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
-                    documentId = userId
+                    queries = listOf(
+                        io.appwrite.Query.equal("userId", userId)
+                    )
                 )
                 
-                val profile = documentToUserProfile(document)
-                Result.success(profile)
+                if (response.documents.isNotEmpty()) {
+                    val profile = documentToUserProfile(response.documents[0])
+                    Result.success(profile)
+                } else {
+                    Result.failure(Exception("User profile not found"))
+                }
             } catch (e: AppwriteException) {
                 Result.failure(e)
             }
@@ -37,7 +44,7 @@ open class UserRepository @Inject constructor(
                 val document = appwriteService.databases.createDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
-                    documentId = userId,
+                    documentId = "unique()",
                     data = mapOf(
                         "userId" to userId,
                         "username" to username,
@@ -68,15 +75,30 @@ open class UserRepository @Inject constructor(
     suspend fun updateUserProfile(userId: String, updates: Map<String, Any>): Result<UserProfile> {
         return withContext(Dispatchers.IO) {
             try {
-                val document = appwriteService.databases.updateDocument(
+                // First, find the user profile document by userId field
+                val response = appwriteService.databases.listDocuments(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
-                    documentId = userId,
-                    data = updates
+                    queries = listOf(
+                        io.appwrite.Query.equal("userId", userId)
+                    )
                 )
                 
-                val profile = documentToUserProfile(document)
-                Result.success(profile)
+                if (response.documents.isNotEmpty()) {
+                    val documentId = response.documents[0].id
+                    
+                    val document = appwriteService.databases.updateDocument(
+                        databaseId = AppwriteService.DATABASE_ID,
+                        collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                        documentId = documentId,
+                        data = updates
+                    )
+                    
+                    val profile = documentToUserProfile(document)
+                    Result.success(profile)
+                } else {
+                    Result.failure(Exception("User profile not found"))
+                }
             } catch (e: AppwriteException) {
                 Result.failure(e)
             }
@@ -88,8 +110,8 @@ open class UserRepository @Inject constructor(
         val data = document.data as Map<String, Any>
         
         return UserProfile(
-            id = document.id,
-            userId = data["userId"] as String,
+            id = document.id ?: "",
+            userId = data["userId"] as? String ?: "",
             username = data["username"] as? String,
             email = data["email"] as? String,
             totalCoins = (data["totalCoins"] as? Number)?.toDouble() ?: 0.0,
@@ -109,8 +131,8 @@ open class UserRepository @Inject constructor(
             todayEarnings = (data["todayEarnings"] as? Number)?.toDouble() ?: 0.0,
             lastMiningDate = data["lastMiningDate"] as? String,
             streakBonusClaimed = (data["streakBonusClaimed"] as? Number)?.toInt() ?: 0,
-            createdAt = document.createdAt,
-            updatedAt = document.updatedAt
+            createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",
+            updatedAt = document.updatedAt ?: "1970-01-01T00:00:00.000Z"
         )
     }
 }

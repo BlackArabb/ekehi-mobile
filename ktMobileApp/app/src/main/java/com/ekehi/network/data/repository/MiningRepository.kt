@@ -137,7 +137,7 @@ open class MiningRepository @Inject constructor(
                 val currentDate = dateFormat.format(Date())
 
                 // Update user profile with reward
-                val updatedProfile = appwriteService.databases.updateDocument(
+                appwriteService.databases.updateDocument(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         documentId = profile.id,
@@ -335,13 +335,13 @@ open class MiningRepository @Inject constructor(
         val data = document.data as Map<String, Any>
 
         return MiningSession(
-                id = document.id,
-                userId = data["userId"] as String,
+                id = document.id ?: "",
+                userId = data["userId"] as? String ?: "",
                 coinsEarned = (data["amount"] as? Number)?.toDouble() ?: 2.0,
                 clicksMade = 0,
                 sessionDuration = (data["duration"] as? Number)?.toInt() ?: 30,
-                createdAt = document.createdAt,
-                updatedAt = document.updatedAt
+                createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",
+                updatedAt = document.updatedAt ?: "1970-01-01T00:00:00.000Z"
         )
     }
 }

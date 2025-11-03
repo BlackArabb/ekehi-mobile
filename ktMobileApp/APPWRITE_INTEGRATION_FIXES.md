@@ -108,13 +108,20 @@ val document = appwriteService.databases.updateDocument(
 
 **File**: `data/repository/MiningRepository.kt`
 
-Updated claimFinalReward method to properly handle unused variable:
+Updated claimFinalReward method to properly handle unused variable and made documentToMiningSession method more robust:
 ```kotlin
 // Before
 val updatedProfile = appwriteService.databases.updateDocument(...) // Variable never used
 
 // After
 appwriteService.databases.updateDocument(...) // Direct call without unused variable
+
+// Also fixed documentToMiningSession to handle null values
+return MiningSession(
+    id = document.id ?: "",
+    userId = data["userId"] as? String ?: "",
+    // ... other fields with proper null handling
+)
 ```
 
 ## Root Cause Analysis
@@ -131,6 +138,15 @@ After applying these fixes:
 1. Profile page should now correctly display user data from the database
 2. Mining page should now correctly display mining session data
 3. Leaderboard and social pages should continue to work as before
+
+## Additional Fixes for Null Safety
+
+Made all document conversion methods more robust by adding null checks:
+
+1. **UserRepository.documentToUserProfile**: Added null checks for all fields including document.id, document.createdAt, and document.updatedAt
+2. **MiningRepository.documentToMiningSession**: Added null checks for document.id, document.createdAt, and document.updatedAt
+3. **SocialTaskRepository.documentToSocialTask**: Added null checks for all fields
+4. **SocialTaskRepository.documentToUserSocialTask**: Added null checks for userId and taskId
 
 ## Future Considerations
 

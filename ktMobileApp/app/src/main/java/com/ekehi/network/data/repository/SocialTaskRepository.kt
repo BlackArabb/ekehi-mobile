@@ -158,18 +158,18 @@ open class SocialTaskRepository @Inject constructor(
         val data = document.data as Map<String, Any>
         
         return SocialTask(
-            id = document.id,
-            title = data["title"] as String,
-            description = data["description"] as String,
-            platform = data["platform"] as String,
-            taskType = data["taskType"] as String,
+            id = document.id ?: "",
+            title = data["title"] as? String ?: "",
+            description = data["description"] as? String ?: "",
+            platform = data["platform"] as? String ?: "",
+            taskType = data["taskType"] as? String ?: "",
             rewardCoins = (data["rewardCoins"] as? Number)?.toDouble() ?: 0.0,
             actionUrl = data["actionUrl"] as? String,
-            verificationMethod = data["verificationMethod"] as String,
+            verificationMethod = data["verificationMethod"] as? String ?: "",
             isActive = data["isActive"] as? Boolean ?: false,
             sortOrder = (data["sortOrder"] as? Number)?.toInt() ?: 0,
-            createdAt = document.createdAt,
-            updatedAt = document.updatedAt
+            createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",
+            updatedAt = document.updatedAt ?: "1970-01-01T00:00:00.000Z"
         )
     }
 
@@ -178,8 +178,8 @@ open class SocialTaskRepository @Inject constructor(
         val data = document.data as Map<String, Any>
         
         return UserSocialTask(
-            userId = data["userId"] as String,
-            taskId = data["taskId"] as String,
+            userId = data["userId"] as? String ?: "",
+            taskId = data["taskId"] as? String ?: "",
             status = data["status"] as? String ?: "pending",
             completedAt = data["completedAt"] as? String,
             verifiedAt = data["verifiedAt"] as? String
