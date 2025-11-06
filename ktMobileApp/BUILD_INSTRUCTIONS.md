@@ -11,6 +11,43 @@ Before building the application, ensure you have the following installed:
 3. JDK 11 or later (JDK 17 recommended)
 4. Kotlin 1.9.0 or later
 
+### Android SDK Installation
+
+If you don't have the Android SDK installed:
+
+#### Option 1: Install Android Studio (Recommended)
+1. Download Android Studio from [https://developer.android.com/studio](https://developer.android.com/studio)
+2. Install Android Studio with default settings
+3. During installation, make sure to select "Android SDK" components
+4. After installation, open Android Studio and go to Settings > Appearance & Behavior > System Settings > Android SDK
+5. Install the required SDK platforms (API level 34) and tools
+
+#### Option 2: Install Command-line Tools Only
+1. Download "Command line tools only" from [https://developer.android.com/studio#command-tools](https://developer.android.com/studio#command-tools)
+2. Extract the ZIP file to a directory (e.g., `C:\Android\Sdk`)
+3. Navigate to the `cmdline-tools\latest\bin` directory in your terminal
+4. Run the following command to install required packages:
+   ```
+   sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+   ```
+
+### SDK Path Configuration
+
+After installing the Android SDK, you need to configure the SDK path:
+
+1. Open the `local.properties` file in the project root directory
+2. Add the following line with your actual SDK path:
+   ```
+   sdk.dir=C:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
+   ```
+   
+   Or if you installed to a custom location:
+   ```
+   sdk.dir=C:\\Android\\Sdk
+   ```
+
+If the `local.properties` file doesn't exist, create it in the project root directory (`ktMobileApp/`).
+
 ## Project Setup
 
 1. Open Android Studio
@@ -163,10 +200,10 @@ app/
 
 If you encounter issues building the project:
 
-1. Ensure all prerequisites are installed
-2. Try "File" > "Sync Project with Gradle Files" in Android Studio
-3. Clean and rebuild the project: "Build" > "Clean Project" then "Build" > "Rebuild Project"
-4. Check that the Android SDK path is correctly configured in Android Studio settings
+1. Ensure all prerequisites are installed, especially the Android SDK
+2. Verify that the Android SDK path is correctly configured in the `local.properties` file
+3. Try "File" > "Sync Project with Gradle Files" in Android Studio
+4. Clean and rebuild the project: "Build" > "Clean Project" then "Build" > "Rebuild Project"
 5. Ensure you have a stable internet connection for downloading dependencies
 6. Verify that the JDK path in `gradle.properties` matches your installation
 7. If Gradle wrapper issues occur, ensure `gradle-wrapper.jar` exists in `gradle/wrapper/` directory

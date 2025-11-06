@@ -46,12 +46,27 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.5.4' // Updated to be compatible with Kotlin 1.9.20
+        kotlinCompilerExtensionVersion '1.5.10' // Updated from 1.5.4 to 1.5.10 for better compatibility
     }
     packaging {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
+    }
+    
+    // Add this to ensure Hilt classes are properly included
+    packagingOptions {
+        pickFirst '**/lib/**'
+        pickFirst '**/*.so'
+    }
+}
+
+// Add this to force kapt to run properly
+kapt {
+    correctErrorTypes true
+    useBuildCache false  // Changed from true to false
+    arguments {
+        arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
     }
 }
 
@@ -129,4 +144,14 @@ dependencies {
     // Mocking framework for tests
     testImplementation "io.mockk:mockk:1.13.7"
     androidTestImplementation "io.mockk:mockk-android:1.13.7"
+    
+    // Force Hilt annotation processor to run
+    kapt 'com.google.dagger:hilt-android-compiler:2.48'
+    
+    // Add these explicitly
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation 'javax.inject:javax.inject:1'
+    
+    // Ensure AndroidX Core is present
+    implementation 'androidx.core:core:1.12.0'
 }

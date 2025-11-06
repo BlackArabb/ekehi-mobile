@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
         try {
             // Initialize Start.io
             startIoService.initialize()
+            // Note: We no longer automatically show ads on app start
         } catch (e: Exception) {
             // Log the error but don't crash the app
             Log.e("MainActivity", "Error initializing Start.io", e)
@@ -75,9 +76,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    // This function is no longer needed but kept for reference
 }

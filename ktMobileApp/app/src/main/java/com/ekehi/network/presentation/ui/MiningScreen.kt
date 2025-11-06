@@ -43,6 +43,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import android.app.Activity
+import android.util.Log
+import com.ekehi.network.service.StartIoService
+import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
+import com.startapp.sdk.adsbase.adlisteners.AdEventListener
+import com.startapp.sdk.adsbase.Ad
+import com.ekehi.network.di.StartIoServiceEntryPoint
 
 @Composable
 fun MiningScreen(
@@ -53,6 +60,15 @@ fun MiningScreen(
         LocalContext.current.applicationContext,
         MiningManagerEntryPoint::class.java
     ).getMiningManager()*/
+    
+    // Get StartIoService through DI
+    val startIoService = EntryPointAccessors.fromApplication(
+        LocalContext.current.applicationContext,
+        StartIoServiceEntryPoint::class.java
+    ).startIoService() // Changed from getStartIoService() to startIoService()
+    
+    val context = LocalContext.current
+    val activity = context as? Activity
     
     val scrollState = rememberScrollState()
     val isMining by viewModel.is24HourMiningActive.collectAsState()
@@ -120,8 +136,8 @@ fun MiningScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Ad Bonus Button
-            MiningAdBonusButton()
+            // Ad Bonus Button - Modified to use StartIoService
+            MiningAdBonusButton(startIoService = startIoService, activity = activity)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -463,66 +479,154 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
 }
 
 @Composable
-fun MiningAdBonusButton() {
-    Button(
-        onClick = { /* Handle ad bonus */ },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent
-        ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Color(0xFF8b5cf6),
-                            Color(0xFF7c3aed)
-                        )
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .clip(RoundedCornerShape(16.dp))
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Watch Ad",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Watch Ad for +0.5 EKH",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+fun MiningAdBonusButton(
+    startIoService: StartIoService,
+    activity: Activity?
+) {
+    val context = LocalContext.current
+    var isAdLoading by remember { mutableStateOf(false) }
+    var adErrorMessage by remember { mutableStateOf<String?>(null) }
+    
+    // Load ad when component is first composed
+    LaunchedEffect(Unit) {
+        if (startIoService.isStartIoInitialized()) {
+            startIoService.loadRewardedAd(object : AdEventListener {
+                override fun onReceiveAd(ad: Ad) {
+                    Log.d("MiningScreen", "Ad loaded successfully")
+                }
+                
+                override fun onFailedToReceiveAd(ad: Ad?) {
+                    Log.e("MiningScreen", "Failed to load ad")
+                    adErrorMessage = "Failed to load ad. Please try again later."
+                }
+            })
         }
     }
     
-    Spacer(modifier = Modifier.height(8.dp))
-    
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Watch a short ad to earn bonus EKH tokens",
-            color = Color(0xB3FFFFFF), // Light gray
-            fontSize = 14.sp
-        )
+        Button(
+            onClick = { 
+                // Reset error message
+                adErrorMessage = null
+                
+                // Check if we have an activity and Start.io is initialized
+                if (activity == null) {
+                    adErrorMessage = "Unable to show ad: No activity context"
+                    return@Button
+                }
+                
+                if (!startIoService.isStartIoInitialized()) {
+                    adErrorMessage = "Ads not initialized. Please try again later."
+                    return@Button
+                }
+                
+                // Check if ad is ready
+                if (startIoService.isRewardedAdReady()) {
+                    // Show the ad
+                    startIoService.showRewardedAd(activity, object : AdDisplayListener {
+                        override fun adHidden(ad: Ad?) {
+                            Log.d("MiningScreen", "Ad closed by user")
+                            // TODO: Add reward to user's account here
+                        }
+                        
+                        override fun adDisplayed(ad: Ad?) {
+                            Log.d("MiningScreen", "Ad displayed successfully")
+                        }
+                        
+                        override fun adClicked(ad: Ad?) {
+                            Log.d("MiningScreen", "Ad clicked by user")
+                        }
+                        
+                        override fun adNotDisplayed(ad: Ad?) {
+                            Log.e("MiningScreen", "Ad not displayed")
+                            adErrorMessage = "Ad could not be displayed. Please try again."
+                        }
+                    })
+                } else {
+                    adErrorMessage = "Ad not ready yet. Please try again in a moment."
+                    // Try to load a new ad
+                    startIoService.loadRewardedAd()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                Color(0xFF8b5cf6),
+                                Color(0xFF7c3aed)
+                            )
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    if (isAdLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Watch Ad",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(
+                        text = "Watch Ad for +0.5 EKH",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Watch a short ad to earn bonus EKH tokens",
+                color = Color(0xB3FFFFFF), // Light gray
+                fontSize = 14.sp
+            )
+        }
+        
+        // Show error message if there is one
+        adErrorMessage?.let { error ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = error,
+                color = Color.Red,
+                fontSize = 12.sp
+            )
+        }
     }
 }
 

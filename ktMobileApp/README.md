@@ -59,12 +59,51 @@ app/
 - Android SDK API level 34
 - JDK 11 or later (JDK 17 recommended)
 
+### Installing Android SDK
+
+Since the Android SDK is not currently installed on your system, you need to install it before building the project:
+
+#### Option 1: Install Android Studio (Recommended)
+1. Download Android Studio from [https://developer.android.com/studio](https://developer.android.com/studio)
+2. Install Android Studio with default settings
+3. During installation, make sure to select "Android SDK" components
+4. After installation, open Android Studio and go to Settings > Appearance & Behavior > System Settings > Android SDK
+5. Install the required SDK platforms (API level 34) and tools
+
+#### Option 2: Install Command-line Tools Only
+1. Download "Command line tools only" from [https://developer.android.com/studio#command-tools](https://developer.android.com/studio#command-tools)
+2. Extract the ZIP file to a directory (e.g., `C:\Android\Sdk`)
+3. Navigate to the `cmdline-tools\latest\bin` directory in your terminal
+4. Run the following command to install required packages:
+   ```
+   sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+   ```
+
+> **Note**: You can run the [SETUP_ANDROID_SDK.bat](SETUP_ANDROID_SDK.bat) script for quick guidance on installing the Android SDK.
+
+### Setting up SDK Path
+
+After installing the Android SDK, you need to configure the SDK path:
+
+1. Open the `local.properties` file in the project root directory
+2. Add the following line with your actual SDK path:
+   ```
+   sdk.dir=C:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
+   ```
+   
+   Or if you installed to a custom location:
+   ```
+   sdk.dir=C:\\Android\\Sdk
+   ```
+
 ### Setup
 
 1. Clone the repository
-2. Open the project in Android Studio
-3. Sync Gradle dependencies
-4. Build and run the project
+2. Install Android SDK (following instructions above)
+3. Configure SDK path in `local.properties`
+4. Open the project in Android Studio
+5. Sync Gradle dependencies
+6. Build and run the project
 
 ### JVM Configuration
 

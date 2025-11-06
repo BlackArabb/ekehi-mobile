@@ -5,6 +5,8 @@ import android.content.Context
 import android.util.Log
 import com.startapp.sdk.adsbase.StartAppAd
 import com.startapp.sdk.adsbase.StartAppSDK
+import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
+import com.startapp.sdk.adsbase.adlisteners.AdEventListener
 
 /**
  * StartIoService handles Start.io ad integration for the Ekehi Mobile app.
@@ -15,6 +17,7 @@ class StartIoService(private val context: Context) {
     private var isInitialized = false
     private var exitAdShown = false
     private val appId = "209257659" // Start.io App ID from React Native implementation
+    private var startAppAd: StartAppAd? = null
 
     /**
      * Initialize Start.io SDK
@@ -28,8 +31,12 @@ class StartIoService(private val context: Context) {
         try {
             Log.d(TAG, "Initializing with App ID: $appId")
             // Simple initialization
-            StartAppSDK.init(context, appId, false)
+            StartAppSDK.init(context, appId)
             isInitialized = true
+            
+            // Initialize the ad object
+            startAppAd = StartAppAd(context)
+            
             Log.d(TAG, "✅ Start.io initialized successfully")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Failed to initialize Start.io", e)
@@ -38,10 +45,28 @@ class StartIoService(private val context: Context) {
     }
 
     /**
+     * Load a rewarded ad asynchronously
+     * This should be called before showing the ad to ensure it's ready
+     */
+    fun loadRewardedAd(listener: AdEventListener? = null) {
+        if (!isInitialized) {
+            Log.w(TAG, "Start.io not initialized")
+            return
+        }
+
+        try {
+            startAppAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, listener)
+            Log.d(TAG, "Loading rewarded ad...")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Failed to load rewarded ad", e)
+        }
+    }
+
+    /**
      * Show a rewarded ad
      * @return true if ad was shown successfully, false otherwise
      */
-    fun showRewardedAd(activity: Activity): Boolean {
+    fun showRewardedAd(activity: Activity, listener: AdDisplayListener? = null): Boolean {
         Log.d(TAG, "showRewardedAd called")
 
         if (!isInitialized) {
@@ -49,10 +74,14 @@ class StartIoService(private val context: Context) {
             return false
         }
 
+        if (startAppAd == null) {
+            Log.w(TAG, "StartAppAd not initialized")
+            return false
+        }
+
         try {
-            val startAppAd = StartAppAd(context)
-            startAppAd.loadAd()
-            startAppAd.showAd()
+            // Show the ad without specifying activity parameter
+            startAppAd?.showAd()
             Log.d(TAG, "✅ Rewarded ad shown successfully")
             return true
         } catch (e: Exception) {
@@ -62,18 +91,45 @@ class StartIoService(private val context: Context) {
     }
 
     /**
+     * Load an exit ad asynchronously
+     */
+    fun loadExitAd(listener: AdEventListener? = null) {
+        if (!isInitialized) {
+            Log.w(TAG, "Start.io not initialized")
+            return
+        }
+
+        try {
+            // Use rewarded video mode for exit ads as EXIT mode was removed
+            startAppAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, listener)
+            Log.d(TAG, "Loading exit ad...")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Failed to load exit ad", e)
+        }
+    }
+
+    /**
      * Show an exit ad
      * @return true if ad was shown successfully, false otherwise
      */
-    fun showExitAd(activity: Activity): Boolean {
+    fun showExitAd(activity: Activity, listener: AdDisplayListener? = null): Boolean {
         if (exitAdShown) {
             return false
         }
 
+        if (!isInitialized) {
+            Log.w(TAG, "Start.io not initialized")
+            return false
+        }
+
+        if (startAppAd == null) {
+            Log.w(TAG, "StartAppAd not initialized")
+            return false
+        }
+
         try {
-            val startAppAd = StartAppAd(context)
-            startAppAd.loadAd()
-            startAppAd.showAd()
+            // Show the ad without specifying activity parameter
+            startAppAd?.showAd()
             exitAdShown = true
             Log.d(TAG, "✅ Exit ad shown")
             return true
@@ -89,6 +145,22 @@ class StartIoService(private val context: Context) {
      */
     fun isStartIoInitialized(): Boolean {
         return isInitialized
+    }
+
+    /**
+     * Check if a rewarded ad is ready to be shown
+     * @return true if ready, false otherwise
+     */
+    fun isRewardedAdReady(): Boolean {
+        return startAppAd?.isReady ?: false
+    }
+
+    /**
+     * Check if an exit ad is ready to be shown
+     * @return true if ready, false otherwise
+     */
+    fun isExitAdReady(): Boolean {
+        return startAppAd?.isReady ?: false
     }
 
     /**

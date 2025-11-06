@@ -29,6 +29,16 @@ import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
 import kotlinx.coroutines.flow.collect
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
+import com.ekehi.network.service.StartIoService
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
+import com.startapp.sdk.adsbase.Ad
+import com.ekehi.network.di.StartIoServiceEntryPoint
 
 @Composable
 fun ProfileScreen(
@@ -37,6 +47,15 @@ fun ProfileScreen(
 ) {
     val userProfileResource by viewModel.userProfile.collectAsState()
     val scrollState = rememberScrollState()
+    
+    // Get StartIoService through DI
+    val startIoService = EntryPointAccessors.fromApplication(
+        LocalContext.current.applicationContext,
+        StartIoServiceEntryPoint::class.java
+    ).startIoService()
+    
+    val context = LocalContext.current
+    val activity = context as? Activity
 
     // Extract the actual UserProfile from Resource
     val userProfile: UserProfile? = when (userProfileResource) {
@@ -110,7 +129,37 @@ fun ProfileScreen(
                 onEditProfile = { /* Handle edit profile */ },
                 onSettings = onNavigateToSettings,
                 onReferralCode = { /* Handle referral code */ },
-                onLogout = { /* Handle logout */ }
+                onLogout = { 
+                    // Show exit ad before logging out
+                    if (activity != null && startIoService.isStartIoInitialized()) {
+                        // Load and show exit ad
+                        startIoService.loadExitAd()
+                        startIoService.showExitAd(activity, object : AdDisplayListener {
+                            override fun adHidden(ad: Ad?) {
+                                Log.d("ProfileScreen", "Exit ad closed by user")
+                                // Proceed with logout after ad is closed
+                                // TODO: Implement actual logout functionality here
+                            }
+                            
+                            override fun adDisplayed(ad: Ad?) {
+                                Log.d("ProfileScreen", "Exit ad displayed successfully")
+                            }
+                            
+                            override fun adClicked(ad: Ad?) {
+                                Log.d("ProfileScreen", "Exit ad clicked by user")
+                            }
+                            
+                            override fun adNotDisplayed(ad: Ad?) {
+                                Log.e("ProfileScreen", "Exit ad not displayed")
+                                // Proceed with logout even if ad fails to display
+                                // TODO: Implement actual logout functionality here
+                            }
+                        })
+                    } else {
+                        // If Start.io is not initialized or no activity, proceed with logout
+                        // TODO: Implement actual logout functionality here
+                    }
+                }
             )
         }
     }
@@ -595,3 +644,6 @@ fun ProfileStatsSectionPreview() {
         )
     }
 }
+
+// Remove the duplicate StartIoServiceEntryPoint interface as it's now in a separate file
+// The interface is now located in com.ekehi.network.di.StartIoServiceEntryPoint
