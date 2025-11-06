@@ -20,7 +20,7 @@ class StartIoService(private val context: Context) {
     private var startAppAd: StartAppAd? = null
 
     /**
-     * Initialize Start.io SDK
+     * Initialize Start.io SDK with disabled automatic features
      */
     fun initialize() {
         if (isInitialized) {
@@ -30,14 +30,21 @@ class StartIoService(private val context: Context) {
 
         try {
             Log.d(TAG, "Initializing with App ID: $appId")
-            // Simple initialization
+            // Initialize with disabled automatic features
             StartAppSDK.init(context, appId)
+            
+            // Disable automatic ad loading features
+            StartAppSDK.setTestMode(false) // Disable test mode
+            StartAppAd.disableSplash() // Disable splash ads
+            StartAppAd.disableAutoInterstitial() // Disable automatic interstitial ads
+            StartAppAd.disableReturnAd() // Disable return ads
+            
             isInitialized = true
             
             // Initialize the ad object
             startAppAd = StartAppAd(context)
             
-            Log.d(TAG, "✅ Start.io initialized successfully")
+            Log.d(TAG, "✅ Start.io initialized successfully with automatic features disabled")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Failed to initialize Start.io", e)
             isInitialized = false
