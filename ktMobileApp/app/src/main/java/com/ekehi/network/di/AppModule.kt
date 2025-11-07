@@ -17,6 +17,7 @@ import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.service.MiningManager
 import com.ekehi.network.service.OAuthService
 import com.ekehi.network.service.StartIoService
+import com.ekehi.network.presentation.viewmodel.StreakViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -208,5 +209,11 @@ object AppModule {
     @Singleton
     fun provideMiningManager(@ApplicationContext context: Context): MiningManager {
         return MiningManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideStreakViewModel(userUseCase: UserUseCase): StreakViewModel {
+        return StreakViewModel(userUseCase)
     }
 }

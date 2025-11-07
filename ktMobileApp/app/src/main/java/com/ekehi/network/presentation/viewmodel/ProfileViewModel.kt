@@ -8,6 +8,7 @@ import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.data.repository.offline.OfflineUserRepository
 import com.ekehi.network.data.sync.SyncManager
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.domain.usecase.UserUseCase
 import com.ekehi.network.performance.PerformanceMonitor
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
@@ -22,6 +23,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
         private val userRepository: UserRepository,
         private val authRepository: AuthRepository,
+        private val userUseCase: UserUseCase,
         private val syncManager: SyncManager,
         private val performanceMonitor: PerformanceMonitor
 ) : ViewModel() {
@@ -121,7 +123,27 @@ class ProfileViewModel @Inject constructor(
                     val profile = result.getOrNull()
                     if (profile != null) {
                         Log.d("ProfileViewModel", "Profile synced successfully: ${profile.username}, Coins: ${profile.totalCoins}")
-                        _userProfile.value = Resource.Success(profile)
+                        
+                        // Update streak when profile is loaded
+                        userUseCase.updateStreak(userId, profile).collect { streakResource ->
+                            when (streakResource) {
+                                is Resource.Success -> {
+                                    Log.d("ProfileViewModel", "✅ Streak updated: current=${streakResource.data.currentStreak}, longest=${streakResource.data.longestStreak}")
+                                    // Update the profile with the new streak data
+                                    _userProfile.value = Resource.Success(streakResource.data)
+                                }
+                                is Resource.Error -> {
+                                    Log.e("ProfileViewModel", "❌ Failed to update streak: ${streakResource.message}")
+                                    // Still show the original profile even if streak update fails
+                                    _userProfile.value = Resource.Success(profile)
+                                }
+                                else -> {
+                                    // For Loading or Idle states, show the original profile
+                                    _userProfile.value = Resource.Success(profile)
+                                }
+                            }
+                        }
+                        
                         if (userRepository is OfflineUserRepository) {
                             userRepository.cacheUserProfile(profile)
                         }
