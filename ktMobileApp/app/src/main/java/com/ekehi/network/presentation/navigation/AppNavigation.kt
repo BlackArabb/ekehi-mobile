@@ -1,46 +1,51 @@
 package com.ekehi.network.presentation.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ekehi.network.presentation.ui.*
 import com.ekehi.network.presentation.ui.components.BottomNavigationBar
-import com.ekehi.network.service.MiningManager
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(isAuthenticated: Boolean? = null) {
     val navController = rememberNavController()
+    
+    // Determine the start destination based on authentication state
+    val startDestination = when (isAuthenticated) {
+        true -> {
+            Log.d("AppNavigation", "User authenticated, starting at main screen")
+            "main"
+        }
+        false -> {
+            Log.d("AppNavigation", "User not authenticated, starting at landing screen")
+            "landing"
+        }
+        null -> {
+            Log.d("AppNavigation", "Authentication state unknown, starting at landing screen")
+            "landing"
+        }
+    }
 
     NavHost(
         navController = navController,
-        startDestination = "splash"
+        startDestination = startDestination
     ) {
-        composable("splash") {
-            SplashScreen(navController = navController)
-        }
-        
         composable("landing") {
             LandingScreen(
                 onNavigateToLogin = {
-                    navController.navigate("login") {
-                        // Clear the back stack up to splash when navigating to login
-                        popUpTo("splash") { inclusive = true }
-                    }
+                    navController.navigate("login")
                 },
                 onNavigateToRegister = {
-                    navController.navigate("register") {
-                        // Clear the back stack up to splash when navigating to register
-                        popUpTo("splash") { inclusive = true }
-                    }
+                    navController.navigate("register")
                 }
             )
         }
@@ -51,10 +56,10 @@ fun AppNavigation() {
                     try {
                         navController.navigate("main") {
                             // Clear the entire back stack when navigating to main
-                            popUpTo("splash") { inclusive = true }
+                            popUpTo("landing") { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        // Handle navigation error
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -66,20 +71,17 @@ fun AppNavigation() {
                     try {
                         navController.navigate("main") {
                             // Clear the entire back stack when navigating to main
-                            popUpTo("splash") { inclusive = true }
+                            popUpTo("landing") { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        // Handle navigation error
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 },
                 onNavigateToLogin = {
                     try {
-                        navController.navigate("login") {
-                            // Clear the back stack up to splash when navigating to login
-                            popUpTo("splash") { inclusive = true }
-                        }
+                        navController.navigate("login")
                     } catch (e: Exception) {
-                        // Handle navigation error
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -95,10 +97,10 @@ fun AppNavigation() {
                     try {
                         navController.navigate("landing") {
                             // Clear the back stack when signing out
-                            popUpTo("splash") { inclusive = true }
+                            popUpTo("main") { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        // Handle navigation error
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -152,7 +154,7 @@ fun MainScreen() {
                             try {
                                 navController.navigate("settings")
                             } catch (e: Exception) {
-                                // Handle navigation error
+                                Log.e("MainScreen", "Navigation error", e)
                             }
                         }
                     )

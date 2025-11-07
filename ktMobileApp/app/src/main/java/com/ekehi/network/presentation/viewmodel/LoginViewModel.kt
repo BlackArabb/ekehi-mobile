@@ -12,6 +12,7 @@ import com.ekehi.network.security.InputValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -144,101 +145,107 @@ class LoginViewModel @Inject constructor(
     }
     
     fun checkCurrentUser() {
-        Log.d("LoginViewModel", "Checking current user status")
+        Log.d("LoginViewModel", "=== CHECKING CURRENT USER ===")
         
         viewModelScope.launch {
             try {
                 // First check if there's an active session
-                Log.d("LoginViewModel", "Checking for active session")
+                Log.d("LoginViewModel", "Step 1: Checking for active session")
                 
                 authUseCase.hasActiveSession().collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
+                            Log.d("LoginViewModel", "Step 1 SUCCESS: Active session check returned ${resource.data}")
                             if (resource.data) {
-                                Log.d("LoginViewModel", "Active session found, user is logged in")
+                                Log.d("LoginViewModel", "✅✅✅ SUCCESS: Active session found, user is logged in")
                                 // If we have an active session, user is authenticated
                                 _loginState.value = Resource.Success(Unit)
                             } else {
-                                Log.d("LoginViewModel", "No active session found, checking stored credentials")
+                                Log.d("LoginViewModel", "Step 1: No active session found, checking stored credentials")
                                 // No active session, check stored credentials
                                 checkStoredCredentials()
                             }
                         }
                         is Resource.Error -> {
-                            Log.e("LoginViewModel", "Error checking active session: ${resource.message}")
+                            Log.e("LoginViewModel", "Step 1 ERROR: Error checking active session: ${resource.message}")
                             // Error checking session, fall back to stored credentials
                             checkStoredCredentials()
                         }
                         else -> {
                             // For Loading or Idle states, do nothing
+                            Log.d("LoginViewModel", "Step 1: Active session check in progress...")
                         }
                     }
                 }
             } catch (e: Exception) {
                 val errorResult = ErrorHandler.handleException(e, "Failed to verify user")
                 val errorMessage = errorResult.userMessage
-                Log.e("LoginViewModel", "User verification exception: ${e.message}", e)
+                Log.e("LoginViewModel", "Step 1 EXCEPTION: User verification exception: ${e.message}", e)
                 _loginState.value = Resource.Error(errorMessage)
             }
         }
     }
-    
+
     private fun checkStoredCredentials() {
         viewModelScope.launch {
             try {
                 // Check if we have valid stored credentials
-                Log.d("LoginViewModel", "Checking stored credentials")
+                Log.d("LoginViewModel", "Step 2: Checking stored credentials")
                 
                 authUseCase.checkStoredCredentials().collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
+                            Log.d("LoginViewModel", "Step 2 SUCCESS: Stored credentials check returned ${resource.data}")
                             if (resource.data) {
-                                Log.d("LoginViewModel", "Valid stored credentials found, verifying with Appwrite")
+                                Log.d("LoginViewModel", "Step 2: Valid stored credentials found, verifying with Appwrite")
                                 // If we have valid stored credentials, check if the session is still valid
                                 verifyCurrentUser()
                             } else {
-                                Log.d("LoginViewModel", "No valid stored credentials found, user needs to login")
+                                Log.d("LoginViewModel", "❌❌❌ Step 2: No valid stored credentials found, user needs to login")
                                 // No valid stored credentials, user needs to login
                                 _loginState.value = Resource.Error("No valid stored credentials")
                             }
                         }
                         is Resource.Error -> {
-                            Log.e("LoginViewModel", "Error checking stored credentials: ${resource.message}")
+                            Log.e("LoginViewModel", "Step 2 ERROR: Error checking stored credentials: ${resource.message}")
                             // Error checking credentials, navigate to login
                             _loginState.value = Resource.Error(resource.message)
                         }
                         else -> {
                             // For Loading or Idle states, do nothing
+                            Log.d("LoginViewModel", "Step 2: Stored credentials check in progress...")
                         }
                     }
                 }
             } catch (e: Exception) {
                 val errorResult = ErrorHandler.handleException(e, "Failed to check stored credentials")
                 val errorMessage = errorResult.userMessage
-                Log.e("LoginViewModel", "Stored credentials check exception: ${e.message}", e)
+                Log.e("LoginViewModel", "Step 2 EXCEPTION: Stored credentials check exception: ${e.message}", e)
                 _loginState.value = Resource.Error(errorMessage)
             }
         }
     }
-    
+
     private fun verifyCurrentUser() {
         viewModelScope.launch {
             try {
+                Log.d("LoginViewModel", "Step 3: Verifying current user with Appwrite")
+                
                 authUseCase.getCurrentUser().collect { resource -> 
-                    Log.d("LoginViewModel", "Received current user response: ${resource.javaClass.simpleName}")
+                    Log.d("LoginViewModel", "Step 3: Received current user response: ${resource.javaClass.simpleName}")
                     when (resource) {
                         is Resource.Success -> {
-                            Log.d("LoginViewModel", "Current user verified successfully")
+                            Log.d("LoginViewModel", "✅✅✅ Step 3 SUCCESS: Current user verified successfully")
                             // User is authenticated, navigate to dashboard
                             _loginState.value = Resource.Success(Unit)
                         }
                         is Resource.Error -> {
-                            Log.e("LoginViewModel", "Failed to verify current user: ${resource.message}")
+                            Log.e("LoginViewModel", "❌❌❌ Step 3 ERROR: Failed to verify current user: ${resource.message}")
                             // User is not authenticated, show error
                             _loginState.value = Resource.Error(resource.message)
                         }
                         is Resource.Loading -> {
-                            Log.d("LoginViewModel", "User verification in progress")
+                            Log.d("LoginViewModel", "Step 3: User verification in progress")
                             _loginState.value = resource
                         }
                         is Resource.Idle -> {
@@ -250,7 +257,7 @@ class LoginViewModel @Inject constructor(
             } catch (e: Exception) {
                 val errorResult = ErrorHandler.handleException(e, "Failed to verify user")
                 val errorMessage = errorResult.userMessage
-                Log.e("LoginViewModel", "User verification exception: ${e.message}", e)
+                Log.e("LoginViewModel", "Step 3 EXCEPTION: User verification exception: ${e.message}", e)
                 _loginState.value = Resource.Error(errorMessage)
             }
         }
