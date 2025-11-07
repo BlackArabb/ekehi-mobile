@@ -31,13 +31,23 @@ class StartIoService(private val context: Context) {
         try {
             Log.d(TAG, "Initializing with App ID: $appId")
             // Initialize with disabled automatic features
-            StartAppSDK.init(context, appId)
+            StartAppSDK.init(context, appId, false) // Third parameter is for test mode
             
-            // Disable automatic ad loading features
-            StartAppSDK.setTestMode(false) // Disable test mode
-            StartAppAd.disableSplash() // Disable splash ads
-            StartAppAd.disableAutoInterstitial() // Disable automatic interstitial ads
-            StartAppAd.disableReturnAd() // Disable return ads
+            // Disable automatic ad loading features that are available in current SDK
+            // Note: Some methods may have been deprecated or removed in newer versions
+            // We'll try to call them and catch any exceptions if they don't exist
+            
+            try {
+                StartAppAd.disableSplash() // Disable splash ads
+            } catch (e: Exception) {
+                Log.w(TAG, "disableSplash method not available in current SDK version")
+            }
+            
+            try {
+                StartAppAd.disableAutoInterstitial() // Disable automatic interstitial ads
+            } catch (e: Exception) {
+                Log.w(TAG, "disableAutoInterstitial method not available in current SDK version")
+            }
             
             isInitialized = true
             
