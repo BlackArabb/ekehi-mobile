@@ -30,7 +30,8 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     oAuthViewModel: OAuthViewModel = hiltViewModel(),
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegistration: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -317,7 +318,9 @@ fun LoginScreen(
                 text = "Don't have an account? Sign up",
                 color = Color(0xFF3b82f6),
                 fontSize = 14.sp,
-                modifier = Modifier.clickable { /* Handle sign up navigation */ }
+                modifier = Modifier.clickable { 
+                    onNavigateToRegistration()
+                }
             )
 
             // Error Messages
@@ -347,7 +350,8 @@ fun LoginScreen(
 fun LoginScreenPreview() {
     EkehiMobileTheme {
         LoginScreen(
-            onLoginSuccess = {}
+            onLoginSuccess = {},
+            onNavigateToRegistration = {}
         )
     }
 }

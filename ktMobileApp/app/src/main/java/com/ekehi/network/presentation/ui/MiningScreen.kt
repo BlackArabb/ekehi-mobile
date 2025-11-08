@@ -50,6 +50,8 @@ import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
 import com.startapp.sdk.adsbase.adlisteners.AdEventListener
 import com.startapp.sdk.adsbase.Ad
 import com.ekehi.network.di.StartIoServiceEntryPoint
+import com.ekehi.network.util.EventBus
+import com.ekehi.network.util.Event
 
 @Composable
 fun MiningScreen(
@@ -90,6 +92,22 @@ fun MiningScreen(
     // Refresh mining status when screen appears
     LaunchedEffect(Unit) {
         viewModel.refreshMiningStatus()
+    }
+    
+    // Listen for profile refresh events
+    LaunchedEffect(Unit) {
+        EventBus.events.collect { event ->
+            when (event) {
+                is Event.RefreshUserProfile -> {
+                    // Refresh user profile when we receive this event
+                    Log.d("MiningScreen", "Received RefreshUserProfile event")
+                    viewModel.refreshUserProfile()
+                }
+                else -> {
+                    // Handle other events if needed
+                }
+            }
+        }
     }
 
     Box(

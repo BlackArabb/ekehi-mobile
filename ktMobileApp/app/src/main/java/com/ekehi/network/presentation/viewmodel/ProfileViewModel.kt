@@ -72,8 +72,8 @@ class ProfileViewModel @Inject constructor(
     fun refreshUserProfile() {
         viewModelScope.launch {
             val userId = currentUserId
-            if (userId == null) {
-                Log.e("ProfileViewModel", "Cannot refresh profile: userId is null")
+            if (userId.isNullOrEmpty() || userId == "user_id_placeholder") {
+                Log.e("ProfileViewModel", "Cannot refresh profile: userId is invalid")
                 // Try to get user ID again
                 try {
                     val result = authRepository.getCurrentUser()
@@ -95,6 +95,12 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun loadUserProfile(userId: String) {
+        if (userId.isNullOrEmpty() || userId == "user_id_placeholder") {
+            Log.e("ProfileViewModel", "Cannot load profile: userId is invalid")
+            _userProfile.value = Resource.Error("User ID is invalid")
+            return
+        }
+        
         currentUserId = userId
 
         viewModelScope.launch {

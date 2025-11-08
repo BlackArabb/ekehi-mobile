@@ -43,7 +43,10 @@ import com.ekehi.network.di.StartIoServiceEntryPoint
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToEditProfile: () -> Unit,
+    onNavigateToReferralCode: () -> Unit,
+    onSignOut: () -> Unit
 ) {
     val userProfileResource by viewModel.userProfile.collectAsState()
     val scrollState = rememberScrollState()
@@ -62,15 +65,20 @@ fun ProfileScreen(
         is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
         else -> null
     }
+    
+    // Get current user ID
+    val currentUserId = userProfile?.userId?.takeIf { it.isNotEmpty() } ?: "user_id_placeholder"
 
     // Listen for profile refresh events
     LaunchedEffect(Unit) {
         EventBus.events.collect { event ->
             when (event) {
                 is Event.RefreshUserProfile -> {
-                    // Get current user ID from the existing profile or some other source
-                    // For now, we'll just log that we received the event
+                    // Refresh the profile when we receive this event
                     Log.d("ProfileScreen", "Received RefreshUserProfile event")
+                    if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
+                        viewModel.refreshUserProfile()
+                    }
                 }
                 else -> {
                     // Handle other events if needed
@@ -81,10 +89,24 @@ fun ProfileScreen(
 
     // Load user profile when screen is first displayed
     LaunchedEffect(Unit) {
-        // In a real implementation, you would get the current user ID from authentication
-        // For now, we'll use a placeholder
-        val currentUserId = "user_id_placeholder"
-        viewModel.loadUserProfile(currentUserId)
+        // Load user profile when screen is first displayed
+        if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
+            viewModel.loadUserProfile(currentUserId)
+        }
+    }
+    
+    // Refresh profile when screen is recomposed
+    LaunchedEffect(key1 = currentUserId) {
+        if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
+            viewModel.refreshUserProfile()
+        }
+    }
+    
+    // Also refresh when the screen is recomposed but only if we don't have data yet
+    LaunchedEffect(Unit) {
+        if (userProfileResource is Resource.Idle && currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
+            viewModel.refreshUserProfile()
+        }
     }
 
     Box(
@@ -109,7 +131,8 @@ fun ProfileScreen(
             // Header Section (30% of screen)
             ProfileHeader(
                 userProfile = userProfile,
-                onNavigateToSettings = onNavigateToSettings
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToEditProfile = onNavigateToEditProfile
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -126,9 +149,9 @@ fun ProfileScreen(
 
             // Actions Section
             ProfileActionsSection(
-                onEditProfile = { /* Handle edit profile */ },
+                onEditProfile = onNavigateToEditProfile,
                 onSettings = onNavigateToSettings,
-                onReferralCode = { /* Handle referral code */ },
+                onReferralCode = onNavigateToReferralCode,
                 onLogout = { 
                     // Show exit ad before logging out
                     if (activity != null && startIoService.isStartIoInitialized()) {
@@ -138,7 +161,7 @@ fun ProfileScreen(
                             override fun adHidden(ad: Ad?) {
                                 Log.d("ProfileScreen", "Exit ad closed by user")
                                 // Proceed with logout after ad is closed
-                                // TODO: Implement actual logout functionality here
+                                onSignOut()
                             }
                             
                             override fun adDisplayed(ad: Ad?) {
@@ -152,12 +175,13 @@ fun ProfileScreen(
                             override fun adNotDisplayed(ad: Ad?) {
                                 Log.e("ProfileScreen", "Exit ad not displayed")
                                 // Proceed with logout even if ad fails to display
-                                // TODO: Implement actual logout functionality here
+                                onSignOut()
                             }
                         })
                     } else {
                         // If Start.io is not initialized or no activity, proceed with logout
-                        // TODO: Implement actual logout functionality here
+                        Log.d("ProfileScreen", "Proceeding with logout without ad")
+                        onSignOut()
                     }
                 }
             )
@@ -168,7 +192,8 @@ fun ProfileScreen(
 @Composable
 fun ProfileHeader(
     userProfile: UserProfile?,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToEditProfile: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -258,7 +283,7 @@ fun ProfileHeader(
 
             // Edit Profile Button
             Button(
-                onClick = onNavigateToSettings,
+                onClick = onNavigateToEditProfile,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
@@ -562,7 +587,9 @@ fun ActionButton(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() }
+            .clickable(
+                onClick = onClick
+            )
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -595,7 +622,10 @@ fun ActionButton(
 fun ProfileScreenPreview() {
     EkehiMobileTheme {
         ProfileScreen(
-            onNavigateToSettings = {}
+            onNavigateToSettings = {},
+            onNavigateToEditProfile = {},
+            onNavigateToReferralCode = {},
+            onSignOut = {}
         )
     }
 }
@@ -618,7 +648,8 @@ fun ProfileHeaderPreview() {
                 createdAt = "2023-01-15T10:30:00Z",
                 updatedAt = "2023-01-15T10:30:00Z"
             ),
-            onNavigateToSettings = {}
+            onNavigateToSettings = {},
+            onNavigateToEditProfile = {}
         )
     }
 }

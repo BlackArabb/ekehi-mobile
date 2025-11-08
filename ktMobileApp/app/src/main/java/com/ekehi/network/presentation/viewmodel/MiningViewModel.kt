@@ -252,7 +252,14 @@ class MiningViewModel @Inject constructor(
                 // Clear session after successful claim
                 miningRepository.clearMiningSession()
 
-                // Send event to refresh user profile
+                // Update user profile immediately
+                val currentProfile = _userProfile.value
+                if (currentProfile is Resource.Success) {
+                    val newBalance = currentProfile.data.totalCoins + _sessionReward.value
+                    updateUserProfileBalance(newBalance)
+                }
+                
+                // Also send event to refresh user profile from server
                 viewModelScope.launch {
                     EventBus.sendEvent(Event.RefreshUserProfile)
                 }
@@ -374,6 +381,32 @@ class MiningViewModel @Inject constructor(
      */
     fun clearError() {
         _errorMessage.value = null
+    }
+    
+    /**
+     * Refreshes the user profile
+     */
+    fun refreshUserProfile() {
+        viewModelScope.launch {
+            val userId = currentUserId
+            if (userId != null) {
+                loadUserProfile(userId)
+            }
+        }
+    }
+    
+    /**
+     * Updates the user profile with new balance
+     */
+    fun updateUserProfileBalance(newBalance: Double) {
+        val currentProfile = _userProfile.value
+        if (currentProfile is Resource.Success) {
+            val profile = currentProfile.data
+            val updatedProfile = profile.copy(
+                totalCoins = newBalance
+            )
+            _userProfile.value = Resource.Success(updatedProfile)
+        }
     }
 
     override fun onCleared() {

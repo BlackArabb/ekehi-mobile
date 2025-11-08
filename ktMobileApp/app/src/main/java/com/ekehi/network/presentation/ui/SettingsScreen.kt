@@ -25,6 +25,8 @@ import com.ekehi.network.ui.theme.EkehiMobileTheme
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
+    onChangePassword: () -> Unit,
+    onContactSupport: () -> Unit,
     onSignOut: () -> Unit
 ) {
     val miningNotificationsEnabled by viewModel.miningNotificationsEnabled.collectAsState()
@@ -93,12 +95,16 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Security Settings
-            SecuritySettingsSection()
+            SecuritySettingsSection(
+                onChangePassword = onChangePassword
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // About Section
-            AboutSection()
+            AboutSection(
+                onContactSupport = onContactSupport
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -214,7 +220,9 @@ fun PrivacySettingsSection(onPrivacyToggle: (Boolean) -> Unit) {
 }
 
 @Composable
-fun SecuritySettingsSection() {
+fun SecuritySettingsSection(
+    onChangePassword: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -238,7 +246,7 @@ fun SecuritySettingsSection() {
             SettingItem(
                 text = "Change Password",
                 icon = Icons.Default.Lock,
-                onClick = { /* Handle change password */ }
+                onClick = onChangePassword
             )
 
             SettingItem(
@@ -257,7 +265,9 @@ fun SecuritySettingsSection() {
 }
 
 @Composable
-fun AboutSection() {
+fun AboutSection(
+    onContactSupport: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -293,7 +303,7 @@ fun AboutSection() {
             SettingItem(
                 text = "Contact Support",
                 icon = Icons.Default.SupportAgent,
-                onClick = { /* Handle contact support */ }
+                onClick = onContactSupport
             )
         }
     }
@@ -401,6 +411,8 @@ fun SignOutButton(onClick: () -> Unit) {
 fun SettingsScreenPreview() {
     EkehiMobileTheme {
         SettingsScreen(
+            onChangePassword = {},
+            onContactSupport = {},
             onSignOut = {}
         )
     }
