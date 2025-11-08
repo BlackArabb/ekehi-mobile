@@ -291,7 +291,7 @@ fun UserProfileCard(
                 Text(
                     text = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
                     color = Color(0xFFffa000), // Orange
-                    fontSize = 24.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -509,11 +509,11 @@ fun MiningAdBonusButton(
     LaunchedEffect(Unit) {
         if (startIoService.isStartIoInitialized()) {
             startIoService.loadRewardedAd(object : AdEventListener {
-                override fun onReceiveAd(ad: Ad) {
+                override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
                     Log.d("MiningScreen", "Ad loaded successfully")
                 }
                 
-                override fun onFailedToReceiveAd(ad: Ad?) {
+                override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
                     Log.e("MiningScreen", "Failed to load ad")
                     adErrorMessage = "Failed to load ad. Please try again later."
                 }
@@ -544,20 +544,20 @@ fun MiningAdBonusButton(
                 if (startIoService.isRewardedAdReady()) {
                     // Show the ad
                     startIoService.showRewardedAd(activity, object : AdDisplayListener {
-                        override fun adHidden(ad: Ad?) {
+                        override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
                             Log.d("MiningScreen", "Ad closed by user")
                             // TODO: Add reward to user's account here
                         }
                         
-                        override fun adDisplayed(ad: Ad?) {
+                        override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
                             Log.d("MiningScreen", "Ad displayed successfully")
                         }
                         
-                        override fun adClicked(ad: Ad?) {
+                        override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
                             Log.d("MiningScreen", "Ad clicked by user")
                         }
                         
-                        override fun adNotDisplayed(ad: Ad?) {
+                        override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
                             Log.e("MiningScreen", "Ad not displayed")
                             adErrorMessage = "Ad could not be displayed. Please try again."
                         }
@@ -570,7 +570,7 @@ fun MiningAdBonusButton(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
+                .height(70.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent
             ),
