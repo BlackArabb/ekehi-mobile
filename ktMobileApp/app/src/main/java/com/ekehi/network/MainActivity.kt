@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ekehi.network.presentation.navigation.AppNavigation
 import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.startapp.sdk.adsbase.StartAppAd
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -35,5 +36,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    
+    override fun onBackPressed() {
+        // Show exit ad when back button is pressed
+        StartAppAd.onBackPressed(this)
+        super.onBackPressed()
     }
 }

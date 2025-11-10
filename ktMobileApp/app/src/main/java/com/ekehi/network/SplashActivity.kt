@@ -18,6 +18,7 @@ import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.navigation.AppNavigation
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.startapp.sdk.adsbase.StartAppAd
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -95,5 +96,11 @@ class SplashActivity : ComponentActivity() {
         
         startActivity(intent)
         finish()
+    }
+    
+    override fun onBackPressed() {
+        // Show exit ad when back button is pressed
+        StartAppAd.onBackPressed(this)
+        super.onBackPressed()
     }
 }

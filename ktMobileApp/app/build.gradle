@@ -107,7 +107,7 @@ dependencies {
     implementation 'io.coil-kt:coil-compose:2.5.0'
     
     // Start.io Ads
-    implementation 'com.startapp:inapp-sdk:4.10.2'
+    implementation 'com.startapp:inapp-sdk:5.+'
     
     // Chrome Custom Tabs for OAuth
     implementation 'androidx.browser:browser:1.7.0'

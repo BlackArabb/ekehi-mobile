@@ -507,17 +507,14 @@ fun MiningAdBonusButton(
     
     // Load ad when component is first composed
     LaunchedEffect(Unit) {
-        if (startIoService.isStartIoInitialized()) {
-            startIoService.loadRewardedAd(object : AdEventListener {
-                override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
-                    Log.d("MiningScreen", "Ad loaded successfully")
-                }
-                
-                override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
-                    Log.e("MiningScreen", "Failed to load ad")
-                    adErrorMessage = "Failed to load ad. Please try again later."
-                }
-            })
+        // Initialize StartIoService - SDK is already initialized via AndroidManifest.xml
+        startIoService.initialize()
+        
+        // Load rewarded video ad with reward callback
+        startIoService.loadRewardedVideoAd {
+            // Grant user with the reward when video is completed
+            Log.d("MiningScreen", "User completed watching rewarded video, granting reward")
+            // TODO: Add actual reward logic here
         }
     }
     
@@ -535,37 +532,24 @@ fun MiningAdBonusButton(
                     return@Button
                 }
                 
+                // Check if StartIoService is initialized (SDK is auto-initialized via AndroidManifest.xml)
                 if (!startIoService.isStartIoInitialized()) {
-                    adErrorMessage = "Ads not initialized. Please try again later."
+                    adErrorMessage = "Ads service not ready. Please try again later."
                     return@Button
                 }
                 
                 // Check if ad is ready
                 if (startIoService.isRewardedAdReady()) {
-                    // Show the ad
-                    startIoService.showRewardedAd(activity, object : AdDisplayListener {
-                        override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
-                            Log.d("MiningScreen", "Ad closed by user")
-                            // TODO: Add reward to user's account here
-                        }
-                        
-                        override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
-                            Log.d("MiningScreen", "Ad displayed successfully")
-                        }
-                        
-                        override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
-                            Log.d("MiningScreen", "Ad clicked by user")
-                        }
-                        
-                        override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
-                            Log.e("MiningScreen", "Ad not displayed")
-                            adErrorMessage = "Ad could not be displayed. Please try again."
-                        }
-                    })
+                    // Show the rewarded video ad
+                    startIoService.showRewardedVideoAd(activity)
                 } else {
                     adErrorMessage = "Ad not ready yet. Please try again in a moment."
                     // Try to load a new ad
-                    startIoService.loadRewardedAd()
+                    startIoService.loadRewardedVideoAd {
+                        // Grant user with the reward when video is completed
+                        Log.d("MiningScreen", "User completed watching rewarded video, granting reward")
+                        // TODO: Add actual reward logic here
+                    }
                 }
             },
             modifier = Modifier
@@ -614,7 +598,7 @@ fun MiningAdBonusButton(
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                     Text(
-                        text = "Watch Ad for +0.5 EKH",
+                        text = "Watch Video Ad for +0.5 EKH",
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
@@ -630,7 +614,7 @@ fun MiningAdBonusButton(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Watch a short ad to earn bonus EKH tokens",
+                text = "Watch a rewarded video ad to earn bonus EKH tokens",
                 color = Color(0xB3FFFFFF), // Light gray
                 fontSize = 14.sp
             )

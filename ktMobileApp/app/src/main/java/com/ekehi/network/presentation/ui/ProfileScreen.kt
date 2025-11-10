@@ -89,6 +89,9 @@ fun ProfileScreen(
 
     // Load user profile when screen is first displayed
     LaunchedEffect(Unit) {
+        // Initialize StartIoService - SDK is already initialized via AndroidManifest.xml
+        startIoService.initialize()
+        
         // Load user profile when screen is first displayed
         if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
             viewModel.loadUserProfile(currentUserId)
@@ -153,37 +156,28 @@ fun ProfileScreen(
                 onSettings = onNavigateToSettings,
                 onReferralCode = onNavigateToReferralCode,
                 onLogout = { 
-                    // Show exit ad before logging out
-                    if (activity != null && startIoService.isStartIoInitialized()) {
-                        // Load and show exit ad
-                        startIoService.loadExitAd()
-                        startIoService.showExitAd(activity, object : AdDisplayListener {
-                            override fun adHidden(ad: Ad?) {
-                                Log.d("ProfileScreen", "Exit ad closed by user")
-                                // Proceed with logout after ad is closed
-                                onSignOut()
-                            }
-                            
-                            override fun adDisplayed(ad: Ad?) {
-                                Log.d("ProfileScreen", "Exit ad displayed successfully")
-                            }
-                            
-                            override fun adClicked(ad: Ad?) {
-                                Log.d("ProfileScreen", "Exit ad clicked by user")
-                            }
-                            
-                            override fun adNotDisplayed(ad: Ad?) {
-                                Log.e("ProfileScreen", "Exit ad not displayed")
-                                // Proceed with logout even if ad fails to display
-                                onSignOut()
-                            }
-                        })
+                // Show exit ad before logging out
+                if (activity != null) {
+                    // Initialize StartIoService - SDK is already initialized via AndroidManifest.xml
+                    startIoService.initialize(activity)
+                    
+                    // Show exit ad with callback
+                    if (startIoService.showExitAd(activity) { /* onAdClosed */
+                        onSignOut()
+                    }) {
+                        // Exit ad is being shown, logout will be handled by the callback
+                        Log.d("ProfileScreen", "Exit ad is being shown")
                     } else {
-                        // If Start.io is not initialized or no activity, proceed with logout
-                        Log.d("ProfileScreen", "Proceeding with logout without ad")
+                        // If exit ad couldn't be shown, proceed with logout
+                        Log.d("ProfileScreen", "Proceeding with logout without exit ad")
                         onSignOut()
                     }
+                } else {
+                    // If no activity, proceed with logout
+                    Log.d("ProfileScreen", "Proceeding with logout without ad")
+                    onSignOut()
                 }
+            }
             )
         }
     }
