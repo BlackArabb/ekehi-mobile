@@ -98,35 +98,50 @@
         </service>
         
         <!-- Start.io components -->
-        <activity
-            android:name="com.startapp.sdk.ads.list3d.List3DActivity"
-            android:theme="@android:style/Theme" />
-        <activity
-            android:name="com.startapp.sdk.ads.interstitials.OverlayActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            tools:replace="android:theme"/>
-        <activity
-            android:name="com.startapp.sdk.ads.interstitials.FullScreenActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity
-            android:name="com.startapp.sdk.ads.banner.BannerActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-            
-        <service android:name="com.startapp.sdk.adsbase.StartAppAdService" />
-        <service android:name="com.startapp.sdk.jobs.SchedulerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-            
-        <receiver android:name="com.startapp.sdk.adsbase.StartAppAdReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
-            </intent-filter>
-        </receiver>
-        
-        <!-- Start.io App ID -->
-        <meta-data android:name="com.startapp.sdk.APPLICATION_ID" android:value="210617452" />
-        
+<activity
+    android:name="com.startapp.sdk.ads.list3d.List3DActivity"
+    android:theme="@android:style/Theme"
+    android:exported="false"
+    android:configChanges="orientation|keyboardHidden|screenSize" />
+<activity
+    android:name="com.startapp.sdk.ads.interstitials.OverlayActivity"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar"
+    android:exported="false"
+    android:configChanges="orientation|keyboardHidden|screenSize"
+    tools:replace="android:theme,android:configChanges"/>
+<activity
+    android:name="com.startapp.sdk.ads.interstitials.FullScreenActivity"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar"
+    android:exported="false"
+    android:configChanges="orientation|keyboardHidden|screenSize" />
+<activity
+    android:name="com.startapp.sdk.ads.banner.BannerActivity"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar"
+    android:exported="false"
+    android:configChanges="orientation|keyboardHidden|screenSize" />
+    
+<service 
+    android:name="com.startapp.sdk.adsbase.StartAppAdService"
+    android:exported="false" />
+<service 
+    android:name="com.startapp.sdk.jobs.SchedulerService"
+    android:permission="android.permission.BIND_JOB_SERVICE"
+    android:exported="false" />
+    
+<receiver 
+    android:name="com.startapp.sdk.adsbase.StartAppAdReceiver"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.USER_PRESENT" />
+    </intent-filter>
+</receiver>
+
+<!-- Start.io App ID -->
+<meta-data 
+    android:name="com.startapp.sdk.APPLICATION_ID" 
+    android:value="210617452" />
+    
         <!-- Enable splash ads (enabled by default) -->
         <!-- <meta-data android:name="com.startapp.sdk.SPLASH_ENABLED" android:value="true" /> -->
         

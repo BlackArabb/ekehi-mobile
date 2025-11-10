@@ -501,20 +501,16 @@ fun MiningAdBonusButton(
     startIoService: StartIoService,
     activity: Activity?
 ) {
-    val context = LocalContext.current
     var isAdLoading by remember { mutableStateOf(false) }
     var adErrorMessage by remember { mutableStateOf<String?>(null) }
     
     // Load ad when component is first composed
     LaunchedEffect(Unit) {
-        // Initialize StartIoService - SDK is already initialized via AndroidManifest.xml
-        startIoService.initialize()
-        
-        // Load rewarded video ad with reward callback
         startIoService.loadRewardedVideoAd {
-            // Grant user with the reward when video is completed
-            Log.d("MiningScreen", "User completed watching rewarded video, granting reward")
-            // TODO: Add actual reward logic here
+            // Reward callback - User completed watching the video
+            Log.d("MiningScreen", "✅ User earned 0.5 EKH from ad!")
+            // TODO: Call your API to credit user's account with 0.5 EKH
+            // Example: viewModel.addAdReward(0.5)
         }
     }
     
@@ -526,30 +522,27 @@ fun MiningAdBonusButton(
                 // Reset error message
                 adErrorMessage = null
                 
-                // Check if we have an activity and Start.io is initialized
+                // Check if we have an activity
                 if (activity == null) {
                     adErrorMessage = "Unable to show ad: No activity context"
                     return@Button
                 }
                 
-                // Check if StartIoService is initialized (SDK is auto-initialized via AndroidManifest.xml)
-                if (!startIoService.isStartIoInitialized()) {
-                    adErrorMessage = "Ads service not ready. Please try again later."
+                // Check if ad is ready
+                if (!startIoService.isRewardedAdReady()) {
+                    adErrorMessage = "Ad not ready yet. Please wait..."
+                    isAdLoading = true
+                    // Try to load ad
+                    startIoService.loadRewardedVideoAd {
+                        Log.d("MiningScreen", "✅ User earned 0.5 EKH!")
+                        isAdLoading = false
+                    }
                     return@Button
                 }
                 
-                // Check if ad is ready
-                if (startIoService.isRewardedAdReady()) {
-                    // Show the rewarded video ad
-                    startIoService.showRewardedVideoAd(activity)
-                } else {
-                    adErrorMessage = "Ad not ready yet. Please try again in a moment."
-                    // Try to load a new ad
-                    startIoService.loadRewardedVideoAd {
-                        // Grant user with the reward when video is completed
-                        Log.d("MiningScreen", "User completed watching rewarded video, granting reward")
-                        // TODO: Add actual reward logic here
-                    }
+                // Show the ad
+                if (!startIoService.showRewardedVideoAd(activity)) {
+                    adErrorMessage = "Failed to show ad. Please try again."
                 }
             },
             modifier = Modifier
@@ -598,7 +591,7 @@ fun MiningAdBonusButton(
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                     Text(
-                        text = "Watch Video Ad for +0.5 EKH",
+                        text = "Watch Ad for +0.5 EKH",
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
@@ -614,8 +607,8 @@ fun MiningAdBonusButton(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Watch a rewarded video ad to earn bonus EKH tokens",
-                color = Color(0xB3FFFFFF), // Light gray
+                text = "Watch a short ad to earn bonus EKH tokens",
+                color = Color(0xB3FFFFFF),
                 fontSize = 14.sp
             )
         }
@@ -631,6 +624,8 @@ fun MiningAdBonusButton(
         }
     }
 }
+
+
 
 @Composable
 fun MiningAutoMiningStatus() {

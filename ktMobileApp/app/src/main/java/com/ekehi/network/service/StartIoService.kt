@@ -8,259 +8,234 @@ import com.startapp.sdk.adsbase.StartAppSDK
 import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
 import com.startapp.sdk.adsbase.adlisteners.AdEventListener
 import com.startapp.sdk.adsbase.adlisteners.VideoListener
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * StartIoService handles Start.io ad integration for the Ekehi Mobile app.
- * This service provides functionality for showing rewarded ads and exit ads.
- * 
- * IMPORTANT: This service assumes Start.io SDK is initialized via AndroidManifest.xml
- * with the meta-data tag: <meta-data android:name="com.startapp.sdk.APPLICATION_ID" android:value="210617452" />
+ * SDK is auto-initialized via AndroidManifest.xml with the APPLICATION_ID meta-data.
  */
-class StartIoService(private val context: Context) {
+@Singleton
+class StartIoService @Inject constructor(
+    private val context: Context
+) {
     private val TAG = "StartIoService"
-    private var isInitialized = false
-    private var exitAdShown = false
     private var startAppAd: StartAppAd? = null
+    private var rewardedVideoAd: StartAppAd? = null
+    private var rewardCallback: (() -> Unit)? = null
+
+    init {
+        // SDK is auto-initialized via AndroidManifest.xml
+        // Just create ad instances
+        try {
+            startAppAd = StartAppAd(context)
+            rewardedVideoAd = StartAppAd(context)
+            Log.d(TAG, "✅ Start.io ad instances created successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Failed to create Start.io ad instances", e)
+        }
+    }
 
     /**
-     * Initialize Start.io SDK - but now we check if it's already initialized via AndroidManifest.xml
-     * According to Start.io docs, when using AndroidManifest.xml initialization, SDK is auto-initialized
+     * Initialize is now just a compatibility method.
+     * SDK is already initialized via AndroidManifest.xml.
      */
     fun initialize(activity: Activity? = null) {
-        if (isInitialized) {
-            Log.d(TAG, "Already initialized")
-            return
-        }
+        Log.d(TAG, "SDK already initialized via AndroidManifest.xml")
+    }
 
+    /**
+     * Load a rewarded video ad with completion callback
+     * @param onVideoCompleted Callback invoked when user completes watching the video
+     */
+    fun loadRewardedVideoAd(onVideoCompleted: (() -> Unit)? = null) {
         try {
-            Log.d(TAG, "Checking Start.io SDK initialization status...")
+            // Store the reward callback
+            rewardCallback = onVideoCompleted
             
-            // When using AndroidManifest.xml initialization, the SDK should be auto-initialized
-            // We just need to create the StartAppAd instance
-            startAppAd = StartAppAd(context)
-            
-            // Test if SDK is working by checking if we can access it
-            if (startAppAd != null) {
-                isInitialized = true
-                Log.d(TAG, "✅ Start.io SDK appears to be initialized (via AndroidManifest.xml)")
-            } else {
-                Log.e(TAG, "❌ Failed to create StartAppAd instance")
-                isInitialized = false
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to initialize Start.io", e)
-            isInitialized = false
-        }
-    }
-
-    /**
-     * Load a rewarded ad asynchronously
-     * This should be called before showing the ad to ensure it's ready
-     */
-    fun loadRewardedAd(listener: AdEventListener? = null) {
-        if (!isInitialized) {
-            Log.w(TAG, "Start.io not initialized")
-            return
-        }
-
-        try {
-            if (listener != null) {
-                startAppAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, listener)
-            } else {
-                startAppAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO)
-            }
-            Log.d(TAG, "Loading rewarded ad...")
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to load rewarded ad", e)
-        }
-    }
-
-    /**
-     * Show a rewarded ad
-     * @return true if ad was shown successfully, false otherwise
-     */
-    fun showRewardedAd(activity: Activity, listener: AdDisplayListener? = null): Boolean {
-        Log.d(TAG, "showRewardedAd called")
-
-        if (!isInitialized) {
-            Log.w(TAG, "Start.io not initialized")
-            return false
-        }
-
-        if (startAppAd == null) {
-            Log.w(TAG, "StartAppAd not initialized")
-            return false
-        }
-
-        try {
-            // Show the ad with listener if provided
-            if (listener != null) {
-                startAppAd?.showAd(listener)
-            } else {
-                startAppAd?.showAd()
-            }
-            Log.d(TAG, "✅ Rewarded ad shown successfully")
-            return true
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to show rewarded ad", e)
-            return false
-        }
-    }
-
-    /**
-     * Load an exit ad asynchronously
-     */
-    fun loadExitAd(listener: AdEventListener? = null) {
-        if (!isInitialized) {
-            Log.w(TAG, "Start.io not initialized")
-            return
-        }
-
-        try {
-            // Use rewarded video mode for exit ads as EXIT mode was removed
-            if (listener != null) {
-                startAppAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, listener)
-            } else {
-                startAppAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO)
-            }
-            Log.d(TAG, "Loading exit ad...")
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to load exit ad", e)
-        }
-    }
-
-    /**
-     * Show an exit ad
-     * @return true if ad was shown successfully, false otherwise
-     */
-    fun showExitAd(activity: Activity, onAdClosed: (() -> Unit)? = null): Boolean {
-        if (exitAdShown) {
-            return false
-        }
-
-        if (!isInitialized) {
-            Log.w(TAG, "Start.io not initialized")
-            return false
-        }
-
-        if (startAppAd == null) {
-            Log.w(TAG, "StartAppAd not initialized")
-            return false
-        }
-
-        try {
-            // Show the ad with listener
-            startAppAd?.showAd(object : AdDisplayListener {
-                override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
-                    Log.d(TAG, "Exit ad closed by user")
-                    exitAdShown = true
-                    onAdClosed?.invoke()
-                }
-                
-                override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
-                    Log.d(TAG, "Exit ad displayed successfully")
-                }
-                
-                override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
-                    Log.d(TAG, "Exit ad clicked by user")
-                }
-                
-                override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
-                    Log.e(TAG, "Exit ad not displayed")
-                    // Still consider it shown to prevent multiple attempts
-                    exitAdShown = true
-                    onAdClosed?.invoke()
+            // Set video listener
+            rewardedVideoAd?.setVideoListener(object : VideoListener {
+                override fun onVideoCompleted() {
+                    Log.d(TAG, "✅ Rewarded video completed - User earned reward!")
+                    rewardCallback?.invoke()
                 }
             })
-            Log.d(TAG, "✅ Exit ad shown")
-            return true
+            
+            // Load the ad
+            rewardedVideoAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, object : AdEventListener {
+                override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
+                    Log.d(TAG, "✅ Rewarded video ad loaded successfully")
+                }
+                
+                override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Log.e(TAG, "❌ Failed to load rewarded video ad")
+                }
+            })
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to show exit ad", e)
-            return false
+            Log.e(TAG, "❌ Exception loading rewarded video ad", e)
         }
     }
 
     /**
-     * Check if Start.io is initialized
+     * Show rewarded video ad
+     * @param activity The activity context
+     * @return true if ad was shown, false otherwise
+     */
+    fun showRewardedVideoAd(activity: Activity): Boolean {
+        return try {
+            if (rewardedVideoAd?.isReady == true) {
+                rewardedVideoAd?.showAd(object : AdDisplayListener {
+                    override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.d(TAG, "Rewarded video ad closed")
+                        // Reload ad for next time
+                        loadRewardedVideoAd(rewardCallback)
+                    }
+                    
+                    override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.d(TAG, "✅ Rewarded video ad displayed successfully")
+                    }
+                    
+                    override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.d(TAG, "Rewarded video ad clicked")
+                    }
+                    
+                    override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.e(TAG, "❌ Rewarded video ad not displayed")
+                        // Reload ad for next attempt
+                        loadRewardedVideoAd(rewardCallback)
+                    }
+                })
+                true
+            } else {
+                Log.w(TAG, "⚠️ Rewarded video ad not ready yet")
+                false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Exception showing rewarded video ad", e)
+            false
+        }
+    }
+
+    /**
+     * Show exit ad with callback when ad closes
+     * @param activity The activity context
+     * @param onAdClosed Callback invoked when ad is closed or failed to show
+     * @return true if ad loading started, false otherwise
+     */
+    fun showExitAd(activity: Activity, onAdClosed: () -> Unit): Boolean {
+        return try {
+            // Create a new ad instance for exit ad
+            val exitAd = StartAppAd(context)
+            
+            // Load and show interstitial ad
+            exitAd.loadAd(StartAppAd.AdMode.AUTOMATIC, object : AdEventListener {
+                override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
+                    Log.d(TAG, "Exit ad loaded, showing now...")
+                    exitAd.showAd(object : AdDisplayListener {
+                        override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
+                            Log.d(TAG, "Exit ad closed")
+                            onAdClosed()
+                        }
+                        
+                        override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                            Log.d(TAG, "✅ Exit ad displayed successfully")
+                        }
+                        
+                        override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
+                            Log.d(TAG, "Exit ad clicked")
+                        }
+                        
+                        override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                            Log.e(TAG, "❌ Exit ad not displayed")
+                            onAdClosed()
+                        }
+                    })
+                }
+                
+                override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Log.e(TAG, "❌ Failed to load exit ad")
+                    onAdClosed()
+                }
+            })
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Exception with exit ad", e)
+            onAdClosed()
+            false
+        }
+    }
+
+    /**
+     * Check if Start.io SDK is initialized
      * @return true if initialized, false otherwise
      */
     fun isStartIoInitialized(): Boolean {
-        return isInitialized
+        return startAppAd != null && rewardedVideoAd != null
     }
 
     /**
-     * Check if a rewarded ad is ready to be shown
+     * Check if rewarded video ad is ready to be shown
      * @return true if ready, false otherwise
      */
     fun isRewardedAdReady(): Boolean {
-        return startAppAd?.isReady ?: false
+        return rewardedVideoAd?.isReady == true
     }
 
     /**
-     * Check if an exit ad is ready to be shown
-     * @return true if ready, false otherwise
+     * Load a standard interstitial ad
      */
-    fun isExitAdReady(): Boolean {
-        return startAppAd?.isReady ?: false
-    }
-
-    /**
-     * Reset exit ad flag
-     */
-    fun resetExitAd() {
-        exitAdShown = false
-    }
-
-    /**
-     * Load a rewarded video ad with reward callback
-     * @param onVideoCompleted callback when user completes watching the video
-     */
-    fun loadRewardedVideoAd(onVideoCompleted: (() -> Unit)? = null) {
-        if (!isInitialized) {
-            Log.w(TAG, "Start.io not initialized")
-            return
-        }
-
+    fun loadInterstitialAd() {
         try {
-            startAppAd?.setVideoListener(object : VideoListener {
-                override fun onVideoCompleted() {
-                    Log.d(TAG, "Rewarded video completed")
-                    onVideoCompleted?.invoke()
+            startAppAd?.loadAd(StartAppAd.AdMode.AUTOMATIC, object : AdEventListener {
+                override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
+                    Log.d(TAG, "✅ Interstitial ad loaded successfully")
+                }
+                
+                override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Log.e(TAG, "❌ Failed to load interstitial ad")
                 }
             })
-            
-            startAppAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO)
-            Log.d(TAG, "Loading rewarded video ad...")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to load rewarded video ad", e)
+            Log.e(TAG, "❌ Exception loading interstitial ad", e)
         }
     }
 
     /**
-     * Show a rewarded video ad
-     * @return true if ad was shown successfully, false otherwise
+     * Show a standard interstitial ad
+     * @param activity The activity context
+     * @return true if ad was shown, false otherwise
      */
-    fun showRewardedVideoAd(activity: Activity): Boolean {
-        Log.d(TAG, "showRewardedVideoAd called")
-
-        if (!isInitialized) {
-            Log.w(TAG, "Start.io not initialized")
-            return false
-        }
-
-        if (startAppAd == null) {
-            Log.w(TAG, "StartAppAd not initialized")
-            return false
-        }
-
-        try {
-            // Show the ad
-            startAppAd?.showAd()
-            Log.d(TAG, "✅ Rewarded video ad shown successfully")
-            return true
+    fun showInterstitialAd(activity: Activity): Boolean {
+        return try {
+            if (startAppAd?.isReady == true) {
+                startAppAd?.showAd(object : AdDisplayListener {
+                    override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.d(TAG, "Interstitial ad closed")
+                        // Reload ad for next time
+                        loadInterstitialAd()
+                    }
+                    
+                    override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.d(TAG, "✅ Interstitial ad displayed successfully")
+                    }
+                    
+                    override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.d(TAG, "Interstitial ad clicked")
+                    }
+                    
+                    override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                        Log.e(TAG, "❌ Interstitial ad not displayed")
+                        loadInterstitialAd()
+                    }
+                })
+                true
+            } else {
+                Log.w(TAG, "⚠️ Interstitial ad not ready")
+                false
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to show rewarded video ad", e)
-            return false
+            Log.e(TAG, "❌ Exception showing interstitial ad", e)
+            false
         }
     }
 }
