@@ -23,6 +23,7 @@ class StartIoService @Inject constructor(
     private var startAppAd: StartAppAd? = null
     private var rewardedVideoAd: StartAppAd? = null
     private var rewardCallback: (() -> Unit)? = null
+    private var isVideoAdLoaded = false
 
     init {
         // SDK is auto-initialized via AndroidManifest.xml
@@ -50,29 +51,39 @@ class StartIoService @Inject constructor(
      */
     fun loadRewardedVideoAd(onVideoCompleted: (() -> Unit)? = null) {
         try {
+            Log.d(TAG, "📥 Loading rewarded video ad...")
+            
             // Store the reward callback
             rewardCallback = onVideoCompleted
+            isVideoAdLoaded = false
             
-            // Set video listener
+            // Create a fresh ad instance for rewarded video
+            rewardedVideoAd = StartAppAd(context)
+            
+            // Set video listener BEFORE loading
             rewardedVideoAd?.setVideoListener(object : VideoListener {
                 override fun onVideoCompleted() {
-                    Log.d(TAG, "✅ Rewarded video completed - User earned reward!")
+                    Log.d(TAG, "✅✅✅ Rewarded video COMPLETED - User earned reward!")
                     rewardCallback?.invoke()
                 }
             })
             
-            // Load the ad
+            // Load the ad with REWARDED_VIDEO mode
             rewardedVideoAd?.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, object : AdEventListener {
                 override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
                     Log.d(TAG, "✅ Rewarded video ad loaded successfully")
+                    isVideoAdLoaded = true
                 }
                 
                 override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
                     Log.e(TAG, "❌ Failed to load rewarded video ad")
+                    Log.e(TAG, "   Reason: ${ad?.errorMessage ?: "Unknown error"}")
+                    isVideoAdLoaded = false
                 }
             })
         } catch (e: Exception) {
             Log.e(TAG, "❌ Exception loading rewarded video ad", e)
+            isVideoAdLoaded = false
         }
     }
 
@@ -82,34 +93,51 @@ class StartIoService @Inject constructor(
      * @return true if ad was shown, false otherwise
      */
     fun showRewardedVideoAd(activity: Activity): Boolean {
+        Log.d(TAG, "📺 Attempting to show rewarded video ad")
+        Log.d(TAG, "   Ad ready status: ${rewardedVideoAd?.isReady}")
+        Log.d(TAG, "   Is loaded flag: $isVideoAdLoaded")
+        
         return try {
-            if (rewardedVideoAd?.isReady == true) {
-                rewardedVideoAd?.showAd(object : AdDisplayListener {
-                    override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
-                        Log.d(TAG, "Rewarded video ad closed")
-                        // Reload ad for next time
-                        loadRewardedVideoAd(rewardCallback)
-                    }
-                    
-                    override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
-                        Log.d(TAG, "✅ Rewarded video ad displayed successfully")
-                    }
-                    
-                    override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
-                        Log.d(TAG, "Rewarded video ad clicked")
-                    }
-                    
-                    override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
-                        Log.e(TAG, "❌ Rewarded video ad not displayed")
-                        // Reload ad for next attempt
-                        loadRewardedVideoAd(rewardCallback)
-                    }
-                })
-                true
-            } else {
-                Log.w(TAG, "⚠️ Rewarded video ad not ready yet")
-                false
+            if (rewardedVideoAd == null) {
+                Log.e(TAG, "❌ Rewarded video ad instance is null")
+                return false
             }
+            
+            if (!isVideoAdLoaded || rewardedVideoAd?.isReady != true) {
+                Log.w(TAG, "⚠️ Rewarded video ad not ready yet")
+                Log.w(TAG, "   Try loading the ad first")
+                return false
+            }
+            
+            // Show the ad with display listener
+            rewardedVideoAd?.showAd(object : AdDisplayListener {
+                override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Log.d(TAG, "📱 Rewarded video ad closed/hidden")
+                    // Reload ad for next time
+                    isVideoAdLoaded = false
+                    loadRewardedVideoAd(rewardCallback)
+                }
+                
+                override fun adDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Log.d(TAG, "✅✅✅ Rewarded video ad DISPLAYED successfully!")
+                }
+                
+                override fun adClicked(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Log.d(TAG, "👆 Rewarded video ad clicked")
+                }
+                
+                override fun adNotDisplayed(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Log.e(TAG, "❌ Rewarded video ad NOT displayed")
+                    Log.e(TAG, "   Reason: ${ad?.errorMessage ?: "Unknown error"}")
+                    // Reload ad for next attempt
+                    isVideoAdLoaded = false
+                    loadRewardedVideoAd(rewardCallback)
+                }
+            })
+            
+            Log.d(TAG, "✅ Show rewarded video ad called successfully")
+            true
+            
         } catch (e: Exception) {
             Log.e(TAG, "❌ Exception showing rewarded video ad", e)
             false
@@ -124,13 +152,15 @@ class StartIoService @Inject constructor(
      */
     fun showExitAd(activity: Activity, onAdClosed: () -> Unit): Boolean {
         return try {
+            Log.d(TAG, "🚪 Loading exit ad...")
+            
             // Create a new ad instance for exit ad
             val exitAd = StartAppAd(context)
             
             // Load and show interstitial ad
             exitAd.loadAd(StartAppAd.AdMode.AUTOMATIC, object : AdEventListener {
                 override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
-                    Log.d(TAG, "Exit ad loaded, showing now...")
+                    Log.d(TAG, "✅ Exit ad loaded, showing now...")
                     exitAd.showAd(object : AdDisplayListener {
                         override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
                             Log.d(TAG, "Exit ad closed")
@@ -178,7 +208,11 @@ class StartIoService @Inject constructor(
      * @return true if ready, false otherwise
      */
     fun isRewardedAdReady(): Boolean {
-        return rewardedVideoAd?.isReady == true
+        val isReady = isVideoAdLoaded && rewardedVideoAd?.isReady == true
+        Log.d(TAG, "🔍 Checking if rewarded ad is ready: $isReady")
+        Log.d(TAG, "   isVideoAdLoaded: $isVideoAdLoaded")
+        Log.d(TAG, "   rewardedVideoAd?.isReady: ${rewardedVideoAd?.isReady}")
+        return isReady
     }
 
     /**
