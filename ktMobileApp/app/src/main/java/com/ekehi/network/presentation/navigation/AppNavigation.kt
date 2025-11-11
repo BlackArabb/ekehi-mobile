@@ -154,6 +154,32 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                     } catch (e: Exception) {
                         Log.e("MainScreen", "Navigation error", e)
                     }
+                },
+                onNavigateToEditProfile = {
+                    try {
+                        navController.navigate("edit_profile")
+                    } catch (e: Exception) {
+                        Log.e("MainScreen", "Navigation error", e)
+                    }
+                },
+                onNavigateToReferralCode = {
+                    try {
+                        navController.navigate("referral_code")
+                    } catch (e: Exception) {
+                        Log.e("MainScreen", "Navigation error", e)
+                    }
+                },
+                onLogout = {
+                    // Show exit ad before logging out
+                    // TODO: Implement actual logout after ad
+                    try {
+                        // Navigate to landing and clear the back stack
+                        navController.navigate("landing") {
+                            popUpTo("landing") { inclusive = false }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MainScreen", "Navigation error", e)
+                    }
                 }
             )
         }
@@ -265,6 +291,32 @@ fun MainScreen() {
                             } catch (e: Exception) {
                                 Log.e("MainScreen", "Navigation error", e)
                             }
+                        },
+                        onNavigateToEditProfile = {
+                            try {
+                                navController.navigate("edit_profile")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        },
+                        onNavigateToReferralCode = {
+                            try {
+                                navController.navigate("referral_code")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        },
+                        onLogout = {
+                            // Show exit ad before logging out
+                            // TODO: Implement actual logout after ad
+                            try {
+                                // Navigate to landing and clear the back stack
+                                navController.navigate("landing") {
+                                    popUpTo("landing") { inclusive = false }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
                         }
                     )
                 }
@@ -291,6 +343,30 @@ fun MainScreen() {
                                 navController.navigate("landing") {
                                     popUpTo("landing") { inclusive = false }
                                 }
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                composable("edit_profile") {
+                    EditProfileScreen(
+                        onNavigateBack = {
+                            try {
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                composable("referral_code") {
+                    ReferralCodeScreen(
+                        onNavigateBack = {
+                            try {
+                                navController.popBackStack()
                             } catch (e: Exception) {
                                 Log.e("MainScreen", "Navigation error", e)
                             }

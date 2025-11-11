@@ -43,7 +43,10 @@ import com.ekehi.network.di.StartIoServiceEntryPoint
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToEditProfile: () -> Unit,
+    onNavigateToReferralCode: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val userProfileResource by viewModel.userProfile.collectAsState()
     val scrollState = rememberScrollState()
@@ -114,10 +117,7 @@ fun ProfileScreen(
             ProfileHeader(
                 userProfile = userProfile,
                 onNavigateToSettings = onNavigateToSettings,
-                onNavigateToEditProfile = {
-                    Log.d("ProfileScreen", "Edit Profile clicked")
-                    // TODO: Implement edit profile navigation
-                }
+                onNavigateToEditProfile = onNavigateToEditProfile
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -128,32 +128,10 @@ fun ProfileScreen(
 
             // Actions Section
             ProfileActionsSection(
-                onEditProfile = {
-                    Log.d("ProfileScreen", "Edit Profile action clicked")
-                    // TODO: Navigate to edit profile
-                },
-                onSettings = {
-                    Log.d("ProfileScreen", "Settings action clicked")
-                    onNavigateToSettings()
-                },
-                onReferralCode = {
-                    Log.d("ProfileScreen", "Referral Code action clicked")
-                    // TODO: Navigate to referral code screen
-                },
-                onLogout = { 
-                    Log.d("ProfileScreen", "Logout clicked")
-                    // Show exit ad before logging out
-                    if (activity != null) {
-                        Log.d("ProfileScreen", "Showing exit ad before logout")
-                        startIoService.showExitAd() {
-                        // TODO: Implement actual logout after ad
-                    }
-                        // TODO: Implement actual logout after ad
-                    } else {
-                        Log.d("ProfileScreen", "No activity, proceeding with logout without ad")
-                        // TODO: Implement logout
-                    }
-                }
+                onEditProfile = onNavigateToEditProfile,
+                onSettings = onNavigateToSettings,
+                onReferralCode = onNavigateToReferralCode,
+                onLogout = onLogout
             )
         }
     }
@@ -599,7 +577,10 @@ fun ActionButton(
 fun ProfileScreenPreview() {
     EkehiMobileTheme {
         ProfileScreen(
-            onNavigateToSettings = {}
+            onNavigateToSettings = {},
+            onNavigateToEditProfile = {},
+            onNavigateToReferralCode = {},
+            onLogout = {}
         )
     }
 }
