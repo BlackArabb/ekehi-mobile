@@ -105,7 +105,18 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
         }
 
         composable("main") {
-            MainScreen()
+            MainScreen(
+                onLogout = {
+                    try {
+                        // Navigate to landing and clear the back stack
+                        navController.navigate("landing") {
+                            popUpTo("landing") { inclusive = false }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                }
+            )
         }
 
         composable("settings") {
@@ -244,7 +255,9 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onLogout: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: "mining"
@@ -306,18 +319,7 @@ fun MainScreen() {
                                 Log.e("MainScreen", "Navigation error", e)
                             }
                         },
-                        onLogout = {
-                            // Show exit ad before logging out
-                            // TODO: Implement actual logout after ad
-                            try {
-                                // Navigate to landing and clear the back stack
-                                navController.navigate("landing") {
-                                    popUpTo("landing") { inclusive = false }
-                                }
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        }
+                        onLogout = onLogout
                     )
                 }
                 
