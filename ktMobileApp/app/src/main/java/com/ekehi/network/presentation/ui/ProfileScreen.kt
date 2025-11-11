@@ -42,9 +42,9 @@ import com.ekehi.network.di.StartIoServiceEntryPoint
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = hiltViewModel(),
+    onNavigateToSettings: () -> Unit
 ) {
-    val onNavigateToSettings: () -> Unit = {}
     val userProfileResource by viewModel.userProfile.collectAsState()
     val scrollState = rememberScrollState()
     
@@ -598,7 +598,9 @@ fun ActionButton(
 @Composable
 fun ProfileScreenPreview() {
     EkehiMobileTheme {
-        ProfileScreen()
+        ProfileScreen(
+            onNavigateToSettings = {}
+        )
     }
 }
 

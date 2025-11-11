@@ -147,7 +147,15 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                 }
             }
             
-            ProfileScreen()
+            ProfileScreen(
+                onNavigateToSettings = {
+                    try {
+                        navController.navigate("settings")
+                    } catch (e: Exception) {
+                        Log.e("MainScreen", "Navigation error", e)
+                    }
+                }
+            )
         }
         
         composable("edit_profile") {
@@ -250,7 +258,44 @@ fun MainScreen() {
                         }
                     }
                     
-                    ProfileScreen()
+                    ProfileScreen(
+                        onNavigateToSettings = {
+                            try {
+                                navController.navigate("settings")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                composable("settings") {
+                    SettingsScreen(
+                        onChangePassword = {
+                            try {
+                                navController.navigate("change_password")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        },
+                        onContactSupport = {
+                            try {
+                                navController.navigate("contact_support")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        },
+                        onSignOut = {
+                            try {
+                                // Navigate to landing and clear the back stack
+                                navController.navigate("landing") {
+                                    popUpTo("landing") { inclusive = false }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
                 }
             }
         }
