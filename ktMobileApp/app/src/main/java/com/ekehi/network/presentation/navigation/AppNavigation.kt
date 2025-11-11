@@ -147,39 +147,7 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                 }
             }
             
-            ProfileScreen(
-                onNavigateToSettings = {
-                    try {
-                        navController.navigate("settings")
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                },
-                onNavigateToEditProfile = {
-                    try {
-                        navController.navigate("edit_profile")
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                },
-                onNavigateToReferralCode = {
-                    try {
-                        navController.navigate("referral_code")
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                },
-                onSignOut = {
-                    try {
-                        // Navigate to landing and clear the back stack
-                        navController.navigate("landing") {
-                            popUpTo("landing") { inclusive = false }
-                        }
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                }
-            )
+            ProfileScreen()
         }
         
         composable("edit_profile") {
@@ -282,39 +250,7 @@ fun MainScreen() {
                         }
                     }
                     
-                    ProfileScreen(
-                        onNavigateToSettings = {
-                            try {
-                                navController.navigate("settings")
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        },
-                        onNavigateToEditProfile = {
-                            try {
-                                navController.navigate("edit_profile")
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        },
-                        onNavigateToReferralCode = {
-                            try {
-                                navController.navigate("referral_code")
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        },
-                        onSignOut = {
-                            try {
-                                // Navigate to landing and clear the back stack
-                                navController.navigate("landing") {
-                                    popUpTo("landing") { inclusive = false }
-                                }
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        }
-                    )
+                    ProfileScreen()
                 }
             }
         }

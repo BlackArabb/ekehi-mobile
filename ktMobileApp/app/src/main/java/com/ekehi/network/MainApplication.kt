@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import dagger.hilt.android.HiltAndroidApp
 import com.ekehi.network.service.StartIoService
-import com.startapp.sdk.adsbase.StartAppSDK
 import javax.inject.Inject
 import android.util.Log
 
@@ -28,7 +27,6 @@ class MainApplication : Application() {
             Log.e("MainApplication", "Failed to initialize Start.io service", e)
         }
 
-        // In your MainApplication.kt onCreate()
-        // StartAppSDK.setTestAdsEnabled(true) // ONLY FOR TESTING!
+
     }
 }

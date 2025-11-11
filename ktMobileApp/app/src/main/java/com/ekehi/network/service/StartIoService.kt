@@ -40,9 +40,14 @@ class StartIoService @Inject constructor(
     /**
      * Initialize is now just a compatibility method.
      * SDK is already initialized via AndroidManifest.xml.
+     * We'll preload ads here.
      */
-    fun initialize(activity: Activity? = null) {
+    fun initialize() {
         Log.d(TAG, "SDK already initialized via AndroidManifest.xml")
+        
+        // Preload ads
+        loadRewardedVideoAd()
+        loadInterstitialAd()
     }
 
     /**
@@ -79,6 +84,9 @@ class StartIoService @Inject constructor(
                     Log.e(TAG, "❌ Failed to load rewarded video ad")
                     Log.e(TAG, "   Reason: ${ad?.errorMessage ?: "Unknown error"}")
                     isVideoAdLoaded = false
+                    
+                    // Try to load a standard interstitial as fallback
+                    loadInterstitialAd()
                 }
             })
         } catch (e: Exception) {
@@ -94,7 +102,7 @@ class StartIoService @Inject constructor(
      */
     fun showRewardedVideoAd(activity: Activity): Boolean {
         Log.d(TAG, "📺 Attempting to show rewarded video ad")
-        Log.d(TAG, "   Ad ready status: ${rewardedVideoAd?.isReady}")
+        Log.d(TAG, "   Ad ready status: $isVideoAdLoaded")
         Log.d(TAG, "   Is loaded flag: $isVideoAdLoaded")
         
         return try {
@@ -103,9 +111,19 @@ class StartIoService @Inject constructor(
                 return false
             }
             
-            if (!isVideoAdLoaded || rewardedVideoAd?.isReady != true) {
+            if (!isVideoAdLoaded) {
                 Log.w(TAG, "⚠️ Rewarded video ad not ready yet")
                 Log.w(TAG, "   Try loading the ad first")
+                
+                // Try to show interstitial ad as fallback
+                Log.d(TAG, "Checking interstitial ad readiness: ${startAppAd != null}")
+                if (startAppAd != null) {
+                    Log.d(TAG, "📺 Showing interstitial ad as fallback")
+                    return showInterstitialAd()
+                } else {
+                    Log.w(TAG, "⚠️ Interstitial ad not ready either")
+                }
+                
                 return false
             }
             
@@ -150,7 +168,7 @@ class StartIoService @Inject constructor(
      * @param onAdClosed Callback invoked when ad is closed or failed to show
      * @return true if ad loading started, false otherwise
      */
-    fun showExitAd(activity: Activity, onAdClosed: () -> Unit): Boolean {
+    fun showExitAd(onAdClosed: () -> Unit): Boolean {
         return try {
             Log.d(TAG, "🚪 Loading exit ad...")
             
@@ -208,10 +226,10 @@ class StartIoService @Inject constructor(
      * @return true if ready, false otherwise
      */
     fun isRewardedAdReady(): Boolean {
-        val isReady = isVideoAdLoaded && rewardedVideoAd?.isReady == true
+        val isReady = isVideoAdLoaded && rewardedVideoAd != null
         Log.d(TAG, "🔍 Checking if rewarded ad is ready: $isReady")
         Log.d(TAG, "   isVideoAdLoaded: $isVideoAdLoaded")
-        Log.d(TAG, "   rewardedVideoAd?.isReady: ${rewardedVideoAd?.isReady}")
+        Log.d(TAG, "   rewardedVideoAd != null: ${rewardedVideoAd != null}")
         return isReady
     }
 
@@ -239,9 +257,11 @@ class StartIoService @Inject constructor(
      * @param activity The activity context
      * @return true if ad was shown, false otherwise
      */
-    fun showInterstitialAd(activity: Activity): Boolean {
+    fun showInterstitialAd(): Boolean {
+        Log.d(TAG, "Attempting to show interstitial ad")
+        Log.d(TAG, "Interstitial ad ready status: ${startAppAd != null}")
         return try {
-            if (startAppAd?.isReady == true) {
+            if (startAppAd != null) {
                 startAppAd?.showAd(object : AdDisplayListener {
                     override fun adHidden(ad: com.startapp.sdk.adsbase.Ad?) {
                         Log.d(TAG, "Interstitial ad closed")
@@ -262,6 +282,7 @@ class StartIoService @Inject constructor(
                         loadInterstitialAd()
                     }
                 })
+                Log.d(TAG, "Interstitial ad show call completed")
                 true
             } else {
                 Log.w(TAG, "⚠️ Interstitial ad not ready")

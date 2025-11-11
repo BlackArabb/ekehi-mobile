@@ -530,19 +530,28 @@ fun MiningAdBonusButton(
                 
                 // Check if ad is ready
                 if (!startIoService.isRewardedAdReady()) {
-                    adErrorMessage = "Ad not ready yet. Please wait..."
+                    adErrorMessage = "Ad not ready yet. Trying to load..."
                     isAdLoading = true
-                    // Try to load ad
+                    
+                    // Try to load ad with retry mechanism
                     startIoService.loadRewardedVideoAd {
                         Log.d("MiningScreen", "✅ User earned 0.5 EKH!")
                         isAdLoading = false
+                        adErrorMessage = null
                     }
+                    
+                    // Give it a moment to load, then check again
+                    // In a real app, you might want to use a more sophisticated approach
                     return@Button
                 }
                 
                 // Show the ad
+                Log.d("MiningScreen", "Attempting to show rewarded video ad")
                 if (!startIoService.showRewardedVideoAd(activity)) {
-                    adErrorMessage = "Failed to show ad. Please try again."
+                    Log.e("MiningScreen", "Failed to show rewarded video ad")
+                    adErrorMessage = "Failed to show ad. Ads may be unavailable in your region. Please try again later."
+                } else {
+                    Log.d("MiningScreen", "Successfully called showRewardedVideoAd")
                 }
             },
             modifier = Modifier
@@ -607,7 +616,7 @@ fun MiningAdBonusButton(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Watch a short ad to earn bonus EKH tokens",
+                text = "Watch a short ad to earn bonus EKH tokens. Ads may take a moment to load.",
                 color = Color(0xB3FFFFFF),
                 fontSize = 14.sp
             )

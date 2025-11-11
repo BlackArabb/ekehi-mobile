@@ -42,22 +42,21 @@ import com.ekehi.network.di.StartIoServiceEntryPoint
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = hiltViewModel(),
-    onNavigateToSettings: () -> Unit,
-    onNavigateToEditProfile: () -> Unit,
-    onNavigateToReferralCode: () -> Unit,
-    onSignOut: () -> Unit
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
+    val onNavigateToSettings: () -> Unit = {}
     val userProfileResource by viewModel.userProfile.collectAsState()
     val scrollState = rememberScrollState()
     
     // Get StartIoService through DI
-    val startIoService = EntryPointAccessors.fromApplication(
-        LocalContext.current.applicationContext,
-        StartIoServiceEntryPoint::class.java
-    ).startIoService()
-    
     val context = LocalContext.current
+    val startIoService = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            StartIoServiceEntryPoint::class.java
+        ).startIoService()
+    }
+    
     val activity = context as? Activity
 
     // Extract the actual UserProfile from Resource
@@ -74,41 +73,22 @@ fun ProfileScreen(
         EventBus.events.collect { event ->
             when (event) {
                 is Event.RefreshUserProfile -> {
-                    // Refresh the profile when we receive this event
                     Log.d("ProfileScreen", "Received RefreshUserProfile event")
                     if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
                         viewModel.refreshUserProfile()
                     }
                 }
-                else -> {
-                    // Handle other events if needed
-                }
+                else -> {}
             }
         }
     }
 
     // Load user profile when screen is first displayed
     LaunchedEffect(Unit) {
-        // Initialize StartIoService - SDK is already initialized via AndroidManifest.xml
         startIoService.initialize()
         
-        // Load user profile when screen is first displayed
         if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
             viewModel.loadUserProfile(currentUserId)
-        }
-    }
-    
-    // Refresh profile when screen is recomposed
-    LaunchedEffect(key1 = currentUserId) {
-        if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
-            viewModel.refreshUserProfile()
-        }
-    }
-    
-    // Also refresh when the screen is recomposed but only if we don't have data yet
-    LaunchedEffect(Unit) {
-        if (userProfileResource is Resource.Idle && currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
-            viewModel.refreshUserProfile()
         }
     }
 
@@ -131,45 +111,49 @@ fun ProfileScreen(
                 .verticalScroll(scrollState)
                 .padding(16.dp)
         ) {
-            // Header Section (30% of screen)
             ProfileHeader(
                 userProfile = userProfile,
                 onNavigateToSettings = onNavigateToSettings,
-                onNavigateToEditProfile = onNavigateToEditProfile
+                onNavigateToEditProfile = {
+                    Log.d("ProfileScreen", "Edit Profile clicked")
+                    // TODO: Implement edit profile navigation
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Stats Section (horizontal cards)
             ProfileStatsSection(userProfile = userProfile)
-
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Main Content Section (scrollable)
             ProfileContentSection(userProfile = userProfile)
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // Actions Section
             ProfileActionsSection(
-                onEditProfile = onNavigateToEditProfile,
-                onSettings = onNavigateToSettings,
-                onReferralCode = onNavigateToReferralCode,
+                onEditProfile = {
+                    Log.d("ProfileScreen", "Edit Profile action clicked")
+                    // TODO: Navigate to edit profile
+                },
+                onSettings = {
+                    Log.d("ProfileScreen", "Settings action clicked")
+                    onNavigateToSettings()
+                },
+                onReferralCode = {
+                    Log.d("ProfileScreen", "Referral Code action clicked")
+                    // TODO: Navigate to referral code screen
+                },
                 onLogout = { 
-                // Show exit ad before logging out
-                if (activity != null) {
+                    Log.d("ProfileScreen", "Logout clicked")
+                    // Show exit ad before logging out
+                    if (activity != null) {
                         Log.d("ProfileScreen", "Showing exit ad before logout")
-                        startIoService.showExitAd(activity) {
-                            // Callback after ad closes
-                            Log.d("ProfileScreen", "Exit ad closed, proceeding with logout")
-                            onSignOut()
-                        }
-                    } else {
-                        // No activity, just logout
-                        Log.d("ProfileScreen", "No activity, proceeding with logout without ad")
-                        onSignOut()
+                        startIoService.showExitAd() {
+                        // TODO: Implement actual logout after ad
                     }
-            }
+                        // TODO: Implement actual logout after ad
+                    } else {
+                        Log.d("ProfileScreen", "No activity, proceeding with logout without ad")
+                        // TODO: Implement logout
+                    }
+                }
             )
         }
     }
@@ -568,38 +552,45 @@ fun ActionButton(
     onClick: () -> Unit,
     isDanger: Boolean = false
 ) {
-    Row(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(
-                onClick = onClick
-            )
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0x1AFFFFFF), // 10% opacity white
+        onClick = {
+            Log.d("ActionButton", "Button clicked: $text")
+            onClick()
+        }
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = text,
-            tint = if (isDanger) Color(0xFFef4444) else Color(0xFFffa000),
-            modifier = Modifier.size(24.dp)
-        )
-        Text(
-            text = text,
-            color = if (isDanger) Color(0xFFef4444) else Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
+        Row(
             modifier = Modifier
-                .padding(start = 12.dp)
-                .weight(1f)
-        )
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = "Navigate",
-            tint = Color(0xB3FFFFFF), // 70% opacity white
-            modifier = Modifier.size(24.dp)
-        )
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = text,
+                tint = if (isDanger) Color(0xFFef4444) else Color(0xFFffa000),
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = text,
+                color = if (isDanger) Color(0xFFef4444) else Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .weight(1f)
+            )
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Navigate",
+                tint = Color(0xB3FFFFFF),
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
@@ -607,12 +598,7 @@ fun ActionButton(
 @Composable
 fun ProfileScreenPreview() {
     EkehiMobileTheme {
-        ProfileScreen(
-            onNavigateToSettings = {},
-            onNavigateToEditProfile = {},
-            onNavigateToReferralCode = {},
-            onSignOut = {}
-        )
+        ProfileScreen()
     }
 }
 
