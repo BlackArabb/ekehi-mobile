@@ -39,7 +39,9 @@ fun EditProfileScreen(
     
     // Form state
     var username by remember { mutableStateOf(userProfile?.username ?: "") }
-    var email by remember { mutableStateOf(userProfile?.email ?: "") }
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var isUpdating by remember { mutableStateOf(false) }
     var updateError by remember { mutableStateOf<String?>(null) }
     
@@ -47,7 +49,6 @@ fun EditProfileScreen(
     LaunchedEffect(userProfile) {
         userProfile?.let {
             username = it.username ?: ""
-            email = it.email ?: ""
         }
     }
     
@@ -200,32 +201,27 @@ fun EditProfileScreen(
                             )
                         )
                         
-                        // Email Field
+                        // Email Field (Read-only)
                         OutlinedTextField(
-                            value = email,
-                            onValueChange = { 
-                                email = it
-                                // Clear error when user starts typing
-                                if (updateError != null) {
-                                    updateError = null
-                                }
-                            },
+                            value = userProfile?.email ?: "",
+                            onValueChange = {},
                             label = { 
                                 Text(
                                     text = "Email",
                                     color = Color(0xB3FFFFFF)
                                 )
                             },
+                            readOnly = true,
                             singleLine = true,
                             textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFFffa000),
+                                focusedBorderColor = Color(0x33FFFFFF),
                                 unfocusedBorderColor = Color(0x33FFFFFF),
-                                cursorColor = Color(0xFFffa000),
-                                focusedLabelColor = Color(0xFFffa000),
+                                cursorColor = Color(0x33FFFFFF),
+                                focusedLabelColor = Color(0xB3FFFFFF),
                                 unfocusedLabelColor = Color(0xB3FFFFFF)
                             )
                         )
@@ -254,6 +250,110 @@ fun EditProfileScreen(
                                 unfocusedLabelColor = Color(0xB3FFFFFF)
                             )
                         )
+                        
+                        // Password Change Section
+                        Text(
+                            text = "Change Password",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, bottom = 8.dp)
+                        )
+                        
+                        // Current Password Field
+                        OutlinedTextField(
+                            value = currentPassword,
+                            onValueChange = { 
+                                currentPassword = it
+                                // Clear error when user starts typing
+                                if (updateError != null) {
+                                    updateError = null
+                                }
+                            },
+                            label = { 
+                                Text(
+                                    text = "Current Password",
+                                    color = Color(0xB3FFFFFF)
+                                )
+                            },
+                            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFffa000),
+                                unfocusedBorderColor = Color(0x33FFFFFF),
+                                cursorColor = Color(0xFFffa000),
+                                focusedLabelColor = Color(0xFFffa000),
+                                unfocusedLabelColor = Color(0xB3FFFFFF)
+                            )
+                        )
+                        
+                        // New Password Field
+                        OutlinedTextField(
+                            value = newPassword,
+                            onValueChange = { 
+                                newPassword = it
+                                // Clear error when user starts typing
+                                if (updateError != null) {
+                                    updateError = null
+                                }
+                            },
+                            label = { 
+                                Text(
+                                    text = "New Password",
+                                    color = Color(0xB3FFFFFF)
+                                )
+                            },
+                            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFffa000),
+                                unfocusedBorderColor = Color(0x33FFFFFF),
+                                cursorColor = Color(0xFFffa000),
+                                focusedLabelColor = Color(0xFFffa000),
+                                unfocusedLabelColor = Color(0xB3FFFFFF)
+                            )
+                        )
+                        
+                        // Confirm Password Field
+                        OutlinedTextField(
+                            value = confirmPassword,
+                            onValueChange = { 
+                                confirmPassword = it
+                                // Clear error when user starts typing
+                                if (updateError != null) {
+                                    updateError = null
+                                }
+                            },
+                            label = { 
+                                Text(
+                                    text = "Confirm New Password",
+                                    color = Color(0xB3FFFFFF)
+                                )
+                            },
+                            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFffa000),
+                                unfocusedBorderColor = Color(0x33FFFFFF),
+                                cursorColor = Color(0xFFffa000),
+                                focusedLabelColor = Color(0xFFffa000),
+                                unfocusedLabelColor = Color(0xB3FFFFFF)
+                            )
+                        )
                     }
                 }
                 
@@ -262,26 +362,57 @@ fun EditProfileScreen(
                 // Save Button
                 Button(
                     onClick = {
-                        // Prepare updates
+                        // Handle password change if any password fields are filled
+                        if (currentPassword.isNotEmpty() || newPassword.isNotEmpty() || confirmPassword.isNotEmpty()) {
+                            if (currentPassword.isEmpty()) {
+                                updateError = "Please enter your current password"
+                                return@Button
+                            }
+                            if (newPassword.isEmpty()) {
+                                updateError = "Please enter a new password"
+                                return@Button
+                            }
+                            if (confirmPassword.isEmpty()) {
+                                updateError = "Please confirm your new password"
+                                return@Button
+                            }
+                            if (newPassword != confirmPassword) {
+                                updateError = "New passwords do not match"
+                                return@Button
+                            }
+                            if (newPassword.length < 6) {
+                                updateError = "Password must be at least 6 characters"
+                                return@Button
+                            }
+                            
+                            // Update password
+                            isUpdating = true
+                            updateError = null
+                            Log.d("EditProfileScreen", "Updating password")
+                            viewModel.updatePassword(currentPassword, newPassword)
+                            
+                            // Clear password fields after submission
+                            currentPassword = ""
+                            newPassword = ""
+                            confirmPassword = ""
+                            
+                            isUpdating = false
+                            return@Button
+                        }
+                        
+                        // Prepare updates for username only
                         val updates = mutableMapOf<String, Any>()
                         
-                        // Only add fields that have changed
+                        // Only add username if it has changed
                         userProfile?.username?.let { currentUsername ->
-                            if (username != currentUsername) {
+                            if (username != currentUsername && username.isNotEmpty()) {
                                 updates["username"] = username
                             }
                         } ?: run {
-                            // If no current username, add the new one
-                            updates["username"] = username
-                        }
-                        
-                        userProfile?.email?.let { currentEmail ->
-                            if (email != currentEmail) {
-                                updates["email"] = email
+                            // If no current username and new username is not empty, add the new one
+                            if (username.isNotEmpty()) {
+                                updates["username"] = username
                             }
-                        } ?: run {
-                            // If no current email, add the new one
-                            updates["email"] = email
                         }
                         
                         if (updates.isNotEmpty()) {
@@ -294,7 +425,7 @@ fun EditProfileScreen(
                             // Show a message that no changes were made
                         }
                     },
-                    enabled = !isUpdating && username.isNotEmpty() && email.isNotEmpty(),
+                    enabled = !isUpdating && (username.isNotEmpty() || currentPassword.isNotEmpty() || newPassword.isNotEmpty() || confirmPassword.isNotEmpty()),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),

@@ -85,9 +85,6 @@ open class UserUseCase @Inject constructor(
             var updatedStreakBonusClaimed = userProfile.streakBonusClaimed
             
             // Check if this is a new day login
-            if (lastLoginCalendar == null || lastLoginCalendar.before(todayCalendar))
-            
-            // Check if this is a new day login
             if (lastLoginCalendar == null || lastLoginCalendar.before(todayCalendar)) {
                 // Calculate the difference in days
                 val diffDays = if (lastLoginCalendar != null) {
@@ -105,11 +102,13 @@ open class UserUseCase @Inject constructor(
                     Log.d(TAG, "Consecutive login. New streak: $updatedStreak")
                     
                     // Check if user has reached 7 consecutive days
-                    if (updatedStreak == 7 && userProfile.streakBonusClaimed < 1) {
+                    if (updatedStreak == 7) {
                         // Award 5 EKH bonus
                         updatedTotalCoins += 5.0
                         updatedStreakBonusClaimed += 1
                         Log.d(TAG, "🎉 User achieved 7-day streak! Awarding 5 EKH bonus.")
+                        // Reset streak after 7 days
+                        updatedStreak = 0
                     }
                     
                     // Update longest streak if needed
@@ -119,8 +118,8 @@ open class UserUseCase @Inject constructor(
                     }
                 } else if (diffDays > 1) {
                     // Missed days - reset streak
-                    updatedStreak = 1
-                    Log.d(TAG, "Missed days. Resetting streak to 1")
+                    updatedStreak = 0
+                    Log.d(TAG, "Missed days. Resetting streak to 0")
                 }
                 
                 // Prepare updates

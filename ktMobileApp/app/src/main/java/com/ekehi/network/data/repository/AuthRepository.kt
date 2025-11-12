@@ -322,4 +322,33 @@ class AuthRepository @Inject constructor(
             false
         }
     }
+    
+    /**
+     * Update user password
+     * @param currentPassword The user's current password
+     * @param newPassword The new password to set
+     * @return Result indicating success or failure
+     */
+    suspend fun updatePassword(currentPassword: String, newPassword: String): Result<Unit> {
+        Log.d("AuthRepository", "Attempting to update user password")
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("AuthRepository", "Calling Appwrite update password API")
+                appwriteService.account.updatePassword(
+                    password = newPassword,
+                    oldPassword = currentPassword
+                )
+                Log.d("AuthRepository", "Password updated successfully")
+                Result.success(Unit)
+            } catch (e: AppwriteException) {
+                val errorMessage = "Appwrite password update failed: ${e.message}"
+                Log.e("AuthRepository", errorMessage, e)
+                Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Password update failed: ${e.message}"
+                Log.e("AuthRepository", errorMessage, e)
+                Result.failure(e)
+            }
+        }
+    }
 }

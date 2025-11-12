@@ -8,6 +8,7 @@ import io.appwrite.exceptions.AppwriteException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.random.Random
 
 open class UserRepository @Inject constructor(
     private val appwriteService: AppwriteService,
@@ -41,6 +42,9 @@ open class UserRepository @Inject constructor(
     suspend fun createUserProfile(userId: String, username: String): Result<UserProfile> {
         return withContext(Dispatchers.IO) {
             try {
+                // Generate a unique referral code
+                val referralCode = "REF${Random.nextInt(100000, 999999)}"
+                
                 val document = appwriteService.databases.createDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
@@ -60,7 +64,8 @@ open class UserRepository @Inject constructor(
                         "dailyMiningRate" to 0.0,
                         "maxDailyEarnings" to 100.0,
                         "todayEarnings" to 0.0,
-                        "streakBonusClaimed" to 0
+                        "streakBonusClaimed" to 0,
+                        "referralCode" to referralCode
                     )
                 )
                 
@@ -122,7 +127,11 @@ open class UserRepository @Inject constructor(
             currentStreak = (data["currentStreak"] as? Number)?.toInt() ?: 0,
             longestStreak = (data["longestStreak"] as? Number)?.toInt() ?: 0,
             lastLoginDate = data["lastLoginDate"] as? String,
-            referralCode = data["referralCode"] as? String,
+            referralCode = when (val referralCodeValue = data["referralCode"]) {
+                is List<*> -> referralCodeValue.firstOrNull() as? String
+                is String -> referralCodeValue
+                else -> null
+            },
             referredBy = data["referredBy"] as? String,
             totalReferrals = (data["totalReferrals"] as? Number)?.toInt() ?: 0,
             lifetimeEarnings = (data["lifetimeEarnings"] as? Number)?.toDouble() ?: 0.0,

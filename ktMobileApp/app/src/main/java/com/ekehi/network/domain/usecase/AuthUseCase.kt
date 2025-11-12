@@ -187,4 +187,28 @@ class AuthUseCase @Inject constructor(
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
+    
+    /**
+     * Update user password
+     * @param currentPassword The user's current password
+     * @param newPassword The new password to set
+     * @return Flow<Resource<Unit>> indicating success or failure
+     */
+    fun updatePassword(currentPassword: String, newPassword: String): Flow<Resource<Unit>> = flow {
+        Log.d("AuthUseCase", "Starting password update flow")
+        emit(Resource.Loading)
+        val result = authRepository.updatePassword(currentPassword, newPassword)
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Password updated successfully")
+            emit(Resource.Success(Unit))
+        } else {
+            val errorMessage = "Failed to update password: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error updating password: ${e.message ?: "Unknown error"}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
 }

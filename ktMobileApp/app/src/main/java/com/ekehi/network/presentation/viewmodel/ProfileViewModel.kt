@@ -222,6 +222,26 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Update user password
+     * @param currentPassword The user's current password
+     * @param newPassword The new password to set
+     */
+    fun updatePassword(currentPassword: String, newPassword: String) {
+        viewModelScope.launch {
+            Log.d("ProfileViewModel", "Updating password")
+            val result = authRepository.updatePassword(currentPassword, newPassword)
+            if (result.isSuccess) {
+                Log.d("ProfileViewModel", "Password updated successfully")
+                // Password update was successful
+            } else {
+                val error = result.exceptionOrNull()
+                Log.e("ProfileViewModel", "Failed to update password: ${error?.message}")
+                // Handle error - in a real implementation, you might want to emit this to the UI
+            }
+        }
+    }
+    
     override fun onCleared() {
         super.onCleared()
         Log.d("ProfileViewModel", "ViewModel cleared")

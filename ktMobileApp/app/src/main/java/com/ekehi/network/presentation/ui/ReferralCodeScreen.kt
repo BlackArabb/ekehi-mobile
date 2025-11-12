@@ -41,8 +41,12 @@ fun ReferralCodeScreen(
     // Extract the actual UserProfile from Resource
     val userProfile: UserProfile? = when (userProfileResource) {
         is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
+        is Resource.Loading -> null
         else -> null
     }
+    
+    // Check if we're still loading
+    val isLoading = userProfileResource is Resource.Loading
     
     Box(
         modifier = Modifier
@@ -147,33 +151,45 @@ fun ReferralCodeScreen(
                         )
                         
                         // Referral Code Display
-                        Text(
-                            text = userProfile?.referralCode ?: "N/A",
-                            color = Color.White,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                color = Color(0xFFffa000),
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .padding(bottom = 16.dp)
+                            )
+                        } else {
+                            Text(
+                                text = userProfile?.referralCode?.takeIf { it.isNotEmpty() } ?: "Not available",
+                                color = Color.White,
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        }
                         
                         // Copy Button
                         Button(
                             onClick = {
                                 // Copy referral code to clipboard
-                                val referralCode = userProfile?.referralCode ?: ""
-                                if (referralCode.isNotEmpty()) {
+                                val referralCode = userProfile?.referralCode?.takeIf { it.isNotEmpty() }
+                                if (referralCode != null) {
                                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                     val clip = ClipData.newPlainText("Referral Code", referralCode)
                                     clipboard.setPrimaryClip(clip)
                                     
                                     // Show toast
                                     Toast.makeText(context, "Referral code copied to clipboard", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Referral code not available", Toast.LENGTH_SHORT).show()
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFFffa000)
                             ),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = userProfile?.referralCode?.isNotEmpty() ?: false
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ContentCopy,
@@ -235,18 +251,21 @@ fun ReferralCodeScreen(
                 Button(
                     onClick = {
                         // Share referral code
-                        val referralCode = userProfile?.referralCode ?: ""
-                        if (referralCode.isNotEmpty()) {
-                            val shareText = "Join Ekehi Network and start mining cryptocurrency! Use my referral code: $referralCode\n\nDownload the app now!"
+                        val referralCode = userProfile?.referralCode?.takeIf { it.isNotEmpty() }
+                        if (referralCode != null) {
+                            val shareText = "Join Ekehi Network and start mining cryptocurrency! Use my referral code: $referralCode\n\nDownload the app now and earn rewards together!\n\n#EkehiNetwork #CryptoMining"
                             
                             val sendIntent = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_TEXT, shareText)
+                                putExtra(Intent.EXTRA_TITLE, "Join me on Ekehi Network!")
                                 type = "text/plain"
                             }
                             
                             val shareIntent = Intent.createChooser(sendIntent, "Share referral code")
                             context.startActivity(shareIntent)
+                        } else {
+                            Toast.makeText(context, "Referral code not available", Toast.LENGTH_SHORT).show()
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -255,7 +274,8 @@ fun ReferralCodeScreen(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(50.dp),
+                    enabled = userProfile?.referralCode?.isNotEmpty() ?: false
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
