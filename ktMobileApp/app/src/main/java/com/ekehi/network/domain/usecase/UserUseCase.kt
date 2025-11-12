@@ -54,15 +54,15 @@ open class UserUseCase @Inject constructor(
         
         try {
             // Get current date (normalized to start of day)
-            val today = Calendar.getInstance().apply {
+            val todayCalendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
-            }.time
+            }
             
             // Parse last login date if it exists
-            val lastLoginDate = userProfile.lastLoginDate?.let { dateString ->
+            val lastLoginCalendar = userProfile.lastLoginDate?.let { dateString ->
                 try {
                     SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).parse(dateString)?.let {
                         Calendar.getInstance().apply {
@@ -71,7 +71,7 @@ open class UserUseCase @Inject constructor(
                             set(Calendar.MINUTE, 0)
                             set(Calendar.SECOND, 0)
                             set(Calendar.MILLISECOND, 0)
-                        }.time
+                        }
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to parse last login date: $dateString", e)
@@ -85,10 +85,13 @@ open class UserUseCase @Inject constructor(
             var updatedStreakBonusClaimed = userProfile.streakBonusClaimed
             
             // Check if this is a new day login
-            if (lastLoginDate == null || lastLoginDate.before(today)) {
+            if (lastLoginCalendar == null || lastLoginCalendar.before(todayCalendar))
+            
+            // Check if this is a new day login
+            if (lastLoginCalendar == null || lastLoginCalendar.before(todayCalendar)) {
                 // Calculate the difference in days
-                val diffDays = if (lastLoginDate != null) {
-                    val diffInMillis = today.time - lastLoginDate.time
+                val diffDays = if (lastLoginCalendar != null) {
+                    val diffInMillis = todayCalendar.timeInMillis - lastLoginCalendar.timeInMillis
                     (diffInMillis / (24 * 60 * 60 * 1000)).toInt()
                 } else {
                     1 // First login
