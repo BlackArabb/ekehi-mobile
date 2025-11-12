@@ -128,7 +128,6 @@ fun ProfileScreen(
 
             // Actions Section
             ProfileActionsSection(
-                onEditProfile = onNavigateToEditProfile,
                 onSettings = onNavigateToSettings,
                 onReferralCode = onNavigateToReferralCode,
                 onLogout = onLogout
@@ -229,7 +228,7 @@ fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Edit Profile Button
+            // Edit Username Button
             Button(
                 onClick = onNavigateToEditProfile,
                 modifier = Modifier
@@ -241,7 +240,7 @@ fun ProfileHeader(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
-                    text = "Edit Profile",
+                    text = "Edit Username",
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
@@ -468,7 +467,6 @@ fun ProfileDetailItem(label: String, value: String) {
 
 @Composable
 fun ProfileActionsSection(
-    onEditProfile: () -> Unit,
     onSettings: () -> Unit,
     onReferralCode: () -> Unit,
     onLogout: () -> Unit
@@ -491,12 +489,6 @@ fun ProfileActionsSection(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            ActionButton(
-                text = "Edit Profile",
-                icon = Icons.Default.Edit,
-                onClick = onEditProfile
             )
 
             ActionButton(

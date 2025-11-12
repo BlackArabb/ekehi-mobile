@@ -22,7 +22,7 @@ import com.ekehi.network.presentation.ui.LoginScreen
 import com.ekehi.network.presentation.ui.RegistrationScreen
 import com.ekehi.network.presentation.ui.SettingsScreen
 import com.ekehi.network.presentation.ui.ProfileScreen
-import com.ekehi.network.presentation.ui.EditProfileScreen
+import com.ekehi.network.presentation.ui.EditUsernameScreen
 import com.ekehi.network.presentation.ui.ReferralCodeScreen
 import com.ekehi.network.presentation.ui.ChangePasswordScreen
 import com.ekehi.network.presentation.ui.ContactSupportScreen
@@ -196,7 +196,7 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
         }
         
         composable("edit_profile") {
-            EditProfileScreen(
+            EditUsernameScreen(
                 onNavigateBack = {
                     try {
                         navController.popBackStack()
@@ -353,7 +353,7 @@ fun MainScreen(
                 }
                 
                 composable("edit_profile") {
-                    EditProfileScreen(
+                    EditUsernameScreen(
                         onNavigateBack = {
                             try {
                                 navController.popBackStack()

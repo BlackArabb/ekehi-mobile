@@ -92,11 +92,15 @@ open class UserRepository @Inject constructor(
                 if (response.documents.isNotEmpty()) {
                     val documentId = response.documents[0].id
                     
+                    // Add updatedAt timestamp to the updates
+                    val updatesWithTimestamp = updates.toMutableMap()
+                    updatesWithTimestamp["updatedAt"] = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                    
                     val document = appwriteService.databases.updateDocument(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         documentId = documentId,
-                        data = updates
+                        data = updatesWithTimestamp
                     )
                     
                     val profile = documentToUserProfile(document)
