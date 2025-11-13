@@ -152,13 +152,13 @@ fun ProfileHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // User Avatar
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(90.dp)
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
@@ -174,21 +174,21 @@ fun ProfileHeader(
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Avatar",
                     tint = Color.White,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(45.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // User Info
             Text(
                 text = userProfile?.username ?: "User Name",
                 color = Color.White,
-                fontSize = 24.sp,
+                fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = userProfile?.email ?: "user@example.com",
@@ -196,7 +196,7 @@ fun ProfileHeader(
                 fontSize = 16.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Join Date
             Text(
@@ -205,7 +205,7 @@ fun ProfileHeader(
                 fontSize = 14.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Verification Badge
             Row(
@@ -215,25 +215,25 @@ fun ProfileHeader(
                     imageVector = Icons.Default.Verified,
                     contentDescription = "Verified",
                     tint = Color(0xFF3b82f6),
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Verified Account",
                     color = Color(0xFF3b82f6),
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Edit Username Button
             Button(
                 onClick = onNavigateToEditProfile,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFffa000)
                 ),
@@ -272,48 +272,65 @@ fun ProfileStatsSection(userProfile: UserProfile?) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            Row(
+            // 2 rows 2 columns layout
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard(
-                    value = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
-                    label = "Total Mined",
-                    icon = Icons.Default.AccountBalance,
-                    iconColor = Color(0xFFffa000)
-                )
+                // First row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatCard(
+                        value = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
+                        label = "Total Mined",
+                        icon = Icons.Default.AccountBalance,
+                        iconColor = Color(0xFFffa000),
+                        modifier = Modifier.weight(1f)
+                    )
 
-                StatCard(
-                    value = (userProfile?.totalReferrals ?: 0).toString(),
-                    label = "Tasks Completed",
-                    icon = Icons.Default.Task,
-                    iconColor = Color(0xFF3b82f6)
-                )
+                    StatCard(
+                        value = (userProfile?.totalReferrals ?: 0).toString(),
+                        label = "Tasks Completed",
+                        icon = Icons.Default.Task,
+                        iconColor = Color(0xFF3b82f6),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
-                StatCard(
-                    value = "#${userProfile?.miningPower?.toInt() ?: 0}",
-                    label = "Current Rank",
-                    icon = Icons.Default.Leaderboard,
-                    iconColor = Color(0xFF10b981)
-                )
+                // Second row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatCard(
+                        value = "#${userProfile?.miningPower?.toInt() ?: 0}",
+                        label = "Current Rank",
+                        icon = Icons.Default.Leaderboard,
+                        iconColor = Color(0xFF10b981),
+                        modifier = Modifier.weight(1f)
+                    )
 
-                StatCard(
-                    value = (userProfile?.totalReferrals ?: 0).toString(),
-                    label = "Referral Count",
-                    icon = Icons.Default.People,
-                    iconColor = Color(0xFF8b5cf6)
-                )
+                    StatCard(
+                        value = (userProfile?.totalReferrals ?: 0).toString(),
+                        label = "Referral Count",
+                        icon = Icons.Default.People,
+                        iconColor = Color(0xFF8b5cf6),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, iconColor: Color) {
+fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, iconColor: Color, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
-            .width(80.dp)
-            .height(80.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(1f), // Make it square
         colors = CardDefaults.cardColors(
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
         ),
@@ -322,7 +339,7 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -330,20 +347,20 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconColor,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(24.dp)
             )
             Text(
                 text = value,
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 8.dp)
             )
             Text(
                 text = label,
                 color = Color(0xB3FFFFFF), // 70% opacity white
-                fontSize = 10.sp,
-                modifier = Modifier.padding(top = 2.dp)
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
@@ -448,7 +465,7 @@ fun ProfileDetailItem(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
@@ -525,7 +542,7 @@ fun ActionButton(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
         color = Color(0x1AFFFFFF), // 10% opacity white
         onClick = {
@@ -551,7 +568,7 @@ fun ActionButton(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
-                    .padding(start = 12.dp)
+                    .padding(start = 16.dp)
                     .weight(1f)
             )
             Icon(

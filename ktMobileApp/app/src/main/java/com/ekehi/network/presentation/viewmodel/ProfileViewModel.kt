@@ -160,8 +160,14 @@ class ProfileViewModel @Inject constructor(
                     }
                 } else {
                     val error = result.exceptionOrNull()
-                    Log.e("ProfileViewModel", "Failed to load profile: ${error?.message}")
-                    _userProfile.value = Resource.Error("Failed to load user profile: ${error?.message}")
+                    // If profile not found, create a new one
+                    if (error?.message?.contains("not found") == true) {
+                        Log.d("ProfileViewModel", "Profile not found, creating new profile for user: $userId")
+                        createNewUserProfile(userId)
+                    } else {
+                        Log.e("ProfileViewModel", "Failed to load profile: ${error?.message}")
+                        _userProfile.value = Resource.Error("Failed to load user profile: ${error?.message}")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Exception loading profile", e)
@@ -187,6 +193,59 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Creates a new user profile for the given user ID
+     */
+    private fun createNewUserProfile(userId: String) {
+        viewModelScope.launch {
+            try {
+                Log.d("ProfileViewModel", "Creating new profile for user: $userId")
+                // Get the user's name from the auth repository
+                val userResult = authRepository.getCurrentUser()
+                userResult.onSuccess { user ->
+                    val username = user.name.ifEmpty { "User${userId.take(6)}" }
+                    val createResult = userRepository.createUserProfile(userId, username)
+                    if (createResult.isSuccess) {
+                        val profile = createResult.getOrNull()
+                        if (profile != null) {
+                            Log.d("ProfileViewModel", "New profile created successfully: ${profile.username}")
+                            _userProfile.value = Resource.Success(profile)
+                            // Update streak for new profile
+                            userUseCase.updateStreak(userId, profile).collect { streakResource ->
+                                when (streakResource) {
+                                    is Resource.Success -> {
+                                        Log.d("ProfileViewModel", "✅ Streak updated for new profile: current=${streakResource.data.currentStreak}")
+                                        _userProfile.value = Resource.Success(streakResource.data)
+                                    }
+                                    is Resource.Error -> {
+                                        Log.e("ProfileViewModel", "❌ Failed to update streak for new profile: ${streakResource.message}")
+                                        _userProfile.value = Resource.Success(profile)
+                                    }
+                                    else -> {
+                                        _userProfile.value = Resource.Success(profile)
+                                    }
+                                }
+                            }
+                        } else {
+                            Log.e("ProfileViewModel", "Created profile is null")
+                            _userProfile.value = Resource.Error("Failed to create user profile")
+                        }
+                    } else {
+                        val error = createResult.exceptionOrNull()
+                        Log.e("ProfileViewModel", "Failed to create profile: ${error?.message}")
+                        _userProfile.value = Resource.Error("Failed to create user profile: ${error?.message}")
+                    }
+                }.onFailure { error ->
+                    Log.e("ProfileViewModel", "Failed to get user info for profile creation: ${error.message}")
+                    _userProfile.value = Resource.Error("Failed to get user info: ${error.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Exception creating new profile", e)
+                _userProfile.value = Resource.Error("Exception creating profile: ${e.message}")
+            }
+        }
+    }
+
     private fun subscribeToUserProfileUpdates(userId: String) {
         // Removed realtime functionality for now
         // In a real implementation, you would subscribe to user profile updates
@@ -200,6 +259,15 @@ class ProfileViewModel @Inject constructor(
     fun updateUserProfile(userId: String, updates: Map<String, Any>) {
         viewModelScope.launch {
             Log.d("ProfileViewModel", "Updating profile for user: $userId")
+            
+            // Validate userId
+            if (userId.isEmpty()) {
+                val errorMessage = "User ID is required to update profile"
+                Log.e("ProfileViewModel", errorMessage)
+                _userProfile.value = Resource.Error(errorMessage)
+                return@launch
+            }
+            
             val result = userRepository.updateUserProfile(userId, updates)
             if (result.isSuccess) {
                 val profile = result.getOrNull()
@@ -216,8 +284,9 @@ class ProfileViewModel @Inject constructor(
                 }
             } else {
                 val error = result.exceptionOrNull()
-                Log.e("ProfileViewModel", "Failed to update profile: ${error?.message}")
-                _userProfile.value = Resource.Error("Failed to update user profile: ${error?.message}")
+                val errorMessage = "Failed to update user profile: ${error?.message ?: "Unknown error"}"
+                Log.e("ProfileViewModel", errorMessage)
+                _userProfile.value = Resource.Error(errorMessage)
             }
         }
     }
