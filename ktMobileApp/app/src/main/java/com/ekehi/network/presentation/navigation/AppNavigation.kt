@@ -135,6 +135,20 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                         Log.e("AppNavigation", "Navigation error", e)
                     }
                 },
+                onTermsOfService = {
+                    try {
+                        navController.navigate("terms_and_service")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onLoginHistory = {
+                    try {
+                        navController.navigate("login_history")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
                 onSignOut = {
                     try {
                         // Navigate to landing and clear the back stack
@@ -255,9 +269,7 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
 }
 
 @Composable
-fun MainScreen(
-    onLogout: () -> Unit = {}
-) {
+fun MainScreen(onLogout: () -> Unit = {}) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: "mining"
@@ -300,6 +312,7 @@ fun MainScreen(
                     ProfileScreen(
                         onNavigateToSettings = {
                             try {
+                                Log.d("MainScreen", "Navigating to settings")
                                 navController.navigate("settings")
                             } catch (e: Exception) {
                                 Log.e("MainScreen", "Navigation error", e)
@@ -327,6 +340,7 @@ fun MainScreen(
                     SettingsScreen(
                         onChangePassword = {
                             try {
+                                Log.d("MainScreen", "Navigating to change password")
                                 navController.navigate("change_password")
                             } catch (e: Exception) {
                                 Log.e("MainScreen", "Navigation error", e)
@@ -334,17 +348,91 @@ fun MainScreen(
                         },
                         onContactSupport = {
                             try {
+                                Log.d("MainScreen", "Navigating to contact support")
                                 navController.navigate("contact_support")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        },
+                        onTermsOfService = {
+                            try {
+                                Log.d("MainScreen", "Navigating to terms of service")
+                                navController.navigate("terms_and_service")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        },
+                        onLoginHistory = {
+                            try {
+                                Log.d("MainScreen", "Navigating to login history")
+                                navController.navigate("login_history")
                             } catch (e: Exception) {
                                 Log.e("MainScreen", "Navigation error", e)
                             }
                         },
                         onSignOut = {
                             try {
+                                Log.d("MainScreen", "Sign out from settings")
                                 // Navigate to landing and clear the back stack
                                 navController.navigate("landing") {
                                     popUpTo("landing") { inclusive = false }
                                 }
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+
+                // Add Change Password Screen
+                composable("change_password") {
+                    ChangePasswordScreen(
+                        onNavigateBack = {
+                            Log.d("MainScreen", "Navigating back from change password")
+                            try {
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                // Add Contact Support Screen
+                composable("contact_support") {
+                    ContactSupportScreen(
+                        onNavigateBack = {
+                            Log.d("MainScreen", "Navigating back from contact support")
+                            try {
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                // Add Terms and Service Screen
+                composable("terms_and_service") {
+                    TermsOfServiceScreen(
+                        onNavigateBack = {
+                            Log.d("MainScreen", "Navigating back from terms and service")
+                            try {
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                // Add Login History Screen
+                composable("login_history") {
+                    LoginHistoryScreen(
+                        onNavigateBack = {
+                            Log.d("MainScreen", "Navigating back from login history")
+                            try {
+                                navController.popBackStack()
                             } catch (e: Exception) {
                                 Log.e("MainScreen", "Navigation error", e)
                             }

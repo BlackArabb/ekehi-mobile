@@ -21,9 +21,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.presentation.viewmodel.SettingsViewModel
 
 @Composable
 fun ChangePasswordScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -39,6 +43,35 @@ fun ChangePasswordScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showPasswordMismatch by remember { mutableStateOf(false) }
+    
+    // Observe password change result
+    val passwordChangeResult by viewModel.passwordChangeResult.collectAsState()
+    
+    // Handle password change result
+    LaunchedEffect(passwordChangeResult) {
+        Log.d("ChangePasswordScreen", "Password change result updated: ${passwordChangeResult?.javaClass?.simpleName}")
+        when (passwordChangeResult) {
+            is Resource.Success -> {
+                Log.d("ChangePasswordScreen", "Password change successful, navigating back")
+                isLoading = false
+                Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
+                onNavigateBack()
+            }
+            is Resource.Error -> {
+                Log.d("ChangePasswordScreen", "Password change failed: ${(passwordChangeResult as Resource.Error).message}")
+                isLoading = false
+                errorMessage = (passwordChangeResult as Resource.Error).message
+            }
+            is Resource.Loading -> {
+                Log.d("ChangePasswordScreen", "Password change in progress")
+                isLoading = true
+                errorMessage = null
+            }
+            else -> {
+                Log.d("ChangePasswordScreen", "Password change result is null or idle")
+            }
+        }
+    }
     
     Box(
         modifier = Modifier
@@ -288,19 +321,8 @@ fun ChangePasswordScreen(
                             return@Button
                         }
                         
-                        // In a real implementation, you would call the API to change the password
-                        // For now, we'll just show a success message
-                        isLoading = true
-                        errorMessage = null
-                        
-                        // Simulate API call
-                        // In a real app, you would make an actual API call here
-                        // For demonstration, we'll just show a success message after a delay
-                        android.os.Handler().postDelayed({
-                            isLoading = false
-                            Toast.makeText(context, "Password changed successfully", Toast.LENGTH_SHORT).show()
-                            onNavigateBack()
-                        }, 1000)
+                        // Call the ViewModel to change the password
+                        viewModel.changePassword(currentPassword, newPassword)
                     },
                     enabled = !isLoading && currentPassword.isNotEmpty() && newPassword.isNotEmpty() && confirmNewPassword.isNotEmpty(),
                     modifier = Modifier

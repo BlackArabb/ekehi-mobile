@@ -15,7 +15,9 @@ import com.ekehi.network.performance.PerformanceMonitor
 import com.ekehi.network.security.SecurePreferences
 import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.service.MiningManager
+import com.ekehi.network.service.NotificationService
 import com.ekehi.network.service.OAuthService
+import com.ekehi.network.service.PushNotificationService
 import com.ekehi.network.service.StartIoService
 import com.ekehi.network.presentation.viewmodel.StreakViewModel
 import com.ekehi.network.presentation.viewmodel.SettingsViewModel
@@ -214,13 +216,25 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideNotificationService(@ApplicationContext context: Context, securePreferences: SecurePreferences): NotificationService {
+        return NotificationService(context, securePreferences)
+    }
+    
+    @Provides
+    @Singleton
+    fun providePushNotificationService(@ApplicationContext context: Context, securePreferences: SecurePreferences): PushNotificationService {
+        return PushNotificationService(context, securePreferences)
+    }
+
+    @Provides
+    @Singleton
     fun provideStreakViewModel(userUseCase: UserUseCase): StreakViewModel {
         return StreakViewModel(userUseCase)
     }
 
     @Provides
     @Singleton
-    fun provideSettingsViewModel(authUseCase: AuthUseCase): SettingsViewModel {
-        return SettingsViewModel(authUseCase)
+    fun provideSettingsViewModel(authUseCase: AuthUseCase, securePreferences: SecurePreferences): SettingsViewModel {
+        return SettingsViewModel(authUseCase, securePreferences)
     }
 }

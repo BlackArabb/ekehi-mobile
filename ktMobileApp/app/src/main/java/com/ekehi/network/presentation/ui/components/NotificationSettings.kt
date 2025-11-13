@@ -1,14 +1,15 @@
 package com.ekehi.network.presentation.ui.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationSettings(
     miningNotificationsEnabled: Boolean,
@@ -27,33 +28,36 @@ fun NotificationSettings(
     ) {
         Text(
             text = "Notification Settings",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
         )
         
-        SwitchSettingItem(
-            title = "Mining Updates",
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        SettingToggle(
+            text = "Mining Updates",
             description = "Get notified when you earn EKEHI coins from mining",
             checked = miningNotificationsEnabled,
             onCheckedChange = onMiningNotificationsChanged
         )
         
-        SwitchSettingItem(
-            title = "Social Task Completion",
+        SettingToggle(
+            text = "Social Task Completion",
             description = "Get notified when you complete social tasks",
             checked = socialTaskNotificationsEnabled,
             onCheckedChange = onSocialTaskNotificationsChanged
         )
         
-        SwitchSettingItem(
-            title = "Referral Bonuses",
+        SettingToggle(
+            text = "Referral Bonuses",
             description = "Get notified when you earn referral bonuses",
             checked = referralNotificationsEnabled,
             onCheckedChange = onReferralNotificationsChanged
         )
         
-        SwitchSettingItem(
-            title = "Streak Bonuses",
+        SettingToggle(
+            text = "Streak Bonuses",
             description = "Get notified when you maintain mining streaks",
             checked = streakNotificationsEnabled,
             onCheckedChange = onStreakNotificationsChanged
@@ -62,20 +66,43 @@ fun NotificationSettings(
 }
 
 @Composable
-fun SwitchSettingItem(
-    title: String,
+fun SettingToggle(
+    text: String,
     description: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    ListItem(
-        headlineContent = { Text(title) },
-        supportingContent = { Text(description) },
-        trailingContent = {
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = text,
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = description,
+                color = Color(0xB3FFFFFF), // 70% opacity white
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
-    )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFFffa000),
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = Color(0x33FFFFFF) // Light white
+            )
+        )
+    }
 }

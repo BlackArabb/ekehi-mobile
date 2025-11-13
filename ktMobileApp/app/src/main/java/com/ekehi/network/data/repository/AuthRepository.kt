@@ -331,18 +331,23 @@ class AuthRepository @Inject constructor(
      */
     suspend fun updatePassword(currentPassword: String, newPassword: String): Result<Unit> {
         Log.d("AuthRepository", "Attempting to update user password")
+        Log.d("AuthRepository", "Current password length: ${currentPassword.length}")
+        Log.d("AuthRepository", "New password length: ${newPassword.length}")
         return withContext(Dispatchers.IO) {
             try {
                 Log.d("AuthRepository", "Calling Appwrite update password API")
-                appwriteService.account.updatePassword(
+                val result = appwriteService.account.updatePassword(
                     password = newPassword,
                     oldPassword = currentPassword
                 )
                 Log.d("AuthRepository", "Password updated successfully")
+                Log.d("AuthRepository", "Update password result: $result")
                 Result.success(Unit)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite password update failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
+                Log.e("AuthRepository", "Appwrite error code: ${e.code}")
+                Log.e("AuthRepository", "Appwrite error type: ${e.type}")
                 Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Password update failed: ${e.message}"
