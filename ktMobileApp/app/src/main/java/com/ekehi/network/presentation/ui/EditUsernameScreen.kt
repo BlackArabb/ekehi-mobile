@@ -240,19 +240,19 @@ fun EditUsernameScreen(
                             }
                         }
                         
-                        // Validate that we have a user profile and userId before updating
-                        val userId = userProfile?.userId
-                        if (userId.isNullOrEmpty()) {
+                        // Validate that we have a user profile and documentId before updating
+                        val documentId = userProfile?.id
+                        if (documentId.isNullOrEmpty()) {
                             updateError = "User profile not loaded properly. Please try again."
-                            Log.e("EditUsernameScreen", "User ID is null or empty")
+                            Log.e("EditUsernameScreen", "Document ID is null or empty")
                             return@Button
                         }
                         
                         if (updates.isNotEmpty()) {
                             isUpdating = true
                             updateError = null
-                            Log.d("EditUsernameScreen", "Updating profile for user: $userId with: $updates")
-                            viewModel.updateUserProfile(userId, updates)
+                            Log.d("EditUsernameScreen", "Updating profile by document ID: $documentId with: $updates")
+                            viewModel.updateUserProfileByDocumentId(documentId, updates)
                         } else {
                             Log.d("EditUsernameScreen", "No changes to save")
                             // Show a message that no changes were made

@@ -142,6 +142,37 @@ open class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun updateUserProfileByDocumentId(documentId: String, updates: Map<String, Any>): Result<UserProfile> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("UserRepository", "Updating profile by document ID: $documentId")
+                
+                // Add updatedAt timestamp to the updates
+                val updatesWithTimestamp = updates.toMutableMap()
+                updatesWithTimestamp["updatedAt"] = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                
+                val document = appwriteService.databases.updateDocument(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    documentId = documentId,
+                    data = updatesWithTimestamp
+                )
+                
+                val profile = documentToUserProfile(document)
+                Log.d("UserRepository", "Successfully updated profile by document ID: $documentId")
+                Result.success(profile)
+            } catch (e: AppwriteException) {
+                val errorMessage = "Appwrite exception while updating profile by document ID: ${e.message}"
+                Log.e("UserRepository", errorMessage, e)
+                Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Unexpected error while updating profile by document ID: ${e.message}"
+                Log.e("UserRepository", errorMessage, e)
+                Result.failure(e)
+            }
+        }
+    }
+
     private fun documentToUserProfile(document: Document<*>): UserProfile {
         @Suppress("UNCHECKED_CAST")
         val data = document.data as Map<String, Any>

@@ -291,6 +291,41 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun updateUserProfileByDocumentId(documentId: String, updates: Map<String, Any>) {
+        viewModelScope.launch {
+            Log.d("ProfileViewModel", "Updating profile by document ID: $documentId")
+            
+            // Validate documentId
+            if (documentId.isEmpty()) {
+                val errorMessage = "Document ID is required to update profile"
+                Log.e("ProfileViewModel", errorMessage)
+                _userProfile.value = Resource.Error(errorMessage)
+                return@launch
+            }
+            
+            val result = userRepository.updateUserProfileByDocumentId(documentId, updates)
+            if (result.isSuccess) {
+                val profile = result.getOrNull()
+                if (profile != null) {
+                    Log.d("ProfileViewModel", "Profile updated successfully by document ID")
+                    _userProfile.value = Resource.Success(profile)
+                    // Cache the updated profile if we're using offline repository
+                    if (userRepository is OfflineUserRepository) {
+                        userRepository.cacheUserProfile(profile)
+                    }
+                } else {
+                    Log.e("ProfileViewModel", "Updated profile is null")
+                    _userProfile.value = Resource.Error("Failed to update profile")
+                }
+            } else {
+                val error = result.exceptionOrNull()
+                val errorMessage = "Failed to update user profile: ${error?.message ?: "Unknown error"}"
+                Log.e("ProfileViewModel", errorMessage)
+                _userProfile.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+
     /**
      * Update user password
      * @param currentPassword The user's current password
