@@ -249,8 +249,8 @@ fun QuickAccessSection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             QuickAccessCard(
-                icon = Icons.Default.Share,
-                label = "Social",
+                icon = Icons.Default.Checklist,
+                label = "Tasks",
                 iconColor = Color(0xFF3b82f6),
                 onClick = onNavigateToSocial
             )

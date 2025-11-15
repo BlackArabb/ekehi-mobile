@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.analytics.AnalyticsManager
 import com.ekehi.network.domain.usecase.AuthUseCase
+import com.ekehi.network.domain.usecase.UserUseCase
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.performance.PerformanceMonitor
 import com.ekehi.network.security.ErrorHandler
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authUseCase: AuthUseCase,
+    private val userUseCase: UserUseCase,
     private val analyticsManager: AnalyticsManager,
     private val performanceMonitor: PerformanceMonitor
 ) : ViewModel() {
@@ -80,6 +82,8 @@ class LoginViewModel @Inject constructor(
                     when (resource) {
                         is Resource.Success -> {
                             Log.d("LoginViewModel", "Login successful")
+                            // After successful login, update the user's streak
+                            updateStreakAfterLogin()
                         }
                         is Resource.Error -> {
                             Log.e("LoginViewModel", "Login failed: ${resource.message}")
@@ -123,6 +127,8 @@ class LoginViewModel @Inject constructor(
                     when (resource) {
                         is Resource.Success -> {
                             Log.d("LoginViewModel", "Google login successful")
+                            // After successful Google login, update the user's streak
+                            updateStreakAfterLogin()
                         }
                         is Resource.Error -> {
                             Log.e("LoginViewModel", "Google login failed: ${resource.message}")
@@ -140,6 +146,73 @@ class LoginViewModel @Inject constructor(
                 val errorMessage = errorResult.userMessage
                 Log.e("LoginViewModel", "Google login exception: ${e.message}", e)
                 _loginState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
+    /**
+     * Updates the user's streak after a successful login
+     */
+    private fun updateStreakAfterLogin() {
+        Log.d("LoginViewModel", "=== UPDATING STREAK AFTER LOGIN ===")
+        viewModelScope.launch {
+            try {
+                // Get the current user to update their streak
+                authUseCase.getCurrentUserIfLoggedIn().collect { authResource ->
+                    when (authResource) {
+                        is Resource.Success -> {
+                            val user = authResource.data
+                            if (user != null) {
+                                Log.d("LoginViewModel", "Got current user: ${user.id}, now updating streak")
+                                // Get the user profile to update the streak
+                                userUseCase.getUserProfile(user.id).collect { profileResource ->
+                                    when (profileResource) {
+                                        is Resource.Success -> {
+                                            Log.d("LoginViewModel", "Got user profile for user: ${user.id}, updating streak")
+                                            Log.d("LoginViewModel", "Current streak: ${profileResource.data.currentStreak}")
+                                            Log.d("LoginViewModel", "Last login date: ${profileResource.data.lastLoginDate}")
+                                            // Update the streak
+                                            userUseCase.updateStreak(user.id, profileResource.data).collect { streakResource ->
+                                                when (streakResource) {
+                                                    is Resource.Success -> {
+                                                        Log.d("LoginViewModel", "✅ STREAK UPDATED SUCCESSFULLY AFTER LOGIN")
+                                                        Log.d("LoginViewModel", "New streak: ${streakResource.data.currentStreak}")
+                                                        Log.d("LoginViewModel", "Last login date: ${streakResource.data.lastLoginDate}")
+                                                    }
+                                                    is Resource.Error -> {
+                                                        Log.e("LoginViewModel", "❌ FAILED TO UPDATE STREAK AFTER LOGIN: ${streakResource.message}")
+                                                    }
+                                                    else -> {
+                                                        // For Loading or Idle states, do nothing
+                                                        Log.d("LoginViewModel", "Streak update state: ${streakResource.javaClass.simpleName}")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        is Resource.Error -> {
+                                            Log.e("LoginViewModel", "Failed to get user profile for streak update: ${profileResource.message}")
+                                        }
+                                        else -> {
+                                            // For Loading or Idle states, do nothing
+                                            Log.d("LoginViewModel", "User profile state: ${profileResource.javaClass.simpleName}")
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.e("LoginViewModel", "Failed to get current user: user is null")
+                            }
+                        }
+                        is Resource.Error -> {
+                            Log.e("LoginViewModel", "Failed to get current user for streak update: ${authResource.message}")
+                        }
+                        else -> {
+                            // For Loading or Idle states, do nothing
+                            Log.d("LoginViewModel", "Current user state: ${authResource.javaClass.simpleName}")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "Exception updating streak after login: ${e.message}", e)
             }
         }
     }
@@ -238,6 +311,8 @@ class LoginViewModel @Inject constructor(
                             Log.d("LoginViewModel", "✅✅✅ Step 3 SUCCESS: Current user verified successfully")
                             // User is authenticated, navigate to dashboard
                             _loginState.value = Resource.Success(Unit)
+                            // Update streak when user is verified
+                            updateStreakAfterLogin()
                         }
                         is Resource.Error -> {
                             Log.e("LoginViewModel", "❌❌❌ Step 3 ERROR: Failed to verify current user: ${resource.message}")

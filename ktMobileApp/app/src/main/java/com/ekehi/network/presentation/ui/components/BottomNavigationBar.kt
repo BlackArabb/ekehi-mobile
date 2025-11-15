@@ -72,7 +72,7 @@ sealed class BottomNavItem(
         val icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
     object Mine : BottomNavItem("mining", "Mine", Icons.Default.Home)
-    object SocialTasks : BottomNavItem("social", "Social", Icons.Default.Share)
+    object SocialTasks : BottomNavItem("social", "Tasks", Icons.Default.Checklist)
     object Leaderboard : BottomNavItem("leaderboard", "Leaderboard", Icons.Default.EmojiEvents)
     object Profile : BottomNavItem("profile", "Profile", Icons.Default.Person)
 }

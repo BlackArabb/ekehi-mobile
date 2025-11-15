@@ -131,6 +131,7 @@ class ProfileViewModel @Inject constructor(
                         Log.d("ProfileViewModel", "Profile synced successfully: ${profile.username}, Coins: ${profile.totalCoins}")
                         
                         // Update streak when profile is loaded
+                        Log.d("ProfileViewModel", "=== UPDATING STREAK WHEN PROFILE LOADED ===")
                         userUseCase.updateStreak(userId, profile).collect { streakResource ->
                             when (streakResource) {
                                 is Resource.Success -> {
@@ -145,6 +146,7 @@ class ProfileViewModel @Inject constructor(
                                 }
                                 else -> {
                                     // For Loading or Idle states, show the original profile
+                                    Log.d("ProfileViewModel", "Streak update state: ${streakResource.javaClass.simpleName}")
                                     _userProfile.value = Resource.Success(profile)
                                 }
                             }
@@ -211,6 +213,7 @@ class ProfileViewModel @Inject constructor(
                             Log.d("ProfileViewModel", "New profile created successfully: ${profile.username}")
                             _userProfile.value = Resource.Success(profile)
                             // Update streak for new profile
+                            Log.d("ProfileViewModel", "=== UPDATING STREAK FOR NEW PROFILE ===")
                             userUseCase.updateStreak(userId, profile).collect { streakResource ->
                                 when (streakResource) {
                                     is Resource.Success -> {
@@ -222,13 +225,11 @@ class ProfileViewModel @Inject constructor(
                                         _userProfile.value = Resource.Success(profile)
                                     }
                                     else -> {
+                                        Log.d("ProfileViewModel", "Streak update state for new profile: ${streakResource.javaClass.simpleName}")
                                         _userProfile.value = Resource.Success(profile)
                                     }
                                 }
                             }
-                        } else {
-                            Log.e("ProfileViewModel", "Created profile is null")
-                            _userProfile.value = Resource.Error("Failed to create user profile")
                         }
                     } else {
                         val error = createResult.exceptionOrNull()

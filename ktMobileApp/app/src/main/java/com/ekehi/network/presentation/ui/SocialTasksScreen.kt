@@ -56,7 +56,7 @@ fun SocialTasksScreen(
         ) {
             // Header
             Text(
-                text = "Social Tasks",
+                text = "Tasks",
                 color = Color.White,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,

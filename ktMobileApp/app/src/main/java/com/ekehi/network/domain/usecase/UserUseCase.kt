@@ -20,6 +20,17 @@ open class UserUseCase @Inject constructor(
         private const val STREAK_BONUS_AMOUNT = 5.0
     }
     
+    /**
+     * Helper function to check if two Calendar instances represent the same day
+     */
+    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
+        val sameYear = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+        val sameDayOfYear = cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+        Log.d(TAG, "isSameDay check - Year: ${cal1.get(Calendar.YEAR)} == ${cal2.get(Calendar.YEAR)} = $sameYear")
+        Log.d(TAG, "isSameDay check - Day of Year: ${cal1.get(Calendar.DAY_OF_YEAR)} == ${cal2.get(Calendar.DAY_OF_YEAR)} = $sameDayOfYear")
+        return sameYear && sameDayOfYear
+    }
+    
     fun getUserProfile(userId: String): Flow<Resource<UserProfile>> = flow {
         emit(Resource.Loading)
         val result = userRepository.getUserProfile(userId)
@@ -67,25 +78,38 @@ open class UserUseCase @Inject constructor(
         emit(Resource.Loading)
         
         try {
-            // Get current date (normalized to start of day)
-            val todayCalendar = Calendar.getInstance().apply {
+            // Get current date (normalized to start of day in UTC)
+            val todayCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
             }
             
-            // Parse last login date if it exists
+            Log.d(TAG, "Today's date (UTC): ${todayCalendar.time}")
+            
+            // Parse last login date if it exists (in UTC)
             val lastLoginCalendar = userProfile.lastLoginDate?.let { dateString ->
                 try {
-                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).parse(dateString)?.let {
-                        Calendar.getInstance().apply {
-                            time = it
+                    Log.d(TAG, "Parsing last login date: $dateString")
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                    dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+                    val parsedDate = dateFormat.parse(dateString)
+                    Log.d(TAG, "Parsed date: $parsedDate")
+                    
+                    if (parsedDate != null) {
+                        Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                            time = parsedDate
                             set(Calendar.HOUR_OF_DAY, 0)
                             set(Calendar.MINUTE, 0)
                             set(Calendar.SECOND, 0)
                             set(Calendar.MILLISECOND, 0)
+                        }.also {
+                            Log.d(TAG, "Normalized last login date: ${it.time}")
                         }
+                    } else {
+                        Log.w(TAG, "Parsed date is null")
+                        null
                     }
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to parse last login date: $dateString", e)
@@ -99,31 +123,49 @@ open class UserUseCase @Inject constructor(
             var updatedStreakBonusClaimed = userProfile.streakBonusClaimed
             var bonusAwarded = false
             
-            // Check if this is a new day login
-            if (lastLoginCalendar == null || lastLoginCalendar.before(todayCalendar)) {
-                // Calculate the difference in days
+            // Check if this is a new day login - compare dates properly
+            val isNewDayLogin = lastLoginCalendar == null || !isSameDay(lastLoginCalendar, todayCalendar)
+            
+            Log.d(TAG, "isNewDayLogin: $isNewDayLogin")
+            Log.d(TAG, "lastLoginCalendar: ${lastLoginCalendar?.time}")
+            Log.d(TAG, "todayCalendar: ${todayCalendar.time}")
+            
+            if (isNewDayLogin) {
+                // Calculate the difference in days more accurately
                 val diffDays = if (lastLoginCalendar != null) {
-                    val diffInMillis = todayCalendar.timeInMillis - lastLoginCalendar.timeInMillis
-                    (diffInMillis / (24 * 60 * 60 * 1000)).toInt()
+                    // Calculate days between dates using a more reliable method
+                    // Convert both dates to milliseconds at start of day and calculate difference
+                    val lastLoginMillis = lastLoginCalendar.timeInMillis
+                    val todayMillis = todayCalendar.timeInMillis
+                    val oneDayInMillis = 24 * 60 * 60 * 1000L
+                    val diffMillis = todayMillis - lastLoginMillis
+                    // Add half day to handle potential timezone issues and round properly
+                    val diffDaysCalculated = ((diffMillis + 12 * 60 * 60 * 1000L) / oneDayInMillis).toInt()
+                    Log.d(TAG, "📅 Raw millisecond difference: $diffMillis ms")
+                    Log.d(TAG, "📅 Adjusted calculation: $diffDaysCalculated days")
+                    diffDaysCalculated
                 } else {
-                    0 // First login ever - start with streak 1
+                    1 // First login ever - treat as 1 day difference to start streak
                 }
                 
                 Log.d(TAG, "📅 Days since last login: $diffDays")
+                Log.d(TAG, "Last login calendar: ${lastLoginCalendar?.time}")
+                Log.d(TAG, "Today calendar: ${todayCalendar.time}")
                 
-                when {
+                // Initialize updatedStreak based on the logic
+                updatedStreak = when {
                     lastLoginCalendar == null -> {
                         // First login ever
-                        updatedStreak = 1
                         Log.d(TAG, "🎉 First login! Starting streak at 1")
+                        1
                     }
                     diffDays == 1 -> {
                         // Consecutive day - increment streak
-                        updatedStreak = userProfile.currentStreak + 1
-                        Log.d(TAG, "✅ Consecutive login! New streak: $updatedStreak")
+                        val newStreak = userProfile.currentStreak + 1
+                        Log.d(TAG, "✅ Consecutive login! New streak: $newStreak")
                         
                         // Check if user has reached 7 consecutive days
-                        if (updatedStreak == STREAK_BONUS_THRESHOLD) {
+                        if (newStreak == STREAK_BONUS_THRESHOLD) {
                             // Award 5 EKH bonus
                             updatedTotalCoins += STREAK_BONUS_AMOUNT
                             updatedStreakBonusClaimed += 1
@@ -134,30 +176,37 @@ open class UserUseCase @Inject constructor(
                             Log.d(TAG, "🔄 Resetting streak to 1 for new cycle")
                             
                             // Reset streak to 1 after 7 days (start new cycle)
-                            updatedStreak = 1
-                        }
-                        
-                        // Update longest streak if needed (before reset)
-                        if (updatedStreak > userProfile.longestStreak) {
-                            updatedLongestStreak = updatedStreak
-                            Log.d(TAG, "⭐ New longest streak: $updatedLongestStreak")
+                            1
+                        } else {
+                            newStreak
                         }
                     }
                     diffDays > 1 -> {
                         // Missed days - reset streak to 1
-                        updatedStreak = 1
                         Log.d(TAG, "❌ Missed $diffDays days. Resetting streak to 1")
+                        1
                     }
                     else -> {
-                        // diffDays == 0 or negative (shouldn't happen but handle it)
-                        Log.d(TAG, "⚠️ Same day login or invalid date. Keeping current streak: ${userProfile.currentStreak}")
+                        // diffDays == 0 (same day login)
+                        Log.d(TAG, "⚠️ Same day login. Keeping current streak: ${userProfile.currentStreak}")
                         emit(Resource.Success(userProfile))
                         return@flow
                     }
                 }
                 
-                // Prepare updates
-                val currentDateTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(Date())
+                // Update longest streak if needed (before reset)
+                if (updatedStreak > userProfile.longestStreak) {
+                    updatedLongestStreak = updatedStreak
+                    Log.d(TAG, "⭐ New longest streak: $updatedLongestStreak")
+                }
+                
+                // Prepare updates with UTC timestamp
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+                val currentDateTime = dateFormat.format(Date())
+                
+                Log.d(TAG, "Setting lastLoginDate to: $currentDateTime")
+                
                 val updates = mutableMapOf<String, Any>(
                     "currentStreak" to updatedStreak,
                     "longestStreak" to updatedLongestStreak,

@@ -2,6 +2,7 @@ package com.ekehi.network.di
 
 import android.content.Context
 import androidx.room.Room
+import com.ekehi.network.analytics.AnalyticsManager
 import com.ekehi.network.data.local.EkehiDatabase
 import com.ekehi.network.data.local.CacheManager
 import com.ekehi.network.data.local.dao.MiningSessionDao
@@ -19,6 +20,7 @@ import com.ekehi.network.service.NotificationService
 import com.ekehi.network.service.OAuthService
 import com.ekehi.network.service.PushNotificationService
 import com.ekehi.network.service.StartIoService
+import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.StreakViewModel
 import com.ekehi.network.presentation.viewmodel.SettingsViewModel
 import dagger.Module
@@ -174,14 +176,14 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSyncManager(
-            userRepository: UserRepository,
-            miningRepository: MiningRepository,
-            socialTaskRepository: SocialTaskRepository,
-            userProfileDao: UserProfileDao,
-            miningSessionDao: MiningSessionDao,
-            socialTaskDao: SocialTaskDao,
-            cacheManager: CacheManager,
-            performanceMonitor: PerformanceMonitor
+        userRepository: UserRepository,
+        miningRepository: MiningRepository,
+        socialTaskRepository: SocialTaskRepository,
+        userProfileDao: UserProfileDao,
+        miningSessionDao: MiningSessionDao,
+        socialTaskDao: SocialTaskDao,
+        cacheManager: CacheManager,
+        performanceMonitor: PerformanceMonitor
     ): SyncManager {
         return SyncManager(
                 userRepository,
@@ -236,5 +238,16 @@ object AppModule {
     @Singleton
     fun provideSettingsViewModel(authUseCase: AuthUseCase, securePreferences: SecurePreferences): SettingsViewModel {
         return SettingsViewModel(authUseCase, securePreferences)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideLoginViewModel(
+        authUseCase: AuthUseCase,
+        userUseCase: UserUseCase,
+        analyticsManager: AnalyticsManager,
+        performanceMonitor: PerformanceMonitor
+    ): LoginViewModel {
+        return LoginViewModel(authUseCase, userUseCase, analyticsManager, performanceMonitor)
     }
 }
