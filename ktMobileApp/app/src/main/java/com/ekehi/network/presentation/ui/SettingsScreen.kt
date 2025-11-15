@@ -31,7 +31,9 @@ fun SettingsScreen(
     onContactSupport: () -> Unit,
     onTermsOfService: () -> Unit,
     onLoginHistory: () -> Unit,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onPrivacyPolicy: () -> Unit,  // Add this parameter
+    onDataManagement: () -> Unit   // Add this parameter
 ) {
     Log.d("SettingsScreen", "🔄 SettingsScreen recomposed")
     
@@ -136,11 +138,11 @@ fun SettingsScreen(
                 },
                 onPrivacyPolicyClick = {
                     Log.d("SettingsScreen", "Privacy policy clicked")
-                    // TODO: Navigate to privacy policy screen
+                    onPrivacyPolicy()
                 },
                 onDataManagementClick = {
                     Log.d("SettingsScreen", "Data management clicked")
-                    // TODO: Navigate to data management screen
+                    onDataManagement()
                 }
             )
 
@@ -508,7 +510,9 @@ fun SettingsScreenPreview() {
             onContactSupport = {},
             onTermsOfService = {},
             onLoginHistory = {},
-            onSignOut = {}
+            onSignOut = {},
+            onPrivacyPolicy = {},
+            onDataManagement = {}
         )
     }
 }

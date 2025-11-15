@@ -29,6 +29,10 @@ import com.ekehi.network.presentation.ui.ContactSupportScreen
 import com.ekehi.network.presentation.ui.MiningScreen
 import com.ekehi.network.presentation.ui.SocialTasksScreen
 import com.ekehi.network.presentation.ui.LeaderboardScreen
+import com.ekehi.network.presentation.ui.TermsOfServiceScreen
+import com.ekehi.network.presentation.ui.LoginHistoryScreen
+import com.ekehi.network.presentation.ui.PrivacyPolicyScreen
+import com.ekehi.network.presentation.ui.DataManagementScreen
 import com.ekehi.network.presentation.ui.components.BottomNavigationBar
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
@@ -158,6 +162,20 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                     } catch (e: Exception) {
                         Log.e("AppNavigation", "Navigation error", e)
                     }
+                },
+                onPrivacyPolicy = {
+                    try {
+                        navController.navigate("privacy_policy")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onDataManagement = {
+                    try {
+                        navController.navigate("data_management")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
                 }
             )
         }
@@ -252,6 +270,32 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                         navController.popBackStack()
                     } catch (e: Exception) {
                         Log.e("MainScreen", "Navigation error", e)
+                    }
+                }
+            )
+        }
+
+        // Add Privacy Policy Screen
+        composable("privacy_policy") {
+            PrivacyPolicyScreen(
+                onNavigateBack = {
+                    try {
+                        navController.popBackStack()
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                }
+            )
+        }
+        
+        // Add Data Management Screen
+        composable("data_management") {
+            DataManagementScreen(
+                onNavigateBack = {
+                    try {
+                        navController.popBackStack()
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -380,6 +424,22 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                             } catch (e: Exception) {
                                 Log.e("MainScreen", "Navigation error", e)
                             }
+                        },
+                        onPrivacyPolicy = {
+                            try {
+                                Log.d("MainScreen", "Navigating to privacy policy")
+                                navController.navigate("privacy_policy")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        },
+                        onDataManagement = {
+                            try {
+                                Log.d("MainScreen", "Navigating to data management")
+                                navController.navigate("data_management")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
                         }
                     )
                 }
@@ -454,6 +514,32 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                 
                 composable("referral_code") {
                     ReferralCodeScreen(
+                        onNavigateBack = {
+                            try {
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                // Add Privacy Policy Screen
+                composable("privacy_policy") {
+                    PrivacyPolicyScreen(
+                        onNavigateBack = {
+                            try {
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+                
+                // Add Data Management Screen
+                composable("data_management") {
+                    DataManagementScreen(
                         onNavigateBack = {
                             try {
                                 navController.popBackStack()

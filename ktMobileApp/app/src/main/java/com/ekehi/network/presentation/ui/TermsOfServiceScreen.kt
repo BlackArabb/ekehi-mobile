@@ -137,24 +137,3 @@ fun TermsOfServiceScreen(
         }
     }
 }
-
-@Composable
-fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        color = Color.White,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-}
-
-@Composable
-fun SectionText(text: String) {
-    Text(
-        text = text,
-        color = Color(0xB3FFFFFF),
-        fontSize = 16.sp,
-        lineHeight = 24.sp
-    )
-}
