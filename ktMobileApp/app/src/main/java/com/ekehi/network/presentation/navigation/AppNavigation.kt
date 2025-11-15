@@ -30,7 +30,6 @@ import com.ekehi.network.presentation.ui.MiningScreen
 import com.ekehi.network.presentation.ui.SocialTasksScreen
 import com.ekehi.network.presentation.ui.LeaderboardScreen
 import com.ekehi.network.presentation.ui.TermsOfServiceScreen
-import com.ekehi.network.presentation.ui.LoginHistoryScreen
 import com.ekehi.network.presentation.ui.PrivacyPolicyScreen
 import com.ekehi.network.presentation.ui.DataManagementScreen
 import com.ekehi.network.presentation.ui.components.BottomNavigationBar
@@ -142,13 +141,6 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                 onTermsOfService = {
                     try {
                         navController.navigate("terms_and_service")
-                    } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
-                    }
-                },
-                onLoginHistory = {
-                    try {
-                        navController.navigate("login_history")
                     } catch (e: Exception) {
                         Log.e("AppNavigation", "Navigation error", e)
                     }
@@ -406,14 +398,6 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                                 Log.e("MainScreen", "Navigation error", e)
                             }
                         },
-                        onLoginHistory = {
-                            try {
-                                Log.d("MainScreen", "Navigating to login history")
-                                navController.navigate("login_history")
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        },
                         onSignOut = {
                             try {
                                 Log.d("MainScreen", "Sign out from settings")
@@ -477,20 +461,6 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                     TermsOfServiceScreen(
                         onNavigateBack = {
                             Log.d("MainScreen", "Navigating back from terms and service")
-                            try {
-                                navController.popBackStack()
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        }
-                    )
-                }
-                
-                // Add Login History Screen
-                composable("login_history") {
-                    LoginHistoryScreen(
-                        onNavigateBack = {
-                            Log.d("MainScreen", "Navigating back from login history")
                             try {
                                 navController.popBackStack()
                             } catch (e: Exception) {

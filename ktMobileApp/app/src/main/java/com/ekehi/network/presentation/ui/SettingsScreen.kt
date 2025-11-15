@@ -30,10 +30,9 @@ fun SettingsScreen(
     onChangePassword: () -> Unit,
     onContactSupport: () -> Unit,
     onTermsOfService: () -> Unit,
-    onLoginHistory: () -> Unit,
     onSignOut: () -> Unit,
-    onPrivacyPolicy: () -> Unit,  // Add this parameter
-    onDataManagement: () -> Unit   // Add this parameter
+    onPrivacyPolicy: () -> Unit,
+    onDataManagement: () -> Unit
 ) {
     Log.d("SettingsScreen", "🔄 SettingsScreen recomposed")
     
@@ -153,10 +152,6 @@ fun SettingsScreen(
                 onChangePassword = {
                     Log.d("SettingsScreen", "Change password clicked")
                     onChangePassword()
-                },
-                onLoginHistoryClick = {
-                    Log.d("SettingsScreen", "Login history clicked")
-                    onLoginHistory()
                 }
             )
 
@@ -171,10 +166,6 @@ fun SettingsScreen(
                 onTermsOfServiceClick = {
                     Log.d("SettingsScreen", "Terms of service clicked")
                     onTermsOfService()
-                },
-                onVersionInfoClick = {
-                    Log.d("SettingsScreen", "Version info clicked")
-                    // TODO: Show version info dialog or screen
                 }
             )
 
@@ -226,6 +217,34 @@ fun SettingItem(
                 modifier = Modifier.size(24.dp)
             )
         }
+    }
+}
+
+@Composable
+fun SettingItemWithoutArrow(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = text,
+            tint = Color(0xFFffa000),
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = 16.sp,
+            modifier = Modifier
+                .padding(start = 16.dp)
+        )
     }
 }
 
@@ -401,8 +420,7 @@ fun PrivacySettingsSection(
 
 @Composable
 fun SecuritySettingsSection(
-    onChangePassword: () -> Unit,
-    onLoginHistoryClick: () -> Unit = {}
+    onChangePassword: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -432,15 +450,6 @@ fun SecuritySettingsSection(
                     onChangePassword()
                 }
             )
-
-            SettingItem(
-                text = "Login History",
-                icon = Icons.Default.History,
-                onClick = {
-                    Log.d("SecuritySettings", "📜 Login History clicked - triggering callback")
-                    onLoginHistoryClick()
-                }
-            )
         }
     }
 }
@@ -448,8 +457,7 @@ fun SecuritySettingsSection(
 @Composable
 fun AboutSection(
     onContactSupport: () -> Unit,
-    onTermsOfServiceClick: () -> Unit = {},
-    onVersionInfoClick: () -> Unit = {}
+    onTermsOfServiceClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -481,21 +489,18 @@ fun AboutSection(
             )
 
             SettingItem(
-                text = "Version 1.0.0",
-                icon = Icons.Default.Info,
-                onClick = {
-                    Log.d("AboutSection", "ℹ️ Version Info clicked")
-                    onVersionInfoClick()
-                }
-            )
-
-            SettingItem(
                 text = "Contact Support",
                 icon = Icons.Default.SupportAgent,
                 onClick = {
                     Log.d("AboutSection", "📧 Contact Support clicked - triggering callback")
                     onContactSupport()
                 }
+            )
+            
+            // Version info at the bottom without dropdown arrow
+            SettingItemWithoutArrow(
+                text = "Version 1.0.0",
+                icon = Icons.Default.Info
             )
         }
     }
@@ -509,7 +514,6 @@ fun SettingsScreenPreview() {
             onChangePassword = {},
             onContactSupport = {},
             onTermsOfService = {},
-            onLoginHistory = {},
             onSignOut = {},
             onPrivacyPolicy = {},
             onDataManagement = {}
