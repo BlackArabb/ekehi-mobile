@@ -120,11 +120,11 @@ fun ContactSupportScreen(
                         ContactMethodItem(
                             icon = Icons.Default.Email,
                             title = "Email Support",
-                            description = "support@ekehi.network",
+                            description = "support@ekehi.xyz",
                             onClick = {
                                 try {
                                     val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                        data = Uri.parse("mailto:support@ekehi.network")
+                                        data = Uri.parse("mailto:support@ekehi.xyz")
                                         putExtra(Intent.EXTRA_SUBJECT, "Ekehi Network Support Request")
                                     }
                                     context.startActivity(intent)
@@ -140,10 +140,10 @@ fun ContactSupportScreen(
                         ContactMethodItem(
                             icon = Icons.Default.Language,
                             title = "Visit Website",
-                            description = "www.ekehi.network",
+                            description = "www.ekehi.xyz",
                             onClick = {
                                 try {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.ekehi.network"))
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.ekehi.xyz"))
                                     context.startActivity(intent)
                                 } catch (e: Exception) {
                                     Log.e("ContactSupport", "Failed to open website", e)
