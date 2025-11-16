@@ -216,7 +216,7 @@ fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Edit Username Button
+            // Edit Profile Button
             Button(
                 onClick = onNavigateToEditProfile,
                 modifier = Modifier
@@ -228,7 +228,7 @@ fun ProfileHeader(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
-                    text = "Edit Username",
+                    text = "Edit Profile",
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium

@@ -240,7 +240,7 @@ fun EditUsernameScreen(
                             },
                             placeholder = {
                                 Text(
-                                    text = "8-15 digits",
+                                    text = "e.g., +1234567890",
                                     color = Color(0x80FFFFFF)
                                 )
                             },
@@ -256,6 +256,16 @@ fun EditUsernameScreen(
                                 focusedLabelColor = Color(0xFFffa000),
                                 unfocusedLabelColor = Color(0xB3FFFFFF)
                             )
+                        )
+                        
+                        // Helper text for phone number
+                        Text(
+                            text = "Include your country code (e.g., +1 for US, +44 for UK)",
+                            color = Color(0x80FFFFFF),
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
                         )
                         
                         // Country Field (Required)
@@ -296,14 +306,26 @@ fun EditUsernameScreen(
                 Button(
                     onClick = {
                         // Validate phone number
-                        val cleanedPhoneNumber = phoneNumber.filter { it.isDigit() }
-                        if (cleanedPhoneNumber.isEmpty()) {
+                        // Allow + sign at the beginning and digits
+                        val cleanedPhoneNumber = if (phoneNumber.startsWith("+")) {
+                            "+" + phoneNumber.substring(1).filter { it.isDigit() }
+                        } else {
+                            phoneNumber.filter { it.isDigit() }
+                        }
+                        
+                        if (cleanedPhoneNumber.isEmpty() || cleanedPhoneNumber == "+") {
                             updateError = "Phone number is required"
                             return@Button
                         }
                         
-                        // Check if the phone number length is between 8 and 15 digits
-                        if (cleanedPhoneNumber.length < 8 || cleanedPhoneNumber.length > 15) {
+                        // Check if the phone number length is between 8 and 15 digits (excluding the + sign)
+                        val digitCount = if (cleanedPhoneNumber.startsWith("+")) {
+                            cleanedPhoneNumber.substring(1).length
+                        } else {
+                            cleanedPhoneNumber.length
+                        }
+                        
+                        if (digitCount < 8 || digitCount > 15) {
                             updateError = "Phone number must be between 8 and 15 digits"
                             return@Button
                         }
