@@ -45,6 +45,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import android.app.Activity
+import android.content.Intent
 import android.util.Log
 import com.ekehi.network.service.StartIoService
 import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
@@ -166,11 +167,6 @@ fun MiningScreen(
                         viewModel.handleMine()
                     }
                 )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Ad Bonus Button - Modified to use StartIoService
-                MiningAdBonusButton(startIoService = startIoService, activity = activity)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -507,148 +503,11 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
     }
 }
 
-@Composable
-fun MiningAdBonusButton(
-    startIoService: StartIoService,
-    activity: Activity?
-) {
-    var isAdLoading by remember { mutableStateOf(false) }
-    var adErrorMessage by remember { mutableStateOf<String?>(null) }
-    
-    // Load ad when component is first composed
-    LaunchedEffect(Unit) {
-        startIoService.loadRewardedVideoAd {
-            // Reward callback - User completed watching the video
-            Log.d("MiningScreen", "✅ User earned 0.5 EKH from ad!")
-            // TODO: Call your API to credit user's account with 0.5 EKH
-            // Example: viewModel.addAdReward(0.5)
-        }
-    }
-    
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(
-            onClick = { 
-                // Reset error message
-                adErrorMessage = null
-                
-                // Check if we have an activity
-                if (activity == null) {
-                    adErrorMessage = "Unable to show ad: No activity context"
-                    return@Button
-                }
-                
-                // Check if ad is ready
-                if (!startIoService.isRewardedAdReady()) {
-                    adErrorMessage = "Ad not ready yet. Trying to load..."
-                    isAdLoading = true
-                    
-                    // Try to load ad with retry mechanism
-                    startIoService.loadRewardedVideoAd {
-                        Log.d("MiningScreen", "✅ User earned 0.5 EKH!")
-                        isAdLoading = false
-                        adErrorMessage = null
-                    }
-                    
-                    // Give it a moment to load, then check again
-                    // In a real app, you might want to use a more sophisticated approach
-                    return@Button
-                }
-                
-                // Show the ad
-                Log.d("MiningScreen", "Attempting to show rewarded video ad")
-                if (!startIoService.showRewardedVideoAd(activity)) {
-                    Log.e("MiningScreen", "Failed to show rewarded video ad")
-                    adErrorMessage = "Failed to show ad. Ads may be unavailable in your region. Please try again later."
-                } else {
-                    Log.d("MiningScreen", "Successfully called showRewardedVideoAd")
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(70.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent
-            ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(0xFF8b5cf6),
-                                Color(0xFF7c3aed)
-                            )
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    if (isAdLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Watch Ad",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    Text(
-                        text = "Watch Ad for +0.5 EKH",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Watch a short ad to earn bonus EKH tokens. Ads may take a moment to load.",
-                color = Color(0xB3FFFFFF),
-                fontSize = 14.sp
-            )
-        }
-        
-        // Show error message if there is one
-        adErrorMessage?.let { error ->
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = error,
-                color = Color.Red,
-                fontSize = 12.sp
-            )
-        }
-    }
-}
-
-
 
 @Composable
 fun ReferralCard() {
+    val context = LocalContext.current
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -690,7 +549,17 @@ fun ReferralCard() {
             Spacer(modifier = Modifier.height(16.dp))
             
             Button(
-                onClick = { /* Handle share */ },
+                onClick = { 
+                    // Share referral link outside the app
+                    val sendIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        type = "text/plain"
+                    }
+                    
+                    val shareIntent = Intent.createChooser(sendIntent, "Share referral link via")
+                    context.startActivity(shareIntent)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFffa000)
