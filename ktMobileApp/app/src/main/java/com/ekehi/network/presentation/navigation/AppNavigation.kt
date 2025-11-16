@@ -2,12 +2,18 @@ package com.ekehi.network.presentation.navigation
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -16,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.ui.*
 import com.ekehi.network.presentation.ui.LandingScreen
 import com.ekehi.network.presentation.ui.LoginScreen
@@ -35,6 +42,8 @@ import com.ekehi.network.presentation.ui.DataManagementScreen
 import com.ekehi.network.presentation.ui.components.BottomNavigationBar
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
+import com.ekehi.network.presentation.viewmodel.ProfileViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun AppNavigation(isAuthenticated: Boolean = false) {
@@ -147,6 +156,7 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                 },
                 onSignOut = {
                     try {
+                        Log.d("AppNavigation", "Sign out from settings")
                         // Navigate to landing and clear the back stack
                         navController.navigate("landing") {
                             popUpTo("landing") { inclusive = false }
@@ -172,60 +182,13 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
             )
         }
 
-        composable("profile") {
-            val coroutineScope = rememberCoroutineScope()
-            
-            // Refresh profile when entering this screen
-            LaunchedEffect(Unit) {
-                coroutineScope.launch {
-                    EventBus.sendEvent(Event.RefreshUserProfile)
-                }
-            }
-            
-            ProfileScreen(
-                onNavigateToSettings = {
-                    try {
-                        navController.navigate("settings")
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                },
-                onNavigateToEditProfile = {
-                    try {
-                        navController.navigate("edit_profile")
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                },
-                onNavigateToReferralCode = {
-                    try {
-                        navController.navigate("referral_code")
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                },
-                onLogout = {
-                    // Show exit ad before logging out
-                    // TODO: Implement actual logout after ad
-                    try {
-                        // Navigate to landing and clear the back stack
-                        navController.navigate("landing") {
-                            popUpTo("landing") { inclusive = false }
-                        }
-                    } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
-                    }
-                }
-            )
-        }
-        
         composable("edit_profile") {
             EditUsernameScreen(
                 onNavigateBack = {
                     try {
                         navController.popBackStack()
                     } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -237,7 +200,7 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                     try {
                         navController.popBackStack()
                     } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -249,7 +212,7 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                     try {
                         navController.popBackStack()
                     } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -261,7 +224,7 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                     try {
                         navController.popBackStack()
                     } catch (e: Exception) {
-                        Log.e("MainScreen", "Navigation error", e)
+                        Log.e("AppNavigation", "Navigation error", e)
                     }
                 }
             )
@@ -309,7 +272,7 @@ fun MainScreen(onLogout: () -> Unit = {}) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = backStackEntry?.destination?.route ?: "mining"
-
+    
     Scaffold(
         bottomBar = {
             // Show bottom navigation bar for main screens only

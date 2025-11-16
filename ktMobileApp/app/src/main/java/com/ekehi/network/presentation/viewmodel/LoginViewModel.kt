@@ -231,8 +231,8 @@ class LoginViewModel @Inject constructor(
                             Log.d("LoginViewModel", "Step 1 SUCCESS: Active session check returned ${resource.data}")
                             if (resource.data) {
                                 Log.d("LoginViewModel", "✅✅✅ SUCCESS: Active session found, user is logged in")
-                                // If we have an active session, user is authenticated
-                                _loginState.value = Resource.Success(Unit)
+                                // If we have an active session, get the user data
+                                getCurrentUser()
                             } else {
                                 Log.d("LoginViewModel", "Step 1: No active session found, checking stored credentials")
                                 // No active session, check stored credentials
@@ -258,7 +258,51 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
-
+    
+    private fun getCurrentUser() {
+        viewModelScope.launch {
+            try {
+                Log.d("LoginViewModel", "Getting current user data")
+                
+                authUseCase.getCurrentUserIfLoggedIn().collect { resource ->
+                    when (resource) {
+                        is Resource.Success -> {
+                            if (resource.data != null) {
+                                Log.d("LoginViewModel", "✅✅✅ Current user data retrieved successfully: ${resource.data.id}")
+                                // User is authenticated with data, navigate to dashboard
+                                _loginState.value = Resource.Success(Unit)
+                                // Update streak when user is verified
+                                updateStreakAfterLogin()
+                            } else {
+                                Log.d("LoginViewModel", "❌❌❌ No user data found, user needs to login")
+                                // No user data, user needs to login
+                                _loginState.value = Resource.Error("No user data found")
+                            }
+                        }
+                        is Resource.Error -> {
+                            Log.e("LoginViewModel", "❌❌❌ ERROR: Failed to get current user: ${resource.message}")
+                            // User is not authenticated, show error
+                            _loginState.value = Resource.Error(resource.message)
+                        }
+                        is Resource.Loading -> {
+                            Log.d("LoginViewModel", "User data retrieval in progress")
+                            _loginState.value = resource
+                        }
+                        is Resource.Idle -> {
+                            // Do nothing for Idle state
+                            _loginState.value = resource
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorResult = ErrorHandler.handleException(e, "Failed to get user data")
+                val errorMessage = errorResult.userMessage
+                Log.e("LoginViewModel", "EXCEPTION: User data retrieval exception: ${e.message}", e)
+                _loginState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
     private fun checkStoredCredentials() {
         viewModelScope.launch {
             try {

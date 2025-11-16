@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.LeaderboardViewModel
+import com.ekehi.network.presentation.ui.components.LeaderboardScreenSkeleton
 
 @Composable
 fun LeaderboardScreen(
@@ -62,12 +63,7 @@ fun LeaderboardScreen(
             // Handle different states
             when (leaderboardResource) {
                 is Resource.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Color(0xFFffa000))
-                    }
+                    LeaderboardScreenSkeleton()
                 }
                 is Resource.Success -> {
                     val leaderboardData = (leaderboardResource as Resource.Success<List<Map<String, Any>>>).data

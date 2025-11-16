@@ -32,6 +32,7 @@ import com.ekehi.network.service.MiningManager
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.presentation.ui.components.MiningScreenSkeleton
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -123,49 +124,64 @@ fun MiningScreen(
                 )
             )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 100.dp), // Bottom padding for safe area
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // User Profile Card at the top with real user data and streaks
-            UserProfileCard(userProfile = userProfile)
-            
-            Spacer(modifier = Modifier.height(24.dp))
+        // Show skeleton loader while loading
+        if (userProfileResource is Resource.Loading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 100.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                MiningScreenSkeleton()
+            }
+        } else {
+            // Show actual content when data is loaded
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 100.dp), // Bottom padding for safe area
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // User Profile Card at the top with real user data and streaks
+                UserProfileCard(userProfile = userProfile)
+                
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Mining Stats - Pass the actual session earnings
-            MiningScreenStats(totalMined = userProfile?.totalCoins ?: 0.0, sessionEarnings = sessionEarnings)
+                // Mining Stats - Pass the actual session earnings
+                MiningScreenStats(totalMined = userProfile?.totalCoins ?: 0.0, sessionEarnings = sessionEarnings)
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
-            // Enhanced Mining Button with Circular Progress
-            EnhancedMiningButton(
-                isMining = isMining,
-                remainingTime = remainingTime,
-                progressPercentage = progressPercentage,
-                sessionReward = sessionReward,
-                onClick = { 
-                    viewModel.handleMine()
-                }
-            )
+                // Enhanced Mining Button with Circular Progress
+                EnhancedMiningButton(
+                    isMining = isMining,
+                    remainingTime = remainingTime,
+                    progressPercentage = progressPercentage,
+                    sessionReward = sessionReward,
+                    onClick = { 
+                        viewModel.handleMine()
+                    }
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Ad Bonus Button - Modified to use StartIoService
-            MiningAdBonusButton(startIoService = startIoService, activity = activity)
+                // Ad Bonus Button - Modified to use StartIoService
+                MiningAdBonusButton(startIoService = startIoService, activity = activity)
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Auto Mining Status
-            MiningAutoMiningStatus()
+                // Auto Mining Status
+                MiningAutoMiningStatus()
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Referral Card
-            ReferralCard()
+                // Referral Card
+                ReferralCard()
+            }
         }
         
         // Show error message if there is one

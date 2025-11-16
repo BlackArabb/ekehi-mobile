@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.ekehi.network.presentation.ui.components.SocialTasksScreenSkeleton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,12 +73,7 @@ fun SocialTasksScreen(
             // Social Tasks List
             when (socialTasksResource) {
                 is Resource.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Color(0xFFffa000))
-                    }
+                    SocialTasksScreenSkeleton()
                 }
                 is Resource.Success -> {
                     val tasks = (socialTasksResource as Resource.Success).data

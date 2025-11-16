@@ -32,6 +32,7 @@ import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import android.app.Activity
 import com.ekehi.network.service.StartIoService
+import com.ekehi.network.presentation.ui.components.ProfileHeaderSkeleton
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -60,32 +61,6 @@ fun ProfileScreen(
         ).startIoService()
     }
     
-    val activity = context as? Activity
-
-    // Extract the actual UserProfile from Resource
-    val userProfile: UserProfile? = when (userProfileResource) {
-        is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
-        else -> null
-    }
-    
-    // Get current user ID
-    val currentUserId = userProfile?.userId?.takeIf { it.isNotEmpty() } ?: "user_id_placeholder"
-
-    // Listen for profile refresh events
-    LaunchedEffect(Unit) {
-        EventBus.events.collect { event ->
-            when (event) {
-                is Event.RefreshUserProfile -> {
-                    Log.d("ProfileScreen", "Received RefreshUserProfile event")
-                    if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
-                        viewModel.refreshUserProfile()
-                    }
-                }
-                else -> {}
-            }
-        }
-    }
-    
     // Initialize StartIoService
     LaunchedEffect(Unit) {
         startIoService.initialize()
@@ -104,30 +79,123 @@ fun ProfileScreen(
                 )
             )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(16.dp)
-        ) {
-            ProfileHeader(
-                userProfile = userProfile,
-                onNavigateToSettings = onNavigateToSettings,
-                onNavigateToEditProfile = onNavigateToEditProfile
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-            ProfileStatsSection(userProfile = userProfile)
-            Spacer(modifier = Modifier.height(24.dp))
-            ProfileContentSection(userProfile = userProfile)
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Actions Section
-            ProfileActionsSection(
-                onSettings = onNavigateToSettings,
-                onReferralCode = onNavigateToReferralCode,
-                onLogout = onLogout
-            )
+        // Show skeleton loader while loading
+        if (userProfileResource is Resource.Loading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(16.dp)
+            ) {
+                ProfileHeaderSkeleton()
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Stats Section Skeleton
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0x1AFFFFFF)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0x1AFFFFFF))
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Content Section Skeleton
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0x1AFFFFFF)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0x1AFFFFFF))
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Actions Section Skeleton
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0x1AFFFFFF)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0x1AFFFFFF))
+                    )
+                }
+            }
+        } else {
+            // Show actual content when data is loaded
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(16.dp)
+            ) {
+                // Extract the actual UserProfile from Resource
+                val userProfile: UserProfile? = when (userProfileResource) {
+                    is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
+                    else -> null
+                }
+                
+                // Get current user ID
+                val currentUserId = userProfile?.userId?.takeIf { it.isNotEmpty() } ?: "user_id_placeholder"
+                
+                // Listen for profile refresh events
+                LaunchedEffect(Unit) {
+                    EventBus.events.collect { event ->
+                        when (event) {
+                            is Event.RefreshUserProfile -> {
+                                Log.d("ProfileScreen", "Received RefreshUserProfile event")
+                                if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
+                                    viewModel.refreshUserProfile()
+                                }
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+                
+                ProfileHeader(
+                    userProfile = userProfile,
+                    onNavigateToEditProfile = onNavigateToEditProfile
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                ProfileStatsSection(userProfile = userProfile)
+                Spacer(modifier = Modifier.height(24.dp))
+                ProfileContentSection(userProfile = userProfile)
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Actions Section
+                ProfileActionsSection(
+                    onSettings = onNavigateToSettings,
+                    onReferralCode = onNavigateToReferralCode,
+                    onLogout = onLogout
+                )
+            }
         }
     }
 }
@@ -135,7 +203,6 @@ fun ProfileScreen(
 @Composable
 fun ProfileHeader(
     userProfile: UserProfile?,
-    onNavigateToSettings: () -> Unit,
     onNavigateToEditProfile: () -> Unit
 ) {
     Card(
@@ -571,19 +638,6 @@ fun ActionButton(
 
 @Preview(showBackground = true)
 @Composable
-fun ProfileScreenPreview() {
-    EkehiMobileTheme {
-        ProfileScreen(
-            onNavigateToSettings = {},
-            onNavigateToEditProfile = {},
-            onNavigateToReferralCode = {},
-            onLogout = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
 fun ProfileHeaderPreview() {
     EkehiMobileTheme {
         ProfileHeader(
@@ -592,6 +646,8 @@ fun ProfileHeaderPreview() {
                 userId = "user1",
                 username = "John Doe",
                 email = "john@example.com",
+                phone_number = "1234567890",
+                country = "United States",
                 totalCoins = 125.50,
                 miningPower = 2.5,
                 autoMiningRate = 0.005,
@@ -600,7 +656,6 @@ fun ProfileHeaderPreview() {
                 createdAt = "2023-01-15T10:30:00Z",
                 updatedAt = "2023-01-15T10:30:00Z"
             ),
-            onNavigateToSettings = {},
             onNavigateToEditProfile = {}
         )
     }
