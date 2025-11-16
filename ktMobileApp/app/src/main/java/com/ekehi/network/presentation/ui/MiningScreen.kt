@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +42,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.delay
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -54,6 +57,7 @@ import com.startapp.sdk.adsbase.Ad
 import com.ekehi.network.di.StartIoServiceEntryPoint
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
+import com.ekehi.network.R
 
 @Composable
 fun MiningScreen(
@@ -450,7 +454,7 @@ fun MiningScreenStats(totalMined: Double, sessionEarnings: Double) {
                 StatCard(
                     value = "%.4f".format(totalMined),
                     label = "Total Mined",
-                    icon = Icons.Default.AccountBalance
+                    iconPainter = painterResource(id = R.mipmap.ic_launcher)
                 )
 
                 StatCard(
@@ -464,7 +468,7 @@ fun MiningScreenStats(totalMined: Double, sessionEarnings: Double) {
 }
 
 @Composable
-fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector? = null, iconPainter: Painter? = null) {
     Card(
         modifier = Modifier
             .width(100.dp)
@@ -480,12 +484,20 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color(0xFFffa000),
-                modifier = Modifier.size(24.dp)
-            )
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color(0xFFffa000),
+                    modifier = Modifier.size(24.dp)
+                )
+            } else if (iconPainter != null) {
+                Image(
+                    painter = iconPainter,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = value,
@@ -670,18 +682,17 @@ fun EnhancedMiningButton(
                         }
                     }
                     isCompleted -> {
-                        // Completed: Show coins icon
-                        Icon(
-                            imageVector = Icons.Default.AccountBalance,
+                        // Completed: Show app logo from mipmap
+                        Image(
+                            painter = painterResource(id = R.mipmap.ic_launcher),
                             contentDescription = "Claim Reward",
-                            tint = Color.White,
-                            modifier = Modifier.size(60.dp)
+                            modifier = Modifier.size(60.dp),
                         )
                     }
                     else -> {
-                        // Ready to start: Show pickaxe icon
+                        // Ready to start: Show construction icon for mining
                         Icon(
-                            imageVector = Icons.Default.Build,
+                            imageVector = Icons.Default.Construction,
                             contentDescription = "Start Mining",
                             tint = Color.White,
                             modifier = Modifier.size(60.dp)
@@ -732,7 +743,7 @@ fun EnhancedMiningButton(
                 else -> {
                     // Action text
                     Text(
-                        text = if (isCompleted) "Claim ${"%.2f".format(sessionReward)} EKH Reward" else "Start Mining",
+                        text = if (isCompleted) "Claim ${"%.2f".format(sessionReward)} EKH" else "Start Mining",
                         color = Color(0xFFffa000),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
