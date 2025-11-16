@@ -85,16 +85,12 @@ fun ProfileScreen(
             }
         }
     }
-
-    // Load user profile when screen is first displayed
+    
+    // Initialize StartIoService
     LaunchedEffect(Unit) {
         startIoService.initialize()
-        
-        if (currentUserId.isNotEmpty() && currentUserId != "user_id_placeholder") {
-            viewModel.loadUserProfile(currentUserId)
-        }
     }
-
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -186,14 +182,6 @@ fun ProfileHeader(
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = userProfile?.email ?: "user@example.com",
-                color = Color(0xB3FFFFFF), // 70% opacity white
-                fontSize = 16.sp
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -390,13 +378,13 @@ fun ProfileContentSection(userProfile: UserProfile?) {
             )
 
             ProfileDetailItem(
-                label = "Email",
-                value = userProfile?.email ?: "N/A"
+                label = "Phone",
+                value = userProfile?.phone_number?.toString() ?: ""
             )
 
             ProfileDetailItem(
-                label = "Phone",
-                value = "Not provided"
+                label = "Country",
+                value = userProfile?.country ?: ""
             )
 
             ProfileDetailItem(

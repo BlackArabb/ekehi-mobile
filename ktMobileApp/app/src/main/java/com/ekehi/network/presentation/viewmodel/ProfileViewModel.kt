@@ -81,7 +81,7 @@ class ProfileViewModel @Inject constructor(
                         currentUserId = user.id
                         loadUserProfile(user.id)
                     }.onFailure { error ->
-                        _userProfile.value = Resource.Error("User not logged in")
+                        _userProfile.value = Resource.Error("Failed to get current user: ${error.message}")
                     }
                 } catch (e: Exception) {
                     _userProfile.value = Resource.Error("User not logged in")
@@ -90,7 +90,19 @@ class ProfileViewModel @Inject constructor(
             }
 
             Log.d("ProfileViewModel", "Refreshing profile for user: $userId")
-            loadUserProfile(userId)
+            // Get current user email and pass it to loadUserProfile
+            try {
+                val result = authRepository.getCurrentUser()
+                result.onSuccess { user ->
+                    loadUserProfile(userId)
+                }.onFailure { error ->
+                    // If we can't get the user, still refresh with just the userId
+                    loadUserProfile(userId)
+                }
+            } catch (e: Exception) {
+                // If we can't get the user, still refresh with just the userId
+                loadUserProfile(userId)
+            }
         }
     }
 
@@ -185,7 +197,19 @@ class ProfileViewModel @Inject constructor(
             when (result) {
                 is SyncManager.SyncResult.Success -> {
                     Log.d("ProfileViewModel", "Sync successful, reloading profile")
-                    loadUserProfile(userId)
+                    // Get current user email and pass it to loadUserProfile
+                    try {
+                        val result = authRepository.getCurrentUser()
+                        result.onSuccess { user ->
+                            loadUserProfile(userId)
+                        }.onFailure { error ->
+                            // If we can't get the user, still refresh with just the userId
+                            loadUserProfile(userId)
+                        }
+                    } catch (e: Exception) {
+                        // If we can't get the user, still refresh with just the userId
+                        loadUserProfile(userId)
+                    }
                 }
                 is SyncManager.SyncResult.Failure -> {
                     Log.e("ProfileViewModel", "Sync failed: ${result.message}")

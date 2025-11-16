@@ -66,6 +66,8 @@ open class UserRepository @Inject constructor(
                     data = mapOf(
                         "userId" to userId,
                         "username" to username,
+                        "phone_number" to "",
+                        "country" to "",
                         "totalCoins" to 0.0,
                         "coinsPerSecond" to 0.0,
                         "autoMiningRate" to 0.0,
@@ -182,6 +184,8 @@ open class UserRepository @Inject constructor(
             userId = data["userId"] as? String ?: "",
             username = data["username"] as? String,
             email = data["email"] as? String,
+            phone_number = data["phone_number"] as? String ?: "",
+            country = data["country"] as? String ?: "",
             totalCoins = (data["totalCoins"] as? Number)?.toDouble() ?: 0.0,
             coinsPerSecond = (data["coinsPerSecond"] as? Number)?.toDouble() ?: 0.0,
             autoMiningRate = (data["autoMiningRate"] as? Number)?.toDouble() ?: 0.0,

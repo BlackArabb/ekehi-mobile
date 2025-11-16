@@ -41,6 +41,8 @@ fun EditUsernameScreen(
     
     // Form state
     var username by remember { mutableStateOf(userProfile?.username ?: "") }
+    var phoneNumber by remember { mutableStateOf(userProfile?.phone_number ?: "") }
+    var country by remember { mutableStateOf(userProfile?.country ?: "") }
     var isUpdating by remember { mutableStateOf(false) }
     var updateError by remember { mutableStateOf<String?>(null) }
     
@@ -66,6 +68,8 @@ fun EditUsernameScreen(
     LaunchedEffect(userProfile) {
         userProfile?.let {
             username = it.username ?: ""
+            phoneNumber = it.phone_number
+            country = it.country
         }
     }
     
@@ -217,6 +221,72 @@ fun EditUsernameScreen(
                                 unfocusedLabelColor = Color(0xB3FFFFFF)
                             )
                         )
+                        
+                        // Phone Number Field (Required)
+                        OutlinedTextField(
+                            value = phoneNumber,
+                            onValueChange = { 
+                                phoneNumber = it
+                                // Clear error when user starts typing
+                                if (updateError != null) {
+                                    updateError = null
+                                }
+                            },
+                            label = { 
+                                Text(
+                                    text = "Phone Number *",
+                                    color = Color(0xB3FFFFFF)
+                                )
+                            },
+                            placeholder = {
+                                Text(
+                                    text = "8-15 digits",
+                                    color = Color(0x80FFFFFF)
+                                )
+                            },
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFffa000),
+                                unfocusedBorderColor = Color(0x33FFFFFF),
+                                cursorColor = Color(0xFFffa000),
+                                focusedLabelColor = Color(0xFFffa000),
+                                unfocusedLabelColor = Color(0xB3FFFFFF)
+                            )
+                        )
+                        
+                        // Country Field (Required)
+                        OutlinedTextField(
+                            value = country,
+                            onValueChange = { 
+                                country = it
+                                // Clear error when user starts typing
+                                if (updateError != null) {
+                                    updateError = null
+                                }
+                            },
+                            label = { 
+                                Text(
+                                    text = "Country *",
+                                    color = Color(0xB3FFFFFF)
+                                )
+                            },
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFffa000),
+                                unfocusedBorderColor = Color(0x33FFFFFF),
+                                cursorColor = Color(0xFFffa000),
+                                focusedLabelColor = Color(0xFFffa000),
+                                unfocusedLabelColor = Color(0xB3FFFFFF)
+                            )
+                        )
                     }
                 }
                 
@@ -225,7 +295,25 @@ fun EditUsernameScreen(
                 // Save Button
                 Button(
                     onClick = {
-                        // Prepare updates for username only
+                        // Validate phone number
+                        val cleanedPhoneNumber = phoneNumber.filter { it.isDigit() }
+                        if (cleanedPhoneNumber.isEmpty()) {
+                            updateError = "Phone number is required"
+                            return@Button
+                        }
+                        
+                        // Check if the phone number length is between 8 and 15 digits
+                        if (cleanedPhoneNumber.length < 8 || cleanedPhoneNumber.length > 15) {
+                            updateError = "Phone number must be between 8 and 15 digits"
+                            return@Button
+                        }
+                        
+                        if (country.isEmpty()) {
+                            updateError = "Country is required"
+                            return@Button
+                        }
+                        
+                        // Prepare updates for all fields
                         val updates = mutableMapOf<String, Any>()
                         
                         // Only add username if it has changed
@@ -238,6 +326,16 @@ fun EditUsernameScreen(
                             if (username.isNotEmpty()) {
                                 updates["username"] = username
                             }
+                        }
+                        
+                        // Only add phone number if it has changed
+                        if (cleanedPhoneNumber != userProfile?.phone_number) {
+                            updates["phone_number"] = cleanedPhoneNumber
+                        }
+                        
+                        // Only add country if it has changed
+                        if (country != userProfile?.country) {
+                            updates["country"] = country
                         }
                         
                         // Validate that we have a user profile and documentId before updating

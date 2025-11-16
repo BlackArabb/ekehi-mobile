@@ -5,6 +5,8 @@ data class UserProfile(
         val userId: String,
         val username: String? = null,
         val email: String? = null, // ADD THIS LINE
+        val phone_number: String = "",
+        val country: String = "",
         val totalCoins: Double = 0.0,
         val coinsPerSecond: Double = 0.0, // Deprecated - will be replaced with autoMiningRate
         val autoMiningRate: Double = 0.0, // New field for auto mining rate
