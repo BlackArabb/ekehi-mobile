@@ -2,6 +2,9 @@ package com.ekehi.network.presentation.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -21,6 +24,12 @@ import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.presentation.ui.components.SocialTasksScreenSkeleton
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import java.net.URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +40,7 @@ fun SocialTasksScreen(
     // For now, we'll use a placeholder
     var userId by remember { mutableStateOf("user_id_placeholder") }
     val socialTasksResource by viewModel.socialTasks.collectAsState()
+    var isGridView by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadSocialTasks()
@@ -55,15 +65,32 @@ fun SocialTasksScreen(
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-            // Header
-            Text(
-                text = "Tasks",
-                color = Color.White,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
+            // Header with toggle button
+            Row(
                 modifier = Modifier
-                    .padding(top = 20.dp, bottom = 24.dp)
-            )
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, bottom = 24.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Tasks",
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                // Toggle view button
+                IconButton(
+                    onClick = { isGridView = !isGridView }
+                ) {
+                    Icon(
+                        imageVector = if (isGridView) Icons.Default.ViewList else Icons.Default.GridView,
+                        contentDescription = if (isGridView) "List View" else "Grid View",
+                        tint = Color.White
+                    )
+                }
+            }
 
             // Filter Tabs
             SocialTaskFilterTabs()
@@ -77,15 +104,27 @@ fun SocialTasksScreen(
                 }
                 is Resource.Success -> {
                     val tasks = (socialTasksResource as Resource.Success).data
-                    SocialTasksList(
-                        tasks = tasks,
-                        onTaskComplete = { taskId ->
-                            viewModel.completeSocialTask(userId, taskId, "", 0.0)
-                        },
-                        onTaskVerify = { taskId ->
-                            viewModel.verifySocialTask(userId, taskId)
-                        }
-                    )
+                    if (isGridView) {
+                        SocialTasksGrid(
+                            tasks = tasks,
+                            onTaskComplete = { taskId ->
+                                viewModel.completeSocialTask(userId, taskId, "", 0.0)
+                            },
+                            onTaskVerify = { taskId ->
+                                viewModel.verifySocialTask(userId, taskId)
+                            }
+                        )
+                    } else {
+                        SocialTasksList(
+                            tasks = tasks,
+                            onTaskComplete = { taskId ->
+                                viewModel.completeSocialTask(userId, taskId, "", 0.0)
+                            },
+                            onTaskVerify = { taskId ->
+                                viewModel.verifySocialTask(userId, taskId)
+                            }
+                        )
+                    }
                 }
                 is Resource.Error -> {
                     val error = (socialTasksResource as Resource.Error).message
@@ -178,6 +217,41 @@ fun SocialTasksList(
 }
 
 @Composable
+fun SocialTasksGrid(
+    tasks: List<com.ekehi.network.data.model.SocialTask>,
+    onTaskComplete: (String) -> Unit,
+    onTaskVerify: (String) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(tasks) { task ->
+            // Create a SocialTaskItem from the SocialTask model
+            val taskItem = SocialTaskItem(
+                id = task.id,
+                title = task.title,
+                description = task.description,
+                platform = task.platform,
+                link = task.actionUrl ?: "",
+                reward = task.rewardCoins,
+                isCompleted = task.isCompleted,
+                isVerified = task.isVerified
+            )
+            
+            SocialTaskGridItem(
+                task = taskItem,
+                onTaskComplete = onTaskComplete,
+                onTaskVerify = onTaskVerify
+            )
+        }
+    }
+}
+
+@Composable
 fun SocialTaskCard(
     task: SocialTaskItem,
     onTaskComplete: (String) -> Unit,
@@ -195,22 +269,38 @@ fun SocialTaskCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Platform Icon
+            // Platform Icon with favicon support
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .background(
                         color = getPlatformColor(task.platform),
-                        shape = androidx.compose.foundation.shape.CircleShape
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = getPlatformIcon(task.platform),
-                    contentDescription = task.platform,
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
+                if (task.link.isNotEmpty()) {
+                    // Try to load favicon, fallback to platform icon if failed
+                    val faviconUrl = getFaviconUrl(task.link)
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(faviconUrl)
+                                .crossfade(true)
+                                .build()
+                        ),
+                        contentDescription = task.platform,
+                        modifier = Modifier.size(24.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Icon(
+                        imageVector = getPlatformIcon(task.platform),
+                        contentDescription = task.platform,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -297,6 +387,161 @@ fun SocialTaskCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun SocialTaskGridItem(
+    task: SocialTaskItem,
+    onTaskComplete: (String) -> Unit,
+    onTaskVerify: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0x1AFFFFFF) // 10% opacity white
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Platform Icon with favicon support
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        color = getPlatformColor(task.platform),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (task.link.isNotEmpty()) {
+                    // Try to load favicon, fallback to platform icon if failed
+                    val faviconUrl = getFaviconUrl(task.link)
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(faviconUrl)
+                                .crossfade(true)
+                                .build()
+                        ),
+                        contentDescription = task.platform,
+                        modifier = Modifier.size(24.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Icon(
+                        imageVector = getPlatformIcon(task.platform),
+                        contentDescription = task.platform,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Task Info
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = task.title,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2
+                )
+                Text(
+                    text = task.description,
+                    color = Color(0xB3FFFFFF), // 70% opacity white
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp),
+                    maxLines = 2
+                )
+                Text(
+                    text = "+${task.reward} EKH",
+                    color = Color(0xFFffa000),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                
+                // Status badge
+                if (task.isVerified) {
+                    Text(
+                        text = "Verified",
+                        color = Color(0xFF10b981),
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                } else if (task.isCompleted) {
+                    Text(
+                        text = "Completed",
+                        color = Color(0xFFf59e0b),
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Action Button
+            if (task.isVerified) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Verified",
+                    tint = Color(0xFF10b981), // green
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (task.isCompleted) {
+                Button(
+                    onClick = { onTaskVerify(task.id) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFf59e0b)
+                    ),
+                    modifier = Modifier
+                        .height(28.dp)
+                        .fillMaxWidth(0.8f)
+                ) {
+                    Text(
+                        text = "Verify",
+                        color = Color.White,
+                        fontSize = 10.sp
+                    )
+                }
+            } else {
+                Button(
+                    onClick = { onTaskComplete(task.id) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFffa000)
+                    ),
+                    modifier = Modifier
+                        .height(28.dp)
+                        .fillMaxWidth(0.8f)
+                ) {
+                    Text(
+                        text = "Complete",
+                        color = Color.White,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+// Function to generate favicon URL like React Native app
+fun getFaviconUrl(url: String): String {
+    return try {
+        val domain = URL(url).host
+        "https://www.google.com/s2/favicons?domain=$domain&sz=64"
+    } catch (e: Exception) {
+        "https://www.google.com/s2/favicons?domain=example.com&sz=64"
     }
 }
 
