@@ -1,10 +1,21 @@
 package com.ekehi.network.presentation.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -68,7 +79,7 @@ fun ProfileHeaderSkeleton() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(24.dp),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Avatar Skeleton
         Box(
@@ -104,7 +115,7 @@ fun ProfileHeaderSkeleton() {
         
         // Verification Badge Skeleton
         Row(
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
@@ -167,7 +178,7 @@ fun MiningScreenSkeleton() {
                 .size(200.dp)
                 .clip(CircleShape)
                 .background(Color(0x1AFFFFFF))
-                .align(androidx.compose.ui.Alignment.CenterHorizontally)
+                .align(Alignment.CenterHorizontally)
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -255,7 +266,8 @@ fun LeaderboardScreenSkeleton() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .padding(16.dp)
+            .background(Color(0xFF1E1B2E)) // Dark purple background
     ) {
         // Header Skeleton
         Box(
@@ -264,47 +276,203 @@ fun LeaderboardScreenSkeleton() {
                 .height(28.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(Color(0x33FFFFFF))
+                .padding(top = 20.dp, bottom = 24.dp)
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
-        // Podium Skeleton
+        // Top Three Users Section Skeleton
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            // 2nd place
-            CardSkeleton(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(120.dp)
-            )
+            // 2nd place skeleton
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Profile image skeleton
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Username skeleton
+                Box(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Rank skeleton
+                Box(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+            }
             
-            // 1st place
-            CardSkeleton(
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(140.dp)
-            )
+            Spacer(modifier = Modifier.width(16.dp))
             
-            // 3rd place
-            CardSkeleton(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(100.dp)
-            )
+            // 1st place skeleton
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Profile image skeleton (larger for 1st place)
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Crown skeleton
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Username skeleton
+                Box(
+                    modifier = Modifier
+                        .width(70.dp)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Rank skeleton
+                Box(
+                    modifier = Modifier
+                        .width(50.dp)
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // 3rd place skeleton
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Profile image skeleton
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Username skeleton
+                Box(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Rank skeleton
+                Box(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+            }
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
-        // Leaderboard List Skeleton
+        // User Rank Banner Skeleton
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0xFF6A4FCF)) // Purple banner color
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Ranked User List Skeleton
         repeat(8) {
-            CardSkeleton(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Profile image skeleton
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFffa000)) // Orange color for profile
+                )
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                // Username and rank skeleton
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .width(100.dp)
+                            .height(14.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x33FFFFFF))
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Box(
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x33FFFFFF))
+                    )
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                // Rank change indicator skeleton
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x33FFFFFF))
+                )
+            }
+            
+            if (it < 7) {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
