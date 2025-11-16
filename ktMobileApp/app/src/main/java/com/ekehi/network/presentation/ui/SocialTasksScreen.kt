@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import java.net.URL
+import androidx.compose.foundation.border
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +64,7 @@ fun SocialTasksScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
+                .padding(horizontal = 20.dp)
         ) {
             // Header with toggle button
             Row(
@@ -74,7 +75,7 @@ fun SocialTasksScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Tasks",
+                    text = "Social Tasks",
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
@@ -92,8 +93,8 @@ fun SocialTasksScreen(
                 }
             }
 
-            // Filter Tabs
-            SocialTaskFilterTabs()
+            // Stats Section (matching React Native design)
+            StatsSection(viewModel)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -155,6 +156,91 @@ fun SocialTasksScreen(
     }
 }
 
+@Composable
+fun StatsSection(viewModel: SocialTasksViewModel) {
+    val socialTasksResource by viewModel.socialTasks.collectAsState()
+    
+    // Calculate stats from tasks
+    var completedTasks = 0
+    var totalTasks = 0
+    var totalRewards = 0.0
+    
+    if (socialTasksResource is Resource.Success) {
+        val tasks = (socialTasksResource as Resource.Success).data
+        totalTasks = tasks.size
+        completedTasks = tasks.count { it.isCompleted }
+        totalRewards = tasks.filter { it.isCompleted }.sumOf { it.rewardCoins }
+    }
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = Color(0x0DFFFFFF), // 5% opacity white
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = Color(0x4DFFA000), // 30% opacity orange
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        // Completed Tasks Card
+        Box(modifier = Modifier.weight(1f)) {
+            StatCard(
+                value = "$completedTasks/$totalTasks",
+                label = "Completed"
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        // EKH Earned Card
+        Box(modifier = Modifier.weight(1f)) {
+            StatCard(
+                value = totalRewards.toString(),
+                label = "EKH Earned"
+            )
+        }
+    }
+}
+
+@Composable
+fun StatCard(
+    value: String,
+    label: String
+) {
+    Column(
+        modifier = Modifier
+            .background(
+                color = Color(0x1AFFFFFF), // 10% opacity white
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = Color(0x4DFFA000), // 30% opacity orange
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+            )
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = label,
+            color = Color(0x99FFFFFF), // 60% opacity white
+            fontSize = 14.sp,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SocialTaskFilterTabs() {
@@ -192,7 +278,10 @@ fun SocialTasksList(
     onTaskComplete: (String) -> Unit,
     onTaskVerify: (String) -> Unit
 ) {
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         items(tasks) { task ->
             // Create a SocialTaskItem from the SocialTask model
             val taskItem = SocialTaskItem(
@@ -211,7 +300,6 @@ fun SocialTasksList(
                 onTaskComplete = onTaskComplete,
                 onTaskVerify = onTaskVerify
             )
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -258,132 +346,194 @@ fun SocialTaskCard(
     onTaskVerify: (String) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = Color(0x4DFFA000), // 30% opacity orange
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+            ),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
+        ),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            // Platform Icon with favicon support
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        color = getPlatformColor(task.platform),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
-                    ),
-                contentAlignment = Alignment.Center
+            // Task Header (Icon, Title, Description)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
             ) {
-                if (task.link.isNotEmpty()) {
-                    // Try to load favicon, fallback to platform icon if failed
-                    val faviconUrl = getFaviconUrl(task.link)
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(faviconUrl)
-                                .crossfade(true)
-                                .build()
+                // Platform Icon with favicon support
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .background(
+                            color = getPlatformColor(task.platform),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                         ),
-                        contentDescription = task.platform,
-                        modifier = Modifier.size(24.dp),
-                        contentScale = ContentScale.Fit
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (task.link.isNotEmpty()) {
+                        // Try to load favicon, fallback to platform icon if failed
+                        val faviconUrl = getFaviconUrl(task.link)
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current)
+                                    .data(faviconUrl)
+                                    .crossfade(true)
+                                    .build()
+                            ),
+                            contentDescription = task.platform,
+                            modifier = Modifier.size(32.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    } else {
+                        Icon(
+                            imageVector = getPlatformIcon(task.platform),
+                            contentDescription = task.platform,
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Task Info
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = task.title,
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                } else {
-                    Icon(
-                        imageVector = getPlatformIcon(task.platform),
-                        contentDescription = task.platform,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                    Text(
+                        text = task.description,
+                        color = Color(0xB3FFFFFF), // 70% opacity white
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(top = 4.dp),
+                        lineHeight = 20.sp
                     )
+                    if (task.link.isNotEmpty()) {
+                        Text(
+                            text = extractDomain(task.link),
+                            color = Color(0x80FFFFFF), // 50% opacity white
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 4.dp),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Task Info
-            Column(
-                modifier = Modifier.weight(1f)
+            // Task Footer (Reward and Action Button)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = task.title,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = task.description,
-                    color = Color(0xB3FFFFFF), // 70% opacity white
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-                Text(
-                    text = "+${task.reward} EKH",
-                    color = Color(0xFFffa000),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-                
-                // Status badge
+                // Reward Container
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "+${task.reward}",
+                        color = Color(0xFFffa000),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "EKH",
+                        color = Color(0x99FFFFFF), // 60% opacity white
+                        fontSize = 14.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Action Button
                 if (task.isVerified) {
-                    Text(
-                        text = "Verified",
-                        color = Color(0xFF10b981),
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Verified",
+                            tint = Color(0xFF10b981), // green
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "Completed",
+                            color = Color(0xFF10b981),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 } else if (task.isCompleted) {
-                    Text(
-                        text = "Completed - Awaiting Verification",
-                        color = Color(0xFFf59e0b),
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Action Button
-            if (task.isVerified) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Verified",
-                    tint = Color(0xFF10b981), // green
-                    modifier = Modifier.size(24.dp)
-                )
-            } else if (task.isCompleted) {
-                Button(
-                    onClick = { onTaskVerify(task.id) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFf59e0b)
-                    ),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Text(
-                        text = "Verify",
-                        color = Color.White,
-                        fontSize = 12.sp
-                    )
-                }
-            } else {
-                Button(
-                    onClick = { onTaskComplete(task.id) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFffa000)
-                    ),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Text(
-                        text = "Complete",
-                        color = Color.White,
-                        fontSize = 12.sp
-                    )
+                    Button(
+                        onClick = { onTaskVerify(task.id) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFf59e0b)
+                        ),
+                        modifier = Modifier
+                            .height(36.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Completed",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Completed",
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = { onTaskComplete(task.id) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFffa000)
+                        ),
+                        modifier = Modifier
+                            .height(36.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.OpenInNew, // Changed from ExternalLink to OpenInNew
+                                contentDescription = "Complete",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Complete",
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -397,10 +547,17 @@ fun SocialTaskGridItem(
     onTaskVerify: (String) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = Color(0x4DFFA000), // 30% opacity orange
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+            ),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
+        ),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -411,10 +568,10 @@ fun SocialTaskGridItem(
             // Platform Icon with favicon support
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(52.dp)
                     .background(
                         color = getPlatformColor(task.platform),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -429,7 +586,7 @@ fun SocialTaskGridItem(
                                 .build()
                         ),
                         contentDescription = task.platform,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(32.dp),
                         contentScale = ContentScale.Fit
                     )
                 } else {
@@ -437,7 +594,7 @@ fun SocialTaskGridItem(
                         imageVector = getPlatformIcon(task.platform),
                         contentDescription = task.platform,
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -460,44 +617,47 @@ fun SocialTaskGridItem(
                     color = Color(0xB3FFFFFF), // 70% opacity white
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 4.dp),
-                    maxLines = 2
+                    maxLines = 2,
+                    lineHeight = 16.sp
                 )
+                if (task.link.isNotEmpty()) {
+                    Text(
+                        text = extractDomain(task.link),
+                        color = Color(0x80FFFFFF), // 50% opacity white
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 4.dp),
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    )
+                }
                 Text(
                     text = "+${task.reward} EKH",
                     color = Color(0xFFffa000),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 8.dp)
                 )
-                
-                // Status badge
-                if (task.isVerified) {
-                    Text(
-                        text = "Verified",
-                        color = Color(0xFF10b981),
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                } else if (task.isCompleted) {
-                    Text(
-                        text = "Completed",
-                        color = Color(0xFFf59e0b),
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Action Button
             if (task.isVerified) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Verified",
-                    tint = Color(0xFF10b981), // green
-                    modifier = Modifier.size(20.dp)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Verified",
+                        tint = Color(0xFF10b981), // green
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = "Completed",
+                        color = Color(0xFF10b981),
+                        fontSize = 10.sp
+                    )
+                }
             } else if (task.isCompleted) {
                 Button(
                     onClick = { onTaskVerify(task.id) },
@@ -508,11 +668,22 @@ fun SocialTaskGridItem(
                         .height(28.dp)
                         .fillMaxWidth(0.8f)
                 ) {
-                    Text(
-                        text = "Verify",
-                        color = Color.White,
-                        fontSize = 10.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Completed",
+                            tint = Color.White,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = "Completed",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                    }
                 }
             } else {
                 Button(
@@ -524,11 +695,22 @@ fun SocialTaskGridItem(
                         .height(28.dp)
                         .fillMaxWidth(0.8f)
                 ) {
-                    Text(
-                        text = "Complete",
-                        color = Color.White,
-                        fontSize = 10.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.OpenInNew, // Changed from ExternalLink to OpenInNew
+                            contentDescription = "Complete",
+                            tint = Color.White,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = "Complete",
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                    }
                 }
             }
         }
@@ -542,6 +724,20 @@ fun getFaviconUrl(url: String): String {
         "https://www.google.com/s2/favicons?domain=$domain&sz=64"
     } catch (e: Exception) {
         "https://www.google.com/s2/favicons?domain=example.com&sz=64"
+    }
+}
+
+// Function to extract domain from URL like React Native app
+fun extractDomain(url: String): String {
+    return try {
+        val domain = URL(url).host
+        if (domain.startsWith("www.")) {
+            domain.substring(4)
+        } else {
+            domain
+        }
+    } catch (e: Exception) {
+        "unknown"
     }
 }
 
