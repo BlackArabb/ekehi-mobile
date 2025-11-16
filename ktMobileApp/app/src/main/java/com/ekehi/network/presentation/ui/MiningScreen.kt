@@ -174,11 +174,6 @@ fun MiningScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Auto Mining Status
-                MiningAutoMiningStatus()
-
-                Spacer(modifier = Modifier.height(24.dp))
-
                 // Referral Card
                 ReferralCard()
             }
@@ -651,56 +646,6 @@ fun MiningAdBonusButton(
 }
 
 
-
-@Composable
-fun MiningAutoMiningStatus() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Autorenew,
-                contentDescription = "Auto Mining",
-                tint = Color(0xFF4ecdc4),
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Auto Mining",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "Keep app in background to continue mining",
-                    color = Color.Gray,
-                    fontSize = 12.sp
-                )
-            }
-            Switch(
-                checked = true,
-                onCheckedChange = { /* Handle toggle */ },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = Color(0xFF4ecdc4),
-                    uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = Color.Gray
-                )
-            )
-        }
-    }
-}
 
 @Composable
 fun ReferralCard() {
