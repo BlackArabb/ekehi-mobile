@@ -58,10 +58,12 @@ import com.ekehi.network.di.StartIoServiceEntryPoint
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
 import com.ekehi.network.R
+import androidx.navigation.NavHostController
 
 @Composable
 fun MiningScreen(
-    viewModel: MiningViewModel = hiltViewModel()
+    viewModel: MiningViewModel = hiltViewModel(),
+    navController: NavHostController? = null
 ) {
     // Get MiningManager through DI
     /*val miningManager = EntryPointAccessors.fromApplication(
@@ -152,7 +154,17 @@ fun MiningScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // User Profile Card at the top with real user data and streaks
-                UserProfileCard(userProfile = userProfile)
+                UserProfileCard(
+                    userProfile = userProfile,
+                    onNavigateToProfile = { 
+                        // Navigate to settings screen
+                        try {
+                            navController?.navigate("settings")
+                        } catch (e: Exception) {
+                            Log.e("MiningScreen", "Navigation error", e)
+                        }
+                    }
+                )
                 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -205,32 +217,24 @@ fun MiningScreen(
 
 @Composable
 fun UserProfileCard(
-    userProfile: UserProfile?
+    userProfile: UserProfile?,
+    onNavigateToProfile: () -> Unit = {}
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = Color(0x1AFFFFFF), // rgba(255, 255, 255, 0.1)
-                shape = RoundedCornerShape(20.dp)
-            )
-            .shadow(elevation = 5.dp, shape = RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x0CFFFFFF) // rgba(255, 255, 255, 0.05)
-        ),
-        shape = RoundedCornerShape(20.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // Left side: User Avatar, Username, and Total Balance
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // User Avatar
+            // User Avatar (smaller size)
             Box(
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(36.dp) // Further reduced size
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
@@ -247,69 +251,68 @@ fun UserProfileCard(
                     imageVector = Icons.Default.Person,
                     contentDescription = "User Avatar",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(14.dp) // Reduced size
                 )
-                
                 // Online indicator
                 Box(
                     modifier = Modifier
-                        .size(16.dp)
+                        .size(8.dp) // Reduced size
                         .align(Alignment.BottomEnd)
-                        .offset(x = 4.dp, y = 4.dp)
+                        .offset(x = 1.dp, y = 1.dp) // Adjusted offset
                         .background(Color(0xFF10b981), CircleShape) // Green dot
                 )
             }
+            Spacer(modifier = Modifier.width(8.dp)) // Reduced spacing
             
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            // User Info Section
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            // User Info Section with reduced font sizes
+            Column {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = userProfile?.username ?: "User Name",
                         color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 14.sp, // Further reduced from 16.sp
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1 // Prevent text overflow
                     )
+                    Spacer(modifier = Modifier.width(4.dp)) // Reduced spacing
                     
-                    Spacer(modifier = Modifier.width(8.dp))
-                    
-                    // Verification Badge
+                    // Verification Badge (smaller)
                     Box(
                         modifier = Modifier
-                            .size(20.dp)
+                            .size(14.dp) // Reduced size
                             .background(Color(0xFF3b82f6), CircleShape), // Blue circle
                         contentAlignment = Alignment.Center
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
+                                .size(5.dp) // Reduced size
                                 .background(Color.White, CircleShape) // White dot inside
                         )
                     }
                 }
-                
                 Text(
                     text = "Total Balance",
                     color = Color(0xB3FFFFFF), // Light gray
-                    fontSize = 14.sp
+                    fontSize = 10.sp, // Further reduced from 12.sp
+                    maxLines = 1
                 )
-                
                 Text(
                     text = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
                     color = Color(0xFFffa000), // Orange
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 12.sp, // Further reduced from 14.sp
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
             }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            // Stats Section with Streaks
+        }
+        
+        // Right side: Streaks and Settings Icon
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Stats Section with Streaks (reduced font sizes)
             Column(
                 horizontalAlignment = Alignment.End
             ) {
@@ -324,24 +327,24 @@ fun UserProfileCard(
                             imageVector = Icons.Default.LocalFireDepartment,
                             contentDescription = "Streak",
                             tint = Color(0xFFef4444), // Red
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(12.dp) // Further reduced size
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(2.dp)) // Reduced spacing
                         Text(
                             text = (userProfile?.currentStreak ?: 0).toString(),
                             color = Color.White,
-                            fontSize = 18.sp,
+                            fontSize = 12.sp, // Further reduced from 14.sp
                             fontWeight = FontWeight.Bold
                         )
                     }
                     Text(
                         text = "Streak",
                         color = Color(0xB3FFFFFF), // Light gray
-                        fontSize = 12.sp
+                        fontSize = 8.sp, // Further reduced from 10.sp
+                        maxLines = 1
                     )
                 }
-                
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(8.dp)) // Further reduced spacing
                 
                 // Longest Streak
                 Column(
@@ -354,22 +357,37 @@ fun UserProfileCard(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Longest Streak",
                             tint = Color(0xFFfbbf24), // Yellow
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(12.dp) // Further reduced size
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(2.dp)) // Reduced spacing
                         Text(
                             text = (userProfile?.longestStreak ?: 0).toString(),
                             color = Color.White,
-                            fontSize = 18.sp,
+                            fontSize = 12.sp, // Further reduced from 14.sp
                             fontWeight = FontWeight.Bold
                         )
                     }
                     Text(
                         text = "Best",
                         color = Color(0xB3FFFFFF), // Light gray
-                        fontSize = 12.sp
+                        fontSize = 8.sp, // Further reduced from 10.sp
+                        maxLines = 1
                     )
                 }
+            }
+            Spacer(modifier = Modifier.width(12.dp)) // Reduced spacing
+            
+            // Settings Icon for quick access
+            IconButton(
+                onClick = onNavigateToProfile,
+                modifier = Modifier.size(32.dp) // Reduced size for touch target
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = Color(0xFFffa000), // Orange color to match theme
+                    modifier = Modifier.size(18.dp) // Reduced icon size
+                )
             }
         }
     }

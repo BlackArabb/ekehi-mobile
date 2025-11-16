@@ -287,7 +287,7 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                 startDestination = "mining"
             ) {
                 composable("mining") {
-                    MiningScreen()
+                    MiningScreen(navController = navController)
                 }
 
                 composable("social") {
