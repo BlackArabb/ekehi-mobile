@@ -146,12 +146,8 @@ fun MiningScreenSkeleton() {
             .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
-        // User Profile Card Skeleton
-        CardSkeleton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-        )
+        // Updated User Profile Card Skeleton to match the new UI
+        UserProfileCardSkeleton()
         
         Spacer(modifier = Modifier.height(24.dp))
         
@@ -199,6 +195,171 @@ fun MiningScreenSkeleton() {
                 .fillMaxWidth()
                 .height(150.dp)
         )
+    }
+}
+
+@Composable
+fun UserProfileCardSkeleton() {
+    // Match the structure of the updated UserProfileCard
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Left side: User Avatar and Info
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // User Avatar Skeleton (36.dp size)
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x33FFFFFF))
+            )
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // User Info Section
+            Column {
+                // Username and Verification Badge Row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(14.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x33FFFFFF))
+                    )
+                    
+                    Spacer(modifier = Modifier.width(4.dp))
+                    
+                    // Verification Badge Skeleton (14.dp size)
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x33FFFFFF))
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(2.dp))
+                
+                // Total Balance Label
+                Box(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+                
+                Spacer(modifier = Modifier.height(2.dp))
+                
+                // Total Balance Value
+                Box(
+                    modifier = Modifier
+                        .width(70.dp)
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0x33FFFFFF))
+                )
+            }
+        }
+        
+        // Right side: Streaks and Settings Icon
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Stats Section with Streaks
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                // Current Streak
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Streak Icon and Value Row
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x33FFFFFF))
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(10.dp)
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color(0x33FFFFFF))
+                        )
+                    }
+                    // Streak Label
+                    Box(
+                        modifier = Modifier
+                            .width(24.dp)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x33FFFFFF))
+                            .padding(top = 2.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Longest Streak
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Best Icon and Value Row
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .clip(CircleShape)
+                                .background(Color(0x33FFFFFF))
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(10.dp)
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color(0x33FFFFFF))
+                        )
+                    }
+                    // Best Label
+                    Box(
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x33FFFFFF))
+                            .padding(top = 2.dp)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            // Settings Icon Skeleton (32.dp size)
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x33FFFFFF))
+            )
+        }
     }
 }
 
