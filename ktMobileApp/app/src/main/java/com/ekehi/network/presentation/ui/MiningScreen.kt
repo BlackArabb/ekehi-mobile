@@ -682,11 +682,31 @@ fun DirectShareCard() {
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.facebook),
-                        contentDescription = "Facebook",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF1877F2).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF1877F2),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.facebook),
+                            contentDescription = "Facebook",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
                 
                 // Telegram
@@ -696,11 +716,31 @@ fun DirectShareCard() {
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.telegram),
-                        contentDescription = "Telegram",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF0088CC).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF0088CC),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.telegram),
+                            contentDescription = "Telegram",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
                 
                 // WhatsApp
@@ -710,11 +750,31 @@ fun DirectShareCard() {
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.whatsapp),
-                        contentDescription = "WhatsApp",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF25D366).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF25D366),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.whatsapp),
+                            contentDescription = "WhatsApp",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
                 
                 // Twitter
@@ -724,11 +784,31 @@ fun DirectShareCard() {
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.twitter),
-                        contentDescription = "Twitter",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF1DA1F2).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF1DA1F2),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.twitter),
+                            contentDescription = "Twitter",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
                 
                 // Messenger
@@ -738,11 +818,31 @@ fun DirectShareCard() {
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.messenger),
-                        contentDescription = "Messenger",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF006AFF).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF006AFF),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.messenger),
+                            contentDescription = "Messenger",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
                 
                 // Discord
@@ -752,11 +852,31 @@ fun DirectShareCard() {
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.discord),
-                        contentDescription = "Discord",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF5865F2).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF5865F2),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.discord),
+                            contentDescription = "Discord",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
                 
                 // Line
@@ -766,11 +886,31 @@ fun DirectShareCard() {
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.line),
-                        contentDescription = "LINE",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF00C300).copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFF00C300),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.line),
+                            contentDescription = "LINE",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             }
         }
