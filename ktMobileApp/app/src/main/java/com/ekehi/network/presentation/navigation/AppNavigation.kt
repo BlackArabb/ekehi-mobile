@@ -39,6 +39,7 @@ import com.ekehi.network.presentation.ui.LeaderboardScreen
 import com.ekehi.network.presentation.ui.TermsOfServiceScreen
 import com.ekehi.network.presentation.ui.PrivacyPolicyScreen
 import com.ekehi.network.presentation.ui.DataManagementScreen
+import com.ekehi.network.presentation.ui.FriendsScreen
 import com.ekehi.network.presentation.ui.components.BottomNavigationBar
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
@@ -456,7 +457,20 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                         }
                     )
                 }
-                
+
+                // Add Friends Screen
+                composable("friends") {
+                    FriendsScreen(
+                        onNavigateBack = {
+                            try {
+                                navController.popBackStack()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Navigation error", e)
+                            }
+                        }
+                    )
+                }
+
                 // Add Privacy Policy Screen
                 composable("privacy_policy") {
                     PrivacyPolicyScreen(

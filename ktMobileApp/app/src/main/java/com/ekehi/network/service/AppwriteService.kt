@@ -36,5 +36,6 @@ class AppwriteService @Inject constructor(
         const val USER_ACHIEVEMENTS_COLLECTION = "user_achievements"
         const val PRESALE_PURCHASES_COLLECTION = "presale_purchases"
         const val AD_VIEWS_COLLECTION = "ad_views"
+        const val REFERRALS_COLLECTION = "referrals"
     }
 }

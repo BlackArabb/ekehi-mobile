@@ -3,6 +3,7 @@ package com.ekehi.network.data.repository
 import android.util.Log
 import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.data.model.UserProfile
+import com.ekehi.network.data.model.Referral
 import com.ekehi.network.performance.PerformanceMonitor
 import io.appwrite.models.Document
 import io.appwrite.exceptions.AppwriteException
@@ -175,6 +176,46 @@ open class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun getReferrals(): List<Referral> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // This would need the current user ID to fetch their referrals
+                // For now, returning an empty list as we need to implement proper authentication context
+                emptyList()
+            } catch (e: Exception) {
+                Log.e("UserRepository", "Error fetching referrals", e)
+                emptyList()
+            }
+        }
+    }
+
+    // Helper method to convert Appwrite document to Referral model
+    private fun documentToReferral(document: Document<*>): Referral {
+        @Suppress("UNCHECKED_CAST")
+        val data = document.data as Map<String, Any>
+        
+        return Referral(
+            id = document.id ?: "",
+            referrerId = data["referrerId"] as? String ?: "",
+            referredUserId = data["referredUserId"] as? String ?: "",
+            referredUserName = data["referredUserName"] as? String,
+            referralCode = data["referralCode"] as? String ?: "",
+            rewardAmount = (data["rewardAmount"] as? Number)?.toDouble() ?: 0.5,
+            rewardClaimed = data["rewardClaimed"] as? Boolean ?: false,
+            createdAt = (data["createdAt"] as? String)?.let { parseTimestamp(it) },
+            claimedAt = (data["claimedAt"] as? String)?.let { parseTimestamp(it) }
+        )
+    }
+
+    private fun parseTimestamp(timestamp: String): Long? {
+        return try {
+            val formatter = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault())
+            formatter.parse(timestamp)?.time
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
     private fun documentToUserProfile(document: Document<*>): UserProfile {
         @Suppress("UNCHECKED_CAST")
         val data = document.data as Map<String, Any>

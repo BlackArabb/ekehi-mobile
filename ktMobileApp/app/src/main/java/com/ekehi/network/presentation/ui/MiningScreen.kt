@@ -187,7 +187,7 @@ fun MiningScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Referral Card
-                ReferralCard()
+                ReferralCard(navController = navController)
             }
         }
         
@@ -535,7 +535,7 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
 
 
 @Composable
-fun ReferralCard() {
+fun ReferralCard(navController: NavHostController? = null) {
     val context = LocalContext.current
     
     Card(
@@ -578,31 +578,226 @@ fun ReferralCard() {
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            Button(
-                onClick = { 
-                    // Share referral link outside the app
-                    val sendIntent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
-                        type = "text/plain"
-                    }
-                    
-                    val shareIntent = Intent.createChooser(sendIntent, "Share referral link via")
-                    context.startActivity(shareIntent)
-                },
+            // Buttons Row
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFffa000)
-                )
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "Share Referral Link",
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                // View Friends Button
+                Button(
+                    onClick = { 
+                        try {
+                            navController?.navigate("friends")
+                        } catch (e: Exception) {
+                            Log.e("MiningScreen", "Navigation error", e)
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8b5cf6)
+                    )
+                ) {
+                    Text(
+                        text = "View Friends",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                
+                // Share Referral Link Button
+                Button(
+                    onClick = { 
+                        // Share referral link outside the app
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                            type = "text/plain"
+                        }
+                        
+                        val shareIntent = Intent.createChooser(sendIntent, "Share referral link via")
+                        context.startActivity(shareIntent)
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFffa000)
+                    )
+                ) {
+                    Text(
+                        text = "Share",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Social Media Sharing Icons in one line
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Facebook
+                IconButton(
+                    onClick = { 
+                        shareToSocialMedia(context, "https://facebook.com/sharer/sharer.php?u=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF1877F2)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Facebook,
+                            contentDescription = "Facebook",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                // Telegram
+                IconButton(
+                    onClick = { 
+                        shareToSocialMedia(context, "https://t.me/share/url?url=&text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF0088CC)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Telegram",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                // WhatsApp
+                IconButton(
+                    onClick = { 
+                        shareToSocialMedia(context, "https://api.whatsapp.com/send?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF25D366)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Chat,
+                            contentDescription = "WhatsApp",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                // Twitter
+                IconButton(
+                    onClick = { 
+                        shareToSocialMedia(context, "https://twitter.com/intent/tweet?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF1DA1F2)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tag,
+                            contentDescription = "Twitter",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                // Messenger
+                IconButton(
+                    onClick = { 
+                        shareToSocialMedia(context, "https://www.facebook.com/dialog/send?app_id=&display=popup&href=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF006AFF)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QuestionAnswer,
+                            contentDescription = "Messenger",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                // Line
+                IconButton(
+                    onClick = { 
+                        shareToSocialMedia(context, "https://social-plugins.line.me/lineit/share?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                    },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF00C300)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "LINE",
+                            color = Color.White,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+// Helper function for sharing to social media
+fun shareToSocialMedia(context: android.content.Context, baseUrl: String, message: String) {
+    try {
+        val url = baseUrl + android.net.Uri.encode(message)
+        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        android.util.Log.e("MiningScreen", "Error sharing to social media", e)
+        // Fallback to generic share
+        val sendIntent = android.content.Intent().apply {
+            action = android.content.Intent.ACTION_SEND
+            putExtra(android.content.Intent.EXTRA_TEXT, message)
+            type = "text/plain"
+        }
+        val shareIntent = android.content.Intent.createChooser(sendIntent, "Share via")
+        context.startActivity(shareIntent)
     }
 }
 
