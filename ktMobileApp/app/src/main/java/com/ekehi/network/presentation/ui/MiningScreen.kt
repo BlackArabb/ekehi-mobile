@@ -186,8 +186,15 @@ fun MiningScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Referral Card
+                // Referral Card (invite/friend buttons only)
                 ReferralCard(navController = navController)
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Direct Share Card (separated from ReferralCard)
+                DirectShareCard()
+                
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
         
@@ -578,7 +585,7 @@ fun ReferralCard(navController: NavHostController? = null) {
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Buttons Row
+            // Buttons Row (Invite/Friend buttons only)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -592,7 +599,9 @@ fun ReferralCard(navController: NavHostController? = null) {
                             Log.e("MiningScreen", "Navigation error", e)
                         }
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF8b5cf6)
                     )
@@ -618,7 +627,9 @@ fun ReferralCard(navController: NavHostController? = null) {
                         val shareIntent = Intent.createChooser(sendIntent, "Share referral link via")
                         context.startActivity(shareIntent)
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFffa000)
                     )
@@ -631,10 +642,34 @@ fun ReferralCard(navController: NavHostController? = null) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DirectShareCard() {
+    val context = LocalContext.current
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0x1AFFFFFF) // 10% opacity white
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Text(
+                text = "Share Directly",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Social Media Sharing Icons in one line
+            // Social Media Sharing Icons in one line with actual logos
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -645,22 +680,13 @@ fun ReferralCard(navController: NavHostController? = null) {
                     onClick = { 
                         shareToSocialMedia(context, "https://facebook.com/sharer/sharer.php?u=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
                     },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF1877F2)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Facebook,
-                            contentDescription = "Facebook",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.facebook),
+                        contentDescription = "Facebook",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 
                 // Telegram
@@ -668,22 +694,13 @@ fun ReferralCard(navController: NavHostController? = null) {
                     onClick = { 
                         shareToSocialMedia(context, "https://t.me/share/url?url=&text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
                     },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF0088CC)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Telegram",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.telegram),
+                        contentDescription = "Telegram",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 
                 // WhatsApp
@@ -691,22 +708,13 @@ fun ReferralCard(navController: NavHostController? = null) {
                     onClick = { 
                         shareToSocialMedia(context, "https://api.whatsapp.com/send?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
                     },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF25D366)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Chat,
-                            contentDescription = "WhatsApp",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.whatsapp),
+                        contentDescription = "WhatsApp",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 
                 // Twitter
@@ -714,22 +722,13 @@ fun ReferralCard(navController: NavHostController? = null) {
                     onClick = { 
                         shareToSocialMedia(context, "https://twitter.com/intent/tweet?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
                     },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF1DA1F2)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Tag,
-                            contentDescription = "Twitter",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.twitter),
+                        contentDescription = "Twitter",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 
                 // Messenger
@@ -737,22 +736,27 @@ fun ReferralCard(navController: NavHostController? = null) {
                     onClick = { 
                         shareToSocialMedia(context, "https://www.facebook.com/dialog/send?app_id=&display=popup&href=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
                     },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF006AFF)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.QuestionAnswer,
-                            contentDescription = "Messenger",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.messenger),
+                        contentDescription = "Messenger",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                
+                // Discord
+                IconButton(
+                    onClick = { 
+                        shareToSocialMedia(context, "https://discord.com/channels/@me", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                    },
+                    modifier = Modifier.size(50.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.discord),
+                        contentDescription = "Discord",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 
                 // Line
@@ -760,22 +764,13 @@ fun ReferralCard(navController: NavHostController? = null) {
                     onClick = { 
                         shareToSocialMedia(context, "https://social-plugins.line.me/lineit/share?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
                     },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF00C300)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "LINE",
-                            color = Color.White,
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.line),
+                        contentDescription = "LINE",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
             }
         }
