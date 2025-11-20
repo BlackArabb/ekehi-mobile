@@ -132,6 +132,9 @@ class SplashActivity : ComponentActivity() {
     private fun navigateToMainActivity(isAuthenticated: Boolean) {
         Log.d("SplashActivity", "Navigating to MainActivity with auth status: $isAuthenticated")
         
+        // Reset the login state before navigating to ensure clean state for LoginScreen
+        loginViewModel.resetState()
+        
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("IS_AUTHENTICATED", isAuthenticated)
             // Clear the splash activity from back stack

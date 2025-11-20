@@ -19,12 +19,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.runtime.DisposableEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -38,77 +39,51 @@ fun LoginScreen(
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isRememberMeChecked by remember { mutableStateOf(false) }
     
-    // Separate states for email login
-    var isEmailLoginLoading by remember { mutableStateOf(false) }
-    var emailLoginError by remember { mutableStateOf<String?>(null) }
-    
-    // Separate states for OAuth
-    var isOAuthLoading by remember { mutableStateOf(false) }
-    var oAuthError by remember { mutableStateOf<String?>(null) }
-    
-    val coroutineScope = rememberCoroutineScope()
-
-    // Handle login state changes
+    // Collect states properly
     val loginState by viewModel.loginState.collectAsState()
+    val oauthState by oAuthViewModel.oauthState.collectAsState()
+    
+    // Derive UI states from the collected states
+    val isEmailLoginLoading = loginState is Resource.Loading
+    val emailLoginError = (loginState as? Resource.Error)?.message
+    val oAuthError = (oauthState as? Resource.Error)?.message
+
+    // Calculate if button should be enabled
+    val isLoginButtonEnabled = remember(email, password, isEmailLoginLoading) {
+        !isEmailLoginLoading && email.trim().isNotEmpty() && password.trim().isNotEmpty()
+    }
+
+    // Handle login success
     LaunchedEffect(loginState) {
         Log.d("LoginScreen", "Login state changed: ${loginState.javaClass.simpleName}")
-        when (loginState) {
-            is Resource.Loading -> {
-                Log.d("LoginScreen", "Setting email login loading state to true")
-                isEmailLoginLoading = true
-                emailLoginError = null
-            }
-            is Resource.Success -> {
-                Log.d("LoginScreen", "Email login successful, navigating to dashboard")
-                isEmailLoginLoading = false
-                // Use coroutineScope to safely call onLoginSuccess
-                coroutineScope.launch {
-                    onLoginSuccess()
-                }
-            }
-            is Resource.Error -> {
-                Log.e("LoginScreen", "Email login error: ${(loginState as Resource.Error).message}")
-                isEmailLoginLoading = false
-                emailLoginError = (loginState as Resource.Error).message
-            }
-            is Resource.Idle -> {
-                Log.d("LoginScreen", "Email login state is idle")
-                isEmailLoginLoading = false
-                emailLoginError = null
-            }
+        if (loginState is Resource.Success) {
+            Log.d("LoginScreen", "Email login successful, navigating to dashboard")
+            onLoginSuccess()
         }
     }
 
-    // Handle OAuth state changes
-    val oauthState by oAuthViewModel.oauthState.collectAsState()
+    // Handle OAuth success
     LaunchedEffect(oauthState) {
-        when (oauthState) {
-            is Resource.Loading -> {
-                isOAuthLoading = true
-                oAuthError = null
-            }
-            is Resource.Success -> {
-                isOAuthLoading = false
-                // For OAuth, we need to check if we have a valid session
-                // The OAuthCallbackActivity should have set up the session
-                // Let's verify the current user to confirm successful authentication
-                viewModel.checkCurrentUser()
-            }
-            is Resource.Error -> {
-                isOAuthLoading = false
-                oAuthError = (oauthState as Resource.Error).message
-            }
-            is Resource.Idle -> {
-                isOAuthLoading = false
-                oAuthError = null
-            }
+        if (oauthState is Resource.Success) {
+            // For OAuth, verify the current user
+            viewModel.checkCurrentUser()
         }
     }
 
     // Reset the state when the screen is first displayed
     LaunchedEffect(Unit) {
+        Log.d("LoginScreen", "Screen mounted - resetting states")
         viewModel.resetState()
         oAuthViewModel.resetState()
+    }
+    
+    // Also reset state when the screen is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("LoginScreen", "Screen disposed - resetting states")
+            viewModel.resetState()
+            oAuthViewModel.resetState()
+        }
     }
 
     Box(
@@ -153,10 +128,7 @@ fun LoginScreen(
                 value = email,
                 onValueChange = { 
                     email = it
-                    // Clear error when user starts typing
-                    if (emailLoginError != null) {
-                        emailLoginError = null
-                    }
+                    // Remove the error clearing logic as emailLoginError is now a val
                 },
                 label = { Text("Email", color = Color(0xB3FFFFFF)) },
                 singleLine = true,
@@ -178,10 +150,7 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { 
                     password = it
-                    // Clear error when user starts typing
-                    if (emailLoginError != null) {
-                        emailLoginError = null
-                    }
+                    // Remove the error clearing logic as emailLoginError is now a val
                 },
                 label = { Text("Password", color = Color(0xB3FFFFFF)) },
                 singleLine = true,
@@ -243,7 +212,7 @@ fun LoginScreen(
                     Log.d("LoginScreen", "Login button clicked with email: $email")
                     viewModel.login(email, password)
                 },
-                enabled = !isEmailLoginLoading && email.isNotEmpty() && password.isNotEmpty(),
+                enabled = isLoginButtonEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)

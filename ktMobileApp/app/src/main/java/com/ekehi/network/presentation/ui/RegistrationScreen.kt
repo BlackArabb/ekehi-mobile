@@ -19,6 +19,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.runtime.DisposableEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.RegistrationViewModel
@@ -38,40 +40,48 @@ fun RegistrationScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     var showPasswordMismatch by remember { mutableStateOf(false) }
     var isTermsAccepted by remember { mutableStateOf(false) }
+    
+    // Collect state properly
+    val registrationState by viewModel.registrationState.collectAsState()
+    
+    // Derive UI states from the collected state
+    val isLoading = registrationState is Resource.Loading
+    val errorMessage = (registrationState as? Resource.Error)?.message
 
-    LaunchedEffect(viewModel.registrationState) {
-        viewModel.registrationState.collect { resource ->
-            when (resource) {
-                is Resource.Loading -> {
-                    isLoading = true
-                    errorMessage = null
-                    showPasswordMismatch = false
-                }
-                is Resource.Success -> {
-                    isLoading = false
-                    onRegistrationSuccess()
-                }
-                is Resource.Error -> {
-                    isLoading = false
-                    errorMessage = resource.message
-                }
-                is Resource.Idle -> {
-                    isLoading = false
-                    errorMessage = null
-                    showPasswordMismatch = false
-                }
-            }
+    // Calculate if button should be enabled
+    val isSignUpButtonEnabled = remember(name, email, password, confirmPassword, isTermsAccepted, isLoading) {
+        !isLoading && 
+        name.trim().isNotEmpty() && 
+        email.trim().isNotEmpty() && 
+        password.trim().isNotEmpty() && 
+        confirmPassword.trim().isNotEmpty() &&
+        isTermsAccepted &&
+        password.trim() == confirmPassword.trim()
+    }
+
+    // Handle registration success
+    LaunchedEffect(registrationState) {
+        if (registrationState is Resource.Success) {
+            onRegistrationSuccess()
         }
     }
 
     // Reset the state when the screen is first displayed
     LaunchedEffect(Unit) {
+        Log.d("RegistrationScreen", "Screen mounted - resetting states")
         viewModel.resetState()
         oAuthViewModel.resetState()
+    }
+    
+    // Also reset state when the screen is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("RegistrationScreen", "Screen disposed - resetting states")
+            viewModel.resetState()
+            oAuthViewModel.resetState()
+        }
     }
 
     Box(
@@ -154,10 +164,7 @@ fun RegistrationScreen(
                 value = password,
                 onValueChange = { 
                     password = it
-                    // Clear error when user starts typing
-                    if (errorMessage != null) {
-                        errorMessage = null
-                    }
+                    // Remove the error clearing logic as errorMessage is now a val
                 },
                 label = { Text("Password", color = Color(0xB3FFFFFF)) },
                 singleLine = true,
@@ -200,10 +207,7 @@ fun RegistrationScreen(
                 value = confirmPassword,
                 onValueChange = { 
                     confirmPassword = it
-                    // Clear error when user starts typing
-                    if (errorMessage != null) {
-                        errorMessage = null
-                    }
+                    // Remove the error clearing logic as errorMessage is now a val
                     // Check if passwords match as user types
                     showPasswordMismatch = confirmPassword.isNotEmpty() && password != confirmPassword
                 },
@@ -280,13 +284,15 @@ fun RegistrationScreen(
                     if (password != confirmPassword) {
                         showPasswordMismatch = true
                     } else if (!isTermsAccepted) {
-                        errorMessage = "Please accept the Terms & Conditions"
+                        // Remove direct assignment to errorMessage as it's now a val
+                        // The error will be shown through the viewModel's error state
+                        Log.e("RegistrationScreen", "Terms not accepted")
                     } else {
                         showPasswordMismatch = false
                         viewModel.register(name, email, password)
                     }
                 },
-                enabled = !isLoading && name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty(),
+                enabled = isSignUpButtonEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
