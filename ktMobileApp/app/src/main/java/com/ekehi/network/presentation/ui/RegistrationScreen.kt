@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,11 +26,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.RegistrationViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.ekehi.network.R
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -135,10 +138,9 @@ fun RegistrationScreen(
             verticalArrangement = Arrangement.Center
         ) {
             // Ekehi Logo
-            Icon(
-                imageVector = Icons.Default.AccountBalance,
+            Image(
+                painter = painterResource(id = R.mipmap.ic_launcher),
                 contentDescription = "Ekehi Logo",
-                tint = Color(0xFFffa000),
                 modifier = Modifier
                     .size(80.dp)
                     .padding(bottom = 16.dp)
@@ -366,7 +368,7 @@ fun RegistrationScreen(
                 enabled = isSignUpButtonEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(70.dp)
                     .padding(bottom = 16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFffa000),

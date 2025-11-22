@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ekehi.network.R
 
 @Composable
 fun LandingScreen(
@@ -34,10 +35,9 @@ fun LandingScreen(
             verticalArrangement = Arrangement.Center
         ) {
             // Ekehi Logo
-            Icon(
-                imageVector = Icons.Default.AccountBalance,
+            Image(
+                painter = painterResource(id = R.mipmap.ic_launcher),
                 contentDescription = "Ekehi Logo",
-                tint = Color(0xFFffa000), // Orange color
                 modifier = Modifier
                     .size(120.dp)
                     .padding(bottom = 32.dp)
