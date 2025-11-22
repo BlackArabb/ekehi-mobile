@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,10 +18,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.runtime.DisposableEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
@@ -27,6 +35,7 @@ import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
@@ -48,17 +57,27 @@ fun LoginScreen(
     val emailLoginError = (loginState as? Resource.Error)?.message
     val oAuthError = (oauthState as? Resource.Error)?.message
 
-    // Calculate if button should be enabled
-    val isLoginButtonEnabled = remember(email, password, isEmailLoginLoading) {
-        !isEmailLoginLoading && email.trim().isNotEmpty() && password.trim().isNotEmpty()
-    }
-
     // Handle login success
     LaunchedEffect(loginState) {
         Log.d("LoginScreen", "Login state changed: ${loginState.javaClass.simpleName}")
-        if (loginState is Resource.Success) {
-            Log.d("LoginScreen", "Email login successful, navigating to dashboard")
-            onLoginSuccess()
+        when (loginState) {
+            is Resource.Success -> {
+                Log.d("LoginScreen", "Email login successful, navigating to dashboard")
+                onLoginSuccess()
+            }
+            is Resource.Error -> {
+                // Use safe cast to avoid smart cast issues
+                (loginState as? Resource.Error)?.let { error ->
+                    Log.e("LoginScreen", "Email login failed: ${error.message}")
+                }
+                // Error is automatically displayed via emailLoginError
+            }
+            is Resource.Loading -> {
+                Log.d("LoginScreen", "Email login in progress...")
+            }
+            is Resource.Idle -> {
+                Log.d("LoginScreen", "Email login state is idle")
+            }
         }
     }
 
@@ -86,6 +105,10 @@ fun LoginScreen(
         }
     }
 
+    // Get focus manager and keyboard controller
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -100,8 +123,13 @@ fun LoginScreen(
             )
             .padding(16.dp)
     ) {
+        val scrollState = rememberScrollState()
+        
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -171,6 +199,23 @@ fun LoginScreen(
                         )
                     }
                 },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        Log.d("LoginScreen", "=== LOGIN DONE (IME) PRESSED ===")
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+
+                        val trimmedEmail = email.trim()
+                        val trimmedPassword = password.trim()
+
+                        Log.d("LoginScreen", "Proceeding with login from IME...")
+                        viewModel.login(trimmedEmail, trimmedPassword)
+                    }
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
@@ -209,10 +254,23 @@ fun LoginScreen(
             // Login Button
             Button(
                 onClick = {
-                    Log.d("LoginScreen", "Login button clicked with email: $email")
-                    viewModel.login(email, password)
+                    Log.d("LoginScreen", "=== LOGIN BUTTON CLICKED ===")
+                    Log.d("LoginScreen", "Email: '$email'")
+                    Log.d("LoginScreen", "Password: '${password}'")
+                    Log.d("LoginScreen", "isEmailLoginLoading: $isEmailLoginLoading")
+
+                    // Always clear focus and hide keyboard first
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+
+                    val trimmedEmail = email.trim()
+                    val trimmedPassword = password.trim()
+
+                    Log.d("LoginScreen", "Proceeding with login...")
+                    viewModel.login(trimmedEmail, trimmedPassword)
                 },
-                enabled = isLoginButtonEnabled,
+                // Only disable while a request is in progress; validation is handled in the ViewModel
+                enabled = !isEmailLoginLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)

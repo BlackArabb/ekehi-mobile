@@ -51,15 +51,15 @@ class AuthRepository @Inject constructor(
                 // Store user info securely after successful login
                 storeUserInfo(email)
 
-                Result.success(session)
+                return@withContext Result.success(session)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite login failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Login failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }
@@ -76,15 +76,15 @@ class AuthRepository @Inject constructor(
                         name = name
                 )
                 Log.d("AuthRepository", "Registration successful for email: $email")
-                Result.success(user)
+                return@withContext Result.success(user)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite registration failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Registration failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }
@@ -112,15 +112,15 @@ class AuthRepository @Inject constructor(
                 // you would need to handle the OAuth callback properly
                 // The actual OAuth flow is handled through the OAuthService
                 // and OAuthCallbackActivity
-                Result.failure(Exception("Google OAuth flow should be handled through OAuthService"))
+                return@withContext Result.failure(Exception("Google OAuth flow should be handled through OAuthService"))
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite Google login failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Google login failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }
@@ -134,15 +134,15 @@ class AuthRepository @Inject constructor(
                 // you would need to handle the OAuth callback properly
                 // The actual OAuth flow is handled through the OAuthService
                 // and OAuthCallbackActivity
-                Result.failure(Exception("Google OAuth flow should be handled through OAuthService"))
+                return@withContext Result.failure(Exception("Google OAuth flow should be handled through OAuthService"))
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite Google registration failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Google registration failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }
@@ -158,15 +158,15 @@ class AuthRepository @Inject constructor(
                 // Clear stored user info
                 clearUserInfo()
 
-                Result.success(Unit)
+                return@withContext Result.success(Unit)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite logout failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Logout failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }
@@ -185,15 +185,15 @@ class AuthRepository @Inject constructor(
                         updatedAt = ""
                 )
                 Log.d("AuthRepository", "Current user fetched successfully: ${user.id}")
-                Result.success(user)
+                return@withContext Result.success(user)
             } catch (e: AppwriteException) {
                 val errorMessage = "Failed to fetch current user: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Failed to fetch current user: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }
@@ -205,10 +205,10 @@ class AuthRepository @Inject constructor(
                 Log.d("AuthRepository", "Checking stored credentials")
                 val hasValidCredentials = hasValidStoredCredentials()
                 Log.d("AuthRepository", "Stored credentials valid: $hasValidCredentials")
-                Result.success(hasValidCredentials)
+                return@withContext Result.success(hasValidCredentials)
             } catch (e: Exception) {
                 Log.e("AuthRepository", "Error checking stored credentials: ${e.message}", e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }
@@ -223,13 +223,13 @@ class AuthRepository @Inject constructor(
                 // Try to get current session from Appwrite
                 val session = appwriteService.account.getSession("current")
                 Log.d("AuthRepository", "Active session found: ${session.userId}")
-                Result.success(true)
+                return@withContext Result.success(true)
             } catch (e: AppwriteException) {
                 Log.d("AuthRepository", "No active session: ${e.message}")
-                Result.success(false)
+                return@withContext Result.success(false)
             } catch (e: Exception) {
                 Log.d("AuthRepository", "Session check error: ${e.message}")
-                Result.success(false)
+                return@withContext Result.success(false)
             }
         }
     }
@@ -252,14 +252,14 @@ class AuthRepository @Inject constructor(
                         createdAt = account.registration ?: "",
                         updatedAt = ""
                     )
-                    Result.success(user)
+                    return@withContext Result.success(user)
                 } else {
                     // No session
-                    Result.success(null)
+                    return@withContext Result.success(null)
                 }
             } catch (e: Exception) {
                 Log.e("AuthRepository", "Failed to get current user: ${e.message}")
-                Result.success(null)
+                return@withContext Result.success(null)
             }
         }
     }
@@ -342,17 +342,17 @@ class AuthRepository @Inject constructor(
                 )
                 Log.d("AuthRepository", "Password updated successfully")
                 Log.d("AuthRepository", "Update password result: $result")
-                Result.success(Unit)
+                return@withContext Result.success(Unit)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite password update failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
                 Log.e("AuthRepository", "Appwrite error code: ${e.code}")
                 Log.e("AuthRepository", "Appwrite error type: ${e.type}")
-                Result.failure(e)
+                return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Password update failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }

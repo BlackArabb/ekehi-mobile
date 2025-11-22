@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.runtime.DisposableEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
@@ -27,6 +31,7 @@ import com.ekehi.network.presentation.viewmodel.RegistrationViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegistrationScreen(
     viewModel: RegistrationViewModel = hiltViewModel(),
@@ -63,8 +68,25 @@ fun RegistrationScreen(
 
     // Handle registration success
     LaunchedEffect(registrationState) {
-        if (registrationState is Resource.Success) {
-            onRegistrationSuccess()
+        Log.d("RegistrationScreen", "Registration state changed: ${registrationState.javaClass.simpleName}")
+        when (registrationState) {
+            is Resource.Success -> {
+                Log.d("RegistrationScreen", "Registration successful, navigating to main screen")
+                onRegistrationSuccess()
+            }
+            is Resource.Error -> {
+                // Use safe cast to avoid smart cast issues
+                (registrationState as? Resource.Error)?.let { error ->
+                    Log.e("RegistrationScreen", "Registration failed: ${error.message}")
+                }
+                // Error is automatically displayed via errorMessage
+            }
+            is Resource.Loading -> {
+                Log.d("RegistrationScreen", "Registration in progress...")
+            }
+            is Resource.Idle -> {
+                Log.d("RegistrationScreen", "Registration state is idle")
+            }
         }
     }
 
@@ -84,6 +106,10 @@ fun RegistrationScreen(
         }
     }
 
+    // Get focus manager and keyboard controller
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -98,8 +124,13 @@ fun RegistrationScreen(
             )
             .padding(16.dp)
     ) {
+        val scrollState = rememberScrollState()
+        
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -281,15 +312,55 @@ fun RegistrationScreen(
             // Sign Up Button
             Button(
                 onClick = {
-                    if (password != confirmPassword) {
-                        showPasswordMismatch = true
-                    } else if (!isTermsAccepted) {
-                        // Remove direct assignment to errorMessage as it's now a val
-                        // The error will be shown through the viewModel's error state
-                        Log.e("RegistrationScreen", "Terms not accepted")
-                    } else {
+                    Log.d("RegistrationScreen", "=== SIGN UP BUTTON CLICKED ===")
+                    Log.d("RegistrationScreen", "Name: '$name'")
+                    Log.d("RegistrationScreen", "Email: '$email'")
+                    Log.d("RegistrationScreen", "Password: '${password}'")
+                    Log.d("RegistrationScreen", "Confirm Password: '${confirmPassword}'")
+                    Log.d("RegistrationScreen", "Terms Accepted: $isTermsAccepted")
+                    Log.d("RegistrationScreen", "isSignUpButtonEnabled: $isSignUpButtonEnabled")
+                    Log.d("RegistrationScreen", "isLoading: $isLoading")
+                    
+                    // Clear focus and hide keyboard
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    
+                    val trimmedName = name.trim()
+                    val trimmedEmail = email.trim()
+                    val trimmedPassword = password.trim()
+                    val trimmedConfirmPassword = confirmPassword.trim()
+                    
+                    // Validate inputs
+                    val isValid = trimmedName.isNotEmpty() && 
+                                trimmedEmail.isNotEmpty() && 
+                                trimmedPassword.isNotEmpty() && 
+                                trimmedConfirmPassword.isNotEmpty() &&
+                                isTermsAccepted &&
+                                trimmedPassword == trimmedConfirmPassword &&
+                                android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches() &&
+                                !isLoading
+                    
+                    if (isValid) {
+                        Log.d("RegistrationScreen", "All inputs valid, proceeding with registration...")
                         showPasswordMismatch = false
-                        viewModel.register(name, email, password)
+                        viewModel.register(trimmedName, trimmedEmail, trimmedPassword)
+                    } else {
+                        Log.d("RegistrationScreen", "Validation failed:")
+                        if (trimmedName.isEmpty()) Log.d("RegistrationScreen", "- Name is empty")
+                        if (trimmedEmail.isEmpty()) Log.d("RegistrationScreen", "- Email is empty")
+                        if (trimmedPassword.isEmpty()) Log.d("RegistrationScreen", "- Password is empty")
+                        if (trimmedConfirmPassword.isEmpty()) Log.d("RegistrationScreen", "- Confirm password is empty")
+                        if (!isTermsAccepted) Log.d("RegistrationScreen", "- Terms not accepted")
+                        if (trimmedPassword != trimmedConfirmPassword) Log.d("RegistrationScreen", "- Passwords don't match")
+                        if (trimmedEmail.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()) {
+                            Log.d("RegistrationScreen", "- Invalid email format")
+                        }
+                        if (isLoading) Log.d("RegistrationScreen", "- Already loading")
+                        
+                        // Show specific error messages
+                        if (trimmedPassword != trimmedConfirmPassword) {
+                            showPasswordMismatch = true
+                        }
                     }
                 },
                 enabled = isSignUpButtonEnabled,

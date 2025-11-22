@@ -23,6 +23,7 @@ import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.startapp.sdk.adsbase.StartAppAd
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @SuppressLint("CustomSplashScreen")
@@ -34,6 +35,7 @@ class SplashActivity : ComponentActivity() {
     private var isAuthCheckComplete = false
     private var isAuthenticated: Boolean? = null
     private var isProfileLoaded = false
+    private var authCheckTimeout = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen
@@ -48,8 +50,20 @@ class SplashActivity : ComponentActivity() {
             !isAuthCheckComplete || !isProfileLoaded
         }
         
-        // Start authentication check
+        // Start authentication check with timeout
         checkAuthentication()
+        
+        // Set a timeout to prevent infinite waiting
+        lifecycleScope.launch {
+            delay(10000) // 10 second timeout
+            if (!isAuthCheckComplete) {
+                Log.w("SplashActivity", "⚠️ Authentication check timeout - proceeding with default state")
+                authCheckTimeout = true
+                isAuthCheckComplete = true
+                isProfileLoaded = true
+                navigateToMainActivity(isAuthenticated = false)
+            }
+        }
         
         // Observe authentication state
         observeAuthenticationState()
@@ -64,6 +78,12 @@ class SplashActivity : ComponentActivity() {
         lifecycleScope.launch {
             loginViewModel.loginState.collect { state ->
                 Log.d("SplashActivity", "Auth state: ${state::class.simpleName}")
+                
+                // Skip processing if we've already timed out
+                if (authCheckTimeout) {
+                    Log.d("SplashActivity", "Skipping auth state processing due to timeout")
+                    return@collect
+                }
                 
                 when (state) {
                     is Resource.Success -> {

@@ -15,6 +15,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,81 +31,100 @@ class LoginViewModel @Inject constructor(
 
     private val _loginState = MutableStateFlow<Resource<Unit>>(Resource.Idle)
     val loginState: StateFlow<Resource<Unit>> = _loginState
+    
+    // Fallback scope in case viewModelScope is cancelled
+    private val fallbackScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun login(email: String, password: String) {
         Log.d("LoginViewModel", "Login attempt started with email: $email")
         
-        viewModelScope.launch {
-            try {
-                // Validate inputs before proceeding
-                val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
-                val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
-                
-                Log.d("LoginViewModel", "Input validation completed")
-                
-                // Check if all validations pass
-                if (!emailValidation.isValid) {
-                    val errorMessage = "Invalid email: ${emailValidation.errorMessage}"
-                    Log.e("LoginViewModel", errorMessage)
-                    _loginState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                if (!passwordValidation.isValid) {
-                    val errorMessage = "Invalid password: ${passwordValidation.errorMessage}"
-                    Log.e("LoginViewModel", errorMessage)
-                    _loginState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                // Additional specific validations
-                if (!InputValidator.isValidEmail(emailValidation.sanitizedInput)) {
-                    val errorMessage = "Please enter a valid email address"
-                    Log.e("LoginViewModel", errorMessage)
-                    _loginState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                // Track login attempt
-                analyticsManager.trackLogin("email")
-                Log.d("LoginViewModel", "Login attempt tracked in analytics")
-                
-                // Set loading state
-                _loginState.value = Resource.Loading
-                Log.d("LoginViewModel", "Set loading state")
-                
-                // Perform login
-                Log.d("LoginViewModel", "Starting login request")
-                authUseCase.login(
-                    emailValidation.sanitizedInput, 
-                    passwordValidation.sanitizedInput
-                ).collect { resource -> 
-                    Log.d("LoginViewModel", "Received login response: ${resource.javaClass.simpleName}")
-                    _loginState.value = resource
+        // Set loading state immediately on main thread to ensure UI updates
+        _loginState.value = Resource.Loading
+        
+        // Use fallback scope to ensure coroutine always runs
+        // This prevents issues when viewModelScope is cancelled on some devices
+        try {
+            fallbackScope.launch {
+                try {
+                    // Validate inputs
+                    val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
+                    val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
                     
-                    when (resource) {
-                        is Resource.Success -> {
-                            Log.d("LoginViewModel", "Login successful")
-                            // After successful login, update the user's streak
-                            updateStreakAfterLogin()
+                    // Check if all validations pass
+                    if (!emailValidation.isValid) {
+                        val errorMessage = "Invalid email: ${emailValidation.errorMessage}"
+                        Log.e("LoginViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _loginState.value = Resource.Error(errorMessage)
                         }
-                        is Resource.Error -> {
-                            Log.e("LoginViewModel", "Login failed: ${resource.message}")
+                        return@launch
+                    }
+                    
+                    if (!passwordValidation.isValid) {
+                        val errorMessage = "Invalid password: ${passwordValidation.errorMessage}"
+                        Log.e("LoginViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _loginState.value = Resource.Error(errorMessage)
                         }
-                        is Resource.Loading -> {
-                            Log.d("LoginViewModel", "Login in progress")
+                        return@launch
+                    }
+                    
+                    // Additional specific validations
+                    if (!InputValidator.isValidEmail(emailValidation.sanitizedInput)) {
+                        val errorMessage = "Please enter a valid email address"
+                        Log.e("LoginViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _loginState.value = Resource.Error(errorMessage)
                         }
-                        is Resource.Idle -> {
-                            // Do nothing for Idle state
+                        return@launch
+                    }
+                    
+                    // Track login attempt
+                    try {
+                        analyticsManager.trackLogin("email")
+                    } catch (e: Exception) {
+                        Log.w("LoginViewModel", "Failed to track login in analytics: ${e.message}")
+                        // Don't fail login if analytics fails
+                    }
+                    
+                    // Perform login
+                    authUseCase.login(
+                        emailValidation.sanitizedInput, 
+                        passwordValidation.sanitizedInput
+                    ).collect { resource -> 
+                        withContext(Dispatchers.Main) {
+                            _loginState.value = resource
+                        }
+                        
+                        when (resource) {
+                            is Resource.Success -> {
+                                Log.d("LoginViewModel", "Login successful")
+                                // After successful login, update the user's streak
+                                updateStreakAfterLogin()
+                            }
+                            is Resource.Error -> {
+                                Log.e("LoginViewModel", "Login failed: ${resource.message}")
+                            }
+                            is Resource.Loading -> {
+                                // Loading state already set
+                            }
+                            is Resource.Idle -> {
+                                // Do nothing for Idle state
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    val errorResult = ErrorHandler.handleException(e, "Failed to login")
+                    val errorMessage = errorResult.userMessage
+                    Log.e("LoginViewModel", "Login exception: ${e.message}", e)
+                    withContext(Dispatchers.Main) {
+                        _loginState.value = Resource.Error(errorMessage)
+                    }
                 }
-            } catch (e: Exception) {
-                val errorResult = ErrorHandler.handleException(e, "Failed to login")
-                val errorMessage = errorResult.userMessage
-                Log.e("LoginViewModel", "Login exception: ${e.message}", e)
-                _loginState.value = Resource.Error(errorMessage)
             }
+        } catch (e: Exception) {
+            Log.e("LoginViewModel", "Exception launching coroutine: ${e.message}", e)
+            _loginState.value = Resource.Error("Failed to start login process: ${e.message}")
         }
     }
     
@@ -231,8 +254,8 @@ class LoginViewModel @Inject constructor(
                             Log.d("LoginViewModel", "Step 1 SUCCESS: Active session check returned ${resource.data}")
                             if (resource.data) {
                                 Log.d("LoginViewModel", "✅✅✅ SUCCESS: Active session found, user is logged in")
-                                // If we have an active session, get the user data
-                                getCurrentUser()
+                                // User is authenticated, navigate to dashboard
+                                _loginState.value = Resource.Success(Unit)
                             } else {
                                 Log.d("LoginViewModel", "Step 1: No active session found, checking stored credentials")
                                 // No active session, check stored credentials
@@ -271,8 +294,6 @@ class LoginViewModel @Inject constructor(
                                 Log.d("LoginViewModel", "✅✅✅ Current user data retrieved successfully: ${resource.data.id}")
                                 // User is authenticated with data, navigate to dashboard
                                 _loginState.value = Resource.Success(Unit)
-                                // Update streak when user is verified
-                                updateStreakAfterLogin()
                             } else {
                                 Log.d("LoginViewModel", "❌❌❌ No user data found, user needs to login")
                                 // No user data, user needs to login
@@ -355,8 +376,6 @@ class LoginViewModel @Inject constructor(
                             Log.d("LoginViewModel", "✅✅✅ Step 3 SUCCESS: Current user verified successfully")
                             // User is authenticated, navigate to dashboard
                             _loginState.value = Resource.Success(Unit)
-                            // Update streak when user is verified
-                            updateStreakAfterLogin()
                         }
                         is Resource.Error -> {
                             Log.e("LoginViewModel", "❌❌❌ Step 3 ERROR: Failed to verify current user: ${resource.message}")

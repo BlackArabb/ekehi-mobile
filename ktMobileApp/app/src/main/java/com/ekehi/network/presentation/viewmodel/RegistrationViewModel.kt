@@ -12,6 +12,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,143 +27,179 @@ class RegistrationViewModel @Inject constructor(
 
     private val _registrationState = MutableStateFlow<Resource<Unit>>(Resource.Idle)
     val registrationState: StateFlow<Resource<Unit>> = _registrationState
+    
+    // Fallback scope in case viewModelScope is cancelled
+    private val fallbackScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun register(name: String, email: String, password: String) {
         Log.d("RegistrationViewModel", "Registration attempt started with email: $email")
         
-        viewModelScope.launch {
-            try {
-                // Validate inputs before proceeding
-                val nameValidation = InputValidator.validateAndSanitizeText(name, 50)
-                val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
-                val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
-                
-                Log.d("RegistrationViewModel", "Input validation completed")
-                
-                // Check if all validations pass
-                if (!nameValidation.isValid) {
-                    val errorMessage = "Invalid name: ${nameValidation.errorMessage}"
-                    Log.e("RegistrationViewModel", errorMessage)
-                    _registrationState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                if (!emailValidation.isValid) {
-                    val errorMessage = "Invalid email: ${emailValidation.errorMessage}"
-                    Log.e("RegistrationViewModel", errorMessage)
-                    _registrationState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                if (!passwordValidation.isValid) {
-                    val errorMessage = "Invalid password: ${passwordValidation.errorMessage}"
-                    Log.e("RegistrationViewModel", errorMessage)
-                    _registrationState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                // Additional specific validations
-                if (!InputValidator.isValidName(nameValidation.sanitizedInput)) {
-                    val errorMessage = "Name contains invalid characters"
-                    Log.e("RegistrationViewModel", errorMessage)
-                    _registrationState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                if (!InputValidator.isValidEmail(emailValidation.sanitizedInput)) {
-                    val errorMessage = "Please enter a valid email address"
-                    Log.e("RegistrationViewModel", errorMessage)
-                    _registrationState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                if (!InputValidator.isValidPassword(passwordValidation.sanitizedInput)) {
-                    val errorMessage = "Password must be at least 8 characters long and contain uppercase, lowercase, and numeric characters"
-                    Log.e("RegistrationViewModel", errorMessage)
-                    _registrationState.value = Resource.Error(errorMessage)
-                    return@launch
-                }
-                
-                // Track registration attempt
-                analyticsManager.trackSignUp("email")
-                Log.d("RegistrationViewModel", "Registration attempt tracked in analytics")
-                
-                // Set loading state
-                _registrationState.value = Resource.Loading
-                Log.d("RegistrationViewModel", "Set loading state")
-                
-                // Perform registration
-                Log.d("RegistrationViewModel", "Starting registration request")
-                authUseCase.register(
-                    emailValidation.sanitizedInput, 
-                    passwordValidation.sanitizedInput, 
-                    nameValidation.sanitizedInput
-                ).collect { resource ->
-                    Log.d("RegistrationViewModel", "Received registration response: ${resource.javaClass.simpleName}")
-                    _registrationState.value = resource
+        // Set loading state immediately on main thread to ensure UI updates
+        _registrationState.value = Resource.Loading
+        
+        // Use fallback scope to ensure coroutine always runs
+        // This prevents issues when viewModelScope is cancelled on some devices
+        try {
+            fallbackScope.launch {
+                try {
+                    // Validate inputs before proceeding
+                    val nameValidation = InputValidator.validateAndSanitizeText(name, 50)
+                    val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
+                    val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
                     
-                    when (resource) {
-                        is Resource.Success -> {
-                            Log.d("RegistrationViewModel", "Registration successful")
+                    // Check if all validations pass
+                    if (!nameValidation.isValid) {
+                        val errorMessage = "Invalid name: ${nameValidation.errorMessage}"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
                         }
-                        is Resource.Error -> {
-                            Log.e("RegistrationViewModel", "Registration failed: ${resource.message}")
+                        return@launch
+                    }
+                    
+                    if (!emailValidation.isValid) {
+                        val errorMessage = "Invalid email: ${emailValidation.errorMessage}"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
                         }
-                        is Resource.Loading -> {
-                            Log.d("RegistrationViewModel", "Registration in progress")
+                        return@launch
+                    }
+                    
+                    if (!passwordValidation.isValid) {
+                        val errorMessage = "Invalid password: ${passwordValidation.errorMessage}"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
                         }
-                        is Resource.Idle -> {
-                            // Do nothing for Idle state
+                        return@launch
+                    }
+                    
+                    // Additional specific validations
+                    if (!InputValidator.isValidName(nameValidation.sanitizedInput)) {
+                        val errorMessage = "Name contains invalid characters"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
+                        }
+                        return@launch
+                    }
+                    
+                    if (!InputValidator.isValidEmail(emailValidation.sanitizedInput)) {
+                        val errorMessage = "Please enter a valid email address"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
+                        }
+                        return@launch
+                    }
+                    
+                    if (!InputValidator.isValidPassword(passwordValidation.sanitizedInput)) {
+                        val errorMessage = "Password must be at least 8 characters long and contain uppercase, lowercase, and numeric characters"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
+                        }
+                        return@launch
+                    }
+                    
+                    // Track registration attempt
+                    try {
+                        analyticsManager.trackSignUp("email")
+                    } catch (e: Exception) {
+                        Log.w("RegistrationViewModel", "Failed to track registration in analytics: ${e.message}")
+                        // Don't fail registration if analytics fails
+                    }
+                    
+                    // Perform registration
+                    authUseCase.register(
+                        emailValidation.sanitizedInput, 
+                        passwordValidation.sanitizedInput, 
+                        nameValidation.sanitizedInput
+                    ).collect { resource ->
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = resource
+                        }
+                        
+                        when (resource) {
+                            is Resource.Success -> {
+                                Log.d("RegistrationViewModel", "Registration successful")
+                            }
+                            is Resource.Error -> {
+                                Log.e("RegistrationViewModel", "Registration failed: ${resource.message}")
+                            }
+                            is Resource.Loading -> {
+                                // Loading state already set
+                            }
+                            is Resource.Idle -> {
+                                // Do nothing for Idle state
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    val errorMessage = "Registration failed: ${e.message}"
+                    Log.e("RegistrationViewModel", errorMessage, e)
+                    withContext(Dispatchers.Main) {
+                        _registrationState.value = Resource.Error(errorMessage)
+                    }
                 }
-            } catch (e: Exception) {
-                val errorMessage = "Registration failed: ${e.message}"
-                Log.e("RegistrationViewModel", errorMessage, e)
-                _registrationState.value = Resource.Error(errorMessage)
             }
+        } catch (e: Exception) {
+            Log.e("RegistrationViewModel", "Exception launching coroutine: ${e.message}", e)
+            _registrationState.value = Resource.Error("Failed to start registration process: ${e.message}")
         }
     }
     
     fun registerWithGoogle(idToken: String, name: String, email: String) {
         Log.d("RegistrationViewModel", "Google registration attempt started with email: $email")
         
-        viewModelScope.launch {
-            try {
-                // Track Google registration attempt
-                analyticsManager.trackSignUp("google")
-                Log.d("RegistrationViewModel", "Google registration attempt tracked in analytics")
-                
-                // Set loading state
-                _registrationState.value = Resource.Loading
-                Log.d("RegistrationViewModel", "Set loading state for Google registration")
-                
-                // Perform Google registration
-                Log.d("RegistrationViewModel", "Starting Google registration request")
-                authUseCase.registerWithGoogle(idToken, name, email).collect { resource ->
-                    Log.d("RegistrationViewModel", "Received Google registration response: ${resource.javaClass.simpleName}")
-                    _registrationState.value = resource
+        // Set loading state immediately on main thread to ensure UI updates
+        _registrationState.value = Resource.Loading
+        
+        // Use fallback scope to ensure coroutine always runs
+        try {
+            fallbackScope.launch {
+                try {
+                    // Track Google registration attempt
+                    try {
+                        analyticsManager.trackSignUp("google")
+                    } catch (e: Exception) {
+                        Log.w("RegistrationViewModel", "Failed to track Google registration in analytics: ${e.message}")
+                        // Don't fail registration if analytics fails
+                    }
                     
-                    when (resource) {
-                        is Resource.Success -> {
-                            Log.d("RegistrationViewModel", "Google registration successful")
+                    // Perform Google registration
+                    authUseCase.registerWithGoogle(idToken, name, email).collect { resource ->
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = resource
                         }
-                        is Resource.Error -> {
-                            Log.e("RegistrationViewModel", "Google registration failed: ${resource.message}")
-                        }
-                        is Resource.Loading -> {
-                            Log.d("RegistrationViewModel", "Google registration in progress")
-                        }
-                        is Resource.Idle -> {
-                            // Do nothing for Idle state
+                        
+                        when (resource) {
+                            is Resource.Success -> {
+                                Log.d("RegistrationViewModel", "Google registration successful")
+                            }
+                            is Resource.Error -> {
+                                Log.e("RegistrationViewModel", "Google registration failed: ${resource.message}")
+                            }
+                            is Resource.Loading -> {
+                                // Loading state already set
+                            }
+                            is Resource.Idle -> {
+                                // Do nothing for Idle state
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    val errorMessage = "Google registration failed: ${e.message}"
+                    Log.e("RegistrationViewModel", errorMessage, e)
+                    withContext(Dispatchers.Main) {
+                        _registrationState.value = Resource.Error(errorMessage)
+                    }
                 }
-            } catch (e: Exception) {
-                val errorMessage = "Google registration failed: ${e.message}"
-                Log.e("RegistrationViewModel", errorMessage, e)
-                _registrationState.value = Resource.Error(errorMessage)
             }
+        } catch (e: Exception) {
+            Log.e("RegistrationViewModel", "Exception launching coroutine: ${e.message}", e)
+            _registrationState.value = Resource.Error("Failed to start Google registration process: ${e.message}")
         }
     }
     
