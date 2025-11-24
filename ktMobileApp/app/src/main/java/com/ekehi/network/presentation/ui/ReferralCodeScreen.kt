@@ -38,6 +38,12 @@ fun ReferralCodeScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     
+    // State for referral code input
+    var referralCodeInput by remember { mutableStateOf("") }
+    var isClaiming by remember { mutableStateOf(false) }
+    var claimMessage by remember { mutableStateOf<String?>(null) }
+    var claimError by remember { mutableStateOf<String?>(null) }
+    
     // Extract the actual UserProfile from Resource
     val userProfile: UserProfile? = when (userProfileResource) {
         is Resource.Success -> (userProfileResource as Resource.Success<UserProfile>).data
@@ -203,6 +209,128 @@ fun ReferralCodeScreen(
                                 text = "Copy Code",
                                 color = Color.White,
                                 fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+                
+                // Claim Referral Section
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0x1AFFFFFF) // 10% opacity white
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Claim Referral",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        Text(
+                            text = "Enter a referral code you received from a friend to get 2 EKH!",
+                            color = Color(0xB3FFFFFF),
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        // Referral Code Input
+                        OutlinedTextField(
+                            value = referralCodeInput,
+                            onValueChange = { referralCodeInput = it },
+                            label = { Text("Enter referral code", color = Color(0xB3FFFFFF)) },
+                            singleLine = true,
+                            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFffa000),
+                                unfocusedBorderColor = Color(0x33FFFFFF),
+                                cursorColor = Color(0xFFffa000),
+                                focusedLabelColor = Color(0xFFffa000),
+                                unfocusedLabelColor = Color(0xB3FFFFFF)
+                            )
+                        )
+                        
+                        // Claim Button
+                        Button(
+                            onClick = {
+                                if (referralCodeInput.isNotBlank() && userProfile?.userId?.isNotEmpty() == true) {
+                                    isClaiming = true
+                                    claimMessage = null
+                                    claimError = null
+                                    
+                                    viewModel.claimReferral(userProfile.userId, referralCodeInput)
+                                    
+                                    // For now, just show a success message
+                                    // In a real implementation, you would listen to the result from the ViewModel
+                                    referralCodeInput = ""
+                                    isClaiming = false
+                                    claimMessage = "Referral claimed successfully! You received 2 EKH."
+                                } else if (referralCodeInput.isBlank()) {
+                                    claimError = "Please enter a referral code"
+                                } else {
+                                    claimError = "User profile not loaded"
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF4CAF50)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            enabled = !isClaiming && referralCodeInput.isNotBlank() && userProfile?.userId?.isNotEmpty() == true
+                        ) {
+                            if (isClaiming) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Claim",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .padding(end = 8.dp)
+                                )
+                            }
+                            Text(
+                                text = if (isClaiming) "Claiming..." else "Claim 2 EKH",
+                                color = Color.White,
+                                fontSize = 16.sp
+                            )
+                        }
+                        
+                        // Show success or error messages
+                        claimMessage?.let { message ->
+                            Text(
+                                text = message,
+                                color = Color(0xFF4CAF50),
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                        
+                        claimError?.let { error ->
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
                     }

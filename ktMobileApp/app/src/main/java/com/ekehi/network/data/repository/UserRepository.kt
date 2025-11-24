@@ -5,6 +5,7 @@ import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.data.model.Referral
 import com.ekehi.network.performance.PerformanceMonitor
+import com.ekehi.network.security.SecurePreferences
 import io.appwrite.models.Document
 import io.appwrite.exceptions.AppwriteException
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,8 @@ import kotlin.random.Random
 
 open class UserRepository @Inject constructor(
     private val appwriteService: AppwriteService,
-    private val performanceMonitor: PerformanceMonitor
+    private val performanceMonitor: PerformanceMonitor,
+    private val securePreferences: SecurePreferences
 ) {
 
     suspend fun getUserProfile(userId: String): Result<UserProfile> {
@@ -87,6 +89,17 @@ open class UserRepository @Inject constructor(
                 )
                 
                 val profile = documentToUserProfile(document)
+                
+                // Check if there's a stored referral code to claim
+                val storedReferralCode = securePreferences.getString("referral_code", null)
+                if (!storedReferralCode.isNullOrEmpty()) {
+                    Log.d("UserRepository", "Found stored referral code: $storedReferralCode")
+                    // Claim the referral code for this new user
+                    claimReferral(userId, storedReferralCode)
+                    // Clear the stored referral code
+                    securePreferences.remove("referral_code")
+                }
+                
                 Result.success(profile)
             } catch (e: AppwriteException) {
                 Result.failure(e)
@@ -185,6 +198,112 @@ open class UserRepository @Inject constructor(
             } catch (e: Exception) {
                 Log.e("UserRepository", "Error fetching referrals", e)
                 emptyList()
+            }
+        }
+    }
+
+    /**
+     * Claims a referral code for the current user
+     * @param userId The ID of the user claiming the referral
+     * @param referralCode The referral code to claim
+     * @return Result indicating success or failure with a message
+     */
+    suspend fun claimReferral(userId: String, referralCode: String): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("UserRepository", "Attempting to claim referral code: $referralCode for user: $userId")
+                
+                // Validate input
+                if (referralCode.isBlank()) {
+                    return@withContext Result.failure(Exception("Referral code cannot be empty"))
+                }
+                
+                // First, check if the current user already has a referredBy field
+                val currentUserResponse = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    queries = listOf(
+                        io.appwrite.Query.equal("userId", userId)
+                    )
+                )
+                
+                if (currentUserResponse.documents.isEmpty()) {
+                    return@withContext Result.failure(Exception("User profile not found"))
+                }
+                
+                val currentUserDoc = currentUserResponse.documents[0]
+                @Suppress("UNCHECKED_CAST")
+                val currentUserData = currentUserDoc.data as Map<String, Any>
+                
+                // Check if user has already been referred
+                val alreadyReferred = currentUserData["referredBy"] as? String
+                if (!alreadyReferred.isNullOrEmpty()) {
+                    return@withContext Result.failure(Exception("You have already been referred"))
+                }
+                
+                // Find the user with this referral code
+                val response = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    queries = listOf(
+                        io.appwrite.Query.equal("referralCode", referralCode.trim())
+                    )
+                )
+                
+                if (response.documents.isEmpty()) {
+                    return@withContext Result.failure(Exception("Invalid referral code"))
+                }
+                
+                val referrerDoc = response.documents[0]
+                @Suppress("UNCHECKED_CAST")
+                val referrerData = referrerDoc.data as Map<String, Any>
+                
+                // Make sure the user is not referring themselves
+                val referrerUserId = referrerData["userId"] as? String ?: ""
+                if (referrerUserId == userId) {
+                    return@withContext Result.failure(Exception("You cannot refer yourself"))
+                }
+                
+                // Update referrer's profile with increased referral bonus rate and referral count
+                val currentReferralBonusRate = (referrerData["referralBonusRate"] as? Number)?.toDouble() ?: 0.0
+                val currentTotalReferrals = (referrerData["totalReferrals"] as? Number)?.toInt() ?: 0
+                
+                // Check if referrer has reached max referrals (50)
+                if (currentTotalReferrals >= 50) {
+                    return@withContext Result.failure(Exception("This referral code has reached the maximum number of referrals"))
+                }
+                
+                // Update referrer's profile
+                appwriteService.databases.updateDocument(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    documentId = referrerDoc.id,
+                    data = mapOf(
+                        "referralBonusRate" to (currentReferralBonusRate + 0.0083), // Increase referral bonus rate by 0.0083 EKH/hour per referral
+                        "totalReferrals" to (currentTotalReferrals + 1),
+                        "updatedAt" to java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                    )
+                )
+                
+                // Update current user's profile with referredBy field and give them 2 EKH
+                val currentTotalCoins = (currentUserData["totalCoins"] as? Number)?.toDouble() ?: 0.0
+                
+                appwriteService.databases.updateDocument(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    documentId = currentUserDoc.id,
+                    data = mapOf(
+                        "referredBy" to referrerUserId,
+                        "totalCoins" to (currentTotalCoins + 2.0), // 2 EKH for referee
+                        "updatedAt" to java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                    )
+                )
+                
+                Log.d("UserRepository", "Successfully claimed referral code: $referralCode")
+                return@withContext Result.success("Referral claimed successfully! You received 2 EKH.")
+            } catch (e: Exception) {
+                Log.e("UserRepository", "Error claiming referral", e)
+                return@withContext Result.failure(e)
             }
         }
     }

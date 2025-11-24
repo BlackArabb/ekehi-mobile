@@ -161,7 +161,7 @@ open class UserUseCase @Inject constructor(
                         val newStreak = userProfile.currentStreak + 1
                         Log.d(TAG, "✅ Consecutive login! New streak: $newStreak")
                         
-                        // Check if user has reached 7 consecutive days
+                        // Check if user has reached 7 consecutive days for the first time
                         if (newStreak == STREAK_BONUS_THRESHOLD && userProfile.streakBonusClaimed < 1) {
                             // Award 5 EKH bonus
                             updatedTotalCoins += STREAK_BONUS_AMOUNT
@@ -170,12 +170,10 @@ open class UserUseCase @Inject constructor(
                             
                             Log.d(TAG, "🎉🎉🎉 USER ACHIEVED 7-DAY STREAK!")
                             Log.d(TAG, "💰 Awarding $STREAK_BONUS_AMOUNT EKH bonus")
-                            
-                            // Reset streak to 1 after 7 days (start new cycle)
-                            1
-                        } else {
-                            newStreak
                         }
+                        
+                        // Continue streak without resetting
+                        newStreak
                     }
                     diffDays > 1 -> {
                         // Missed days - reset streak to 1

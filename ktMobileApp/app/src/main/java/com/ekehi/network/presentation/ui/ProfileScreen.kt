@@ -481,8 +481,8 @@ fun ProfileContentSection(userProfile: UserProfile?) {
             )
 
             ProfileDetailItem(
-                label = "Best Mining Day",
-                value = "%.2f EKH".format(userProfile?.maxDailyEarnings ?: 0.0)
+                label = "Referral Bonus",
+                value = "%.4f EKH/hour".format(userProfile?.referralBonusRate ?: 0.0)
             )
 
             Spacer(modifier = Modifier.height(16.dp))

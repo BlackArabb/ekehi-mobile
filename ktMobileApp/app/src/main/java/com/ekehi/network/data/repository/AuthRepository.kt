@@ -64,7 +64,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun register(email: String, password: String, name: String): Result<AppwriteUser<Map<String, Any>>> {
+    suspend fun register(email: String, password: String, name: String, referralCode: String = ""): Result<AppwriteUser<Map<String, Any>>> {
         Log.d("AuthRepository", "Attempting registration for email: $email")
         return withContext(Dispatchers.IO) {
             try {
@@ -76,6 +76,17 @@ class AuthRepository @Inject constructor(
                         name = name
                 )
                 Log.d("AuthRepository", "Registration successful for email: $email")
+                
+                // Store the referral code for later use during profile creation
+                if (referralCode.isNotEmpty()) {
+                    try {
+                        securePreferences.putString("referral_code", referralCode)
+                        Log.d("AuthRepository", "Stored referral code: $referralCode")
+                    } catch (e: Exception) {
+                        Log.w("AuthRepository", "Failed to store referral code: ${e.message}", e)
+                    }
+                }
+                
                 return@withContext Result.success(user)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite registration failed: ${e.message}"

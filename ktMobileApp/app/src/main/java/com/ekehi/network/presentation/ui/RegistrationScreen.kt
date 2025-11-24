@@ -46,6 +46,7 @@ fun RegistrationScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var referralCode by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
     var showPasswordMismatch by remember { mutableStateOf(false) }
@@ -286,6 +287,25 @@ fun RegistrationScreen(
                 )
             }
 
+            // Referral Code Input
+            OutlinedTextField(
+                value = referralCode,
+                onValueChange = { referralCode = it },
+                label = { Text("Referral Code (Optional)", color = Color(0xB3FFFFFF)) },
+                singleLine = true,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFFffa000),
+                    unfocusedBorderColor = Color(0x33FFFFFF),
+                    cursorColor = Color(0xFFffa000),
+                    focusedLabelColor = Color(0xFFffa000),
+                    unfocusedLabelColor = Color(0xB3FFFFFF)
+                )
+            )
+
             // Terms & Conditions Checkbox
             Row(
                 modifier = Modifier
@@ -319,6 +339,7 @@ fun RegistrationScreen(
                     Log.d("RegistrationScreen", "Email: '$email'")
                     Log.d("RegistrationScreen", "Password: '${password}'")
                     Log.d("RegistrationScreen", "Confirm Password: '${confirmPassword}'")
+                    Log.d("RegistrationScreen", "Referral Code: '$referralCode'")
                     Log.d("RegistrationScreen", "Terms Accepted: $isTermsAccepted")
                     Log.d("RegistrationScreen", "isSignUpButtonEnabled: $isSignUpButtonEnabled")
                     Log.d("RegistrationScreen", "isLoading: $isLoading")
@@ -331,6 +352,7 @@ fun RegistrationScreen(
                     val trimmedEmail = email.trim()
                     val trimmedPassword = password.trim()
                     val trimmedConfirmPassword = confirmPassword.trim()
+                    val trimmedReferralCode = referralCode.trim()
                     
                     // Validate inputs
                     val isValid = trimmedName.isNotEmpty() && 
@@ -345,7 +367,8 @@ fun RegistrationScreen(
                     if (isValid) {
                         Log.d("RegistrationScreen", "All inputs valid, proceeding with registration...")
                         showPasswordMismatch = false
-                        viewModel.register(trimmedName, trimmedEmail, trimmedPassword)
+                        // Pass referral code to registration
+                        viewModel.register(trimmedName, trimmedEmail, trimmedPassword, trimmedReferralCode)
                     } else {
                         Log.d("RegistrationScreen", "Validation failed:")
                         if (trimmedName.isEmpty()) Log.d("RegistrationScreen", "- Name is empty")

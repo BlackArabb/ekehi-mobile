@@ -10,6 +10,8 @@ data class UserProfileEntity(
     val userId: String,
     val username: String? = null,
     val email: String? = null,
+    val phone_number: String = "", // Add this line
+    val country: String = "", // Add this line
     val totalCoins: Double = 0.0,
     val coinsPerSecond: Double = 0.0,
     val autoMiningRate: Double = 0.0,

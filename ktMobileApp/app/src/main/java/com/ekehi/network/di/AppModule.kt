@@ -8,11 +8,18 @@ import com.ekehi.network.data.local.CacheManager
 import com.ekehi.network.data.local.dao.MiningSessionDao
 import com.ekehi.network.data.local.dao.SocialTaskDao
 import com.ekehi.network.data.local.dao.UserProfileDao
-import com.ekehi.network.data.repository.*
-import com.ekehi.network.data.sync.SyncManager
-import com.ekehi.network.data.sync.SyncService
-import com.ekehi.network.domain.usecase.*
+import com.ekehi.network.data.repository.AuthRepository
+import com.ekehi.network.data.repository.MiningRepository
+import com.ekehi.network.data.repository.SocialTaskRepository
+import com.ekehi.network.data.repository.UserRepository
+import com.ekehi.network.domain.usecase.AuthUseCase
+import com.ekehi.network.domain.usecase.MiningUseCase
+import com.ekehi.network.domain.usecase.SocialTaskUseCase
+import com.ekehi.network.domain.usecase.UserUseCase
 import com.ekehi.network.performance.PerformanceMonitor
+import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.ekehi.network.presentation.viewmodel.SettingsViewModel
+import com.ekehi.network.presentation.viewmodel.StreakViewModel
 import com.ekehi.network.security.SecurePreferences
 import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.service.MiningManager
@@ -20,9 +27,8 @@ import com.ekehi.network.service.NotificationService
 import com.ekehi.network.service.OAuthService
 import com.ekehi.network.service.PushNotificationService
 import com.ekehi.network.service.StartIoService
-import com.ekehi.network.presentation.viewmodel.LoginViewModel
-import com.ekehi.network.presentation.viewmodel.StreakViewModel
-import com.ekehi.network.presentation.viewmodel.SettingsViewModel
+import com.ekehi.network.data.sync.SyncManager
+import com.ekehi.network.data.sync.SyncService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -97,8 +103,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(appwriteService: AppwriteService, performanceMonitor: PerformanceMonitor): UserRepository {
-        return UserRepository(appwriteService, performanceMonitor)
+    fun provideUserRepository(appwriteService: AppwriteService, performanceMonitor: PerformanceMonitor, securePreferences: SecurePreferences): UserRepository {
+        return UserRepository(appwriteService, performanceMonitor, securePreferences)
     }
 
     @Provides

@@ -6,6 +6,7 @@ import com.ekehi.network.data.local.entities.UserProfileEntity
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.data.repository.CachingRepository
 import com.ekehi.network.data.repository.UserRepository
+import com.ekehi.network.security.SecurePreferences
 import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.performance.PerformanceMonitor
 import io.appwrite.exceptions.AppwriteException
@@ -17,8 +18,9 @@ class OfflineUserRepository @Inject constructor(
     appwriteService: AppwriteService,
     performanceMonitor: PerformanceMonitor,
     private val userProfileDao: UserProfileDao,
-    private val cacheManager: CacheManager
-) : UserRepository(appwriteService, performanceMonitor) {
+    private val cacheManager: CacheManager,
+    securePreferences: SecurePreferences
+) : UserRepository(appwriteService, performanceMonitor, securePreferences) {
     
     private val cachingRepository = object : CachingRepository(cacheManager) {}
     

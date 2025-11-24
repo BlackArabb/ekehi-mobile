@@ -34,10 +34,10 @@ class AuthUseCase @Inject constructor(
         emit(Resource.Error(errorMessage))
     }
 
-    fun register(email: String, password: String, name: String): Flow<Resource<Unit>> = flow {
+    fun register(email: String, password: String, name: String, referralCode: String = ""): Flow<Resource<Unit>> = flow {
         Log.d("AuthUseCase", "Starting registration flow for email: $email")
         emit(Resource.Loading)
-        val result = authRepository.register(email, password, name)
+        val result = authRepository.register(email, password, name, referralCode)
         if (result.isSuccess) {
             Log.d("AuthUseCase", "Registration successful for email: $email")
             emit(Resource.Success(Unit))

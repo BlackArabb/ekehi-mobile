@@ -169,7 +169,7 @@ fun MiningScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Mining Stats - Pass the actual session earnings
-                MiningScreenStats(totalMined = userProfile?.totalCoins ?: 0.0, sessionEarnings = sessionEarnings)
+                MiningScreenStats(userProfile = userProfile, sessionEarnings = sessionEarnings)
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -446,7 +446,7 @@ fun MiningProgressBar(progress: Float, remainingTime: String, isMining: Boolean)
 }
 
 @Composable
-fun MiningScreenStats(totalMined: Double, sessionEarnings: Double) {
+fun MiningScreenStats(userProfile: UserProfile?, sessionEarnings: Double) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -471,13 +471,13 @@ fun MiningScreenStats(totalMined: Double, sessionEarnings: Double) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 StatCard(
-                    value = "0.0833",
+                    value = "%.4f".format(userProfile?.coinsPerSecond ?: 0.0833),
                     label = "EKH/hour",
                     icon = Icons.Default.Speed
                 )
 
                 StatCard(
-                    value = "%.4f".format(totalMined),
+                    value = "%.4f".format(userProfile?.totalCoins ?: 0.0),
                     label = "Total Mined",
                     iconPainter = painterResource(id = R.mipmap.ic_launcher)
                 )

@@ -31,7 +31,7 @@ class RegistrationViewModel @Inject constructor(
     // Fallback scope in case viewModelScope is cancelled
     private val fallbackScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun register(name: String, email: String, password: String) {
+    fun register(name: String, email: String, password: String, referralCode: String = "") {
         Log.d("RegistrationViewModel", "Registration attempt started with email: $email")
         
         // Set loading state immediately on main thread to ensure UI updates
@@ -46,6 +46,7 @@ class RegistrationViewModel @Inject constructor(
                     val nameValidation = InputValidator.validateAndSanitizeText(name, 50)
                     val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
                     val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
+                    val referralCodeValidation = InputValidator.validateAndSanitizeText(referralCode, 50)
                     
                     // Check if all validations pass
                     if (!nameValidation.isValid) {
@@ -115,7 +116,8 @@ class RegistrationViewModel @Inject constructor(
                     authUseCase.register(
                         emailValidation.sanitizedInput, 
                         passwordValidation.sanitizedInput, 
-                        nameValidation.sanitizedInput
+                        nameValidation.sanitizedInput,
+                        referralCodeValidation.sanitizedInput
                     ).collect { resource ->
                         withContext(Dispatchers.Main) {
                             _registrationState.value = resource

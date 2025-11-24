@@ -23,8 +23,8 @@ class OAuthService @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.Main)
 
     companion object {
-        const val SUCCESS_URL = "ekehi://oauth/return"
-        const val FAILURE_URL = "ekehi://auth"
+        const val SUCCESS_URL = "appwrite-callback-68c2dd6e002112935ed2://oauth2/success"
+        const val FAILURE_URL = "appwrite-callback-68c2dd6e002112935ed2://oauth2/failure"
     }
 
     fun initiateGoogleOAuth(activity: ComponentActivity) {

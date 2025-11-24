@@ -351,11 +351,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Update user password
-     * @param currentPassword The user's current password
-     * @param newPassword The new password to set
-     */
     fun updatePassword(currentPassword: String, newPassword: String) {
         viewModelScope.launch {
             Log.d("ProfileViewModel", "Updating password")
@@ -366,6 +361,40 @@ class ProfileViewModel @Inject constructor(
             } else {
                 val error = result.exceptionOrNull()
                 Log.e("ProfileViewModel", "Failed to update password: ${error?.message}")
+                // Handle error - in a real implementation, you might want to emit this to the UI
+            }
+        }
+    }
+    
+    /**
+     * Claims a referral code for the current user
+     * @param userId The ID of the user claiming the referral
+     * @param referralCode The referral code to claim
+     */
+    fun claimReferral(userId: String, referralCode: String) {
+        viewModelScope.launch {
+            Log.d("ProfileViewModel", "Claiming referral code: $referralCode for user: $userId")
+            
+            // Validate input
+            if (userId.isEmpty()) {
+                Log.e("ProfileViewModel", "User ID is required to claim referral")
+                return@launch
+            }
+            
+            if (referralCode.isBlank()) {
+                Log.e("ProfileViewModel", "Referral code cannot be empty")
+                return@launch
+            }
+            
+            val result = userRepository.claimReferral(userId, referralCode.trim())
+            if (result.isSuccess) {
+                val message = result.getOrNull()
+                Log.d("ProfileViewModel", "Referral claimed successfully: $message")
+                // Refresh user profile to reflect changes
+                refreshUserProfile()
+            } else {
+                val error = result.exceptionOrNull()
+                Log.e("ProfileViewModel", "Failed to claim referral: ${error?.message}")
                 // Handle error - in a real implementation, you might want to emit this to the UI
             }
         }
