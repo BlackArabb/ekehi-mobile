@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import android.app.Activity
 import com.ekehi.network.service.StartIoService
 import com.ekehi.network.presentation.ui.components.ProfileHeaderSkeleton
+import com.ekehi.network.presentation.viewmodel.SettingsViewModel
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -44,6 +45,7 @@ import com.ekehi.network.di.StartIoServiceEntryPoint
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
     onNavigateToReferralCode: () -> Unit,

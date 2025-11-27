@@ -90,15 +90,16 @@ object AppModule {
     @Singleton
     fun provideOAuthService(
             @ApplicationContext context: Context,
-            client: Client
+            client: Client,
+            userRepository: UserRepository
     ): OAuthService {
-        return OAuthService(context, client)
+        return OAuthService(context, client, userRepository)
     }
 
     @Provides
     @Singleton
-    fun provideAuthRepository(appwriteService: AppwriteService, securePreferences: SecurePreferences): AuthRepository {
-        return AuthRepository(appwriteService, securePreferences)
+    fun provideAuthRepository(appwriteService: AppwriteService, securePreferences: SecurePreferences, userRepository: UserRepository): AuthRepository {
+        return AuthRepository(appwriteService, securePreferences, userRepository)
     }
 
     @Provides

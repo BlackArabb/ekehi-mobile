@@ -1,9 +1,9 @@
 package com.ekehi.network.service
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
+import com.ekehi.network.data.repository.UserRepository
 import io.appwrite.Client
 import io.appwrite.services.Account
 import io.appwrite.enums.OAuthProvider
@@ -17,7 +17,8 @@ import javax.inject.Singleton
 @Singleton
 class OAuthService @Inject constructor(
     private val context: Context,
-    private val client: Client
+    private val client: Client,
+    private val userRepository: UserRepository
 ) {
     private val account: Account = Account(client)
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -54,7 +55,7 @@ class OAuthService @Inject constructor(
                 Log.d("OAuthService", "Handling OAuth callback for userId: $userId")
                 // Check if there's already an active session
                 try {
-                    val currentSession = account.getSession("current")
+                    account.getSession("current")
                     Log.d("OAuthService", "Existing session found, deleting it before creating new one")
                     // Delete existing session before creating a new one
                     account.deleteSession("current")
@@ -69,10 +70,38 @@ class OAuthService @Inject constructor(
                     secret = secret
                 )
                 Log.d("OAuthService", "OAuth session created successfully")
-                Result.success(true)
+                
+                // Check if user profile exists, create one if it doesn't
+                try {
+                    val profileResult = userRepository.getUserProfile(userId)
+                    if (profileResult.isFailure) {
+                        Log.d("OAuthService", "User profile not found, creating new profile")
+                        // Get user info from Appwrite account
+                        val appwriteUser = account.get()
+                        val username = appwriteUser.name.ifEmpty { appwriteUser.email.substringBefore("@") }
+                        
+                        // Create user profile and wait for completion
+                        val createProfileResult = userRepository.createUserProfile(userId, username)
+                        if (createProfileResult.isSuccess) {
+                            Log.d("OAuthService", "User profile created successfully")
+                        } else {
+                            Log.e("OAuthService", "Failed to create user profile: ${createProfileResult.exceptionOrNull()?.message}")
+                            // Return failure if we couldn't create the profile
+                            return@withContext Result.failure(createProfileResult.exceptionOrNull() ?: Exception("Failed to create user profile"))
+                        }
+                    } else {
+                        Log.d("OAuthService", "User profile already exists")
+                    }
+                } catch (e: Exception) {
+                    Log.e("OAuthService", "Error checking/creating user profile: ${e.message}", e)
+                    // Return failure if there was an error checking/creating the profile
+                    return@withContext Result.failure(e)
+                }
+                
+                return@withContext Result.success(true)
             } catch (e: Exception) {
                 Log.e("OAuthService", "Failed to create OAuth session: ${e.message}", e)
-                Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
     }

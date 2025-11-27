@@ -56,6 +56,14 @@ class OAuthCallbackActivity : ComponentActivity() {
                                             val result = oAuthService.handleOAuthCallback(userId, secret)
                                             if (result.isSuccess) {
                                                 Log.d("OAuthCallbackActivity", "OAuth callback processed successfully")
+                                                // Send broadcast to notify other components
+                                                val broadcastIntent = Intent("com.ekehi.network.OAUTH_SUCCESS").apply {
+                                                    putExtra("userId", userId)
+                                                    putExtra("oauth_type", "login") // Default to login
+                                                }
+                                                sendBroadcast(broadcastIntent)
+                                                
+                                                // Set result and finish
                                                 val resultIntent = Intent().apply {
                                                     putExtra("oauth_success", true)
                                                     putExtra("userId", userId)

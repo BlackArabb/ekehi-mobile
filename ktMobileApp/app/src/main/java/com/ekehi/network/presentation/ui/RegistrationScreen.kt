@@ -29,6 +29,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.RegistrationViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
@@ -39,6 +40,7 @@ import com.ekehi.network.R
 fun RegistrationScreen(
     viewModel: RegistrationViewModel = hiltViewModel(),
     oAuthViewModel: OAuthViewModel = hiltViewModel(),
+    loginViewModel: LoginViewModel = hiltViewModel(),
     onRegistrationSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
@@ -107,6 +109,24 @@ fun RegistrationScreen(
             Log.d("RegistrationScreen", "Screen disposed - resetting states")
             viewModel.resetState()
             oAuthViewModel.resetState()
+        }
+    }
+    
+    // Listen for login state changes to navigate after OAuth registration
+    val loginState by loginViewModel.loginState.collectAsState()
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is Resource.Success -> {
+                Log.d("RegistrationScreen", "Login successful after OAuth registration, navigating to main screen")
+                onRegistrationSuccess()
+            }
+            is Resource.Error -> {
+                val error = loginState as Resource.Error
+                Log.e("RegistrationScreen", "Login failed after OAuth registration: ${error.message}")
+            }
+            else -> {
+                // Do nothing for Loading or Idle states
+            }
         }
     }
 
@@ -442,9 +462,10 @@ fun RegistrationScreen(
             OAuthButtons(
                 viewModel = oAuthViewModel,
                 onOAuthSuccess = {
-                    // When OAuth is successful for registration, we should navigate to login
-                    // or check if we need to create a user profile
-                    onNavigateToLogin()
+                    // When OAuth is successful for registration, check if user is properly authenticated
+                    loginViewModel.checkCurrentUser()
+                    // Listen for login state changes to navigate to main screen
+                    // This will be handled by the parent composable
                 },
                 isRegistration = true
             )

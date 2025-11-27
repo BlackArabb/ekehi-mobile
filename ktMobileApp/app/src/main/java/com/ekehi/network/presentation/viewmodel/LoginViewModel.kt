@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 @HiltViewModel
@@ -245,33 +246,49 @@ class LoginViewModel @Inject constructor(
         
         viewModelScope.launch {
             try {
-                // First check if there's an active session
-                Log.d("LoginViewModel", "Step 1: Checking for active session")
+                // Add a small delay to ensure the session is fully established
+                kotlinx.coroutines.delay(500)
                 
-                authUseCase.hasActiveSession().collect { resource ->
-                    when (resource) {
-                        is Resource.Success -> {
-                            Log.d("LoginViewModel", "Step 1 SUCCESS: Active session check returned ${resource.data}")
-                            if (resource.data) {
-                                Log.d("LoginViewModel", "✅✅✅ SUCCESS: Active session found, user is logged in")
-                                // User is authenticated, navigate to dashboard
-                                _loginState.value = Resource.Success(Unit)
-                            } else {
-                                Log.d("LoginViewModel", "Step 1: No active session found, checking stored credentials")
-                                // No active session, check stored credentials
+                // First check if there's an active session and user profile exists
+                Log.d("LoginViewModel", "Step 1: Checking for active session and user profile")
+                
+                // Try up to 3 times with delays to allow profile creation to complete
+                var attempts = 0
+                while (attempts < 3) {
+                    authUseCase.isAuthenticatedWithProfile().collect { resource ->
+                        when (resource) {
+                            is Resource.Success -> {
+                                Log.d("LoginViewModel", "Step 1 SUCCESS: Authentication with profile check returned ${resource.data} (attempt ${attempts + 1})")
+                                if (resource.data) {
+                                    Log.d("LoginViewModel", "✅✅✅ SUCCESS: User is authenticated with profile, navigating to dashboard")
+                                    // User is authenticated with profile, navigate to dashboard
+                                    _loginState.value = Resource.Success(Unit)
+                                    return@collect // Exit the collect block
+                                } else {
+                                    Log.d("LoginViewModel", "Step 1: User is not fully authenticated (attempt ${attempts + 1})")
+                                    if (attempts < 2) {
+                                        // Wait before retrying
+                                        kotlinx.coroutines.delay(1000)
+                                    } else {
+                                        // Last attempt, fall back to stored credentials
+                                        Log.d("LoginViewModel", "Step 1: All attempts failed, checking stored credentials")
+                                        checkStoredCredentials()
+                                    }
+                                }
+                            }
+                            is Resource.Error -> {
+                                Log.e("LoginViewModel", "Step 1 ERROR: Error checking authentication with profile: ${resource.message}")
+                                // Error checking authentication, fall back to stored credentials
                                 checkStoredCredentials()
+                                return@collect // Exit the collect block
+                            }
+                            else -> {
+                                // For Loading or Idle states, do nothing
+                                Log.d("LoginViewModel", "Step 1: Authentication with profile check in progress... (attempt ${attempts + 1})")
                             }
                         }
-                        is Resource.Error -> {
-                            Log.e("LoginViewModel", "Step 1 ERROR: Error checking active session: ${resource.message}")
-                            // Error checking session, fall back to stored credentials
-                            checkStoredCredentials()
-                        }
-                        else -> {
-                            // For Loading or Idle states, do nothing
-                            Log.d("LoginViewModel", "Step 1: Active session check in progress...")
-                        }
                     }
+                    attempts++
                 }
             } catch (e: Exception) {
                 val errorResult = ErrorHandler.handleException(e, "Failed to verify user")

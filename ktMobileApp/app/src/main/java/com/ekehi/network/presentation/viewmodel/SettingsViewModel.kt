@@ -256,29 +256,29 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun signOut() {
-        viewModelScope.launch {
-            try {
-                Log.d(TAG, "Initiating sign out")
-                authUseCase.logout().collect { resource ->
-                    when (resource) {
-                        is com.ekehi.network.domain.model.Resource.Success -> {
-                            Log.d(TAG, "Sign out successful")
-                        }
-                        is com.ekehi.network.domain.model.Resource.Error -> {
-                            Log.e(TAG, "Sign out failed: ${resource.message}")
-                        }
-                        is com.ekehi.network.domain.model.Resource.Loading -> {
-                            Log.d(TAG, "Sign out in progress")
-                        }
-                        is com.ekehi.network.domain.model.Resource.Idle -> {
-                            // Do nothing for Idle state
-                        }
+    suspend fun signOut() {
+        try {
+            Log.d(TAG, "Initiating sign out")
+            authUseCase.logout().collect { resource ->
+                when (resource) {
+                    is com.ekehi.network.domain.model.Resource.Success -> {
+                        Log.d(TAG, "Sign out successful")
+                    }
+                    is com.ekehi.network.domain.model.Resource.Error -> {
+                        Log.e(TAG, "Sign out failed: ${resource.message}")
+                    }
+                    is com.ekehi.network.domain.model.Resource.Loading -> {
+                        Log.d(TAG, "Sign out in progress")
+                    }
+                    is com.ekehi.network.domain.model.Resource.Idle -> {
+                        // Do nothing for Idle state
                     }
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Sign out exception: ${e.message}", e)
             }
+            // Give Appwrite time to fully clear the session on the server
+            kotlinx.coroutines.delay(1000)
+        } catch (e: Exception) {
+            Log.e(TAG, "Sign out exception: ${e.message}", e)
         }
     }
 }

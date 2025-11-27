@@ -1,5 +1,9 @@
 package com.ekehi.network.presentation.ui
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -13,6 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
@@ -25,12 +32,54 @@ fun OAuthButtons(
 ) {
     val context = LocalContext.current
     val activity = context as? ComponentActivity
-
+    
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-
+    
     val oauthState by viewModel.oauthState.collectAsState()
-
+    
+    // Listen for OAuth success broadcast
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // When the screen resumes, check if OAuth was successful
+                // This handles the case where the OAuth flow completed while the app was in background
+            }
+        }
+        
+        lifecycleOwner.lifecycle.addObserver(observer)
+        
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+    
+    // Register broadcast receiver for OAuth success
+    val oauthSuccessReceiver = remember {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == "com.ekehi.network.OAUTH_SUCCESS") {
+                    // OAuth was successful, notify the view model
+                    viewModel.handleOAuthResult(true)
+                }
+            }
+        }
+    }
+    
+    DisposableEffect(context) {
+        val filter = IntentFilter("com.ekehi.network.OAUTH_SUCCESS")
+        context.registerReceiver(oauthSuccessReceiver, filter)
+        
+        onDispose {
+            try {
+                context.unregisterReceiver(oauthSuccessReceiver)
+            } catch (e: Exception) {
+                // Receiver might not be registered, ignore
+            }
+        }
+    }
+    
     LaunchedEffect(oauthState) {
         when (oauthState) {
             is Resource.Loading -> {
@@ -41,6 +90,7 @@ fun OAuthButtons(
                 isLoading = false
                 val success = (oauthState as Resource.Success<Boolean>).data
                 if (success) {
+                    // OAuth was successful, notify the parent composable
                     onOAuthSuccess()
                 }
             }
@@ -54,7 +104,7 @@ fun OAuthButtons(
             }
         }
     }
-
+    
     Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -99,7 +149,7 @@ fun OAuthButtons(
                 }
             }
         }
-
+        
         errorMessage?.let {
             Text(
                     text = it,

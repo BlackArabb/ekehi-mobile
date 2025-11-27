@@ -166,6 +166,27 @@ class AuthUseCase @Inject constructor(
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
+    
+    /**
+     * Checks if there's a valid Appwrite session and user profile exists
+     */
+    fun isAuthenticatedWithProfile(): Flow<Resource<Boolean>> = flow {
+        Log.d("AuthUseCase", "Starting check for authentication with profile flow")
+        emit(Resource.Loading)
+        val result = authRepository.isAuthenticatedWithProfile()
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Authentication with profile check completed: ${result.getOrNull()}")
+            emit(Resource.Success(result.getOrNull() ?: false))
+        } else {
+            val errorMessage = "Failed to check for authentication with profile: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error checking for authentication with profile: ${e.message ?: "Unknown error"}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
 
     /**
      * Gets current user if session exists
