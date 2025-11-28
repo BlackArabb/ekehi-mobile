@@ -108,7 +108,7 @@ class ProfileViewModel @Inject constructor(
 
     fun loadUserProfile(userId: String) {
         if (userId.isNullOrEmpty() || userId == "user_id_placeholder") {
-            Log.e("ProfileViewModel", "Cannot load profile: userId is invalid")
+            Log.e("ProfileViewModel", "❌ Cannot load profile: userId is invalid")
             _userProfile.value = Resource.Error("User ID is invalid")
             return
         }
@@ -116,14 +116,14 @@ class ProfileViewModel @Inject constructor(
         currentUserId = userId
 
         viewModelScope.launch {
-            Log.d("ProfileViewModel", "Loading profile for user: $userId")
+            Log.d("ProfileViewModel", "=== LOADING PROFILE FOR USER: $userId ===")
             _userProfile.value = Resource.Loading
 
             // Try to get offline data first
             if (userRepository is OfflineUserRepository) {
                 userRepository.getOfflineUserProfile(userId).collect { profile ->
                     if (profile != null) {
-                        Log.d("ProfileViewModel", "Loaded offline profile: ${profile.username}")
+                        Log.d("ProfileViewModel", "✅ Loaded offline profile: ${profile.username}")
                         _userProfile.value = Resource.Success(profile)
                     }
                 }
@@ -140,10 +140,10 @@ class ProfileViewModel @Inject constructor(
                 if (result.isSuccess) {
                     val profile = result.getOrNull()
                     if (profile != null) {
-                        Log.d("ProfileViewModel", "Profile synced successfully: ${profile.username}, Coins: ${profile.totalCoins}")
+                        Log.d("ProfileViewModel", "✅ Profile loaded successfully: ${profile.username}, Coins: ${profile.totalCoins}")
                         
                         // Update streak when profile is loaded
-                        Log.d("ProfileViewModel", "=== UPDATING STREAK WHEN PROFILE LOADED ===")
+                        Log.d("ProfileViewModel", "=== UPDATING STREAK ===")
                         userUseCase.updateStreak(userId, profile).collect { streakResource ->
                             when (streakResource) {
                                 is Resource.Success -> {
@@ -169,23 +169,22 @@ class ProfileViewModel @Inject constructor(
                         }
                         subscribeToUserProfileUpdates(userId)
                     } else {
-                        Log.e("ProfileViewModel", "Profile is null despite success")
-                        _userProfile.value = Resource.Error("User profile not found")
+                        Log.e("ProfileViewModel", "❌ Profile is null despite success")
+                        Log.d("ProfileViewModel", "🔧 Creating new profile")
+                        createNewUserProfile(userId)
                     }
                 } else {
                     val error = result.exceptionOrNull()
-                    // If profile not found, create a new one
-                    if (error?.message?.contains("not found") == true) {
-                        Log.d("ProfileViewModel", "Profile not found, creating new profile for user: $userId")
-                        createNewUserProfile(userId)
-                    } else {
-                        Log.e("ProfileViewModel", "Failed to load profile: ${error?.message}")
-                        _userProfile.value = Resource.Error("Failed to load user profile: ${error?.message}")
-                    }
+                    Log.e("ProfileViewModel", "❌ Failed to load profile: ${error?.message}")
+                    // Create profile for ANY error - this ensures profile is created even if it failed during registration
+                    Log.d("ProfileViewModel", "🔧 Creating new profile for user: $userId")
+                    createNewUserProfile(userId)
                 }
             } catch (e: Exception) {
-                Log.e("ProfileViewModel", "Exception loading profile", e)
-                _userProfile.value = Resource.Error("Exception: ${e.message}")
+                Log.e("ProfileViewModel", "❌ Exception loading profile: ${e.message}", e)
+                // Also create profile on exception
+                Log.d("ProfileViewModel", "🔧 Creating new profile after exception")
+                createNewUserProfile(userId)
             }
         }
     }
@@ -225,17 +224,20 @@ class ProfileViewModel @Inject constructor(
     private fun createNewUserProfile(userId: String) {
         viewModelScope.launch {
             try {
-                Log.d("ProfileViewModel", "Creating new profile for user: $userId")
+                Log.d("ProfileViewModel", "🔧 Creating new profile for user: $userId")
                 // Get the user's name from the auth repository
                 val userResult = authRepository.getCurrentUser()
                 userResult.onSuccess { user ->
                     val username = user.name.ifEmpty { "User${userId.take(6)}" }
+                    Log.d("ProfileViewModel", "Creating profile with username: $username")
+                    
                     val createResult = userRepository.createUserProfile(userId, username)
                     if (createResult.isSuccess) {
                         val profile = createResult.getOrNull()
                         if (profile != null) {
-                            Log.d("ProfileViewModel", "New profile created successfully: ${profile.username}")
+                            Log.d("ProfileViewModel", "✅ New profile created successfully: ${profile.username}")
                             _userProfile.value = Resource.Success(profile)
+                            
                             // Update streak for new profile
                             Log.d("ProfileViewModel", "=== UPDATING STREAK FOR NEW PROFILE ===")
                             userUseCase.updateStreak(userId, profile).collect { streakResource ->
@@ -254,18 +256,21 @@ class ProfileViewModel @Inject constructor(
                                     }
                                 }
                             }
+                        } else {
+                            Log.e("ProfileViewModel", "❌ Created profile is null")
+                            _userProfile.value = Resource.Error("Failed to create user profile: profile is null")
                         }
                     } else {
                         val error = createResult.exceptionOrNull()
-                        Log.e("ProfileViewModel", "Failed to create profile: ${error?.message}")
+                        Log.e("ProfileViewModel", "❌ Failed to create profile: ${error?.message}")
                         _userProfile.value = Resource.Error("Failed to create user profile: ${error?.message}")
                     }
                 }.onFailure { error ->
-                    Log.e("ProfileViewModel", "Failed to get user info for profile creation: ${error.message}")
+                    Log.e("ProfileViewModel", "❌ Failed to get user info for profile creation: ${error.message}")
                     _userProfile.value = Resource.Error("Failed to get user info: ${error.message}")
                 }
             } catch (e: Exception) {
-                Log.e("ProfileViewModel", "Exception creating new profile", e)
+                Log.e("ProfileViewModel", "❌ Exception creating new profile: ${e.message}", e)
                 _userProfile.value = Resource.Error("Exception creating profile: ${e.message}")
             }
         }

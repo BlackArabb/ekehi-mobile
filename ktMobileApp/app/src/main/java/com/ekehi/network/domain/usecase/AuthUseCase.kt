@@ -40,6 +40,7 @@ class AuthUseCase @Inject constructor(
         val result = authRepository.register(email, password, name, referralCode)
         if (result.isSuccess) {
             Log.d("AuthUseCase", "Registration successful for email: $email")
+            // Profile is created automatically in AuthRepository.register()
             emit(Resource.Success(Unit))
         } else {
             val errorMessage = "Registration failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
@@ -80,6 +81,7 @@ class AuthUseCase @Inject constructor(
         val result = authRepository.registerWithGoogle(idToken, name, email)
         if (result.isSuccess) {
             Log.d("AuthUseCase", "Google registration successful for email: $email")
+            // Profile is created automatically in AuthRepository.registerWithGoogle()
             emit(Resource.Success(Unit))
         } else {
             val errorMessage = "Google registration failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"

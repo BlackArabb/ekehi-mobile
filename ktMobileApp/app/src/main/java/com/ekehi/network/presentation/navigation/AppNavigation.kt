@@ -171,25 +171,22 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                             }
                         },
                         onLogout = {
-                            coroutineScope.launch {
-                                try {
-                                    Log.d("MainScreen", "Logout button clicked - starting logout process")
-                                    // Sign out from Appwrite and clear local storage
-                                    settingsViewModel.signOut()
-                                    Log.d("MainScreen", "SettingsViewModel.signOut() completed")
-                                    // Navigate to landing screen
-                                    onLogout()
-                                    Log.d("MainScreen", "Navigation callback triggered")
-                                } catch (e: Exception) {
-                                    Log.e("MainScreen", "Error during logout", e)
-                                }
+                            try {
+                                Log.d("MainScreen", "Logout button clicked - starting logout process")
+                                // Sign out from Appwrite and clear local storage
+                                settingsViewModel.signOut()
+                                Log.d("MainScreen", "SettingsViewModel.signOut() completed")
+                                // Navigate to landing screen
+                                onLogout()
+                                Log.d("MainScreen", "Navigation callback triggered")
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Error during logout", e)
                             }
                         }
                     )
                 }
                 
                 composable("settings") {
-                    val coroutineScope = rememberCoroutineScope()
                     SettingsScreen(
                         onChangePassword = {
                             try {
@@ -216,14 +213,12 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                             }
                         },
                         onSignOut = {
-                            coroutineScope.launch {
-                                try {
-                                    Log.d("MainScreen", "Sign out triggered from SettingsScreen")
-                                    settingsViewModel.signOut()
-                                    onLogout()
-                                } catch (e: Exception) {
-                                    Log.e("MainScreen", "Sign out error", e)
-                                }
+                            try {
+                                Log.d("MainScreen", "Sign out triggered from SettingsScreen")
+                                settingsViewModel.signOut()
+                                onLogout()
+                            } catch (e: Exception) {
+                                Log.e("MainScreen", "Sign out error", e)
                             }
                         },
                         onPrivacyPolicy = {

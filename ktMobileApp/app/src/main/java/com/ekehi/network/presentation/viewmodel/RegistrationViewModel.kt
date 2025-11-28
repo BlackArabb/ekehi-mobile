@@ -32,7 +32,8 @@ class RegistrationViewModel @Inject constructor(
     private val fallbackScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun register(name: String, email: String, password: String, referralCode: String = "") {
-        Log.d("RegistrationViewModel", "Registration attempt started with email: $email")
+        Log.d("RegistrationViewModel", "=== REGISTRATION ATTEMPT STARTED ===")
+        Log.d("RegistrationViewModel", "Email: $email, Name: $name")
         
         // Set loading state immediately on main thread to ensure UI updates
         _registrationState.value = Resource.Loading
@@ -112,6 +113,8 @@ class RegistrationViewModel @Inject constructor(
                         // Don't fail registration if analytics fails
                     }
                     
+                    Log.d("RegistrationViewModel", "✅ All validations passed, proceeding with registration")
+                    
                     // Perform registration
                     authUseCase.register(
                         emailValidation.sanitizedInput, 
@@ -125,13 +128,16 @@ class RegistrationViewModel @Inject constructor(
                         
                         when (resource) {
                             is Resource.Success -> {
-                                Log.d("RegistrationViewModel", "Registration successful")
+                                Log.d("RegistrationViewModel", "✅ Registration successful!")
+                                Log.d("RegistrationViewModel", "Profile will be created automatically by ProfileViewModel")
+                                // Profile creation will happen automatically when user navigates to profile screen
+                                // ProfileViewModel.init() will call loadUserProfile() which will create the profile if it doesn't exist
                             }
                             is Resource.Error -> {
-                                Log.e("RegistrationViewModel", "Registration failed: ${resource.message}")
+                                Log.e("RegistrationViewModel", "❌ Registration failed: ${resource.message}")
                             }
                             is Resource.Loading -> {
-                                // Loading state already set
+                                Log.d("RegistrationViewModel", "⏳ Registration in progress...")
                             }
                             is Resource.Idle -> {
                                 // Do nothing for Idle state
@@ -140,20 +146,21 @@ class RegistrationViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     val errorMessage = "Registration failed: ${e.message}"
-                    Log.e("RegistrationViewModel", errorMessage, e)
+                    Log.e("RegistrationViewModel", "❌ $errorMessage", e)
                     withContext(Dispatchers.Main) {
                         _registrationState.value = Resource.Error(errorMessage)
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e("RegistrationViewModel", "Exception launching coroutine: ${e.message}", e)
+            Log.e("RegistrationViewModel", "❌ Exception launching coroutine: ${e.message}", e)
             _registrationState.value = Resource.Error("Failed to start registration process: ${e.message}")
         }
     }
     
     fun registerWithGoogle(idToken: String, name: String, email: String) {
-        Log.d("RegistrationViewModel", "Google registration attempt started with email: $email")
+        Log.d("RegistrationViewModel", "=== GOOGLE REGISTRATION ATTEMPT STARTED ===")
+        Log.d("RegistrationViewModel", "Email: $email, Name: $name")
         
         // Set loading state immediately on main thread to ensure UI updates
         _registrationState.value = Resource.Loading
@@ -170,6 +177,8 @@ class RegistrationViewModel @Inject constructor(
                         // Don't fail registration if analytics fails
                     }
                     
+                    Log.d("RegistrationViewModel", "✅ Proceeding with Google registration")
+                    
                     // Perform Google registration
                     authUseCase.registerWithGoogle(idToken, name, email).collect { resource ->
                         withContext(Dispatchers.Main) {
@@ -178,13 +187,16 @@ class RegistrationViewModel @Inject constructor(
                         
                         when (resource) {
                             is Resource.Success -> {
-                                Log.d("RegistrationViewModel", "Google registration successful")
+                                Log.d("RegistrationViewModel", "✅ Google registration successful!")
+                                Log.d("RegistrationViewModel", "Profile will be created automatically by ProfileViewModel")
+                                // Profile creation will happen automatically when user navigates to profile screen
+                                // ProfileViewModel.init() will call loadUserProfile() which will create the profile if it doesn't exist
                             }
                             is Resource.Error -> {
-                                Log.e("RegistrationViewModel", "Google registration failed: ${resource.message}")
+                                Log.e("RegistrationViewModel", "❌ Google registration failed: ${resource.message}")
                             }
                             is Resource.Loading -> {
-                                // Loading state already set
+                                Log.d("RegistrationViewModel", "⏳ Google registration in progress...")
                             }
                             is Resource.Idle -> {
                                 // Do nothing for Idle state
@@ -193,19 +205,20 @@ class RegistrationViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     val errorMessage = "Google registration failed: ${e.message}"
-                    Log.e("RegistrationViewModel", errorMessage, e)
+                    Log.e("RegistrationViewModel", "❌ $errorMessage", e)
                     withContext(Dispatchers.Main) {
                         _registrationState.value = Resource.Error(errorMessage)
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.e("RegistrationViewModel", "Exception launching coroutine: ${e.message}", e)
+            Log.e("RegistrationViewModel", "❌ Exception launching coroutine: ${e.message}", e)
             _registrationState.value = Resource.Error("Failed to start Google registration process: ${e.message}")
         }
     }
     
     fun resetState() {
+        Log.d("RegistrationViewModel", "Resetting registration state")
         _registrationState.value = Resource.Idle
     }
 }

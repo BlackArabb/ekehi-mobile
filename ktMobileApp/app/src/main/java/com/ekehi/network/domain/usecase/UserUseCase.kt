@@ -17,7 +17,7 @@ open class UserUseCase @Inject constructor(
     companion object {
         private const val TAG = "UserUseCase"
         private const val STREAK_BONUS_THRESHOLD = 7
-        private const val STREAK_BONUS_AMOUNT = 5.0
+        private const val STREAK_BONUS_AMOUNT = 5.0f
     }
     
     /**

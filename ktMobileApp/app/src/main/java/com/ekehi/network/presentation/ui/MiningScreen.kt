@@ -471,7 +471,7 @@ fun MiningScreenStats(userProfile: UserProfile?, sessionEarnings: Double) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 StatCard(
-                    value = "%.4f".format(userProfile?.coinsPerSecond ?: 0.0833),
+                    value = "%.4f".format(userProfile?.autoMiningRate ?: 0.0833),
                     label = "EKH/hour",
                     icon = Icons.Default.Speed
                 )

@@ -3,9 +3,11 @@ package com.ekehi.network.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ekehi.network.data.model.User
 import com.ekehi.network.domain.usecase.AuthUseCase
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.security.SecurePreferences
+import kotlinx.coroutines.flow.first
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -256,29 +258,49 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    suspend fun signOut() {
-        try {
-            Log.d(TAG, "Initiating sign out")
-            authUseCase.logout().collect { resource ->
-                when (resource) {
-                    is com.ekehi.network.domain.model.Resource.Success -> {
-                        Log.d(TAG, "Sign out successful")
-                    }
-                    is com.ekehi.network.domain.model.Resource.Error -> {
-                        Log.e(TAG, "Sign out failed: ${resource.message}")
-                    }
-                    is com.ekehi.network.domain.model.Resource.Loading -> {
-                        Log.d(TAG, "Sign out in progress")
-                    }
-                    is com.ekehi.network.domain.model.Resource.Idle -> {
-                        // Do nothing for Idle state
+    fun signOut() {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Initiating sign out")
+                authUseCase.logout().collect { resource ->
+                    when (resource) {
+                        is com.ekehi.network.domain.model.Resource.Success -> {
+                            Log.d(TAG, "Sign out successful")
+                        }
+                        is com.ekehi.network.domain.model.Resource.Error -> {
+                            Log.e(TAG, "Sign out failed: ${resource.message}")
+                        }
+                        is com.ekehi.network.domain.model.Resource.Loading -> {
+                            Log.d(TAG, "Sign out in progress")
+                        }
+                        is com.ekehi.network.domain.model.Resource.Idle -> {
+                            // Do nothing for Idle state
+                        }
                     }
                 }
+                // Give Appwrite time to fully clear the session on the server
+                kotlinx.coroutines.delay(1000)
+            } catch (e: Exception) {
+                Log.e(TAG, "Sign out exception: ${e.message}", e)
             }
-            // Give Appwrite time to fully clear the session on the server
-            kotlinx.coroutines.delay(1000)
+        }
+    }
+    
+    /**
+     * Gets the current user
+     * @return User object or null if not logged in
+     */
+    suspend fun getCurrentUser(): User? {
+        return try {
+            val result = authUseCase.getCurrentUserIfLoggedIn()
+            val resource = result.first()
+            when (resource) {
+                is Resource.Success -> resource.data
+                else -> null
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Sign out exception: ${e.message}", e)
+            Log.e(TAG, "Error getting current user: ${e.message}", e)
+            null
         }
     }
 }

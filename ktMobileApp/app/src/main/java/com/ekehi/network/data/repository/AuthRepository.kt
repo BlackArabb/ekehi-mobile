@@ -66,52 +66,97 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun register(email: String, password: String, name: String, referralCode: String = ""): Result<AppwriteUser<Map<String, Any>>> {
-        Log.d("AuthRepository", "Attempting registration for email: $email")
+        Log.d("AuthRepository", "=== REGISTRATION STARTED ===")
+        Log.d("AuthRepository", "Email: $email, Name: $name")
         return withContext(Dispatchers.IO) {
             try {
-                Log.d("AuthRepository", "Calling Appwrite registration API")
-                val user = appwriteService.account.create(
-                        userId = ID.unique(),
-                        email = email,
-                        password = password,
-                        name = name
-                )
-                Log.d("AuthRepository", "Registration successful for email: $email")
+                // Step 0: CRITICAL - Delete any existing session first
+                Log.d("AuthRepository", "Step 0: Checking for existing session")
+                try {
+                    val currentSession = getCurrentSession()
+                    if (currentSession.isSuccess) {
+                        Log.d("AuthRepository", "Existing session found, deleting it before registration")
+                        appwriteService.account.deleteSession("current")
+                        Log.d("AuthRepository", "✅ Existing session deleted")
+                    }
+                } catch (e: Exception) {
+                    Log.d("AuthRepository", "No existing session to delete")
+                }
                 
-                // Store the referral code for later use during profile creation
+                // Step 1: Create the Appwrite account
+                Log.d("AuthRepository", "Step 1: Creating Appwrite account")
+                val user = appwriteService.account.create(
+                    userId = ID.unique(),
+                    email = email,
+                    password = password,
+                    name = name
+                )
+                Log.d("AuthRepository", "✅ Account created successfully - userId: ${user.id}")
+                
+                // Step 2: Auto-login the user immediately
+                Log.d("AuthRepository", "Step 2: Auto-logging in user")
+                try {
+                    val session = appwriteService.account.createEmailPasswordSession(
+                        email = email,
+                        password = password
+                    )
+                    Log.d("AuthRepository", "✅ Auto-login successful - sessionId: ${session.id}")
+                    
+                    // Store user info after successful login
+                    storeUserInfo(email)
+                    Log.d("AuthRepository", "✅ User info stored")
+                } catch (e: Exception) {
+                    Log.e("AuthRepository", "❌ Auto-login failed: ${e.message}", e)
+                    // This is critical - if auto-login fails, profile creation will also fail
+                    // So we should return failure here
+                    return@withContext Result.failure(Exception("Registration succeeded but auto-login failed: ${e.message}"))
+                }
+                
+                // Step 3: Store referral code if provided
                 if (referralCode.isNotEmpty()) {
                     try {
                         securePreferences.putString("referral_code", referralCode)
-                        Log.d("AuthRepository", "Stored referral code: $referralCode")
+                        Log.d("AuthRepository", "✅ Stored referral code: $referralCode")
                     } catch (e: Exception) {
-                        Log.w("AuthRepository", "Failed to store referral code: ${e.message}", e)
+                        Log.w("AuthRepository", "⚠️ Failed to store referral code: ${e.message}", e)
                     }
                 }
                 
-                // Create user profile and wait for completion
+                // Step 4: Create user profile (now that user is authenticated)
                 try {
+                    Log.d("AuthRepository", "Step 4: Creating user profile for userId: ${user.id}")
                     val profileResult = userRepository.createUserProfile(user.id, name)
                     if (profileResult.isSuccess) {
-                        Log.d("AuthRepository", "User profile created successfully for userId: ${user.id}")
+                        val profile = profileResult.getOrNull()
+                        if (profile != null) {
+                            Log.d("AuthRepository", "✅ User profile created successfully")
+                            Log.d("AuthRepository", "   Username: ${profile.username}")
+                            Log.d("AuthRepository", "   Coins: ${profile.totalCoins}")
+                            Log.d("AuthRepository", "   Referral Code: ${profile.referralCode}")
+                        } else {
+                            Log.e("AuthRepository", "⚠️ Profile created but is null")
+                        }
                     } else {
-                        Log.e("AuthRepository", "Failed to create user profile: ${profileResult.exceptionOrNull()?.message}")
-                        // Even if profile creation fails, we still return success for the registration
-                        // The profile creation issue should be handled separately
+                        val error = profileResult.exceptionOrNull()
+                        Log.e("AuthRepository", "❌ Failed to create user profile: ${error?.message}")
+                        Log.e("AuthRepository", "   This will be handled by ProfileViewModel on first login")
+                        // Don't fail registration - ProfileViewModel will create it later
                     }
                 } catch (e: Exception) {
-                    Log.e("AuthRepository", "Exception while creating user profile: ${e.message}", e)
-                    // Even if profile creation fails, we still return success for the registration
-                    // The profile creation issue should be handled separately
+                    Log.e("AuthRepository", "❌ Exception while creating user profile: ${e.message}", e)
+                    Log.e("AuthRepository", "   This will be handled by ProfileViewModel on first login")
+                    // Don't fail registration - ProfileViewModel will create it later
                 }
                 
+                Log.d("AuthRepository", "=== REGISTRATION COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(user)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite registration failed: ${e.message}"
-                Log.e("AuthRepository", errorMessage, e)
+                Log.e("AuthRepository", "❌ $errorMessage", e)
                 return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Registration failed: ${e.message}"
-                Log.e("AuthRepository", errorMessage, e)
+                Log.e("AuthRepository", "❌ $errorMessage", e)
                 return@withContext Result.failure(e)
             }
         }
@@ -153,67 +198,92 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun registerWithGoogle(idToken: String, name: String, email: String): Result<AppwriteUser<Map<String, Any>>> {
-        Log.d("AuthRepository", "Attempting Google registration for email: $email")
+        Log.d("AuthRepository", "=== GOOGLE REGISTRATION STARTED ===")
+        Log.d("AuthRepository", "Email: $email, Name: $name")
         return withContext(Dispatchers.IO) {
             try {
-                Log.d("AuthRepository", "Calling Appwrite Google OAuth registration API")
-                // For Google registration, we need to create the user account first
+                // Step 1: Create the Appwrite account
+                Log.d("AuthRepository", "Step 1: Creating Appwrite account via Google OAuth")
                 val user = appwriteService.account.create(
-                        userId = ID.unique(),
-                        email = email,
-                        password = "", // OAuth users don't have passwords
-                        name = name
+                    userId = ID.unique(),
+                    email = email,
+                    password = "", // OAuth users don't have passwords
+                    name = name
                 )
-                Log.d("AuthRepository", "Google registration successful for email: $email")
+                Log.d("AuthRepository", "✅ Google account created successfully - userId: ${user.id}")
                 
-                // Create user profile and wait for completion
+                // Note: For Google OAuth, the user should already be logged in via the OAuth flow
+                // But we'll verify by checking if we can get the current user
                 try {
-                    val profileResult = userRepository.createUserProfile(user.id, name)
-                    if (profileResult.isSuccess) {
-                        Log.d("AuthRepository", "User profile created successfully for userId: ${user.id}")
-                    } else {
-                        Log.e("AuthRepository", "Failed to create user profile: ${profileResult.exceptionOrNull()?.message}")
-                        // Even if profile creation fails, we still return success for the registration
-                        // The profile creation issue should be handled separately
-                    }
+                    val currentUser = appwriteService.account.get()
+                    Log.d("AuthRepository", "✅ User is already logged in via OAuth - userId: ${currentUser.id}")
                 } catch (e: Exception) {
-                    Log.e("AuthRepository", "Exception while creating user profile: ${e.message}", e)
-                    // Even if profile creation fails, we still return success for the registration
-                    // The profile creation issue should be handled separately
+                    Log.w("AuthRepository", "⚠️ User not logged in after OAuth registration: ${e.message}")
                 }
                 
+                // Step 2: Create user profile
+                try {
+                    Log.d("AuthRepository", "Step 2: Creating user profile for userId: ${user.id}")
+                    val profileResult = userRepository.createUserProfile(user.id, name)
+                    if (profileResult.isSuccess) {
+                        val profile = profileResult.getOrNull()
+                        if (profile != null) {
+                            Log.d("AuthRepository", "✅ User profile created successfully")
+                            Log.d("AuthRepository", "   Username: ${profile.username}")
+                            Log.d("AuthRepository", "   Coins: ${profile.totalCoins}")
+                            Log.d("AuthRepository", "   Referral Code: ${profile.referralCode}")
+                        } else {
+                            Log.e("AuthRepository", "⚠️ Profile created but is null")
+                        }
+                    } else {
+                        val error = profileResult.exceptionOrNull()
+                        Log.e("AuthRepository", "❌ Failed to create user profile: ${error?.message}")
+                        Log.e("AuthRepository", "   This will be handled by ProfileViewModel on first login")
+                    }
+                } catch (e: Exception) {
+                    Log.e("AuthRepository", "❌ Exception while creating user profile: ${e.message}", e)
+                    Log.e("AuthRepository", "   This will be handled by ProfileViewModel on first login")
+                }
+                
+                Log.d("AuthRepository", "=== GOOGLE REGISTRATION COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(user)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite Google registration failed: ${e.message}"
-                Log.e("AuthRepository", errorMessage, e)
+                Log.e("AuthRepository", "❌ $errorMessage", e)
                 return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Google registration failed: ${e.message}"
-                Log.e("AuthRepository", errorMessage, e)
+                Log.e("AuthRepository", "❌ $errorMessage", e)
                 return@withContext Result.failure(e)
             }
         }
     }
 
     suspend fun logout(): Result<Unit> {
-        Log.d("AuthRepository", "Attempting logout")
+        Log.d("AuthRepository", "=== LOGOUT STARTED ===")
         return withContext(Dispatchers.IO) {
             try {
                 Log.d("AuthRepository", "Calling Appwrite logout API")
                 appwriteService.account.deleteSession("current")
-                Log.d("AuthRepository", "Logout successful")
+                Log.d("AuthRepository", "✅ Appwrite session deleted")
 
                 // Clear stored user info
                 clearUserInfo()
+                Log.d("AuthRepository", "✅ Local user info cleared")
 
+                Log.d("AuthRepository", "=== LOGOUT COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(Unit)
             } catch (e: AppwriteException) {
                 val errorMessage = "Appwrite logout failed: ${e.message}"
-                Log.e("AuthRepository", errorMessage, e)
+                Log.e("AuthRepository", "❌ $errorMessage", e)
+                // Even if Appwrite logout fails, clear local data
+                clearUserInfo()
                 return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Logout failed: ${e.message}"
-                Log.e("AuthRepository", errorMessage, e)
+                Log.e("AuthRepository", "❌ $errorMessage", e)
+                // Even if logout fails, clear local data
+                clearUserInfo()
                 return@withContext Result.failure(e)
             }
         }
@@ -440,6 +510,54 @@ class AuthRepository @Inject constructor(
             } catch (e: Exception) {
                 val errorMessage = "Password update failed: ${e.message}"
                 Log.e("AuthRepository", errorMessage, e)
+                return@withContext Result.failure(e)
+            }
+        }
+    }
+
+    /**
+     * Creates a user profile if one doesn't exist for the current user
+     */
+    suspend fun createUserProfileIfNotExists(): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("AuthRepository", "Checking if user profile exists")
+                
+                // Get current user
+                val currentUserResult = getCurrentUserIfLoggedIn()
+                if (currentUserResult.isSuccess) {
+                    val currentUser = currentUserResult.getOrNull()
+                    if (currentUser != null) {
+                        // Check if profile exists
+                        val profileResult = userRepository.getUserProfile(currentUser.id)
+                        if (profileResult.isFailure) {
+                            // Profile doesn't exist, create it
+                            Log.d("AuthRepository", "User profile not found, creating new profile for userId: ${currentUser.id}")
+                            val createResult = userRepository.createUserProfile(currentUser.id, currentUser.name)
+                            if (createResult.isSuccess) {
+                                Log.d("AuthRepository", "User profile created successfully")
+                                return@withContext Result.success(Unit)
+                            } else {
+                                val error = createResult.exceptionOrNull()
+                                Log.e("AuthRepository", "Failed to create user profile: ${error?.message}")
+                                return@withContext Result.failure(error ?: Exception("Failed to create user profile"))
+                            }
+                        } else {
+                            // Profile exists
+                            Log.d("AuthRepository", "User profile already exists for userId: ${currentUser.id}")
+                            return@withContext Result.success(Unit)
+                        }
+                    } else {
+                        Log.e("AuthRepository", "No current user found")
+                        return@withContext Result.failure(Exception("No current user found"))
+                    }
+                } else {
+                    val error = currentUserResult.exceptionOrNull()
+                    Log.e("AuthRepository", "Failed to get current user: ${error?.message}")
+                    return@withContext Result.failure(error ?: Exception("Failed to get current user"))
+                }
+            } catch (e: Exception) {
+                Log.e("AuthRepository", "Error in createUserProfileIfNotExists: ${e.message}", e)
                 return@withContext Result.failure(e)
             }
         }

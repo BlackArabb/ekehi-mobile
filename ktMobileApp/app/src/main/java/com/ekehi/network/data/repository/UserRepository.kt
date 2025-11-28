@@ -29,7 +29,7 @@ open class UserRepository @Inject constructor(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     queries = listOf(
-                        io.appwrite.Query.equal("userId", userId)
+                        io.appwrite.Query.equal("userId", listOf(userId))
                     )
                 )
                 
@@ -62,29 +62,38 @@ open class UserRepository @Inject constructor(
                 // Generate a unique referral code
                 val referralCode = "REF${Random.nextInt(100000, 999999)}"
                 
+                // Get current timestamp
+                val currentTimestamp = java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", 
+                    java.util.Locale.getDefault()
+                ).apply {
+                    timeZone = java.util.TimeZone.getTimeZone("UTC")
+                }.format(java.util.Date())
+                
                 val document = appwriteService.databases.createDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     documentId = "unique()",
                     data = mapOf(
-                        "userId" to userId,
+                        "userId" to listOf(userId),
                         "username" to username,
                         "phone_number" to "",
                         "country" to "",
-                        "totalCoins" to 0.0,
-                        "coinsPerSecond" to 0.0,
-                        "autoMiningRate" to 0.0,
-                        "miningPower" to 1.0,
-                        "referralBonusRate" to 0.0,
+                        "totalCoins" to 0.0f,
+                        "autoMiningRate" to 0.0f,
+                        "miningPower" to 1.0f,
+                        "referralBonusRate" to 0.0f,
                         "currentStreak" to 0,
                         "longestStreak" to 0,
                         "totalReferrals" to 0,
-                        "lifetimeEarnings" to 0.0,
-                        "dailyMiningRate" to 0.0,
-                        "maxDailyEarnings" to 100.0,
-                        "todayEarnings" to 0.0,
+                        "lifetimeEarnings" to 0.0f,
+                        "dailyMiningRate" to 2.0f,
+                        "maxDailyEarnings" to 10000.0f,
+                        "todayEarnings" to 0.0f,
                         "streakBonusClaimed" to 0,
-                        "referralCode" to referralCode
+                        "referralCode" to listOf(referralCode),
+                        "createdAt" to currentTimestamp,
+                        "updatedAt" to currentTimestamp
                     )
                 )
                 
@@ -102,6 +111,10 @@ open class UserRepository @Inject constructor(
                 
                 Result.success(profile)
             } catch (e: AppwriteException) {
+                Log.e("UserRepository", "Appwrite exception while creating profile: ${e.message}", e)
+                Result.failure(e)
+            } catch (e: Exception) {
+                Log.e("UserRepository", "Unexpected exception while creating profile: ${e.message}", e)
                 Result.failure(e)
             }
         }
@@ -117,7 +130,7 @@ open class UserRepository @Inject constructor(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     queries = listOf(
-                        io.appwrite.Query.equal("userId", userId)
+                        io.appwrite.Query.equal("userId", listOf(userId))
                     )
                 )
                 
@@ -223,7 +236,7 @@ open class UserRepository @Inject constructor(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     queries = listOf(
-                        io.appwrite.Query.equal("userId", userId)
+                        io.appwrite.Query.equal("userId", listOf(userId))
                     )
                 )
                 
@@ -246,7 +259,7 @@ open class UserRepository @Inject constructor(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     queries = listOf(
-                        io.appwrite.Query.equal("referralCode", referralCode.trim())
+                        io.appwrite.Query.equal("referralCode", listOf(referralCode.trim()))
                     )
                 )
                 
@@ -259,7 +272,11 @@ open class UserRepository @Inject constructor(
                 val referrerData = referrerDoc.data as Map<String, Any>
                 
                 // Make sure the user is not referring themselves
-                val referrerUserId = referrerData["userId"] as? String ?: ""
+                val referrerUserId = when (val referrerUserIdValue = referrerData["userId"]) {
+                    is List<*> -> referrerUserIdValue.firstOrNull() as? String ?: ""
+                    is String -> referrerUserIdValue
+                    else -> ""
+                }
                 if (referrerUserId == userId) {
                     return@withContext Result.failure(Exception("You cannot refer yourself"))
                 }
@@ -318,7 +335,11 @@ open class UserRepository @Inject constructor(
             referrerId = data["referrerId"] as? String ?: "",
             referredUserId = data["referredUserId"] as? String ?: "",
             referredUserName = data["referredUserName"] as? String,
-            referralCode = data["referralCode"] as? String ?: "",
+            referralCode = when (val referralCodeValue = data["referralCode"]) {
+                is List<*> -> referralCodeValue.firstOrNull() as? String ?: ""
+                is String -> referralCodeValue
+                else -> ""
+            },
             rewardAmount = (data["rewardAmount"] as? Number)?.toDouble() ?: 0.5,
             rewardClaimed = data["rewardClaimed"] as? Boolean ?: false,
             createdAt = (data["createdAt"] as? String)?.let { parseTimestamp(it) },
@@ -341,16 +362,19 @@ open class UserRepository @Inject constructor(
         
         return UserProfile(
             id = document.id ?: "",
-            userId = data["userId"] as? String ?: "",
+            userId = when (val userIdValue = data["userId"]) {
+                is List<*> -> userIdValue.firstOrNull() as? String ?: ""
+                is String -> userIdValue
+                else -> ""
+            },
             username = data["username"] as? String,
             email = data["email"] as? String,
             phone_number = data["phone_number"] as? String ?: "",
             country = data["country"] as? String ?: "",
-            totalCoins = (data["totalCoins"] as? Number)?.toDouble() ?: 0.0,
-            coinsPerSecond = (data["coinsPerSecond"] as? Number)?.toDouble() ?: 0.0,
-            autoMiningRate = (data["autoMiningRate"] as? Number)?.toDouble() ?: 0.0,
-            miningPower = (data["miningPower"] as? Number)?.toDouble() ?: 1.0,
-            referralBonusRate = (data["referralBonusRate"] as? Number)?.toDouble() ?: 0.0,
+            totalCoins = (data["totalCoins"] as? Number)?.toFloat() ?: 0.0f,
+            autoMiningRate = (data["autoMiningRate"] as? Number)?.toFloat() ?: 0.0f,
+            miningPower = (data["miningPower"] as? Number)?.toFloat() ?: 1.0f,
+            referralBonusRate = (data["referralBonusRate"] as? Number)?.toFloat() ?: 0.0f,
             currentStreak = (data["currentStreak"] as? Number)?.toInt() ?: 0,
             longestStreak = (data["longestStreak"] as? Number)?.toInt() ?: 0,
             lastLoginDate = data["lastLoginDate"] as? String,
@@ -361,10 +385,10 @@ open class UserRepository @Inject constructor(
             },
             referredBy = data["referredBy"] as? String,
             totalReferrals = (data["totalReferrals"] as? Number)?.toInt() ?: 0,
-            lifetimeEarnings = (data["lifetimeEarnings"] as? Number)?.toDouble() ?: 0.0,
-            dailyMiningRate = (data["dailyMiningRate"] as? Number)?.toDouble() ?: 0.0,
-            maxDailyEarnings = (data["maxDailyEarnings"] as? Number)?.toDouble() ?: 100.0,
-            todayEarnings = (data["todayEarnings"] as? Number)?.toDouble() ?: 0.0,
+            lifetimeEarnings = (data["lifetimeEarnings"] as? Number)?.toFloat() ?: 0.0f,
+            dailyMiningRate = (data["dailyMiningRate"] as? Number)?.toFloat() ?: 0.0f,
+            maxDailyEarnings = (data["maxDailyEarnings"] as? Number)?.toFloat() ?: 100.0f,
+            todayEarnings = (data["todayEarnings"] as? Number)?.toFloat() ?: 0.0f,
             lastMiningDate = data["lastMiningDate"] as? String,
             streakBonusClaimed = (data["streakBonusClaimed"] as? Number)?.toInt() ?: 0,
             createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",

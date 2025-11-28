@@ -255,7 +255,7 @@ class MiningViewModel @Inject constructor(
                 // Update user profile immediately
                 val currentProfile = _userProfile.value
                 if (currentProfile is Resource.Success) {
-                    val newBalance = currentProfile.data.totalCoins + _sessionReward.value
+                    val newBalance = currentProfile.data.totalCoins + _sessionReward.value.toFloat()
                     updateUserProfileBalance(newBalance)
                 }
                 
@@ -396,9 +396,10 @@ class MiningViewModel @Inject constructor(
     }
     
     /**
-     * Updates the user profile with new balance
+     * Updates the user profile balance in the UI (does not persist to database)
+     * @param newBalance The new balance to display
      */
-    fun updateUserProfileBalance(newBalance: Double) {
+    fun updateUserProfileBalance(newBalance: Float) {
         val currentProfile = _userProfile.value
         if (currentProfile is Resource.Success) {
             val profile = currentProfile.data
