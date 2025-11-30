@@ -201,15 +201,48 @@ open class MiningRepository @Inject constructor(
 
     /**
      * Clears the mining session from local storage
+     * ENHANCED: Now clears all mining-related data
      */
     suspend fun clearMiningSession(): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
+                Log.d(TAG, "Clearing mining session...")
+                
+                // Clear the main mining session key
                 prefs.edit().remove(KEY_MINING_SESSION).apply()
-                Log.d(TAG, "Mining session cleared")
+                
+                // Also clear any other mining-related keys that might exist
+                prefs.edit().apply {
+                    remove("mining_start_time")
+                    remove("mining_end_time")
+                    remove("is_mining_active")
+                    remove("mining_user_id")
+                    apply()
+                }
+                
+                Log.d(TAG, "✅ Mining session cleared successfully")
                 Result.success(Unit)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to clear mining session", e)
+                Log.e(TAG, "❌ Failed to clear mining session", e)
+                Result.failure(e)
+            }
+        }
+    }
+    
+    /**
+     * NEW METHOD: Clears all mining data for a specific user
+     */
+    suspend fun clearMiningSessionForUser(userId: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val savedSession = getMiningSession()
+                if (savedSession != null && savedSession.userId == userId) {
+                    clearMiningSession()
+                    Log.d(TAG, "Cleared mining session for user: $userId")
+                }
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to clear mining session for user", e)
                 Result.failure(e)
             }
         }

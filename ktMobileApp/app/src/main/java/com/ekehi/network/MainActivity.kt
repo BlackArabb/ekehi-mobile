@@ -1,30 +1,63 @@
 package com.ekehi.network
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import com.ekehi.network.presentation.navigation.AppNavigation
+import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.startapp.sdk.adsbase.StartAppAd
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    
+    private val loginViewModel: LoginViewModel by viewModels()
+    private val oAuthViewModel: OAuthViewModel by viewModels()
+    
+    private var isAuthenticated by mutableStateOf(false)
+    private var isAuthChecked by mutableStateOf(false)
+    private var oauthError by mutableStateOf<String?>(null)
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Get authentication status from intent
-        val isAuthenticated = intent.getBooleanExtra("IS_AUTHENTICATED", false)
+        Log.d("MainActivity", "=== MAIN ACTIVITY CREATED ===")
         
-        Log.d("MainActivity", "=== MAIN ACTIVITY STARTED ===")
-        Log.d("MainActivity", "Authentication status: $isAuthenticated")
+        // Determine where we came from
+        val fromSplash = intent.getBooleanExtra("FROM_SPLASH", false)
+        val fromOAuth = intent.getBooleanExtra("FROM_OAUTH", false)
+        
+        Log.d("MainActivity", "Source - FromSplash: $fromSplash, FromOAuth: $fromOAuth")
+        
+        when {
+            fromOAuth -> {
+                // Coming from OAuth callback
+                handleOAuthIntent(intent)
+            }
+            fromSplash -> {
+                // Coming from SplashActivity - use the authentication state it determined
+                isAuthenticated = intent.getBooleanExtra("IS_AUTHENTICATED", false)
+                isAuthChecked = true
+                Log.d("MainActivity", "From Splash - Authenticated: $isAuthenticated")
+            }
+            else -> {
+                // Direct launch (shouldn't happen normally, but handle it)
+                Log.w("MainActivity", "⚠️ Direct launch detected - checking authentication")
+                checkAuthenticationStatus()
+            }
+        }
         
         setContent {
             EkehiMobileTheme {
@@ -32,14 +65,85 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(isAuthenticated = isAuthenticated)
+                    if (isAuthChecked) {
+                        AppNavigation(isAuthenticated = isAuthenticated)
+                    }
+                }
+            }
+        }
+    }
+    
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        
+        val fromOAuth = intent.getBooleanExtra("FROM_OAUTH", false)
+        if (fromOAuth) {
+            handleOAuthIntent(intent)
+        }
+    }
+    
+    private fun handleOAuthIntent(intent: Intent?) {
+        intent?.let {
+            val fromOAuth = it.getBooleanExtra("FROM_OAUTH", false)
+            
+            if (fromOAuth) {
+                Log.d("MainActivity", "=== HANDLING OAUTH CALLBACK ===")
+                
+                isAuthenticated = it.getBooleanExtra("IS_AUTHENTICATED", false)
+                oauthError = it.getStringExtra("OAUTH_ERROR")
+                isAuthChecked = true
+                
+                val userId = it.getStringExtra("USER_ID")
+                
+                Log.d("MainActivity", "OAuth Result - Authenticated: $isAuthenticated, UserId: $userId")
+                
+                if (isAuthenticated && userId != null) {
+                    Log.d("MainActivity", "✅ OAuth login successful")
+                    oAuthViewModel.handleOAuthResult(success = true)
+                    
+                    // Refresh login state
+                    lifecycleScope.launch {
+                        loginViewModel.checkCurrentUser()
+                    }
+                } else if (oauthError != null) {
+                    Log.e("MainActivity", "❌ OAuth login failed: $oauthError")
+                    oAuthViewModel.handleOAuthResult(success = false, errorMessage = oauthError)
+                }
+            }
+        }
+    }
+    
+    private fun checkAuthenticationStatus() {
+        Log.d("MainActivity", "Checking authentication status directly")
+        
+        lifecycleScope.launch {
+            loginViewModel.checkCurrentUser()
+            
+            loginViewModel.loginState.collect { state ->
+                when (state) {
+                    is com.ekehi.network.domain.model.Resource.Success -> {
+                        Log.d("MainActivity", "✅ User is authenticated")
+                        isAuthenticated = true
+                        isAuthChecked = true
+                    }
+                    is com.ekehi.network.domain.model.Resource.Error -> {
+                        Log.d("MainActivity", "❌ User is NOT authenticated")
+                        isAuthenticated = false
+                        isAuthChecked = true
+                    }
+                    is com.ekehi.network.domain.model.Resource.Loading -> {
+                        Log.d("MainActivity", "⏳ Checking authentication...")
+                    }
+                    is com.ekehi.network.domain.model.Resource.Idle -> {
+                        // Initial state
+                    }
                 }
             }
         }
     }
     
     override fun onBackPressed() {
-        // Show exit ad when back button is pressed
         StartAppAd.onBackPressed(this)
         super.onBackPressed()
     }

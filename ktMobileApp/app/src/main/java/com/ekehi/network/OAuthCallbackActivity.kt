@@ -55,100 +55,77 @@ class OAuthCallbackActivity : ComponentActivity() {
                                         try {
                                             val result = oAuthService.handleOAuthCallback(userId, secret)
                                             if (result.isSuccess) {
-                                                Log.d("OAuthCallbackActivity", "OAuth callback processed successfully")
-                                                // Send broadcast to notify other components
-                                                val broadcastIntent = Intent("com.ekehi.network.OAUTH_SUCCESS").apply {
-                                                    putExtra("userId", userId)
-                                                    putExtra("oauth_type", "login") // Default to login
-                                                }
-                                                sendBroadcast(broadcastIntent)
+                                                Log.d("OAuthCallbackActivity", "✅ OAuth callback processed successfully")
                                                 
-                                                // Set result and finish
-                                                val resultIntent = Intent().apply {
-                                                    putExtra("oauth_success", true)
-                                                    putExtra("userId", userId)
-                                                }
-                                                setResult(Activity.RESULT_OK, resultIntent)
-                                                finish()
+                                                // Navigate to MainActivity with authenticated state
+                                                navigateToMainActivity(isAuthenticated = true, userId = userId)
                                             } else {
-                                                Log.e("OAuthCallbackActivity", "Failed to process OAuth callback: ${result.exceptionOrNull()?.message}")
-                                                val resultIntent = Intent().apply {
-                                                    putExtra("oauth_success", false)
-                                                    putExtra("error_message", result.exceptionOrNull()?.message)
-                                                }
-                                                setResult(Activity.RESULT_CANCELED, resultIntent)
-                                                finish()
+                                                Log.e("OAuthCallbackActivity", "❌ Failed to process OAuth callback: ${result.exceptionOrNull()?.message}")
+                                                showErrorAndFinish(result.exceptionOrNull()?.message ?: "Authentication failed")
                                             }
                                         } catch (e: Exception) {
-                                            Log.e("OAuthCallbackActivity", "Exception during OAuth callback processing: ${e.message}", e)
-                                            val resultIntent = Intent().apply {
-                                                putExtra("oauth_success", false)
-                                                putExtra("error_message", e.message)
-                                            }
-                                            setResult(Activity.RESULT_CANCELED, resultIntent)
-                                            finish()
+                                            Log.e("OAuthCallbackActivity", "❌ Exception during OAuth callback: ${e.message}", e)
+                                            showErrorAndFinish(e.message ?: "Authentication failed")
                                         }
                                     }
                                 } else {
                                     Log.w("OAuthCallbackActivity", "Missing userId or secret in OAuth callback")
-                                    // If no parameters, just finish and let the main activity handle it
-                                    val resultIntent = Intent().apply {
-                                        putExtra("oauth_success", false)
-                                        putExtra("error_message", "Missing OAuth parameters")
-                                    }
-                                    setResult(Activity.RESULT_CANCELED, resultIntent)
-                                    finish()
+                                    showErrorAndFinish("Missing authentication parameters")
                                 }
                             }
                             "failure" -> {
                                 Log.e("OAuthCallbackActivity", "OAuth authentication failed")
-                                val resultIntent = Intent().apply {
-                                    putExtra("oauth_success", false)
-                                    putExtra("error_message", "OAuth authentication failed")
-                                }
-                                setResult(Activity.RESULT_CANCELED, resultIntent)
-                                finish()
+                                showErrorAndFinish("Authentication failed")
                             }
                             else -> {
                                 Log.w("OAuthCallbackActivity", "Unknown OAuth callback path: ${uri.lastPathSegment}")
-                                val resultIntent = Intent().apply {
-                                    putExtra("oauth_success", false)
-                                    putExtra("error_message", "Unknown OAuth callback")
-                                }
-                                setResult(Activity.RESULT_CANCELED, resultIntent)
-                                finish()
+                                showErrorAndFinish("Unknown authentication response")
                             }
                         }
                     }
                     else -> {
                         Log.w("OAuthCallbackActivity", "Unknown OAuth callback host: ${uri.host}")
-                        val resultIntent = Intent().apply {
-                            putExtra("oauth_success", false)
-                            putExtra("error_message", "Unknown OAuth callback host")
-                        }
-                        setResult(Activity.RESULT_CANCELED, resultIntent)
-                        finish()
+                        showErrorAndFinish("Unknown authentication host")
                     }
                 }
             } ?: run {
                 Log.w("OAuthCallbackActivity", "No data in OAuth callback")
-                // No data, finish
-                val resultIntent = Intent().apply {
-                    putExtra("oauth_success", false)
-                    putExtra("error_message", "No OAuth data received")
-                }
-                setResult(Activity.RESULT_CANCELED, resultIntent)
-                finish()
+                showErrorAndFinish("No authentication data received")
             }
         } catch (e: Exception) {
             Log.e("OAuthCallbackActivity", "Error handling OAuth callback: ${e.message}", e)
-            val resultIntent = Intent().apply {
-                putExtra("oauth_success", false)
-                putExtra("error_message", e.message)
-            }
-            setResult(Activity.RESULT_CANCELED, resultIntent)
-            finish()
+            showErrorAndFinish(e.message ?: "Authentication error")
         }
+    }
+    
+    private fun navigateToMainActivity(isAuthenticated: Boolean, userId: String? = null) {
+        Log.d("OAuthCallbackActivity", "Navigating to MainActivity - authenticated: $isAuthenticated")
+        
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("IS_AUTHENTICATED", isAuthenticated)
+            putExtra("USER_ID", userId)
+            putExtra("FROM_OAUTH", true)
+            // Clear the entire task stack and start fresh
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        
+        startActivity(intent)
+        finish()
+    }
+    
+    private fun showErrorAndFinish(errorMessage: String) {
+        Log.e("OAuthCallbackActivity", "OAuth error: $errorMessage")
+        
+        // Navigate back to MainActivity with error
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("IS_AUTHENTICATED", false)
+            putExtra("OAUTH_ERROR", errorMessage)
+            putExtra("FROM_OAUTH", true)
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        
+        startActivity(intent)
+        finish()
     }
 }
 

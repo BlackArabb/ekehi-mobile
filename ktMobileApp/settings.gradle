@@ -10,6 +10,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Add Start.io repository
+        maven {
+            url "https://startappdev.bintray.com/maven"
+        }
         // Start.io repository is now available through mavenCentral
     }
 }

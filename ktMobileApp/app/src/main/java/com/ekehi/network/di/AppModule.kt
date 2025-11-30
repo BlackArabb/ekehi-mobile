@@ -98,8 +98,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(appwriteService: AppwriteService, securePreferences: SecurePreferences, userRepository: UserRepository): AuthRepository {
-        return AuthRepository(appwriteService, securePreferences, userRepository)
+    fun provideAuthRepository(
+        appwriteService: AppwriteService, 
+        securePreferences: SecurePreferences, 
+        userRepository: UserRepository,
+        @ApplicationContext context: Context,
+        miningManager: MiningManager
+    ): AuthRepository {
+        return AuthRepository(appwriteService, securePreferences, userRepository, context, miningManager)
     }
 
     @Provides

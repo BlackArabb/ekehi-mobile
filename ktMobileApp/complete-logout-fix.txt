@@ -1,0 +1,513 @@
+// ============================================
+// 1. VERIFY AndroidManifest.xml - SplashActivity must be the launcher
+// ============================================
+
+/**
+ * Make sure your AndroidManifest.xml has SplashActivity as the launcher:
+ * 
+ * <activity
+ *     android:name=".SplashActivity"
+ *     android:exported="true"
+ *     android:theme="@style/Theme.App.Starting">
+ *     <intent-filter>
+ *         <action android:name="android.intent.action.MAIN" />
+ *         <category android:name="android.intent.category.LAUNCHER" />
+ *     </intent-filter>
+ * </activity>
+ * 
+ * <activity
+ *     android:name=".MainActivity"
+ *     android:exported="false" />
+ */
+
+// ============================================
+// 2. UPDATED SplashActivity.kt - Fix authentication check
+// ============================================
+
+package com.ekehi.network
+
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
+import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.startapp.sdk.adsbase.StartAppAd
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+@SuppressLint("CustomSplashScreen")
+@AndroidEntryPoint
+class SplashActivity : ComponentActivity() {
+    
+    private val loginViewModel: LoginViewModel by viewModels()
+    private var isAuthCheckComplete = false
+    private var isAuthenticated: Boolean? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Install splash screen
+        val splashScreen = installSplashScreen()
+        
+        super.onCreate(savedInstanceState)
+        
+        Log.d("SplashActivity", "=== APP STARTED - SPLASH SCREEN ===")
+        
+        // Keep splash screen visible until authentication check is complete
+        splashScreen.setKeepOnScreenCondition { 
+            !isAuthCheckComplete
+        }
+        
+        // Start authentication check
+        checkAuthentication()
+        
+        // Set a timeout to prevent infinite waiting (10 seconds)
+        lifecycleScope.launch {
+            delay(10000)
+            if (!isAuthCheckComplete) {
+                Log.w("SplashActivity", "⚠️ Authentication check timeout - proceeding as not authenticated")
+                isAuthCheckComplete = true
+                navigateToMainActivity(isAuthenticated = false)
+            }
+        }
+        
+        // Observe authentication state
+        observeAuthenticationState()
+    }
+    
+    private fun checkAuthentication() {
+        Log.d("SplashActivity", "=== CHECKING AUTHENTICATION ===")
+        lifecycleScope.launch {
+            try {
+                // Use the authentication check from LoginViewModel
+                loginViewModel.checkCurrentUser()
+            } catch (e: Exception) {
+                Log.e("SplashActivity", "Error checking authentication: ${e.message}", e)
+                isAuthenticated = false
+                isAuthCheckComplete = true
+                navigateToMainActivity(isAuthenticated = false)
+            }
+        }
+    }
+    
+    private fun observeAuthenticationState() {
+        lifecycleScope.launch {
+            loginViewModel.loginState.collect { state ->
+                Log.d("SplashActivity", "Auth state received: ${state::class.simpleName}")
+                
+                when (state) {
+                    is Resource.Success -> {
+                        Log.d("SplashActivity", "✅ User is authenticated - User: ${state.data?.email}")
+                        isAuthenticated = true
+                        isAuthCheckComplete = true
+                        
+                        // Small delay to show splash screen properly
+                        delay(500)
+                        navigateToMainActivity(isAuthenticated = true)
+                    }
+                    is Resource.Error -> {
+                        Log.d("SplashActivity", "❌ User is NOT authenticated: ${state.message}")
+                        isAuthenticated = false
+                        isAuthCheckComplete = true
+                        
+                        // Small delay to show splash screen properly
+                        delay(500)
+                        navigateToMainActivity(isAuthenticated = false)
+                    }
+                    is Resource.Loading -> {
+                        Log.d("SplashActivity", "⏳ Checking authentication...")
+                        // Keep splash screen visible
+                    }
+                    is Resource.Idle -> {
+                        // Initial state, do nothing yet
+                    }
+                }
+            }
+        }
+    }
+    
+    private fun navigateToMainActivity(isAuthenticated: Boolean) {
+        // Prevent multiple navigations
+        if (isFinishing) {
+            Log.d("SplashActivity", "Activity is finishing, skipping navigation")
+            return
+        }
+        
+        Log.d("SplashActivity", "=== NAVIGATING TO MAIN ACTIVITY ===")
+        Log.d("SplashActivity", "Authenticated: $isAuthenticated")
+        
+        // Reset the login state before navigating
+        loginViewModel.resetState()
+        
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("IS_AUTHENTICATED", isAuthenticated)
+            putExtra("FROM_SPLASH", true)
+            // Clear the splash activity from back stack
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        
+        startActivity(intent)
+        finish()
+    }
+    
+    override fun onBackPressed() {
+        StartAppAd.onBackPressed(this)
+        super.onBackPressed()
+    }
+}
+
+// ============================================
+// 3. UPDATED MainActivity.kt - Handle both splash and OAuth
+// ============================================
+
+package com.ekehi.network
+
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
+import com.ekehi.network.presentation.navigation.AppNavigation
+import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.ekehi.network.presentation.viewmodel.OAuthViewModel
+import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.startapp.sdk.adsbase.StartAppAd
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    
+    private val loginViewModel: LoginViewModel by viewModels()
+    private val oAuthViewModel: OAuthViewModel by viewModels()
+    
+    private var isAuthenticated by mutableStateOf(false)
+    private var isAuthChecked by mutableStateOf(false)
+    private var oauthError by mutableStateOf<String?>(null)
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        Log.d("MainActivity", "=== MAIN ACTIVITY CREATED ===")
+        
+        // Determine where we came from
+        val fromSplash = intent.getBooleanExtra("FROM_SPLASH", false)
+        val fromOAuth = intent.getBooleanExtra("FROM_OAUTH", false)
+        
+        Log.d("MainActivity", "Source - FromSplash: $fromSplash, FromOAuth: $fromOAuth")
+        
+        when {
+            fromOAuth -> {
+                // Coming from OAuth callback
+                handleOAuthIntent(intent)
+            }
+            fromSplash -> {
+                // Coming from SplashActivity - use the authentication state it determined
+                isAuthenticated = intent.getBooleanExtra("IS_AUTHENTICATED", false)
+                isAuthChecked = true
+                Log.d("MainActivity", "From Splash - Authenticated: $isAuthenticated")
+            }
+            else -> {
+                // Direct launch (shouldn't happen normally, but handle it)
+                Log.w("MainActivity", "⚠️ Direct launch detected - checking authentication")
+                checkAuthenticationStatus()
+            }
+        }
+        
+        setContent {
+            EkehiMobileTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    if (isAuthChecked) {
+                        AppNavigation(
+                            startDestination = if (isAuthenticated) "home" else "login",
+                            oauthError = oauthError
+                        )
+                    }
+                }
+            }
+        }
+    }
+    
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        
+        val fromOAuth = intent.getBooleanExtra("FROM_OAUTH", false)
+        if (fromOAuth) {
+            handleOAuthIntent(intent)
+        }
+    }
+    
+    private fun handleOAuthIntent(intent: Intent?) {
+        intent?.let {
+            val fromOAuth = it.getBooleanExtra("FROM_OAUTH", false)
+            
+            if (fromOAuth) {
+                Log.d("MainActivity", "=== HANDLING OAUTH CALLBACK ===")
+                
+                isAuthenticated = it.getBooleanExtra("IS_AUTHENTICATED", false)
+                oauthError = it.getStringExtra("OAUTH_ERROR")
+                isAuthChecked = true
+                
+                val userId = it.getStringExtra("USER_ID")
+                
+                Log.d("MainActivity", "OAuth Result - Authenticated: $isAuthenticated, UserId: $userId")
+                
+                if (isAuthenticated && userId != null) {
+                    Log.d("MainActivity", "✅ OAuth login successful")
+                    oAuthViewModel.handleOAuthResult(success = true)
+                    
+                    // Refresh login state
+                    lifecycleScope.launch {
+                        loginViewModel.checkCurrentUser()
+                    }
+                } else if (oauthError != null) {
+                    Log.e("MainActivity", "❌ OAuth login failed: $oauthError")
+                    oAuthViewModel.handleOAuthResult(success = false, errorMessage = oauthError)
+                }
+            }
+        }
+    }
+    
+    private fun checkAuthenticationStatus() {
+        Log.d("MainActivity", "Checking authentication status directly")
+        
+        lifecycleScope.launch {
+            loginViewModel.checkCurrentUser()
+            
+            loginViewModel.loginState.collect { state ->
+                when (state) {
+                    is com.ekehi.network.domain.model.Resource.Success -> {
+                        Log.d("MainActivity", "✅ User is authenticated")
+                        isAuthenticated = true
+                        isAuthChecked = true
+                    }
+                    is com.ekehi.network.domain.model.Resource.Error -> {
+                        Log.d("MainActivity", "❌ User is NOT authenticated")
+                        isAuthenticated = false
+                        isAuthChecked = true
+                    }
+                    is com.ekehi.network.domain.model.Resource.Loading -> {
+                        Log.d("MainActivity", "⏳ Checking authentication...")
+                    }
+                    is com.ekehi.network.domain.model.Resource.Idle -> {
+                        // Initial state
+                    }
+                }
+            }
+        }
+    }
+    
+    override fun onBackPressed() {
+        StartAppAd.onBackPressed(this)
+        super.onBackPressed()
+    }
+}
+
+// ============================================
+// 4. UPDATED LoginViewModel.kt - Ensure checkCurrentUser works
+// ============================================
+
+package com.ekehi.network.presentation.viewmodel
+
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ekehi.network.analytics.AnalyticsManager
+import com.ekehi.network.data.model.User
+import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.domain.usecase.AuthUseCase
+import com.ekehi.network.domain.usecase.UserUseCase
+import com.ekehi.network.performance.PerformanceMonitor
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val authUseCase: AuthUseCase,
+    private val userUseCase: UserUseCase,
+    private val analyticsManager: AnalyticsManager,
+    private val performanceMonitor: PerformanceMonitor
+) : ViewModel() {
+
+    private val _loginState = MutableStateFlow<Resource<User>>(Resource.Idle)
+    val loginState: StateFlow<Resource<User>> = _loginState
+
+    /**
+     * Checks if there's a current logged-in user with an active session
+     * This is called on app startup to determine authentication state
+     */
+    fun checkCurrentUser() {
+        Log.d("LoginViewModel", "=== CHECKING CURRENT USER ===")
+        viewModelScope.launch {
+            _loginState.value = Resource.Loading
+            
+            try {
+                // Check if there's an active Appwrite session
+                val hasSessionResult = authUseCase.hasActiveSession()
+                
+                if (hasSessionResult.isSuccess && hasSessionResult.getOrNull() == true) {
+                    Log.d("LoginViewModel", "✅ Active session found, getting user data")
+                    
+                    // Get current user data
+                    val userResult = authUseCase.getCurrentUser()
+                    
+                    if (userResult.isSuccess) {
+                        val user = userResult.getOrNull()
+                        if (user != null) {
+                            Log.d("LoginViewModel", "✅ User authenticated: ${user.email}")
+                            _loginState.value = Resource.Success(user)
+                            
+                            // Track analytics
+                            analyticsManager.trackUserLogin(user.id, "auto_login")
+                        } else {
+                            Log.e("LoginViewModel", "❌ User data is null despite successful result")
+                            _loginState.value = Resource.Error("User data not found")
+                        }
+                    } else {
+                        val error = userResult.exceptionOrNull()?.message ?: "Failed to get user data"
+                        Log.e("LoginViewModel", "❌ Failed to get user data: $error")
+                        _loginState.value = Resource.Error(error)
+                    }
+                } else {
+                    Log.d("LoginViewModel", "❌ No active session found")
+                    _loginState.value = Resource.Error("No active session")
+                }
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "❌ Exception checking current user: ${e.message}", e)
+                _loginState.value = Resource.Error(e.message ?: "Authentication check failed")
+            }
+        }
+    }
+    
+    /**
+     * Resets the login state to Idle
+     */
+    fun resetState() {
+        Log.d("LoginViewModel", "Resetting login state")
+        _loginState.value = Resource.Idle
+    }
+    
+    // ... keep all your other existing methods (login, register, etc.)
+}
+
+// ============================================
+// 5. VERIFY AuthUseCase.kt has hasActiveSession
+// ============================================
+
+package com.ekehi.network.domain.usecase
+
+import com.ekehi.network.data.model.User
+import com.ekehi.network.data.repository.AuthRepository
+import io.appwrite.models.Session
+import io.appwrite.models.User as AppwriteUser
+import javax.inject.Inject
+
+class AuthUseCase @Inject constructor(
+    private val authRepository: AuthRepository
+) {
+    suspend fun login(email: String, password: String): Result<Session> {
+        return authRepository.login(email, password)
+    }
+
+    suspend fun register(
+        email: String, 
+        password: String, 
+        name: String, 
+        referralCode: String = ""
+    ): Result<AppwriteUser<Map<String, Any>>> {
+        return authRepository.register(email, password, name, referralCode)
+    }
+
+    suspend fun logout(): Result<Unit> {
+        return authRepository.logout()
+    }
+
+    suspend fun getCurrentUser(): Result<User> {
+        return authRepository.getCurrentUser()
+    }
+    
+    /**
+     * CRITICAL: Check if there's an active Appwrite session
+     */
+    suspend fun hasActiveSession(): Result<Boolean> {
+        return authRepository.hasActiveSession()
+    }
+    
+    suspend fun getCurrentUserIfLoggedIn(): Result<User?> {
+        return authRepository.getCurrentUserIfLoggedIn()
+    }
+    
+    suspend fun updatePassword(currentPassword: String, newPassword: String): Result<Unit> {
+        return authRepository.updatePassword(currentPassword, newPassword)
+    }
+}
+
+// ============================================
+// 6. DEBUG LOGGING - Add to OAuthCallbackActivity
+// ============================================
+
+/**
+ * Add this logging to OAuthCallbackActivity to debug:
+ */
+private fun navigateToMainActivity(isAuthenticated: Boolean, userId: String? = null) {
+    Log.d("OAuthCallbackActivity", "=== NAVIGATING TO MAIN ACTIVITY ===")
+    Log.d("OAuthCallbackActivity", "Authenticated: $isAuthenticated")
+    Log.d("OAuthCallbackActivity", "UserId: $userId")
+    
+    val intent = Intent(this, MainActivity::class.java).apply {
+        putExtra("IS_AUTHENTICATED", isAuthenticated)
+        putExtra("USER_ID", userId)
+        putExtra("FROM_OAUTH", true)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    
+    Log.d("OAuthCallbackActivity", "Starting MainActivity with intent: ${intent.extras}")
+    startActivity(intent)
+    finish()
+}
+
+// ============================================
+// 7. TESTING CHECKLIST
+// ============================================
+
+/**
+ * Test these scenarios:
+ * 
+ * 1. ✅ Fresh install → Login with email/password → Close app → Reopen
+ *    Expected: Should go directly to home screen
+ * 
+ * 2. ✅ Fresh install → Login with Google → Close app → Reopen
+ *    Expected: Should go directly to home screen
+ * 
+ * 3. ✅ Logged in → Logout → Close app → Reopen
+ *    Expected: Should show login screen
+ * 
+ * 4. ✅ Login with Google → Should immediately show home screen
+ *    Expected: No need to close and reopen
+ * 
+ * Check logcat for these key messages:
+ * - "=== APP STARTED - SPLASH SCREEN ===" (SplashActivity)
+ * - "=== CHECKING AUTHENTICATION ===" (SplashActivity)
+ * - "✅ Active session found" (LoginViewModel)
+ * - "✅ User authenticated: [email]" (LoginViewModel)
+ * - "=== NAVIGATING TO MAIN ACTIVITY ===" (SplashActivity)
+ * - "Authenticated: true/false" (SplashActivity)
+ */

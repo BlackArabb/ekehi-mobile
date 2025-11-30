@@ -9,6 +9,7 @@ import com.ekehi.network.data.repository.offline.OfflineUserRepository
 import com.ekehi.network.data.sync.SyncManager
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.domain.usecase.UserUseCase
+import com.ekehi.network.domain.usecase.LeaderboardUseCase
 import com.ekehi.network.performance.PerformanceMonitor
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
@@ -24,12 +25,17 @@ class ProfileViewModel @Inject constructor(
         private val userRepository: UserRepository,
         private val authRepository: AuthRepository,
         private val userUseCase: UserUseCase,
+        private val leaderboardUseCase: LeaderboardUseCase,
         private val syncManager: SyncManager,
         private val performanceMonitor: PerformanceMonitor
 ) : ViewModel() {
 
     private val _userProfile = MutableStateFlow<Resource<UserProfile>>(Resource.Loading)
     val userProfile: StateFlow<Resource<UserProfile>> = _userProfile
+
+    // Add a state flow for user rank
+    private val _userRank = MutableStateFlow<Resource<Int>>(Resource.Loading)
+    val userRank: StateFlow<Resource<Int>> = _userRank
 
     private var currentUserId: String? = null
 
@@ -118,6 +124,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             Log.d("ProfileViewModel", "=== LOADING PROFILE FOR USER: $userId ===")
             _userProfile.value = Resource.Loading
+            _userRank.value = Resource.Loading
 
             // Try to get offline data first
             if (userRepository is OfflineUserRepository) {
@@ -150,16 +157,22 @@ class ProfileViewModel @Inject constructor(
                                     Log.d("ProfileViewModel", "✅ Streak updated: current=${streakResource.data.currentStreak}, longest=${streakResource.data.longestStreak}")
                                     // Update the profile with the new streak data
                                     _userProfile.value = Resource.Success(streakResource.data)
+                                    // Load user rank after profile is loaded
+                                    loadUserRank(userId)
                                 }
                                 is Resource.Error -> {
                                     Log.e("ProfileViewModel", "❌ Failed to update streak: ${streakResource.message}")
                                     // Still show the original profile even if streak update fails
                                     _userProfile.value = Resource.Success(profile)
+                                    // Load user rank after profile is loaded
+                                    loadUserRank(userId)
                                 }
                                 else -> {
                                     // For Loading or Idle states, show the original profile
                                     Log.d("ProfileViewModel", "Streak update state: ${streakResource.javaClass.simpleName}")
                                     _userProfile.value = Resource.Success(profile)
+                                    // Load user rank after profile is loaded
+                                    loadUserRank(userId)
                                 }
                             }
                         }
@@ -185,6 +198,14 @@ class ProfileViewModel @Inject constructor(
                 // Also create profile on exception
                 Log.d("ProfileViewModel", "🔧 Creating new profile after exception")
                 createNewUserProfile(userId)
+            }
+        }
+    }
+
+    private fun loadUserRank(userId: String) {
+        viewModelScope.launch {
+            leaderboardUseCase.getUserRank(userId).collect { resource ->
+                _userRank.value = resource
             }
         }
     }

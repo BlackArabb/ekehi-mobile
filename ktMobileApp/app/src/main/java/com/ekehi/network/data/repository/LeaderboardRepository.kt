@@ -46,13 +46,21 @@ class LeaderboardRepository @Inject constructor(
     suspend fun getUserRank(userId: String): Result<Int> {
         return withContext(Dispatchers.IO) {
             try {
-                // First, get the user's totalCoins
-                val userDoc = appwriteService.databases.getDocument(
+                // First, get the user's document by querying the userId field
+                val userResponse = appwriteService.databases.listDocuments(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
-                        documentId = userId
+                        queries = listOf(
+                                Query.equal("userId", listOf(userId)),
+                                Query.limit(1)
+                        )
                 )
-
+                
+                if (userResponse.documents.isEmpty()) {
+                    return@withContext Result.failure(Exception("User profile not found"))
+                }
+                
+                val userDoc = userResponse.documents[0]
                 val userTotalCoins = (userDoc.data["totalCoins"] as? Number)?.toDouble() ?: 0.0
 
                 // Then count how many users have more coins than this user

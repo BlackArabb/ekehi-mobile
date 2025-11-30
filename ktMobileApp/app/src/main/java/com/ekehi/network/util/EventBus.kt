@@ -15,5 +15,6 @@ object EventBus {
 sealed class Event {
     object RefreshUserProfile : Event()
     object RefreshLeaderboard : Event()
+    object UserLoggedOut : Event()
     data class RefreshSocialTasks(val userId: String) : Event()
 }

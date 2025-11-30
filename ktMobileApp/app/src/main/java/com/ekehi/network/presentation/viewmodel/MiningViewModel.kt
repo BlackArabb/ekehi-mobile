@@ -1,5 +1,6 @@
 package com.ekehi.network.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.analytics.AnalyticsManager
@@ -10,6 +11,7 @@ import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -66,13 +68,47 @@ class MiningViewModel @Inject constructor(
                 val result = authRepository.getCurrentUser()
                 result.onSuccess { user ->
                     currentUserId = user.id
-                    // Load user profile
                     loadUserProfile(user.id)
                     checkOngoingMiningSession()
                 }
             } catch (e: Exception) {
                 // User not logged in yet
             }
+        }
+        
+        // Listen for logout events
+        viewModelScope.launch {
+            EventBus.events.collect { event ->
+                if (event is Event.UserLoggedOut) {
+                    handleLogout()
+                }
+            }
+        }
+    }
+
+    /**
+     * NEW METHOD: Handles logout event
+     * Stops all mining activities and resets state
+     */
+    private fun handleLogout() {
+        viewModelScope.launch {
+            Log.d("MiningViewModel", "=== HANDLING LOGOUT ===")
+            
+            // Cancel update job immediately
+            updateJob?.cancel()
+            updateJob = null
+            
+            // Clear mining session from repository
+            miningRepository.clearMiningSession()
+            
+            // Reset all state
+            resetMiningState()
+            
+            // Clear user data
+            currentUserId = null
+            _userProfile.value = Resource.Loading
+            
+            Log.d("MiningViewModel", "✅ Mining state reset complete")
         }
     }
 
@@ -259,9 +295,10 @@ class MiningViewModel @Inject constructor(
                     updateUserProfileBalance(newBalance)
                 }
                 
-                // Also send event to refresh user profile from server
+                // Send events to refresh user profile and leaderboard
                 viewModelScope.launch {
                     EventBus.sendEvent(Event.RefreshUserProfile)
+                    EventBus.sendEvent(Event.RefreshLeaderboard)
                 }
 
                 // Reset UI state after a short delay

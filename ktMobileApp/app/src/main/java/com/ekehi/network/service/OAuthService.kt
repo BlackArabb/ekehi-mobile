@@ -32,8 +32,18 @@ class OAuthService @Inject constructor(
         Log.d("OAuthService", "Initiating Google OAuth flow")
         scope.launch {
             try {
-                // Start the OAuth flow - this will redirect to the OAuth provider
-                // and then back to our app via the callback URLs
+                // Delete any existing session before starting OAuth
+                try {
+                    Log.d("OAuthService", "Checking for existing session before OAuth")
+                    account.getSession("current")
+                    Log.d("OAuthService", "Existing session found, deleting it")
+                    account.deleteSession("current")
+                    Log.d("OAuthService", "✅ Existing session deleted")
+                } catch (e: Exception) {
+                    Log.d("OAuthService", "No existing session to delete")
+                }
+                
+                // Start the OAuth flow
                 account.createOAuth2Token(
                     provider = OAuthProvider.GOOGLE,
                     success = SUCCESS_URL,
@@ -43,64 +53,53 @@ class OAuthService @Inject constructor(
                 Log.d("OAuthService", "Google OAuth flow initiated successfully")
             } catch (e: Exception) {
                 Log.e("OAuthService", "Failed to initiate Google OAuth: ${e.message}", e)
-                e.printStackTrace()
             }
         }
     }
     
-    // This method would be called when we receive the OAuth callback
     suspend fun handleOAuthCallback(userId: String, secret: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d("OAuthService", "Handling OAuth callback for userId: $userId")
-                // Check if there's already an active session
-                try {
-                    account.getSession("current")
-                    Log.d("OAuthService", "Existing session found, deleting it before creating new one")
-                    // Delete existing session before creating a new one
-                    account.deleteSession("current")
-                    Log.d("OAuthService", "Existing session deleted successfully")
-                } catch (e: Exception) {
-                    Log.d("OAuthService", "No existing session found or failed to delete: ${e.message}")
-                }
+                Log.d("OAuthService", "=== HANDLING OAUTH CALLBACK ===")
+                Log.d("OAuthService", "UserId: $userId")
                 
-                // Create a session using the OAuth token
+                // Step 1: Create session using the OAuth token
+                Log.d("OAuthService", "Step 1: Creating OAuth session")
                 account.createSession(
                     userId = userId,
                     secret = secret
                 )
-                Log.d("OAuthService", "OAuth session created successfully")
+                Log.d("OAuthService", "✅ OAuth session created successfully")
                 
-                // Check if user profile exists, create one if it doesn't
-                try {
-                    val profileResult = userRepository.getUserProfile(userId)
-                    if (profileResult.isFailure) {
-                        Log.d("OAuthService", "User profile not found, creating new profile")
-                        // Get user info from Appwrite account
-                        val appwriteUser = account.get()
-                        val username = appwriteUser.name.ifEmpty { appwriteUser.email.substringBefore("@") }
-                        
-                        // Create user profile and wait for completion
-                        val createProfileResult = userRepository.createUserProfile(userId, username)
-                        if (createProfileResult.isSuccess) {
-                            Log.d("OAuthService", "User profile created successfully")
-                        } else {
-                            Log.e("OAuthService", "Failed to create user profile: ${createProfileResult.exceptionOrNull()?.message}")
-                            // Return failure if we couldn't create the profile
-                            return@withContext Result.failure(createProfileResult.exceptionOrNull() ?: Exception("Failed to create user profile"))
-                        }
+                // Step 2: Get user info
+                Log.d("OAuthService", "Step 2: Getting user info")
+                val appwriteUser = account.get()
+                val username = appwriteUser.name.ifEmpty { appwriteUser.email.substringBefore("@") }
+                Log.d("OAuthService", "✅ User info retrieved - Username: $username")
+                
+                // Step 3: Check if user profile exists, create if it doesn't
+                Log.d("OAuthService", "Step 3: Checking/creating user profile")
+                val profileResult = userRepository.getUserProfile(userId)
+                if (profileResult.isFailure) {
+                    Log.d("OAuthService", "User profile not found, creating new profile")
+                    
+                    val createProfileResult = userRepository.createUserProfile(userId, username)
+                    if (createProfileResult.isSuccess) {
+                        Log.d("OAuthService", "✅ User profile created successfully")
                     } else {
-                        Log.d("OAuthService", "User profile already exists")
+                        Log.e("OAuthService", "❌ Failed to create user profile: ${createProfileResult.exceptionOrNull()?.message}")
+                        return@withContext Result.failure(
+                            createProfileResult.exceptionOrNull() ?: Exception("Failed to create user profile")
+                        )
                     }
-                } catch (e: Exception) {
-                    Log.e("OAuthService", "Error checking/creating user profile: ${e.message}", e)
-                    // Return failure if there was an error checking/creating the profile
-                    return@withContext Result.failure(e)
+                } else {
+                    Log.d("OAuthService", "✅ User profile already exists")
                 }
                 
+                Log.d("OAuthService", "=== OAUTH CALLBACK COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(true)
             } catch (e: Exception) {
-                Log.e("OAuthService", "Failed to create OAuth session: ${e.message}", e)
+                Log.e("OAuthService", "❌ Failed to process OAuth callback: ${e.message}", e)
                 return@withContext Result.failure(e)
             }
         }

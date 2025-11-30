@@ -268,4 +268,64 @@ open class UserUseCase @Inject constructor(
         Log.e(TAG, "==========================================")
         emit(Resource.Error(errorMessage))
     }
+
+    /**
+     * Updates user's total coin balance
+     * @param userId The user ID
+     * @param newBalance The new balance to set
+     * @return Flow<Resource<UserProfile>> with updated profile
+     */
+    fun updateUserBalance(userId: String, newBalance: Float): Flow<Resource<UserProfile>> = flow {
+        Log.d(TAG, "=== UPDATING USER BALANCE ===")
+        Log.d(TAG, "User ID: $userId")
+        Log.d(TAG, "New balance: $newBalance")
+        
+        emit(Resource.Loading)
+        
+        try {
+            // Get current profile first
+            val profileResult = userRepository.getUserProfile(userId)
+            if (profileResult.isSuccess) {
+                val currentProfile = profileResult.getOrNull()!!
+                
+                // Prepare updates
+                val updates = mapOf<String, Any>(
+                    "totalCoins" to newBalance,
+                    "updatedAt" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
+                        timeZone = TimeZone.getTimeZone("UTC")
+                    }.format(Date())
+                )
+                
+                // Update the profile
+                val result = userRepository.updateUserProfile(userId, updates)
+                
+                if (result.isSuccess) {
+                    val updatedProfile = result.getOrNull()!!
+                    Log.d(TAG, "✅ User balance updated successfully")
+                    Log.d(TAG, "   Previous balance: ${currentProfile.totalCoins}")
+                    Log.d(TAG, "   New balance: ${updatedProfile.totalCoins}")
+                    emit(Resource.Success(updatedProfile))
+                } else {
+                    val error = result.exceptionOrNull()
+                    val errorMessage = "Failed to update user balance: ${error?.message ?: "Unknown error"}"
+                    Log.e(TAG, "❌ $errorMessage", error)
+                    emit(Resource.Error(errorMessage))
+                }
+            } else {
+                val error = profileResult.exceptionOrNull()
+                val errorMessage = "Failed to get current profile: ${error?.message ?: "Unknown error"}"
+                Log.e(TAG, "❌ $errorMessage", error)
+                emit(Resource.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            val errorMessage = "Error updating user balance: ${e.message ?: "Unknown error"}"
+            Log.e(TAG, "❌ BALANCE UPDATE ERROR", e)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Balance update error: ${e.message ?: "Unknown error"}"
+        Log.e(TAG, "❌ BALANCE UPDATE EXCEPTION", e)
+        emit(Resource.Error(errorMessage))
+    }
+
 }

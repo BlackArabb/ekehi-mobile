@@ -47,20 +47,18 @@ class SplashActivity : ComponentActivity() {
         
         // Keep splash screen visible until authentication check is complete
         splashScreen.setKeepOnScreenCondition { 
-            !isAuthCheckComplete || !isProfileLoaded
+            !isAuthCheckComplete
         }
         
-        // Start authentication check with timeout
+        // Start authentication check
         checkAuthentication()
         
-        // Set a timeout to prevent infinite waiting
+        // Set a timeout to prevent infinite waiting (10 seconds)
         lifecycleScope.launch {
-            delay(10000) // 10 second timeout
+            delay(10000)
             if (!isAuthCheckComplete) {
-                Log.w("SplashActivity", "⚠️ Authentication check timeout - proceeding with default state")
-                authCheckTimeout = true
+                Log.w("SplashActivity", "⚠️ Authentication check timeout - proceeding as not authenticated")
                 isAuthCheckComplete = true
-                isProfileLoaded = true
                 navigateToMainActivity(isAuthenticated = false)
             }
         }
@@ -70,14 +68,24 @@ class SplashActivity : ComponentActivity() {
     }
     
     private fun checkAuthentication() {
-        Log.d("SplashActivity", "Starting authentication check")
-        loginViewModel.checkCurrentUser()
+        Log.d("SplashActivity", "=== CHECKING AUTHENTICATION ===")
+        lifecycleScope.launch {
+            try {
+                // Use the authentication check from LoginViewModel
+                loginViewModel.checkCurrentUser()
+            } catch (e: Exception) {
+                Log.e("SplashActivity", "Error checking authentication: ${e.message}", e)
+                isAuthenticated = false
+                isAuthCheckComplete = true
+                navigateToMainActivity(isAuthenticated = false)
+            }
+        }
     }
     
     private fun observeAuthenticationState() {
         lifecycleScope.launch {
             loginViewModel.loginState.collect { state ->
-                Log.d("SplashActivity", "Auth state: ${state::class.simpleName}")
+                Log.d("SplashActivity", "Auth state received: ${state::class.simpleName}")
                 
                 // Skip processing if we've already timed out
                 if (authCheckTimeout) {
@@ -91,15 +99,17 @@ class SplashActivity : ComponentActivity() {
                         isAuthenticated = true
                         isAuthCheckComplete = true
                         
-                        // Load user profile data - we'll get the user ID after the splash screen
-                        isProfileLoaded = true
+                        // Small delay to show splash screen properly
+                        delay(500)
                         navigateToMainActivity(isAuthenticated = true)
                     }
                     is Resource.Error -> {
                         Log.d("SplashActivity", "❌ User is NOT authenticated: ${state.message}")
                         isAuthenticated = false
                         isAuthCheckComplete = true
-                        isProfileLoaded = true // No profile to load for unauthenticated users
+                        
+                        // Small delay to show splash screen properly
+                        delay(500)
                         navigateToMainActivity(isAuthenticated = false)
                     }
                     is Resource.Loading -> {
@@ -107,56 +117,29 @@ class SplashActivity : ComponentActivity() {
                         // Keep splash screen visible
                     }
                     is Resource.Idle -> {
-                        // Initial state, do nothing
+                        // Initial state, do nothing yet
                     }
                 }
-            }
-        }
-    }
-    
-    private fun loadUserProfile(userId: String) {
-        Log.d("SplashActivity", "Loading user profile for user: $userId")
-        
-        lifecycleScope.launch {
-            try {
-                profileViewModel.loadUserProfile(userId)
-                profileViewModel.userProfile.collect { resource ->
-                    when (resource) {
-                        is Resource.Success -> {
-                            Log.d("SplashActivity", "✅ User profile loaded successfully")
-                            isProfileLoaded = true
-                            navigateToMainActivity(isAuthenticated = true)
-                        }
-                        is Resource.Error -> {
-                            Log.e("SplashActivity", "❌ Failed to load user profile: ${resource.message}")
-                            isProfileLoaded = true // Continue even if profile loading fails
-                            navigateToMainActivity(isAuthenticated = true)
-                        }
-                        is Resource.Loading -> {
-                            Log.d("SplashActivity", "⏳ Loading user profile...")
-                            // Keep splash screen visible
-                        }
-                        else -> {
-                            // For Idle state, continue
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("SplashActivity", "Exception loading user profile", e)
-                isProfileLoaded = true // Continue even if profile loading fails
-                navigateToMainActivity(isAuthenticated = true)
             }
         }
     }
     
     private fun navigateToMainActivity(isAuthenticated: Boolean) {
-        Log.d("SplashActivity", "Navigating to MainActivity with auth status: $isAuthenticated")
+        // Prevent multiple navigations
+        if (isFinishing) {
+            Log.d("SplashActivity", "Activity is finishing, skipping navigation")
+            return
+        }
         
-        // Reset the login state before navigating to ensure clean state for LoginScreen
+        Log.d("SplashActivity", "=== NAVIGATING TO MAIN ACTIVITY ===")
+        Log.d("SplashActivity", "Authenticated: $isAuthenticated")
+        
+        // Reset the login state before navigating
         loginViewModel.resetState()
         
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("IS_AUTHENTICATED", isAuthenticated)
+            putExtra("FROM_SPLASH", true)
             // Clear the splash activity from back stack
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

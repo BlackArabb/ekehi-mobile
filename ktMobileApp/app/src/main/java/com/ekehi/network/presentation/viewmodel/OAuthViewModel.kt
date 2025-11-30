@@ -25,22 +25,17 @@ class OAuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _oauthState.value = Resource.Loading
-                // Note: The actual OAuth flow will redirect to the OAuth provider
-                // and then back to our app via the callback URLs
-                // The result will be handled in OAuthCallbackActivity
                 oAuthService.initiateGoogleOAuth(activity)
-                // We don't emit success here because the flow is not complete yet
-                // The OAuthCallbackActivity will handle the final result
                 Log.d("OAuthViewModel", "Google OAuth flow initiated, waiting for callback")
             } catch (e: Exception) {
                 Log.e("OAuthViewModel", "Google OAuth error: ${e.message}", e)
-                _oauthState.value = Resource.Error("Failed to initiate OAuth flow: ${e.message}")
+                _oauthState.value = Resource.Error("Failed to initiate OAuth: ${e.message}")
             }
         }
     }
     
     fun handleOAuthResult(success: Boolean, errorMessage: String? = null) {
-        Log.d("OAuthViewModel", "Handling OAuth result: success=$success")
+        Log.d("OAuthViewModel", "Handling OAuth result: success=$success, error=$errorMessage")
         viewModelScope.launch {
             _oauthState.value = if (success) {
                 Resource.Success(true)
@@ -51,6 +46,7 @@ class OAuthViewModel @Inject constructor(
     }
     
     fun resetState() {
+        Log.d("OAuthViewModel", "Resetting OAuth state")
         _oauthState.value = Resource.Idle
     }
 }
