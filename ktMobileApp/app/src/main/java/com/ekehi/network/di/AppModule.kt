@@ -12,21 +12,18 @@ import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.data.repository.MiningRepository
 import com.ekehi.network.data.repository.SocialTaskRepository
 import com.ekehi.network.data.repository.UserRepository
+import com.ekehi.network.data.repository.offline.OfflineSocialTaskRepository
 import com.ekehi.network.domain.usecase.AuthUseCase
 import com.ekehi.network.domain.usecase.MiningUseCase
 import com.ekehi.network.domain.usecase.SocialTaskUseCase
 import com.ekehi.network.domain.usecase.UserUseCase
+import com.ekehi.network.domain.verification.SocialVerificationService
 import com.ekehi.network.performance.PerformanceMonitor
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.SettingsViewModel
 import com.ekehi.network.presentation.viewmodel.StreakViewModel
 import com.ekehi.network.security.SecurePreferences
-import com.ekehi.network.service.AppwriteService
-import com.ekehi.network.service.MiningManager
-import com.ekehi.network.service.NotificationService
-import com.ekehi.network.service.OAuthService
-import com.ekehi.network.service.PushNotificationService
-import com.ekehi.network.service.StartIoService
+import com.ekehi.network.service.*
 import com.ekehi.network.data.sync.SyncManager
 import com.ekehi.network.data.sync.SyncService
 import dagger.Module
@@ -35,6 +32,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.appwrite.Client
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 @Module
@@ -72,6 +74,47 @@ object AppModule {
         return Client(context)
                 .setEndpoint("https://fra.cloud.appwrite.io/v1") // Frankfurt region endpoint to match React Native app
                 .setProject("68c2dd6e002112935ed2") // Actual project ID
+    }
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(): HttpClient {
+        return HttpClient(Android) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                })
+            }
+        }
+    }
+
+    @Provides
+    @Singleton
+    fun provideTelegramBotService(httpClient: HttpClient): TelegramBotService {
+        return TelegramBotService(httpClient)
+    }
+
+    @Provides
+    @Singleton
+    fun provideYouTubeApiService(httpClient: HttpClient): YouTubeApiService {
+        return YouTubeApiService(httpClient)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFacebookApiService(httpClient: HttpClient): FacebookApiService {
+        return FacebookApiService(httpClient)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSocialVerificationService(
+        telegramBotService: TelegramBotService,
+        youTubeApiService: YouTubeApiService,
+        facebookApiService: FacebookApiService
+    ): SocialVerificationService {
+        return SocialVerificationService(telegramBotService, youTubeApiService, facebookApiService)
     }
 
     @Provides
@@ -126,8 +169,24 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSocialTaskRepository(appwriteService: AppwriteService, performanceMonitor: PerformanceMonitor): SocialTaskRepository {
-        return SocialTaskRepository(appwriteService, performanceMonitor)
+    fun provideSocialTaskRepository(
+        appwriteService: AppwriteService, 
+        performanceMonitor: PerformanceMonitor,
+        socialVerificationService: SocialVerificationService
+    ): SocialTaskRepository {
+        return SocialTaskRepository(appwriteService, performanceMonitor, socialVerificationService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOfflineSocialTaskRepository(
+        appwriteService: AppwriteService,
+        performanceMonitor: PerformanceMonitor,
+        socialVerificationService: SocialVerificationService,
+        socialTaskDao: SocialTaskDao,
+        cacheManager: CacheManager
+    ): OfflineSocialTaskRepository {
+        return OfflineSocialTaskRepository(appwriteService, performanceMonitor, socialVerificationService, socialTaskDao, cacheManager)
     }
 
     @Provides

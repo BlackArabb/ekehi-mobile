@@ -130,7 +130,8 @@ const COLLECTIONS_SCHEMA = {
     attributes: [
       { key: 'userId', type: 'string', size: 255, required: true },
       { key: 'taskId', type: 'string', size: 255, required: true },
-      { key: 'completedAt', type: 'datetime', required: true }
+      { key: 'completedAt', type: 'datetime', required: true },
+      { key: 'username', type: 'string', size: 255, required: false }
     ]
   },
 

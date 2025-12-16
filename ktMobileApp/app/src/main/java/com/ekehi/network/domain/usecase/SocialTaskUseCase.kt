@@ -37,9 +37,9 @@ open class SocialTaskUseCase @Inject constructor(
         emit(Resource.Error("Error getting user social tasks: ${e.message}"))
     }
 
-    fun completeSocialTask(userId: String, taskId: String): Flow<Resource<Unit>> = flow {
+    fun completeSocialTask(userId: String, taskId: String, proofData: Map<String, Any>? = null): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading)
-        val result = socialTaskRepository.completeSocialTask(userId, taskId)
+        val result = socialTaskRepository.completeSocialTask(userId, taskId, proofData)
         if (result.isSuccess) {
             emit(Resource.Success(Unit))
         } else {

@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.ui.components.BottomNavigationBar
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
+import com.ekehi.network.auth.SocialAuthManager
 
 @Composable
 fun AppNavigation(isAuthenticated: Boolean = false) {
@@ -131,7 +132,8 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                 }
 
                 composable("social") {
-                    SocialTasksScreen()
+                    val authManager = SocialAuthManager(androidx.compose.ui.platform.LocalContext.current)
+                    SocialTasksScreen(authManager = authManager)
                 }
 
                 composable("leaderboard") {

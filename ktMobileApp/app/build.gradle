@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
     id 'com.google.gms.google-services'
+    id 'kotlinx-serialization'
 }
 
 android {
@@ -21,6 +22,11 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        
+        // Add build config fields for social media APIs
+        buildConfigField "String", "TELEGRAM_BOT_TOKEN", "\"7969520183:AAGFM4gNVTqnPC_byBfclj--EBw7ytmL_JE\""
+        buildConfigField "String", "YOUTUBE_API_KEY", "\"AIzaSyAO3PhQ_RorWalCim2rby79Wt59sZpG0m4\""
+        buildConfigField "String", "YOUTUBE_CLIENT_ID", "\"842046112756-9acvuujafbpmu7ld7v54eb2lr97u3acj.apps.googleusercontent.com\""
     }
 
     buildTypes {
@@ -49,6 +55,7 @@ android {
     }
     buildFeatures {
         compose true
+        buildConfig true
     }
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.10' // Updated from 1.5.4 to 1.5.10 for better compatibility
@@ -136,6 +143,17 @@ dependencies {
     
     // Gson for JSON serialization
     implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // Ktor for HTTP networking
+    implementation("io.ktor:ktor-client-android:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+    
+    // Kotlinx Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    
+    // Facebook SDK for Facebook OAuth
+    implementation("com.facebook.android:facebook-login:16.2.0")
     
     // Testing
     testImplementation 'junit:junit:4.13.2'

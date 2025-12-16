@@ -7,6 +7,7 @@ import com.ekehi.network.data.model.SocialTask
 import com.ekehi.network.data.model.UserSocialTask
 import com.ekehi.network.data.repository.CachingRepository
 import com.ekehi.network.data.repository.SocialTaskRepository
+import com.ekehi.network.domain.verification.SocialVerificationService
 import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.performance.PerformanceMonitor
 import io.appwrite.exceptions.AppwriteException
@@ -17,9 +18,10 @@ import javax.inject.Inject
 class OfflineSocialTaskRepository @Inject constructor(
     appwriteService: AppwriteService,
     performanceMonitor: PerformanceMonitor,
+    socialVerificationService: SocialVerificationService,
     private val socialTaskDao: SocialTaskDao,
     private val cacheManager: CacheManager
-) : SocialTaskRepository(appwriteService, performanceMonitor) {
+) : SocialTaskRepository(appwriteService, performanceMonitor, socialVerificationService) {
     
     private val cachingRepository = object : CachingRepository(cacheManager) {}
     

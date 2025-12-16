@@ -9,6 +9,7 @@ data class SocialTask(
     val rewardCoins: Double,
     val actionUrl: String? = null,
     val verificationMethod: String,
+    val verificationData: Map<String, String>? = null,
     val isActive: Boolean,
     val sortOrder: Int,
     val isCompleted: Boolean = false,

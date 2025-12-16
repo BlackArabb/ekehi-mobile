@@ -1,157 +1,203 @@
-package com.ekehi.network.presentation.ui
+﻿package com.ekehi.network.presentation.ui
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ekehi.network.auth.SocialAuthManager
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
-import com.ekehi.network.ui.theme.EkehiMobileTheme
-import com.ekehi.network.presentation.ui.components.SocialTasksScreenSkeleton
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import java.net.URL
-import androidx.compose.foundation.border
+import com.ekehi.network.presentation.viewmodel.VerificationState
+import com.facebook.login.LoginManager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SocialTasksScreen(
-    viewModel: SocialTasksViewModel = hiltViewModel()
+    viewModel: SocialTasksViewModel = hiltViewModel(),
+    authManager: SocialAuthManager
 ) {
-    // In a real app, get the user ID from the authentication context
-    // For now, we'll use a placeholder
+    val context = LocalContext.current
     var userId by remember { mutableStateOf("user_id_placeholder") }
     val socialTasksResource by viewModel.socialTasks.collectAsState()
-    var isGridView by remember { mutableStateOf(false) }
-
+    val verificationState by viewModel.verificationState.collectAsState()
+    
+    // OAuth Launchers
+    val youtubeSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            task.addOnSuccessListener { account ->
+                val accessToken = authManager.getYouTubeAccessToken(account)
+                viewModel.setYouTubeAccessToken(accessToken ?: "")
+            }
+        }
+    }
+    
+    val facebookLoginLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        authManager.handleFacebookResult(
+            requestCode = result.resultCode,
+            resultCode = Activity.RESULT_OK,
+            data = result.data
+        )
+    }
+    
+    var selectedTask by remember { mutableStateOf<SocialTaskItem?>(null) }
+    
     LaunchedEffect(Unit) {
         viewModel.loadSocialTasks()
         viewModel.loadUserSocialTasks(userId)
     }
-
+    
+    // Handle verification state changes
+    LaunchedEffect(verificationState) {
+        when (verificationState) {
+            is VerificationState.Success -> {
+                // Refresh tasks after success
+                viewModel.loadUserSocialTasks(userId)
+            }
+            else -> {}
+        }
+    }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1a1a2e),
-                        Color(0xFF16213e),
-                        Color(0xFF0f3460)
-                    )
-                )
-            )
+            .background(Color(0xFF1a1a2e))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)
         ) {
-            // Header with toggle button
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = 24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Social Tasks",
-                    color = Color.White,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                // Toggle view button
-                IconButton(
-                    onClick = { isGridView = !isGridView }
-                ) {
-                    Icon(
-                        imageVector = if (isGridView) Icons.Default.ViewList else Icons.Default.GridView,
-                        contentDescription = if (isGridView) "List View" else "Grid View",
-                        tint = Color.White
-                    )
-                }
-            }
-
-            // Stats Section (matching React Native design)
+            // Header
+            Text(
+                text = "Social Tasks",
+                color = Color.White,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 20.dp, bottom = 24.dp)
+            )
+            
+            // Stats Section
             StatsSection(viewModel)
-
+            
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Social Tasks List
+            
+            // Tasks List
             when (socialTasksResource) {
-                is Resource.Loading -> {
-                    SocialTasksScreenSkeleton()
-                }
                 is Resource.Success -> {
                     val tasks = (socialTasksResource as Resource.Success).data
-                    if (isGridView) {
-                        SocialTasksGrid(
-                            tasks = tasks,
-                            onTaskComplete = { taskId ->
-                                viewModel.completeSocialTask(userId, taskId, "", 0.0)
-                            },
-                            onTaskVerify = { taskId ->
-                                viewModel.verifySocialTask(userId, taskId)
-                            }
-                        )
-                    } else {
-                        SocialTasksList(
-                            tasks = tasks,
-                            onTaskComplete = { taskId ->
-                                viewModel.completeSocialTask(userId, taskId, "", 0.0)
-                            },
-                            onTaskVerify = { taskId ->
-                                viewModel.verifySocialTask(userId, taskId)
-                            }
-                        )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(tasks) { task ->
+                            val taskItem = SocialTaskItem(
+                                id = task.id,
+                                title = task.title,
+                                description = task.description,
+                                platform = task.platform,
+                                taskType = task.taskType,
+                                link = task.actionUrl ?: "",
+                                reward = task.rewardCoins,
+                                isCompleted = task.isCompleted,
+                                isVerified = task.isVerified,
+                                verificationMethod = task.verificationMethod
+                            )
+                            
+                            EnhancedSocialTaskCard(
+                                task = taskItem,
+                                onClick = { selectedTask = taskItem },
+                                verificationState = verificationState
+                            )
+                        }
                     }
+                }
+                is Resource.Loading -> {
+                    CircularProgressIndicator()
                 }
                 is Resource.Error -> {
-                    val error = (socialTasksResource as Resource.Error).message
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error: $error",
-                            color = Color.Red
-                        )
-                    }
+                    Text("Error loading tasks", color = Color.Red)
                 }
-                else -> {
-                    // Idle state
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No tasks available",
-                            color = Color.White
-                        )
-                    }
+                else -> {}
+            }
+        }
+        
+        // Task Completion Dialog
+        selectedTask?.let { task ->
+            TaskCompletionDialog(
+                task = task,
+                viewModel = viewModel,
+                authManager = authManager,
+                youtubeSignInLauncher = youtubeSignInLauncher,
+                onDismiss = { selectedTask = null },
+                onSubmit = { proofData ->
+                    viewModel.completeSocialTask(userId, task.id, proofData)
+                    selectedTask = null
+                }
+            )
+        }
+        
+        // Verification State Snackbar
+        when (verificationState) {
+            is VerificationState.Success -> {
+                Snackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                ) {
+                    Text((verificationState as VerificationState.Success).message)
                 }
             }
+            is VerificationState.Error -> {
+                Snackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    containerColor = MaterialTheme.colorScheme.error
+                ) {
+                    Text((verificationState as VerificationState.Error).message)
+                }
+            }
+            is VerificationState.Pending -> {
+                Snackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                ) {
+                    Text((verificationState as VerificationState.Pending).message)
+                }
+            }
+            else -> {}
         }
     }
 }
@@ -241,173 +287,514 @@ fun StatCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SocialTaskFilterTabs() {
-    val filterOptions = listOf("All", "Pending", "Completed", "Verified")
-    var selectedFilter by remember { mutableStateOf("All") }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        filterOptions.forEach { option ->
-            FilterChip(
-                selected = selectedFilter == option,
-                onClick = { selectedFilter = option },
-                label = { 
-                    Text(
-                        text = option, 
-                        color = if (selectedFilter == option) Color.Black else Color.White
-                    ) 
-                },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = Color(0xFFffa000)
-                )
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-    }
-}
-
-@Composable
-fun SocialTasksList(
-    tasks: List<com.ekehi.network.data.model.SocialTask>,
-    onTaskComplete: (String) -> Unit,
-    onTaskVerify: (String) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(tasks) { task ->
-            // Create a SocialTaskItem from the SocialTask model
-            val taskItem = SocialTaskItem(
-                id = task.id,
-                title = task.title,
-                description = task.description,
-                platform = task.platform,
-                link = task.actionUrl ?: "",
-                reward = task.rewardCoins,
-                isCompleted = task.isCompleted,
-                isVerified = task.isVerified
-            )
-            
-            SocialTaskCard(
-                task = taskItem,
-                onTaskComplete = onTaskComplete,
-                onTaskVerify = onTaskVerify
-            )
-        }
-    }
-}
-
-@Composable
-fun SocialTasksGrid(
-    tasks: List<com.ekehi.network.data.model.SocialTask>,
-    onTaskComplete: (String) -> Unit,
-    onTaskVerify: (String) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(0.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(tasks) { task ->
-            // Create a SocialTaskItem from the SocialTask model
-            val taskItem = SocialTaskItem(
-                id = task.id,
-                title = task.title,
-                description = task.description,
-                platform = task.platform,
-                link = task.actionUrl ?: "",
-                reward = task.rewardCoins,
-                isCompleted = task.isCompleted,
-                isVerified = task.isVerified
-            )
-            
-            SocialTaskGridItem(
-                task = taskItem,
-                onTaskComplete = onTaskComplete,
-                onTaskVerify = onTaskVerify
-            )
-        }
-    }
-}
-
-@Composable
-fun SocialTaskCard(
+fun TaskCompletionDialog(
     task: SocialTaskItem,
-    onTaskComplete: (String) -> Unit,
-    onTaskVerify: (String) -> Unit
+    viewModel: SocialTasksViewModel,
+    authManager: SocialAuthManager,
+    youtubeSignInLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
+    onDismiss: () -> Unit,
+    onSubmit: (Map<String, Any>) -> Unit
+) {
+    val context = LocalContext.current
+    var telegramUserId by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var proofUrl by remember { mutableStateOf("") }
+    var facebookAccessToken by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = getPlatformIcon(task.platform),
+                    contentDescription = null,
+                    tint = getPlatformColor(task.platform)
+                )
+                Text(getDialogTitle(task.platform, task.verificationMethod))
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                when {
+                    // TELEGRAM
+                    task.platform.lowercase() == "telegram" -> {
+                        TelegramVerificationUI(
+                            telegramUserId = telegramUserId,
+                            onTelegramUserIdChange = { telegramUserId = it }
+                        )
+                    }
+                    
+                    // YOUTUBE
+                    task.platform.lowercase() == "youtube" -> {
+                        YouTubeVerificationUI(
+                            taskType = task.taskType,
+                            actionUrl = task.link,
+                            onConnectYouTube = {
+                                val signInIntent = authManager.getYouTubeSignInClient().signInIntent
+                                youtubeSignInLauncher.launch(signInIntent)
+                            }
+                        )
+                    }
+                    
+                    // FACEBOOK
+                    task.platform.lowercase() == "facebook" -> {
+                        FacebookVerificationUI(
+                            actionUrl = task.link,
+                            onConnectFacebook = {
+                                authManager.loginWithFacebook(
+                                    loginManager = LoginManager.getInstance(),
+                                    onSuccess = { accessToken ->
+                                        facebookAccessToken = accessToken
+                                    },
+                                    onError = { error ->
+                                        // Handle error
+                                    }
+                                )
+                                LoginManager.getInstance().logInWithReadPermissions(
+                                    context as Activity,
+                                    listOf("user_likes")
+                                )
+                            }
+                        )
+                    }
+                    
+                    // MANUAL (Twitter, etc.)
+                    else -> {
+                        ManualVerificationUI(
+                            platform = task.platform,
+                            username = username,
+                            proofUrl = proofUrl,
+                            onUsernameChange = { username = it },
+                            onProofUrlChange = { proofUrl = it }
+                        )
+                    }
+                }
+                
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    isLoading = true
+                    errorMessage = ""
+                    
+                    val proofData = buildProofData(
+                        platform = task.platform,
+                        telegramUserId = telegramUserId,
+                        username = username,
+                        proofUrl = proofUrl
+                    )
+                    
+                    // Add Facebook access token if this is a Facebook task
+                    val enhancedProofData = if (task.platform.lowercase() == "facebook" && facebookAccessToken != null) {
+                        proofData.toMutableMap().apply {
+                            put("facebook_access_token", facebookAccessToken!!)
+                        }
+                    } else {
+                        proofData
+                    }
+                    
+                    // Validate Telegram user ID before submitting
+                    if (task.platform.lowercase() == "telegram" && !isValidTelegramUserId(telegramUserId)) {
+                        errorMessage = getTelegramUserIdErrorMessage(telegramUserId)
+                        if (errorMessage.isEmpty()) {
+                            errorMessage = "Please enter a valid Telegram User ID"
+                        }
+                        isLoading = false
+                    } else if (enhancedProofData.isEmpty()) {
+                        errorMessage = "Please provide required information"
+                        isLoading = false
+                    } else {
+                        onSubmit(enhancedProofData)
+                    }
+                },
+                enabled = !isLoading && isReadyToSubmit(
+                    platform = task.platform,
+                    telegramUserId = telegramUserId,
+                    username = username,
+                    proofUrl = proofUrl
+                )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.White
+                    )
+                } else {
+                    Text(getSubmitButtonText(task.platform))
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun TelegramVerificationUI(
+    telegramUserId: String,
+    onTelegramUserIdChange: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val errorMessage = getTelegramUserIdErrorMessage(telegramUserId)
+    val hasError = errorMessage.isNotEmpty()
+    
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "To verify your Telegram membership:",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        
+        Text(
+            text = "1. Open Telegram\n2. Search for @ekehi_task_bot\n3. Send /start to get your ID\n4. Copy your numeric ID from the bot's response\n5. Paste it below",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        OutlinedTextField(
+            value = telegramUserId,
+            onValueChange = { newValue ->
+                // Only allow numeric input for Telegram user ID
+                if (newValue.all { it.isDigit() } || newValue.isEmpty()) {
+                    onTelegramUserIdChange(newValue)
+                }
+            },
+            label = { Text("Telegram User ID (Numbers only)") },
+            placeholder = { Text("e.g., 123456789") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            leadingIcon = {
+                Icon(Icons.Default.Send, "Telegram")
+            },
+            isError = hasError,
+            supportingText = {
+                if (hasError) {
+                    Text(errorMessage)
+                } else {
+                    Text("Enter your unique Telegram ID")
+                }
+            }
+        )
+        
+        Button(
+            onClick = {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/ekehi_task_bot"))
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    // Fallback to opening Telegram app
+                    try {
+                        val intent = context.packageManager.getLaunchIntentForPackage("org.telegram.messenger")
+                        context.startActivity(intent)
+                    } catch (ex: Exception) {
+                        // If Telegram app is not installed, open in browser
+                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://web.telegram.org/#/im?p=@ekehi_task_bot"))
+                        context.startActivity(intent)
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0088CC)
+            )
+        ) {
+            Icon(Icons.Default.OpenInNew, "Open")
+            Spacer(Modifier.width(8.dp))
+            Text("Open @ekehi_task_bot")
+        }
+        
+        // Add explanation about where to find the ID
+        Text(
+            text = "Note: After sending /start to the bot, it will reply with your unique Telegram ID. Copy only the numbers.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+}
+
+@Composable
+fun YouTubeVerificationUI(
+    taskType: String,
+    actionUrl: String,
+    onConnectYouTube: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = when (taskType.lowercase()) {
+                "subscribe", "channel_subscribe" -> "Subscribe to our YouTube channel"
+                "like", "video_like" -> "Like our YouTube video"
+                else -> "Complete the YouTube task"
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Text(
+            text = "1. Complete the task on YouTube\n2. Connect your YouTube account\n3. We'll verify automatically",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        if (actionUrl.isNotEmpty()) {
+            Button(
+                onClick = { /* TODO: Open YouTube URL */ },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF0000)
+                )
+            ) {
+                Icon(Icons.Default.PlayArrow, "YouTube")
+                Spacer(Modifier.width(8.dp))
+                Text("Open on YouTube")
+            }
+        }
+        
+        Button(
+            onClick = onConnectYouTube,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.AccountCircle, "Connect")
+            Spacer(Modifier.width(8.dp))
+            Text("Connect YouTube Account")
+        }
+    }
+}
+
+@Composable
+fun FacebookVerificationUI(
+    actionUrl: String,
+    onConnectFacebook: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Like our Facebook page",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Text(
+            text = "1. Like the page on Facebook\n2. Connect your Facebook account\n3. We'll verify automatically",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        if (actionUrl.isNotEmpty()) {
+            Button(
+                onClick = { /* TODO: Open Facebook URL */ },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4267B2)
+                )
+            ) {
+                Icon(Icons.Default.ThumbUp, "Facebook")
+                Spacer(Modifier.width(8.dp))
+                Text("Open on Facebook")
+            }
+        }
+        
+        Button(
+            onClick = onConnectFacebook,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.AccountCircle, "Connect")
+            Spacer(Modifier.width(8.dp))
+            Text("Connect Facebook Account")
+        }
+    }
+}
+
+@Composable
+fun ManualVerificationUI(
+    platform: String,
+    username: String,
+    proofUrl: String,
+    onUsernameChange: (String) -> Unit,
+    onProofUrlChange: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Submit proof of task completion",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Text(
+            text = "Your submission will be reviewed within 24-48 hours.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        OutlinedTextField(
+            value = username,
+            onValueChange = onUsernameChange,
+            label = { Text("Your $platform Username") },
+            placeholder = { Text("e.g., @yourhandle") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            leadingIcon = {
+                Icon(Icons.Default.Person, "Username")
+            }
+        )
+        
+        OutlinedTextField(
+            value = proofUrl,
+            onValueChange = onProofUrlChange,
+            label = { Text("Screenshot URL or Post Link") },
+            placeholder = { Text("https://...") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            leadingIcon = {
+                Icon(Icons.Default.Link, "URL")
+            }
+        )
+    }
+}
+
+// Helper Functions
+fun getDialogTitle(platform: String, verificationMethod: String): String {
+    return when (platform.lowercase()) {
+        "telegram" -> "Connect Telegram"
+        "youtube" -> "Connect YouTube"
+        "facebook" -> "Connect Facebook"
+        "twitter", "x" -> "Submit Proof"
+        else -> "Complete Task"
+    }
+}
+
+fun getSubmitButtonText(platform: String): String {
+    return when (platform.lowercase()) {
+        "telegram" -> "Verify Membership"
+        "youtube", "facebook" -> "Verify Action"
+        else -> "Submit for Review"
+    }
+}
+
+fun isReadyToSubmit(
+    platform: String,
+    telegramUserId: String,
+    username: String,
+    proofUrl: String
+): Boolean {
+    return when (platform.lowercase()) {
+        "telegram" -> telegramUserId.isNotEmpty() && telegramUserId.all { it.isDigit() } && telegramUserId.length >= 8
+        "youtube", "facebook" -> true // OAuth handles validation
+        else -> username.isNotEmpty() || proofUrl.isNotEmpty()
+    }
+}
+
+/**
+ * Validates Telegram user ID format
+ */
+fun isValidTelegramUserId(userId: String): Boolean {
+    return userId.isNotEmpty() && 
+           userId.all { it.isDigit() } && 
+           userId.length >= 8 && 
+           userId.length <= 12 &&
+           userId.toLongOrNull() != null
+}
+
+/**
+ * Provides helpful error messages for Telegram user ID validation
+ */
+fun getTelegramUserIdErrorMessage(userId: String): String {
+    return when {
+        userId.isEmpty() -> "Please enter your Telegram User ID"
+        !userId.all { it.isDigit() } -> "User ID should contain only numbers"
+        userId.length < 8 -> "User ID should be at least 8 digits"
+        userId.length > 12 -> "User ID should not exceed 12 digits"
+        else -> ""
+    }
+}
+
+fun buildProofData(
+    platform: String,
+    telegramUserId: String,
+    username: String,
+    proofUrl: String
+): Map<String, Any> {
+    return buildMap {
+        when (platform.lowercase()) {
+            "telegram" -> {
+                telegramUserId.toLongOrNull()?.let {
+                    put("telegram_user_id", it)
+                }
+            }
+            "youtube" -> {
+                // Access token will be added by ViewModel
+                put("requires_youtube_oauth", true)
+            }
+            "facebook" -> {
+                // Access token will be added by ViewModel
+                put("requires_facebook_oauth", true)
+            }
+            else -> {
+                if (username.isNotEmpty()) put("username", username)
+                if (proofUrl.isNotEmpty()) put("proof_url", proofUrl)
+            }
+        }
+    }
+}
+
+@Composable
+fun EnhancedSocialTaskCard(
+    task: SocialTaskItem,
+    onClick: () -> Unit,
+    verificationState: VerificationState
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = Color(0x4DFFA000), // 30% opacity orange
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        ),
+            .border(1.dp, Color(0x4DFFA000), androidx.compose.foundation.shape.RoundedCornerShape(16.dp)),
+        colors = CardDefaults.cardColors(containerColor = Color(0x1AFFFFFF)),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Task Header (Icon, Title, Description)
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Task content (same as before)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-                // Platform Icon with favicon support
                 Box(
                     modifier = Modifier
                         .size(52.dp)
                         .background(
-                            color = getPlatformColor(task.platform),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                            getPlatformColor(task.platform),
+                            androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (task.link.isNotEmpty()) {
-                        // Try to load favicon, fallback to platform icon if failed
-                        val faviconUrl = getFaviconUrl(task.link)
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                ImageRequest.Builder(LocalContext.current)
-                                    .data(faviconUrl)
-                                    .crossfade(true)
-                                    .build()
-                            ),
-                            contentDescription = task.platform,
-                            modifier = Modifier.size(32.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                    } else {
-                        Icon(
-                            imageVector = getPlatformIcon(task.platform),
-                            contentDescription = task.platform,
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    Icon(
+                        imageVector = getPlatformIcon(task.platform),
+                        contentDescription = task.platform,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Task Info
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
+                
+                Spacer(Modifier.width(16.dp))
+                
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = task.title,
                         color = Color.White,
@@ -416,355 +803,70 @@ fun SocialTaskCard(
                     )
                     Text(
                         text = task.description,
-                        color = Color(0xB3FFFFFF), // 70% opacity white
+                        color = Color(0xB3FFFFFF),
                         fontSize = 14.sp,
-                        modifier = Modifier.padding(top = 4.dp),
-                        lineHeight = 20.sp
+                        modifier = Modifier.padding(top = 4.dp)
                     )
-                    if (task.link.isNotEmpty()) {
-                        Text(
-                            text = extractDomain(task.link),
-                            color = Color(0x80FFFFFF), // 50% opacity white
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(top = 4.dp),
-                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                        )
-                    }
+                    
+                    // Show verification method badge
+                    Text(
+                        text = if (task.verificationMethod == "api") "✓ Auto-verified" else "⏳ Manual review",
+                        color = if (task.verificationMethod == "api") Color(0xFF10b981) else Color(0xFFf59e0b),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Task Footer (Reward and Action Button)
+            
+            Spacer(Modifier.height(16.dp))
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Reward Container
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = "+${task.reward}",
-                        color = Color(0xFFffa000),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "EKH",
-                        color = Color(0x99FFFFFF), // 60% opacity white
-                        fontSize = 14.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Action Button
-                if (task.isVerified) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Verified",
-                            tint = Color(0xFF10b981), // green
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = "Completed",
-                            color = Color(0xFF10b981),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                } else if (task.isCompleted) {
-                    Button(
-                        onClick = { onTaskVerify(task.id) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFf59e0b)
-                        ),
-                        modifier = Modifier
-                            .height(36.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Completed",
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = "Completed",
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                } else {
-                    Button(
-                        onClick = { onTaskComplete(task.id) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFffa000)
-                        ),
-                        modifier = Modifier
-                            .height(36.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.OpenInNew, // Changed from ExternalLink to OpenInNew
-                                contentDescription = "Complete",
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = "Complete",
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun SocialTaskGridItem(
-    task: SocialTaskItem,
-    onTaskComplete: (String) -> Unit,
-    onTaskVerify: (String) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = Color(0x4DFFA000), // 30% opacity orange
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x1AFFFFFF) // 10% opacity white
-        ),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Platform Icon with favicon support
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .background(
-                        color = getPlatformColor(task.platform),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (task.link.isNotEmpty()) {
-                    // Try to load favicon, fallback to platform icon if failed
-                    val faviconUrl = getFaviconUrl(task.link)
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(faviconUrl)
-                                .crossfade(true)
-                                .build()
-                        ),
-                        contentDescription = task.platform,
-                        modifier = Modifier.size(32.dp),
-                        contentScale = ContentScale.Fit
-                    )
-                } else {
-                    Icon(
-                        imageVector = getPlatformIcon(task.platform),
-                        contentDescription = task.platform,
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Task Info
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = task.title,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2
-                )
-                Text(
-                    text = task.description,
-                    color = Color(0xB3FFFFFF), // 70% opacity white
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp),
-                    maxLines = 2,
-                    lineHeight = 16.sp
-                )
-                if (task.link.isNotEmpty()) {
-                    Text(
-                        text = extractDomain(task.link),
-                        color = Color(0x80FFFFFF), // 50% opacity white
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 4.dp),
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                    )
-                }
                 Text(
                     text = "+${task.reward} EKH",
                     color = Color(0xFFffa000),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Action Button
-            if (task.isVerified) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Verified",
-                        tint = Color(0xFF10b981), // green
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                        text = "Completed",
-                        color = Color(0xFF10b981),
-                        fontSize = 10.sp
-                    )
-                }
-            } else if (task.isCompleted) {
-                Button(
-                    onClick = { onTaskVerify(task.id) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFf59e0b)
-                    ),
-                    modifier = Modifier
-                        .height(28.dp)
-                        .fillMaxWidth(0.8f)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Completed",
-                            tint = Color.White,
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = "Completed",
-                            color = Color.White,
-                            fontSize = 10.sp
-                        )
+                
+                if (task.isVerified) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Check, "Verified", tint = Color(0xFF10b981), modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Completed", color = Color(0xFF10b981), fontSize = 14.sp)
                     }
-                }
-            } else {
-                Button(
-                    onClick = { onTaskComplete(task.id) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFffa000)
-                    ),
-                    modifier = Modifier
-                        .height(28.dp)
-                        .fillMaxWidth(0.8f)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                } else {
+                    Button(
+                        onClick = onClick,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFffa000))
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.OpenInNew, // Changed from ExternalLink to OpenInNew
-                            contentDescription = "Complete",
-                            tint = Color.White,
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = "Complete",
-                            color = Color.White,
-                            fontSize = 10.sp
-                        )
+                        Text("Complete")
                     }
                 }
             }
         }
-    }
-}
-
-// Function to generate favicon URL like React Native app
-fun getFaviconUrl(url: String): String {
-    return try {
-        val domain = URL(url).host
-        "https://www.google.com/s2/favicons?domain=$domain&sz=64"
-    } catch (e: Exception) {
-        "https://www.google.com/s2/favicons?domain=example.com&sz=64"
-    }
-}
-
-// Function to extract domain from URL like React Native app
-fun extractDomain(url: String): String {
-    return try {
-        val domain = URL(url).host
-        if (domain.startsWith("www.")) {
-            domain.substring(4)
-        } else {
-            domain
-        }
-    } catch (e: Exception) {
-        "unknown"
     }
 }
 
 fun getPlatformColor(platform: String): Color {
     return when (platform.lowercase()) {
-        "twitter", "x" -> Color(0xFF1DA1F2)
         "telegram" -> Color(0xFF0088CC)
-        "facebook" -> Color(0xFF4267B2)
-        "instagram" -> Color(0xFFE1306C)
         "youtube" -> Color(0xFFFF0000)
-        "tiktok" -> Color(0xFF69C9D0)
-        "linkedin" -> Color(0xFF0077B5)
-        "ekehi" -> Color(0xFFffa000)
+        "facebook" -> Color(0xFF4267B2)
+        "twitter", "x" -> Color(0xFF1DA1F2)
         else -> Color(0xFFffa000)
     }
 }
 
 fun getPlatformIcon(platform: String): androidx.compose.ui.graphics.vector.ImageVector {
     return when (platform.lowercase()) {
-        "twitter", "x" -> Icons.Default.Message
         "telegram" -> Icons.Default.Send
-        "facebook" -> Icons.Default.ThumbUp
-        "instagram" -> Icons.Default.Camera
         "youtube" -> Icons.Default.PlayArrow
-        "tiktok" -> Icons.Default.MusicNote
-        "linkedin" -> Icons.Default.Work
-        "ekehi" -> Icons.Default.Public
+        "facebook" -> Icons.Default.ThumbUp
+        "twitter", "x" -> Icons.Default.Message
         else -> Icons.Default.Public
     }
 }
@@ -774,45 +876,10 @@ data class SocialTaskItem(
     val title: String,
     val description: String,
     val platform: String,
+    val taskType: String,
     val link: String,
     val reward: Double,
     val isCompleted: Boolean,
-    val isVerified: Boolean
+    val isVerified: Boolean,
+    val verificationMethod: String
 )
-
-@Preview(showBackground = true)
-@Composable
-fun SocialTasksScreenPreview() {
-    EkehiMobileTheme {
-        SocialTasksScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SocialTaskCardPreview() {
-    EkehiMobileTheme {
-        SocialTaskCard(
-            task = SocialTaskItem(
-                id = "1",
-                title = "Follow us on Twitter",
-                description = "Follow our official Twitter account for updates",
-                platform = "Twitter",
-                link = "https://twitter.com/ekehi_network",
-                reward = 0.5,
-                isCompleted = false,
-                isVerified = false
-            ),
-            onTaskComplete = {},
-            onTaskVerify = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SocialTaskFilterTabsPreview() {
-    EkehiMobileTheme {
-        SocialTaskFilterTabs()
-    }
-}
