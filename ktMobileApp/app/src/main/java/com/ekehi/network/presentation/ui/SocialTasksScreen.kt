@@ -1212,7 +1212,7 @@ fun TelegramVerificationUI(
             onClick = {
                 try {
                     // Open the task_verify bot specifically
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/task_verify_bot"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/ekehi_task_bot"))
                     context.startActivity(intent)
                 } catch (e: Exception) {
                     // Fallback to opening Telegram app

@@ -385,6 +385,31 @@ open class SocialTaskRepository @Inject constructor(
     private fun documentToSocialTask(document: Document<*>): SocialTask {
         @Suppress("UNCHECKED_CAST")
         val data = document.data as Map<String, Any>
+        val gson = Gson()
+        
+        // Parse verificationData - it can be either a JSON string or a Map
+        val verificationDataMap: Map<String, String>? = try {
+            when (val verificationData = data["verificationData"]) {
+                is String -> {
+                    // If it's a JSON string, parse it
+                    if (verificationData.isNotEmpty()) {
+                        val type = object : TypeToken<Map<String, String>>() {}.type
+                        gson.fromJson(verificationData, type)
+                    } else {
+                        null
+                    }
+                }
+                is Map<*, *> -> {
+                    // If it's already a map, cast it
+                    @Suppress("UNCHECKED_CAST")
+                    verificationData as? Map<String, String>
+                }
+                else -> null
+            }
+        } catch (e: Exception) {
+            Log.e("SocialTaskRepository", "Failed to parse verificationData: ${e.message}")
+            null
+        }
         
         return SocialTask(
             id = document.id ?: "",
@@ -395,7 +420,7 @@ open class SocialTaskRepository @Inject constructor(
             rewardCoins = (data["rewardCoins"] as? Number)?.toDouble() ?: 0.0,
             actionUrl = data["actionUrl"] as? String,
             verificationMethod = data["verificationMethod"] as? String ?: "manual",
-            verificationData = data["verificationData"] as? Map<String, String>,
+            verificationData = verificationDataMap,
             isActive = data["isActive"] as? Boolean ?: false,
             sortOrder = (data["sortOrder"] as? Number)?.toInt() ?: 0,
             createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",
