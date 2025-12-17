@@ -1128,6 +1128,7 @@ fun TelegramVerificationUI(
     telegramUserId: String,
     onTelegramUserIdChange: (String) -> Unit
 ) {
+    val context = LocalContext.current
     val errorMessage = getTelegramUserIdErrorMessage(telegramUserId)
     val hasError = errorMessage.isNotEmpty()
     
@@ -1138,18 +1139,120 @@ fun TelegramVerificationUI(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Color(0xFF0088CC).copy(alpha = 0.1f),
+                    RoundedCornerShape(8.dp)
+                )
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = null,
+                tint = Color(0xFF0088CC),
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Get your Telegram User ID to verify",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        
         Text(
-            text = "To verify your Telegram membership:",
+            text = "Steps to get your User ID:",
             style = MaterialTheme.typography.bodyMedium,
             color = BrandColors.White,
             fontWeight = FontWeight.Bold
         )
         
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    BrandColors.Black.copy(alpha = 0.3f),
+                    RoundedCornerShape(8.dp)
+                )
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = "1️⃣ Click 'Open Verification Bot' button below",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.White.copy(alpha = 0.9f),
+                lineHeight = 18.sp
+            )
+            Text(
+                text = "2️⃣ Send /start to the bot",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.White.copy(alpha = 0.9f),
+                lineHeight = 18.sp
+            )
+            Text(
+                text = "3️⃣ Bot will reply with your User ID (numbers only)",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.White.copy(alpha = 0.9f),
+                lineHeight = 18.sp
+            )
+            Text(
+                text = "4️⃣ Copy the ID and paste it below",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.White.copy(alpha = 0.9f),
+                lineHeight = 18.sp
+            )
+        }
+        
+        // Button to open verification bot
+        Button(
+            onClick = {
+                try {
+                    // Open the task_verify bot specifically
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/task_verify_bot"))
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    // Fallback to opening Telegram app
+                    try {
+                        val intent = context.packageManager.getLaunchIntentForPackage("org.telegram.messenger")
+                        if (intent != null) {
+                            context.startActivity(intent)
+                        } else {
+                            // Open web version
+                            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org"))
+                            context.startActivity(webIntent)
+                        }
+                    } catch (ex: Exception) {
+                        // Last resort
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0088CC)
+            ),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(vertical = 14.dp)
+        ) {
+            Icon(Icons.Default.OpenInNew, "Open", tint = BrandColors.White)
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "Open Verification Bot",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+        }
+        
+        Spacer(Modifier.height(4.dp))
+        
         Text(
-            text = "1. Send /start to our Telegram bot\n2. Copy your numeric ID from the bot's response\n3. Paste it below",
-            style = MaterialTheme.typography.bodySmall,
-            color = BrandColors.White.copy(alpha = 0.7f),
-            lineHeight = 20.sp
+            text = "Enter your User ID:",
+            style = MaterialTheme.typography.bodyMedium,
+            color = BrandColors.White,
+            fontWeight = FontWeight.Bold
         )
         
         OutlinedTextField(
@@ -1164,14 +1267,14 @@ fun TelegramVerificationUI(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             leadingIcon = {
-                Icon(Icons.Default.Send, "Telegram", tint = Color(0xFF0088CC))
+                Icon(Icons.Default.Tag, "ID", tint = Color(0xFF0088CC))
             },
             isError = hasError,
             supportingText = {
                 if (hasError) {
                     Text(errorMessage, color = BrandColors.Error)
                 } else {
-                    Text("Enter your unique Telegram ID from the bot", color = BrandColors.White.copy(alpha = 0.6f))
+                    Text("Only numbers, 8-12 digits", color = BrandColors.White.copy(alpha = 0.6f))
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -1179,9 +1282,41 @@ fun TelegramVerificationUI(
                 unfocusedBorderColor = BrandColors.LightGray,
                 focusedTextColor = BrandColors.White,
                 unfocusedTextColor = BrandColors.White,
-                cursorColor = BrandColors.Primary
+                cursorColor = BrandColors.Primary,
+                errorBorderColor = BrandColors.Error
             )
         )
+        
+        // Help text
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    BrandColors.Warning.copy(alpha = 0.1f),
+                    RoundedCornerShape(8.dp)
+                )
+                .border(
+                    1.dp,
+                    BrandColors.Warning.copy(alpha = 0.3f),
+                    RoundedCornerShape(8.dp)
+                )
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Lightbulb,
+                contentDescription = null,
+                tint = BrandColors.Warning,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Make sure you've already joined the channel before verifying!",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.White.copy(alpha = 0.9f),
+                fontSize = 12.sp
+            )
+        }
     }
 }
 
@@ -1381,8 +1516,9 @@ fun buildProofData(platform: String, telegramUserId: String, username: String, p
     return buildMap {
         when (platform.lowercase()) {
             "telegram" -> {
-                telegramUserId.toLongOrNull()?.let {
-                    put("telegram_user_id", it)
+                telegramUserId.toLongOrNull()?.let { userId ->
+                    put("telegram_user_id", userId)
+                    put("user_id", userId) // Alternative key some backends expect
                 }
             }
             "youtube" -> {
