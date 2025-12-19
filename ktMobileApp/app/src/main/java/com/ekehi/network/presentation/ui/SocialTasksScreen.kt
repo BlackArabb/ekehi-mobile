@@ -93,11 +93,18 @@ fun SocialTasksScreen(
         viewModel.loadUserSocialTasks(userId)
     }
     
+    // Handle verification state changes and refresh
     LaunchedEffect(verificationState) {
         when (verificationState) {
             is VerificationState.Success -> {
+                // Refresh tasks after success
                 viewModel.loadUserSocialTasks(userId)
-                taskActionCompleted = false
+                viewModel.loadSocialTasks()
+            }
+            is VerificationState.Error -> {
+                // Also refresh on error to show updated status
+                viewModel.loadUserSocialTasks(userId)
+                viewModel.loadSocialTasks()
             }
             else -> {}
         }
@@ -120,11 +127,13 @@ fun SocialTasksScreen(
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)
         ) {
-            // Header with gradient accent
-            Box(
+            // Header with gradient accent and refresh button
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 20.dp)
+                    .padding(top = 24.dp, bottom = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
                     Text(
@@ -146,6 +155,26 @@ fun SocialTasksScreen(
                                 ),
                                 RoundedCornerShape(2.dp)
                             )
+                    )
+                }
+                
+                // Refresh button
+                IconButton(
+                    onClick = {
+                        viewModel.loadSocialTasks()
+                        viewModel.loadUserSocialTasks(userId)
+                    },
+                    modifier = Modifier
+                        .background(
+                            BrandColors.Primary.copy(alpha = 0.2f),
+                            RoundedCornerShape(12.dp)
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        tint = BrandColors.Primary,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -962,89 +991,98 @@ fun TaskVerificationDialog(
             }
         },
         text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
+            // Wrap content in a LazyColumn to make it scrollable
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 500.dp), // Set max height for scrolling
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Now let's verify that you've completed the task.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = BrandColors.White
-                )
+                item {
+                    Text(
+                        text = "Now let's verify that you've completed the task.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = BrandColors.White
+                    )
+                }
                 
-                when {
-                    task.platform.lowercase() == "telegram" -> {
-                        TelegramVerificationUI(
-                            telegramUserId = telegramUserId,
-                            onTelegramUserIdChange = { telegramUserId = it }
-                        )
-                    }
-                    
-                    task.platform.lowercase() == "youtube" -> {
-                        YouTubeVerificationUI(
-                            taskType = task.taskType,
-                            actionUrl = task.link,
-                            onConnectYouTube = {
-                                val signInIntent = authManager.getYouTubeSignInClient().signInIntent
-                                youtubeSignInLauncher.launch(signInIntent)
-                            }
-                        )
-                    }
-                    
-                    task.platform.lowercase() == "facebook" -> {
-                        FacebookVerificationUI(
-                            actionUrl = task.link,
-                            onConnectFacebook = {
-                                authManager.loginWithFacebook(
-                                    loginManager = LoginManager.getInstance(),
-                                    onSuccess = { accessToken ->
-                                        facebookAccessToken = accessToken
-                                    },
-                                    onError = { error -> }
-                                )
-                                LoginManager.getInstance().logInWithReadPermissions(
-                                    context as Activity,
-                                    listOf("user_likes")
-                                )
-                            }
-                        )
-                    }
-                    
-                    else -> {
-                        ManualVerificationUI(
-                            platform = task.platform,
-                            username = username,
-                            proofUrl = proofUrl,
-                            onUsernameChange = { username = it },
-                            onProofUrlChange = { proofUrl = it }
-                        )
+                item {
+                    when {
+                        task.platform.lowercase() == "telegram" -> {
+                            TelegramVerificationUI(
+                                telegramUserId = telegramUserId,
+                                onTelegramUserIdChange = { telegramUserId = it }
+                            )
+                        }
+                        
+                        task.platform.lowercase() == "youtube" -> {
+                            YouTubeVerificationUI(
+                                taskType = task.taskType,
+                                actionUrl = task.link,
+                                onConnectYouTube = {
+                                    val signInIntent = authManager.getYouTubeSignInClient().signInIntent
+                                    youtubeSignInLauncher.launch(signInIntent)
+                                }
+                            )
+                        }
+                        
+                        task.platform.lowercase() == "facebook" -> {
+                            FacebookVerificationUI(
+                                actionUrl = task.link,
+                                onConnectFacebook = {
+                                    authManager.loginWithFacebook(
+                                        loginManager = LoginManager.getInstance(),
+                                        onSuccess = { accessToken ->
+                                            facebookAccessToken = accessToken
+                                        },
+                                        onError = { error -> }
+                                    )
+                                    LoginManager.getInstance().logInWithReadPermissions(
+                                        context as Activity,
+                                        listOf("user_likes")
+                                    )
+                                }
+                            )
+                        }
+                        
+                        else -> {
+                            ManualVerificationUI(
+                                platform = task.platform,
+                                username = username,
+                                proofUrl = proofUrl,
+                                onUsernameChange = { username = it },
+                                onProofUrlChange = { proofUrl = it }
+                            )
+                        }
                     }
                 }
                 
                 if (errorMessage.isNotEmpty()) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = BrandColors.Error.copy(alpha = 0.1f)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    item {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = BrandColors.Error.copy(alpha = 0.1f)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Icon(
-                                Icons.Default.Error,
-                                contentDescription = null,
-                                tint = BrandColors.Error,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = errorMessage,
-                                color = BrandColors.Error,
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Error,
+                                    contentDescription = null,
+                                    tint = BrandColors.Error,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = errorMessage,
+                                    color = BrandColors.Error,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }
@@ -1211,7 +1249,7 @@ fun TelegramVerificationUI(
         Button(
             onClick = {
                 try {
-                    // Open the task_verify bot specifically
+                    // Open the ekehi_task_bot specifically
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/ekehi_task_bot"))
                     context.startActivity(intent)
                 } catch (e: Exception) {

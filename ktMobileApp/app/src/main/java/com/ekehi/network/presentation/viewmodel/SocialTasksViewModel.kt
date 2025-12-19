@@ -83,18 +83,38 @@ class SocialTasksViewModel @Inject constructor(
                 val result = socialTasksRepository.completeSocialTask(userId, taskId, enhancedProofData)
                 if (result.isSuccess) {
                     val (userTask, verificationResult) = result.getOrNull()!!
+                    
+                    // Update verification state based on result
                     _verificationState.value = when (verificationResult) {
-                        is VerificationResult.Success -> VerificationState.Success(verificationResult.message)
-                        is VerificationResult.Pending -> VerificationState.Pending(verificationResult.message)
-                        is VerificationResult.Failure -> VerificationState.Error(verificationResult.reason)
+                        is VerificationResult.Success -> {
+                            // Verification succeeded - coins were awarded
+                            VerificationState.Success(verificationResult.message)
+                        }
+                        is VerificationResult.Pending -> {
+                            // Pending review - no coins awarded yet
+                            VerificationState.Pending(verificationResult.message)
+                        }
+                        is VerificationResult.Failure -> {
+                            // Verification failed - no coins awarded
+                            VerificationState.Error(verificationResult.reason)
+                        }
                     }
                     
-                    // Send event to refresh social tasks
-                    viewModelScope.launch {
-                        EventBus.sendEvent(Event.RefreshSocialTasks(userId))
-                        // Also refresh leaderboard and profile since rewards might have been added
-                        EventBus.sendEvent(Event.RefreshUserProfile)
-                        EventBus.sendEvent(Event.RefreshLeaderboard)
+                    // Send event to refresh social tasks only if verification succeeded or is pending
+                    if (verificationResult is VerificationResult.Success || verificationResult is VerificationResult.Pending) {
+                        viewModelScope.launch {
+                            EventBus.sendEvent(Event.RefreshSocialTasks(userId))
+                            // Only refresh leaderboard and profile if coins were awarded (success only)
+                            if (verificationResult is VerificationResult.Success) {
+                                EventBus.sendEvent(Event.RefreshUserProfile)
+                                EventBus.sendEvent(Event.RefreshLeaderboard)
+                            }
+                        }
+                    } else {
+                        // On failure, still refresh to show the rejected status
+                        viewModelScope.launch {
+                            EventBus.sendEvent(Event.RefreshSocialTasks(userId))
+                        }
                     }
                 } else {
                     _verificationState.value = VerificationState.Error(result.exceptionOrNull()?.message ?: "Failed to complete task")
@@ -126,6 +146,10 @@ class SocialTasksViewModel @Inject constructor(
                 e.printStackTrace()
             }
         }
+    }
+    
+    fun resetVerificationState() {
+        _verificationState.value = VerificationState.Idle
     }
 }
 

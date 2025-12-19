@@ -3,6 +3,7 @@ package com.ekehi.network.domain.usecase
 import com.ekehi.network.data.model.SocialTask
 import com.ekehi.network.data.repository.SocialTaskRepository
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.domain.verification.VerificationResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -39,10 +40,34 @@ open class SocialTaskUseCase @Inject constructor(
 
     fun completeSocialTask(userId: String, taskId: String, proofData: Map<String, Any>? = null): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading)
+        
         val result = socialTaskRepository.completeSocialTask(userId, taskId, proofData)
+        
         if (result.isSuccess) {
-            emit(Resource.Success(Unit))
+            val (userTask, verificationResult) = result.getOrThrow()
+            
+            // The UseCase just confirms the operation succeeded
+            // The ViewModel will handle the actual VerificationResult
+            // This way the ViewModel gets the result and can update UI accordingly
+            when (verificationResult) {
+                is VerificationResult.Success -> {
+                    // Verification succeeded - coins were awarded in repository
+                    emit(Resource.Success(Unit))
+                }
+                is VerificationResult.Pending -> {
+                    // Pending review - no coins awarded yet
+                    // Still return success since task submission succeeded
+                    emit(Resource.Success(Unit))
+                }
+                is VerificationResult.Failure -> {
+                    // Verification failed - no coins awarded
+                    // Still return success since the API call succeeded
+                    // The ViewModel reads verificationResult to show appropriate message
+                    emit(Resource.Success(Unit))
+                }
+            }
         } else {
+            // Repository operation itself failed (network error, etc)
             emit(Resource.Error("Failed to complete social task: ${result.exceptionOrNull()?.message}"))
         }
     }.catch { e ->

@@ -114,6 +114,10 @@ open class SocialTaskRepository @Inject constructor(
                 )
                 val task = documentToSocialTask(taskDoc)
                 
+                // Log the task details for debugging
+                Log.d("SocialTaskRepository", "Task platform: ${task.platform}")
+                Log.d("SocialTaskRepository", "Verification data: ${task.verificationData}")
+                
                 // 2. Get user profile to get username
                 var username: String? = null
                 try {
@@ -130,7 +134,6 @@ open class SocialTaskRepository @Inject constructor(
                         username = userData["username"] as? String
                     }
                 } catch (e: Exception) {
-                    // If we can't get the username, we'll just proceed without it
                     Log.e("SocialTaskRepository", "Failed to get username: ${e.message}")
                 }
                 
@@ -158,15 +161,18 @@ open class SocialTaskRepository @Inject constructor(
                 }
                 
                 // 5. Verify task
+                Log.d("SocialTaskRepository", "Starting verification with proofData: $proofData")
                 val verificationResult = verificationService.verifyTask(
                     task = task,
                     userTask = userTask,
                     proofData = proofData
                 )
+                Log.d("SocialTaskRepository", "Verification result: $verificationResult")
                 
-                // 6. Update based on verification result
+                // 6. Update based on verification result - ONLY award coins on SUCCESS
                 val finalUserTask = when (verificationResult) {
                     is VerificationResult.Success -> {
+                        Log.d("SocialTaskRepository", "Verification SUCCESS - awarding coins")
                         val verified = updateUserTaskStatus(
                             documentId = userTask.id,
                             status = "verified",
@@ -174,11 +180,12 @@ open class SocialTaskRepository @Inject constructor(
                             username = username
                         ).getOrThrow()
                         
-                        // Award coins
+                        // Award coins ONLY on success
                         awardCoinsToUser(userId, task.rewardCoins)
                         verified
                     }
                     is VerificationResult.Pending -> {
+                        Log.d("SocialTaskRepository", "Verification PENDING - no coins awarded yet")
                         updateUserTaskStatus(
                             documentId = userTask.id,
                             status = "pending",
@@ -186,6 +193,8 @@ open class SocialTaskRepository @Inject constructor(
                         ).getOrThrow()
                     }
                     is VerificationResult.Failure -> {
+                        Log.e("SocialTaskRepository", "Verification FAILED: ${verificationResult.reason}")
+                        // Mark as rejected, DO NOT award coins
                         updateUserTaskStatus(
                             documentId = userTask.id,
                             status = "rejected",
@@ -198,6 +207,7 @@ open class SocialTaskRepository @Inject constructor(
                 Result.success(Pair(finalUserTask, verificationResult))
                 
             } catch (e: Exception) {
+                Log.e("SocialTaskRepository", "Error completing task: ${e.message}", e)
                 Result.failure(e)
             }
         }
@@ -393,25 +403,38 @@ open class SocialTaskRepository @Inject constructor(
                 is String -> {
                     // If it's a JSON string, parse it
                     if (verificationData.isNotEmpty()) {
+                        Log.d("SocialTaskRepository", "Parsing verificationData string: $verificationData")
                         val type = object : TypeToken<Map<String, String>>() {}.type
-                        gson.fromJson(verificationData, type)
+                        val parsed = gson.fromJson<Map<String, String>>(verificationData, type)
+                        Log.d("SocialTaskRepository", "Parsed verificationData: $parsed")
+                        parsed
                     } else {
+                        Log.w("SocialTaskRepository", "verificationData is empty string")
                         null
                     }
                 }
                 is Map<*, *> -> {
                     // If it's already a map, cast it
                     @Suppress("UNCHECKED_CAST")
-                    verificationData as? Map<String, String>
+                    val mapped = verificationData as? Map<String, String>
+                    Log.d("SocialTaskRepository", "verificationData is already a map: $mapped")
+                    mapped
                 }
-                else -> null
+                null -> {
+                    Log.w("SocialTaskRepository", "verificationData is null")
+                    null
+                }
+                else -> {
+                    Log.w("SocialTaskRepository", "verificationData is unknown type: ${verificationData::class.java}")
+                    null
+                }
             }
         } catch (e: Exception) {
-            Log.e("SocialTaskRepository", "Failed to parse verificationData: ${e.message}")
+            Log.e("SocialTaskRepository", "Failed to parse verificationData: ${e.message}", e)
             null
         }
         
-        return SocialTask(
+        val task = SocialTask(
             id = document.id ?: "",
             title = data["title"] as? String ?: "",
             description = data["description"] as? String ?: "",
@@ -426,6 +449,9 @@ open class SocialTaskRepository @Inject constructor(
             createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",
             updatedAt = document.updatedAt ?: "1970-01-01T00:00:00.000Z"
         )
+        
+        Log.d("SocialTaskRepository", "Created task: id=${task.id}, platform=${task.platform}, verificationData=${task.verificationData}")
+        return task
     }
 
     private fun documentToUserSocialTask(document: Document<*>): UserSocialTask {
