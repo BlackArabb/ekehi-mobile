@@ -3,11 +3,12 @@ package com.ekehi.network.auth
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.Scope
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -24,95 +25,179 @@ class SocialAuthManager @Inject constructor(
 ) {
     
     private var googleSignInClient: GoogleSignInClient? = null
+    private var youtubeSignInClient: GoogleSignInClient? = null
     private val facebookCallbackManager = CallbackManager.Factory.create()
-    private var facebookCallback: FacebookCallback<LoginResult>? = null
     
-    // ===== YOUTUBE OAUTH =====
+    private val TAG = "SocialAuthManager"
+    
+    // ===== YOUTUBE OAUTH (FOR TASK VERIFICATION) =====
+    
+    /**
+     * Get YouTube-specific sign-in client with YouTube API scopes
+     * This is SEPARATE from your regular Google sign-in for authentication
+     */
     fun getYouTubeSignInClient(): GoogleSignInClient {
-        if (googleSignInClient == null) {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestIdToken(com.ekehi.network.BuildConfig.YOUTUBE_CLIENT_ID) // Add this for better token handling
-                .requestScopes(
-                    Scope("https://www.googleapis.com/auth/youtube.readonly"),
-                    Scope("https://www.googleapis.com/auth/youtube.force-ssl")
-                )
-                .requestServerAuthCode(com.ekehi.network.BuildConfig.YOUTUBE_CLIENT_ID)
-                .build()
-            
-            googleSignInClient = GoogleSignIn.getClient(context, gso)
+        return try {
+            if (youtubeSignInClient == null) {
+                Log.d(TAG, "=== Creating YouTube OAuth Client (for task verification) ===")
+                
+                // Check if already signed in with regular Google (from sign-up/sign-in)
+                val existingAccount = GoogleSignIn.getLastSignedInAccount(context)
+                if (existingAccount != null) {
+                    Log.d(TAG, "✓ User already signed in with Google: ${existingAccount.email}")
+                    
+                    // Check if existing account has YouTube scopes
+                    val hasYouTubeScope = existingAccount.grantedScopes?.any { 
+                        it.scopeUri.contains("youtube") 
+                    } ?: false
+                    
+                    if (hasYouTubeScope) {
+                        Log.d(TAG, "✓ Existing account already has YouTube scope - reusing")
+                        // Create a client that will reuse the existing sign-in
+                        youtubeSignInClient = createYouTubeClient()
+                        return youtubeSignInClient!!
+                    } else {
+                        Log.d(TAG, "⚠ Existing account lacks YouTube scope - will request additional permissions")
+                    }
+                }
+                
+                youtubeSignInClient = createYouTubeClient()
+                Log.d(TAG, "✓ YouTube OAuth Client created")
+            }
+            youtubeSignInClient!!
+        } catch (e: Exception) {
+            Log.e(TAG, "CRITICAL: Failed to create YouTube sign-in client", e)
+            throw e
         }
-        return googleSignInClient!!
+    }
+    
+    /**
+     * Create YouTube-specific OAuth client
+     */
+    private fun createYouTubeClient(): GoogleSignInClient {
+        // For YouTube API access, we need YouTube-specific scopes
+        // If you don't have a separate YouTube client ID, you can use the same one as sign-in
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestIdToken(com.ekehi.network.BuildConfig.YOUTUBE_CLIENT_ID)
+            .requestServerAuthCode(com.ekehi.network.BuildConfig.YOUTUBE_CLIENT_ID)
+            .requestScopes(
+                Scope("https://www.googleapis.com/auth/youtube.readonly"),
+                Scope("https://www.googleapis.com/auth/youtube.force-ssl")
+            )
+            .build()
+        
+        return GoogleSignIn.getClient(context, gso)
     }
     
     /**
      * Get YouTube access token from Google account
-     * IMPORTANT: For production, you should exchange serverAuthCode for access token via your backend
-     * For now, we try to get it from the account or use serverAuthCode
+     * This checks both new sign-in and existing account
      */
     fun getYouTubeAccessToken(account: GoogleSignInAccount): String? {
         return try {
-            // Try to get the server auth code (this is what you exchange for access token)
-            val serverAuthCode = account.serverAuthCode
+            Log.d(TAG, "=== Getting YouTube Access Token ===")
+            Log.d(TAG, "Account email: ${account.email}")
             
+            // Check granted scopes
+            val grantedScopes = account.grantedScopes
+            Log.d(TAG, "Granted scopes:")
+            grantedScopes?.forEach { scope ->
+                Log.d(TAG, "  - ${scope.scopeUri}")
+            }
+            
+            val hasYouTubeScope = grantedScopes?.any { 
+                it.scopeUri.contains("youtube") 
+            } ?: false
+            
+            if (!hasYouTubeScope) {
+                Log.e(TAG, "✗ Account doesn't have YouTube scope!")
+                Log.e(TAG, "User needs to grant YouTube permissions")
+                return null
+            }
+            
+            // Try server auth code first (best for backend token exchange)
+            val serverAuthCode = account.serverAuthCode
             if (serverAuthCode != null) {
-                Log.d("SocialAuthManager", "Got serverAuthCode: ${serverAuthCode.take(20)}...")
-                // In production: send this to your backend to exchange for access token
-                // For now, return the serverAuthCode (your backend should handle the exchange)
+                Log.d(TAG, "✓ Server Auth Code available: ${serverAuthCode.take(15)}...")
                 return serverAuthCode
             }
             
-            // Fallback: try to get ID token (limited functionality)
+            // Fallback to ID token
             val idToken = account.idToken
             if (idToken != null) {
-                Log.d("SocialAuthManager", "Using idToken as fallback: ${idToken.take(20)}...")
+                Log.d(TAG, "✓ Using ID Token: ${idToken.take(15)}...")
                 return idToken
             }
             
-            Log.e("SocialAuthManager", "No token available from Google account")
+            Log.e(TAG, "✗ No authentication token available")
             null
         } catch (e: Exception) {
-            Log.e("SocialAuthManager", "Error getting YouTube access token: ${e.message}", e)
+            Log.e(TAG, "Exception while getting YouTube access token", e)
             null
         }
     }
     
     /**
-     * Check if user is already signed in with Google
-     * This is useful for users who signed up with Google OAuth
+     * Check if the currently signed-in user has YouTube permissions
+     */
+    fun checkYouTubePermissions(): Boolean {
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        if (account == null) {
+            Log.d(TAG, "No Google account signed in")
+            return false
+        }
+        
+        val hasYouTubeScope = account.grantedScopes?.any { 
+            it.scopeUri.contains("youtube") 
+        } ?: false
+        
+        Log.d(TAG, "YouTube permissions check: $hasYouTubeScope")
+        return hasYouTubeScope
+    }
+    
+    /**
+     * Get the existing Google account (from sign-up/sign-in)
      */
     fun getLastSignedInGoogleAccount(): GoogleSignInAccount? {
         return try {
             val account = GoogleSignIn.getLastSignedInAccount(context)
             if (account != null) {
-                Log.d("SocialAuthManager", "Found existing Google account: ${account.email}")
+                Log.d(TAG, "✓ Found existing Google account: ${account.email}")
+                
+                // Check YouTube scope
+                val hasYouTubeScope = account.grantedScopes?.any { 
+                    it.scopeUri.contains("youtube") 
+                } ?: false
+                Log.d(TAG, "  Has YouTube scope: $hasYouTubeScope")
             }
             account
         } catch (e: Exception) {
-            Log.e("SocialAuthManager", "Error getting last signed in account: ${e.message}", e)
+            Log.e(TAG, "Error getting last signed in account", e)
             null
         }
     }
-    
+
     /**
      * Sign out from Google
      */
     fun signOutGoogle(onComplete: () -> Unit = {}) {
         try {
+            Log.d(TAG, "Signing out from Google...")
             getYouTubeSignInClient().signOut().addOnCompleteListener {
-                Log.d("SocialAuthManager", "Google sign out complete")
+                Log.d(TAG, "✓ Google sign out complete")
                 onComplete()
             }
         } catch (e: Exception) {
-            Log.e("SocialAuthManager", "Error signing out from Google: ${e.message}", e)
+            Log.e(TAG, "Error signing out from Google", e)
             onComplete()
         }
     }
     
     // ===== FACEBOOK OAUTH =====
+    
     /**
      * Initialize Facebook login with callbacks
-     * This must be called before attempting to login
      */
     fun loginWithFacebook(
         loginManager: LoginManager,
@@ -120,70 +205,101 @@ class SocialAuthManager @Inject constructor(
         onError: (String) -> Unit
     ) {
         try {
-            // Unregister previous callback if exists
-            facebookCallback?.let {
-                try {
-                    loginManager.unregisterCallback(facebookCallbackManager)
-                } catch (e: Exception) {
-                    Log.w("SocialAuthManager", "Could not unregister previous callback: ${e.message}")
-                }
-            }
+            Log.d(TAG, "=== Setting up Facebook Login ===")
             
-            // Create and register new callback
-            facebookCallback = object : FacebookCallback<LoginResult> {
+            loginManager.registerCallback(facebookCallbackManager, object : FacebookCallback<LoginResult> {
                 override fun onSuccess(result: LoginResult) {
-                    Log.d("SocialAuthManager", "Facebook login success")
+                    Log.d(TAG, "✓ Facebook login SUCCESS")
                     val accessToken = result.accessToken.token
-                    Log.d("SocialAuthManager", "Facebook access token: ${accessToken.take(20)}...")
+                    val userId = result.accessToken.userId
+                    Log.d(TAG, "  User ID: $userId")
+                    Log.d(TAG, "  Access Token: ${accessToken.take(20)}...")
+                    
+                    // Log granted permissions
+                    val permissions = result.accessToken.permissions
+                    Log.d(TAG, "  Granted permissions: ${permissions.joinToString(", ")}")
+                    
+                    // Check if we have the required permissions
+                    if (permissions.contains("user_likes") || permissions.contains("pages_read_engagement")) {
+                        Log.d(TAG, "✓ Has required Facebook permissions")
+                    } else {
+                        Log.w(TAG, "⚠ Missing some Facebook permissions - verification may fail")
+                    }
+                    
                     onSuccess(accessToken)
                 }
                 
                 override fun onCancel() {
-                    Log.d("SocialAuthManager", "Facebook login cancelled")
+                    Log.w(TAG, "✗ Facebook login CANCELLED by user")
                     onError("Login cancelled")
                 }
                 
                 override fun onError(error: FacebookException) {
-                    Log.e("SocialAuthManager", "Facebook login error: ${error.message}", error)
+                    Log.e(TAG, "✗ Facebook login ERROR", error)
+                    Log.e(TAG, "  Error type: ${error.javaClass.simpleName}")
+                    Log.e(TAG, "  Error message: ${error.message}")
                     onError(error.message ?: "Login failed")
                 }
-            }
+            })
             
-            loginManager.registerCallback(facebookCallbackManager, facebookCallback)
-            Log.d("SocialAuthManager", "Facebook callback registered successfully")
+            Log.d(TAG, "✓ Facebook callback registered")
         } catch (e: Exception) {
-            Log.e("SocialAuthManager", "Error setting up Facebook login: ${e.message}", e)
+            Log.e(TAG, "CRITICAL: Failed to setup Facebook login", e)
             onError("Failed to setup Facebook login: ${e.message}")
         }
     }
     
     /**
-     * Handle Facebook activity result
-     * Call this from your activity result launcher
+     * Handle Facebook activity results
      */
     fun handleFacebookResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(TAG, "=== Handling Facebook Result ===")
+        Log.d(TAG, "Request code: $requestCode")
+        Log.d(TAG, "Result code: $resultCode")
+        
         try {
-            Log.d("SocialAuthManager", "Handling Facebook result: requestCode=$requestCode, resultCode=$resultCode")
             facebookCallbackManager.onActivityResult(requestCode, resultCode, data)
         } catch (e: Exception) {
-            Log.e("SocialAuthManager", "Error handling Facebook result: ${e.message}", e)
+            Log.e(TAG, "Error handling Facebook result", e)
         }
     }
-    
-    /**
-     * Get Facebook callback manager for manual result handling
-     */
-    fun getFacebookCallbackManager(): CallbackManager = facebookCallbackManager
-    
+
     /**
      * Sign out from Facebook
      */
     fun signOutFacebook() {
         try {
+            Log.d(TAG, "Signing out from Facebook...")
             LoginManager.getInstance().logOut()
-            Log.d("SocialAuthManager", "Facebook sign out complete")
+            Log.d(TAG, "✓ Facebook sign out complete")
         } catch (e: Exception) {
-            Log.e("SocialAuthManager", "Error signing out from Facebook: ${e.message}", e)
+            Log.e(TAG, "Error signing out from Facebook", e)
         }
+    }
+}
+
+/**
+ * Check if Google Play Services is available
+ */
+fun isGooglePlayServicesAvailable(context: Context): Boolean {
+    val googleApiAvailability = GoogleApiAvailability.getInstance()
+    val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context)
+    return resultCode == ConnectionResult.SUCCESS
+}
+
+/**
+ * Get error message for Google Play Services issues
+ */
+fun getGooglePlayServicesErrorMessage(context: Context): String {
+    val googleApiAvailability = GoogleApiAvailability.getInstance()
+    val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context)
+    return when (resultCode) {
+        ConnectionResult.SUCCESS -> "Available"
+        ConnectionResult.SERVICE_MISSING -> "Google Play Services is missing"
+        ConnectionResult.SERVICE_UPDATING -> "Google Play Services is updating"
+        ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED -> "Update required"
+        ConnectionResult.SERVICE_DISABLED -> "Google Play Services is disabled"
+        ConnectionResult.SERVICE_INVALID -> "Invalid installation"
+        else -> "Error code: $resultCode"
     }
 }

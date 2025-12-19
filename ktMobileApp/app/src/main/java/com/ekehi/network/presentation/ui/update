@@ -1,4 +1,4 @@
-﻿package com.ekehi.network.presentation.ui
+package com.ekehi.network.presentation.ui
 
 import android.app.Activity
 import android.content.Intent
@@ -143,55 +143,47 @@ fun SocialTasksScreen(
                     try {
                         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                         task.addOnFailureListener { e ->
-                            android.util.Log.e("SocialTasksScreen", "Sign-in error class: ${e.javaClass.name}")
-                            android.util.Log.e("SocialTasksScreen", "Sign-in error message: ${e.message}")
+                            android.util.Log.e("SocialTasksScreen", "Cancellation details - Error: ${e.javaClass.simpleName}, Message: ${e.message}")
                             
                             // Check for specific Google Sign-In errors
                             if (e is com.google.android.gms.common.api.ApiException) {
                                 val statusCode = e.statusCode
-                                android.util.Log.e("SocialTasksScreen", "ApiException - Status code: $statusCode")
-                                android.util.Log.e("SocialTasksScreen", "ApiException - Status message: ${e.statusMessage}")
+                                android.util.Log.e("SocialTasksScreen", "Cancellation details - Error code: $statusCode, Description: ${e.statusMessage}")
                                 
                                 val errorMessage = when (statusCode) {
-                                    10 -> // DEVELOPER_ERROR
-                                        "Configuration error! Check:\n1. OAuth Client ID in BuildConfig\n2. SHA-1 fingerprint in Google Cloud Console\n3. Package name matches"
-                                    7 -> // NETWORK_ERROR
+                                    com.google.android.gms.common.api.CommonStatusCodes.DEVELOPER_ERROR -> 
+                                        "Configuration error. Check your OAuth client ID in google-services.json"
+                                    com.google.android.gms.common.api.CommonStatusCodes.NETWORK_ERROR -> 
                                         "Network error. Check your internet connection"
-                                    12501 -> // SIGN_IN_CANCELLED
-                                        "Sign-in was cancelled"
-                                    12500 -> // SIGN_IN_FAILED
+                                    com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes.SIGN_IN_CANCELLED -> 
+                                        "Sign-in cancelled"
+                                    com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes.SIGN_IN_FAILED -> 
                                         "Sign-in failed. Please try again"
-                                    else -> "Error code: $statusCode${if (e.statusMessage != null) " - ${e.statusMessage}" else ""}"
+                                    else -> "Error code: $statusCode - ${e.statusMessage ?: "Unknown error"}"
                                 }
                                 
-                                android.util.Log.e("SocialTasksScreen", "Showing error: $errorMessage")
                                 android.widget.Toast.makeText(
                                     context,
                                     errorMessage,
                                     android.widget.Toast.LENGTH_LONG
                                 ).show()
                             } else {
-                                android.util.Log.e("SocialTasksScreen", "Not an ApiException: ${e.javaClass.name}")
                                 android.widget.Toast.makeText(
                                     context,
-                                    "Sign-in error: ${e.message}",
-                                    android.widget.Toast.LENGTH_LONG
+                                    "Sign-in cancelled: ${e.message}",
+                                    android.widget.Toast.LENGTH_SHORT
                                 ).show()
                             }
-                        }.addOnCompleteListener {
-                            android.util.Log.d("SocialTasksScreen", "Task completion listener called")
                         }
                     } catch (e: Exception) {
-                        android.util.Log.e("SocialTasksScreen", "Exception parsing cancellation: ${e.message}", e)
-                        e.printStackTrace()
+                        android.util.Log.e("SocialTasksScreen", "Error parsing cancellation: ${e.message}", e)
                         android.widget.Toast.makeText(
                             context,
-                            "Sign-in error: ${e.message}",
-                            android.widget.Toast.LENGTH_LONG
+                            "Sign-in cancelled",
+                            android.widget.Toast.LENGTH_SHORT
                         ).show()
                     }
                 } ?: run {
-                    android.util.Log.w("SocialTasksScreen", "No data in cancelled result")
                     android.widget.Toast.makeText(
                         context,
                         "Sign-in cancelled",

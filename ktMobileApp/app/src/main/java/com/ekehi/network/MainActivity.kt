@@ -16,6 +16,7 @@ import com.ekehi.network.presentation.navigation.AppNavigation
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.facebook.CallbackManager
 import com.startapp.sdk.adsbase.StartAppAd
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
     
     private val loginViewModel: LoginViewModel by viewModels()
     private val oAuthViewModel: OAuthViewModel by viewModels()
+    private lateinit var callbackManager: CallbackManager
     
     private var isAuthenticated by mutableStateOf(false)
     private var isAuthChecked by mutableStateOf(false)
@@ -32,6 +34,9 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize Facebook callback manager
+        callbackManager = CallbackManager.Factory.create()
         
         Log.d("MainActivity", "=== MAIN ACTIVITY CREATED ===")
         
@@ -71,6 +76,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        // Handle Facebook login result
+        callbackManager.onActivityResult(requestCode, resultCode, data)
     }
     
     override fun onNewIntent(intent: Intent) {

@@ -6,6 +6,8 @@ import dagger.hilt.android.HiltAndroidApp
 import com.ekehi.network.service.StartIoService
 import javax.inject.Inject
 import android.util.Log
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 
 @HiltAndroidApp
 class MainApplication : Application() {
@@ -15,6 +17,11 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // Application initialization code here
+        
+        // Initialize Facebook SDK
+        FacebookSdk.sdkInitialize(applicationContext)
+        AppEventsLogger.activateApp(this)
+        Log.d("MainApplication", "Facebook SDK initialized")
         
         // Initialize ProcessLifecycleOwner for lifecycle awareness
         ProcessLifecycleOwner.get()

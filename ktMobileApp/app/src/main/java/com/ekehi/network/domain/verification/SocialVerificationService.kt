@@ -42,6 +42,7 @@ class SocialVerificationService @Inject constructor(
             chatId = channelUsername,
             userId = telegramUserId
         )
+        
         return if (result.isSuccess) {
             if (result.getOrNull() == true) {
                 VerificationResult.Success("✅ Telegram membership verified!")
@@ -49,8 +50,7 @@ class SocialVerificationService @Inject constructor(
                 VerificationResult.Failure("❌ Not a member. Please join the channel first.")
             }
         } else {
-            val errorMsg = result.exceptionOrNull()?.message ?: "Unknown error"
-            VerificationResult.Failure("Verification failed: ${errorMsg}")
+            VerificationResult.Failure("Verification failed: ${result.exceptionOrNull()?.message}")
         }
     }
     
@@ -74,8 +74,7 @@ class SocialVerificationService @Inject constructor(
                         VerificationResult.Failure("❌ Not subscribed. Please subscribe first.")
                     }
                 } else {
-                    val errorMsg = result.exceptionOrNull()?.message ?: "Unknown error"
-                    VerificationResult.Failure("Verification failed: ${errorMsg}")
+                    VerificationResult.Failure("Verification failed: ${result.exceptionOrNull()?.message}")
                 }
             }
             
@@ -91,12 +90,11 @@ class SocialVerificationService @Inject constructor(
                         VerificationResult.Failure("❌ Video not liked. Please like first.")
                     }
                 } else {
-                    val errorMsg = result.exceptionOrNull()?.message ?: "Unknown error"
-                    VerificationResult.Failure("Verification failed: ${errorMsg}")
+                    VerificationResult.Failure("Verification failed: ${result.exceptionOrNull()?.message}")
                 }
             }
             
-            else -> VerificationResult.Failure("Unknown YouTube task type: ${'$'}{task.taskType}")
+            else -> VerificationResult.Failure("Unknown YouTube task type: ${task.taskType}")
         }
     }
     
@@ -120,12 +118,11 @@ class SocialVerificationService @Inject constructor(
                         VerificationResult.Failure("❌ Page not liked. Please like first.")
                     }
                 } else {
-                    val errorMsg = result.exceptionOrNull()?.message ?: "Unknown error"
-                    VerificationResult.Failure("Verification failed: ${errorMsg}")
+                    VerificationResult.Failure("Verification failed: ${result.exceptionOrNull()?.message}")
                 }
             }
             
-            else -> VerificationResult.Failure("Unknown Facebook task type: ${'$'}{task.taskType}")
+            else -> VerificationResult.Failure("Unknown Facebook task type: ${task.taskType}")
         }
     }
     
