@@ -65,23 +65,115 @@ fun SocialTasksScreen(
     val youtubeSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            task.addOnSuccessListener { account ->
-                val accessToken = authManager.getYouTubeAccessToken(account)
-                viewModel.setYouTubeAccessToken(accessToken ?: "")
+        android.util.Log.d("SocialTasksScreen", "=== YouTube OAuth Result ===")
+        android.util.Log.d("SocialTasksScreen", "Result code: ${result.resultCode}")
+        android.util.Log.d("SocialTasksScreen", "RESULT_OK: ${Activity.RESULT_OK}")
+        android.util.Log.d("SocialTasksScreen", "RESULT_CANCELED: ${Activity.RESULT_CANCELED}")
+        android.util.Log.d("SocialTasksScreen", "Has data: ${result.data != null}")
+        
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                result.data?.let { data ->
+                    try {
+                        android.util.Log.d("SocialTasksScreen", "Processing sign-in result...")
+                        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                        
+                        task.addOnSuccessListener { account ->
+                            android.util.Log.d("SocialTasksScreen", "Sign-in SUCCESS")
+                            android.util.Log.d("SocialTasksScreen", "Account email: ${account.email}")
+                            android.util.Log.d("SocialTasksScreen", "Has serverAuthCode: ${account.serverAuthCode != null}")
+                            android.util.Log.d("SocialTasksScreen", "Has idToken: ${account.idToken != null}")
+                            
+                            // Get the access token
+                            val accessToken = authManager.getYouTubeAccessToken(account)
+                            
+                            if (accessToken != null && accessToken.isNotEmpty()) {
+                                viewModel.setYouTubeAccessToken(accessToken)
+                                android.util.Log.d("SocialTasksScreen", "YouTube access token set successfully")
+                                
+                                // Show success toast
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "YouTube account connected!",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                android.util.Log.e("SocialTasksScreen", "Failed to get YouTube access token")
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Failed to get access token. Please try again.",
+                                    android.widget.Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }.addOnFailureListener { e ->
+                            android.util.Log.e("SocialTasksScreen", "Sign-in FAILED: ${e.message}", e)
+                            android.widget.Toast.makeText(
+                                context,
+                                "Sign-in failed: ${e.message}",
+                                android.widget.Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("SocialTasksScreen", "Error processing sign-in: ${e.message}", e)
+                        android.widget.Toast.makeText(
+                            context,
+                            "Error: ${e.message}",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } ?: run {
+                    android.util.Log.e("SocialTasksScreen", "Result data is NULL")
+                    android.widget.Toast.makeText(
+                        context,
+                        "No data received from Google",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            Activity.RESULT_CANCELED -> {
+                android.util.Log.w("SocialTasksScreen", "User cancelled sign-in")
+                android.widget.Toast.makeText(
+                    context,
+                    "Sign-in cancelled",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+            else -> {
+                android.util.Log.e("SocialTasksScreen", "Unknown result code: ${result.resultCode}")
+                android.widget.Toast.makeText(
+                    context,
+                    "Unexpected result: ${result.resultCode}",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
             }
         }
+        android.util.Log.d("SocialTasksScreen", "=== End YouTube OAuth Result ===")
     }
     
     val facebookLoginLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        authManager.handleFacebookResult(
-            requestCode = result.resultCode,
-            resultCode = Activity.RESULT_OK,
-            data = result.data
-        )
+        try {
+            android.util.Log.d("SocialTasksScreen", "=== Facebook OAuth Result ===")
+            android.util.Log.d("SocialTasksScreen", "Result code: ${result.resultCode}")
+            android.util.Log.d("SocialTasksScreen", "Has data: ${result.data != null}")
+            
+            authManager.handleFacebookResult(
+                requestCode = result.resultCode,
+                resultCode = Activity.RESULT_OK,
+                data = result.data
+            )
+            
+            android.util.Log.d("SocialTasksScreen", "Facebook result handled")
+            android.util.Log.d("SocialTasksScreen", "=== End Facebook OAuth Result ===")
+        } catch (e: Exception) {
+            android.util.Log.e("SocialTasksScreen", "Facebook login error in launcher: ${e.message}", e)
+            android.widget.Toast.makeText(
+                context,
+                "Facebook error: ${e.message}",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
     }
     
     var selectedTask by remember { mutableStateOf<SocialTaskItem?>(null) }
@@ -1362,8 +1454,21 @@ fun TelegramVerificationUI(
 fun YouTubeVerificationUI(
     taskType: String,
     actionUrl: String,
+    isAlreadySignedIn: Boolean = false,
     onConnectYouTube: () -> Unit
 ) {
+    var isConnecting by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    
+    // Reset connecting state after a timeout
+    LaunchedEffect(isConnecting) {
+        if (isConnecting) {
+            kotlinx.coroutines.delay(10000) // 10 seconds timeout
+            isConnecting = false
+            android.util.Log.w("YouTubeVerificationUI", "Connection timeout - resetting state")
+        }
+    }
+    
     Column(
         modifier = Modifier
             .background(BrandColors.CardBackground, RoundedCornerShape(12.dp))
@@ -1371,8 +1476,44 @@ fun YouTubeVerificationUI(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        if (isAlreadySignedIn) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        BrandColors.Success.copy(alpha = 0.1f),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .border(
+                        1.dp,
+                        BrandColors.Success.copy(alpha = 0.3f),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = BrandColors.Success,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Already connected with Google account",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = BrandColors.Success,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        
         Text(
-            text = "Connect your YouTube account to verify automatically",
+            text = if (isAlreadySignedIn) 
+                "We'll verify using your connected account" 
+            else 
+                "Connect your YouTube account to verify automatically",
             style = MaterialTheme.typography.bodyMedium,
             color = BrandColors.White,
             fontWeight = FontWeight.Bold
@@ -1384,18 +1525,80 @@ fun YouTubeVerificationUI(
             color = BrandColors.White.copy(alpha = 0.7f)
         )
         
-        Button(
-            onClick = onConnectYouTube,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFF0000)
-            ),
-            shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(vertical = 12.dp)
-        ) {
-            Icon(Icons.Default.AccountCircle, "Connect")
-            Spacer(Modifier.width(8.dp))
-            Text("Connect YouTube Account", fontWeight = FontWeight.Bold)
+        if (!isAlreadySignedIn) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Color(0xFFFF0000).copy(alpha = 0.1f),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = null,
+                    tint = Color(0xFFFF0000),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Make sure you've completed the task before connecting",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = BrandColors.White.copy(alpha = 0.9f),
+                    fontSize = 12.sp
+                )
+            }
+            
+            Button(
+                onClick = {
+                    android.util.Log.d("YouTubeVerificationUI", "Connect button clicked")
+                    isConnecting = true
+                    try {
+                        onConnectYouTube()
+                    } catch (e: Exception) {
+                        android.util.Log.e("YouTubeVerificationUI", "Error calling onConnectYouTube: ${e.message}", e)
+                        isConnecting = false
+                        android.widget.Toast.makeText(
+                            context,
+                            "Error: ${e.message}",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF0000)
+                ),
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(vertical = 12.dp),
+                enabled = !isConnecting
+            ) {
+                if (isConnecting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = BrandColors.White
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Connecting...", fontWeight = FontWeight.Bold)
+                } else {
+                    Icon(Icons.Default.AccountCircle, "Connect")
+                    Spacer(Modifier.width(8.dp))
+                    Text("Connect YouTube Account", fontWeight = FontWeight.Bold)
+                }
+            }
+            
+            if (isConnecting) {
+                Text(
+                    text = "Check your browser/app for the sign-in page",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = BrandColors.Warning,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
     }
 }
@@ -1405,6 +1608,18 @@ fun FacebookVerificationUI(
     actionUrl: String,
     onConnectFacebook: () -> Unit
 ) {
+    val context = LocalContext.current
+    var isConnecting by remember { mutableStateOf(false) }
+    
+    // Reset connecting state after timeout
+    LaunchedEffect(isConnecting) {
+        if (isConnecting) {
+            kotlinx.coroutines.delay(10000) // 10 seconds timeout
+            isConnecting = false
+            android.util.Log.w("FacebookVerificationUI", "Connection timeout - resetting state")
+        }
+    }
+    
     Column(
         modifier = Modifier
             .background(BrandColors.CardBackground, RoundedCornerShape(12.dp))
@@ -1425,18 +1640,78 @@ fun FacebookVerificationUI(
             color = BrandColors.White.copy(alpha = 0.7f)
         )
         
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Color(0xFF4267B2).copy(alpha = 0.1f),
+                    RoundedCornerShape(8.dp)
+                )
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Info,
+                contentDescription = null,
+                tint = Color(0xFF4267B2),
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Make sure you've liked the page before connecting",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.White.copy(alpha = 0.9f),
+                fontSize = 12.sp
+            )
+        }
+        
         Button(
-            onClick = onConnectFacebook,
+            onClick = {
+                android.util.Log.d("FacebookVerificationUI", "Connect button clicked")
+                isConnecting = true
+                try {
+                    onConnectFacebook()
+                } catch (e: Exception) {
+                    android.util.Log.e("FacebookVerificationUI", "Error calling onConnectFacebook: ${e.message}", e)
+                    isConnecting = false
+                    android.widget.Toast.makeText(
+                        context,
+                        "Facebook connection failed: ${e.message}",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF4267B2)
             ),
             shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(vertical = 12.dp)
+            contentPadding = PaddingValues(vertical = 12.dp),
+            enabled = !isConnecting
         ) {
-            Icon(Icons.Default.AccountCircle, "Connect")
-            Spacer(Modifier.width(8.dp))
-            Text("Connect Facebook Account", fontWeight = FontWeight.Bold)
+            if (isConnecting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = BrandColors.White
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("Connecting...", fontWeight = FontWeight.Bold)
+            } else {
+                Icon(Icons.Default.AccountCircle, "Connect")
+                Spacer(Modifier.width(8.dp))
+                Text("Connect Facebook Account", fontWeight = FontWeight.Bold)
+            }
+        }
+        
+        if (isConnecting) {
+            Text(
+                text = "Check your browser/app for the Facebook login page",
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandColors.Warning,
+                fontSize = 11.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
     }
 }
