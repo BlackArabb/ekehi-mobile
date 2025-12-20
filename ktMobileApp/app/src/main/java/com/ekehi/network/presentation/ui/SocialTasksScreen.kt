@@ -33,6 +33,8 @@ import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
 import com.ekehi.network.presentation.viewmodel.VerificationState
 import com.facebook.login.LoginManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import coil.compose.AsyncImage
+import java.net.URL
 
 // Brand Colors
 object BrandColors {
@@ -639,30 +641,58 @@ fun EnhancedSocialTaskCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
                 ) {
-                    // Platform icon with gradient background
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .shadow(4.dp, RoundedCornerShape(16.dp))
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        getPlatformColor(task.platform),
-                                        getPlatformColor(task.platform).copy(alpha = 0.7f)
-                                    )
+                    // Platform icon with gradient background or favicon
+                    if (task.link.isNotEmpty()) {
+                        // Try to load favicon
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .shadow(4.dp, RoundedCornerShape(16.dp))
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(
+                                            getPlatformColor(task.platform),
+                                            getPlatformColor(task.platform).copy(alpha = 0.7f)
+                                        )
+                                    ),
+                                    RoundedCornerShape(16.dp)
                                 ),
-                                RoundedCornerShape(16.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = getPlatformIcon(task.platform),
-                            contentDescription = task.platform,
-                            tint = BrandColors.White,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                    
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = getFaviconUrl(task.link),
+                                contentDescription = task.platform,
+                                modifier = Modifier.size(32.dp),
+                                placeholder = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_help),
+                                error = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_help)
+                            )
+
+                        }
+                    } else {
+                        // Fallback to platform icon if no link
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .shadow(4.dp, RoundedCornerShape(16.dp))
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(
+                                            getPlatformColor(task.platform),
+                                            getPlatformColor(task.platform).copy(alpha = 0.7f)
+                                        )
+                                    ),
+                                    RoundedCornerShape(16.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = getPlatformIcon(task.platform),
+                                contentDescription = task.platform,
+                                tint = BrandColors.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }                    
                     Spacer(Modifier.width(16.dp))
                     
                     Column(modifier = Modifier.weight(1f)) {
@@ -679,6 +709,17 @@ fun EnhancedSocialTaskCard(
                             modifier = Modifier.padding(top = 4.dp),
                             lineHeight = 20.sp
                         )
+                        
+                        // Display domain if link is available
+                        if (task.link.isNotEmpty()) {
+                            Text(
+                                text = extractDomain(task.link),
+                                color = BrandColors.White.copy(alpha = 0.5f),
+                                fontSize = 12.sp,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                         
                         Spacer(Modifier.height(8.dp))
                         
@@ -718,7 +759,7 @@ fun EnhancedSocialTaskCard(
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 text = if (task.verificationMethod == "api") 
-                                    "Auto-verified" 
+                                    "Auto-verification" 
                                 else 
                                     "Manual review",
                                 color = if (task.verificationMethod == "api") 
@@ -1170,12 +1211,34 @@ fun TaskVerificationDialog(
                         }
                         
                         task.platform.lowercase() == "youtube" -> {
+                            val lastSignedInAccount = authManager.getLastSignedInGoogleAccount()
+                            val hasYouTubePermissions = if (lastSignedInAccount != null) {
+                                authManager.checkYouTubePermissions()
+                            } else {
+                                false
+                            }
+                            
                             YouTubeVerificationUI(
                                 taskType = task.taskType,
                                 actionUrl = task.link,
+                                isAlreadySignedIn = hasYouTubePermissions,
                                 onConnectYouTube = {
-                                    val signInIntent = authManager.getYouTubeSignInClient().signInIntent
-                                    youtubeSignInLauncher.launch(signInIntent)
+                                    try {
+                                        android.util.Log.d("SocialTasksScreen", "Launching YouTube sign-in...")
+                                        val signInClient = authManager.getYouTubeSignInClient()
+                                        android.util.Log.d("SocialTasksScreen", "Got sign-in client")
+                                        val signInIntent = signInClient.signInIntent
+                                        android.util.Log.d("SocialTasksScreen", "Got sign-in intent")
+                                        youtubeSignInLauncher.launch(signInIntent)
+                                        android.util.Log.d("SocialTasksScreen", "Launched sign-in intent")
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("SocialTasksScreen", "Error launching YouTube sign-in: ${e.message}", e)
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "Error launching sign-in: ${e.message}",
+                                            android.widget.Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                 }
                             )
                         }
@@ -1928,6 +1991,26 @@ fun getPlatformIcon(platform: String): androidx.compose.ui.graphics.vector.Image
         "twitter", "x" -> Icons.Default.Message
         "instagram" -> Icons.Default.PhotoCamera
         else -> Icons.Default.Public
+    }
+}
+
+// Function to extract domain from URL
+fun extractDomain(url: String): String {
+    return try {
+        val domain = URL(url).host
+        if (domain.startsWith("www.")) domain.substring(4) else domain
+    } catch (e: Exception) {
+        "unknown"
+    }
+}
+
+// Function to generate favicon URL
+fun getFaviconUrl(url: String): String {
+    return try {
+        val domain = URL(url).host
+        "https://www.google.com/s2/favicons?domain=$domain&sz=64"
+    } catch (e: Exception) {
+        "https://www.google.com/s2/favicons?domain=example.com&sz=64"
     }
 }
 
