@@ -136,7 +136,7 @@ class SocialTasksViewModel @Inject constructor(
                     // Send event to refresh social tasks
                     viewModelScope.launch {
                         EventBus.sendEvent(Event.RefreshSocialTasks(userId))
-                        // Also refresh leaderboard and profile since rewards might have been added
+                        // Also refresh leaderboard and profile since rewards have been added
                         EventBus.sendEvent(Event.RefreshUserProfile)
                         EventBus.sendEvent(Event.RefreshLeaderboard)
                     }

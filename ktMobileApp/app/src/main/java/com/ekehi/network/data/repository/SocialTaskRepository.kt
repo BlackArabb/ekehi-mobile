@@ -230,6 +230,14 @@ open class SocialTaskRepository @Inject constructor(
                 if (response.documents.isNotEmpty()) {
                     val documentId = response.documents[0].id ?: ""
                     
+                    // Get the task details to get the reward amount
+                    val taskResponse = appwriteService.databases.getDocument(
+                        databaseId = AppwriteService.DATABASE_ID,
+                        collectionId = AppwriteService.SOCIAL_TASKS_COLLECTION,
+                        documentId = taskId
+                    )
+                    val task = documentToSocialTask(taskResponse)
+                    
                     // Get user profile to get username
                     var username: String? = null
                     try {
@@ -263,6 +271,10 @@ open class SocialTaskRepository @Inject constructor(
                     )
                     
                     val userSocialTask = documentToUserSocialTask(document)
+                    
+                    // Award coins for manually verified tasks
+                    awardCoinsToUser(userId, task.rewardCoins)
+                    
                     Result.success(userSocialTask)
                 } else {
                     Result.failure(Exception("User social task not found"))
