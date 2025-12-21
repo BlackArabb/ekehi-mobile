@@ -87,6 +87,7 @@ open class SocialTaskRepository @Inject constructor(
                     task.copy(
                         isCompleted = userTask != null,
                         isVerified = userTask?.status == "verified",
+                        status = userTask?.status,
                         completedAt = userTask?.completedAt,
                         verifiedAt = userTask?.verifiedAt
                     )
@@ -485,5 +486,42 @@ open class SocialTaskRepository @Inject constructor(
             rejectionReason = data["rejectionReason"] as? String,
             username = data["username"] as? String
         )
+    }
+    
+    /**
+     * Delete a pending task submission and revert its status to available
+     */
+    suspend fun deletePendingTask(userId: String, taskId: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // First, find the user social task document
+                val response = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
+                    queries = listOf(
+                        Query.equal("userId", userId),
+                        Query.equal("taskId", taskId),
+                        Query.equal("status", "pending")
+                    )
+                )
+                
+                if (response.documents.isNotEmpty()) {
+                    val documentId = response.documents[0].id ?: ""
+                    
+                    // Delete the document
+                    appwriteService.databases.deleteDocument(
+                        databaseId = AppwriteService.DATABASE_ID,
+                        collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
+                        documentId = documentId
+                    )
+                    
+                    Result.success(Unit)
+                } else {
+                    Result.failure(Exception("Pending task not found"))
+                }
+            } catch (e: AppwriteException) {
+                Result.failure(e)
+            }
+        }
     }
 }

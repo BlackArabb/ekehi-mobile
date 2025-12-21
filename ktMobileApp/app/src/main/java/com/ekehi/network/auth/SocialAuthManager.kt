@@ -276,6 +276,25 @@ class SocialAuthManager @Inject constructor(
             Log.e(TAG, "Error signing out from Facebook", e)
         }
     }
+    
+    /**
+     * Get current user ID from the signed-in account
+     */
+    fun getCurrentUserId(): String? {
+        return try {
+            // Try to get Google account first
+            val googleAccount = GoogleSignIn.getLastSignedInAccount(context)
+            if (googleAccount != null) {
+                return googleAccount.id
+            }
+            
+            // If no Google account, return null
+            null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting current user ID", e)
+            null
+        }
+    }
 }
 
 /**

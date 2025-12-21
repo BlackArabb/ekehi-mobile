@@ -3,6 +3,7 @@
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -12,10 +13,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,15 +27,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.ekehi.network.auth.SocialAuthManager
-import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.data.model.SocialTask
+import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
 import com.ekehi.network.presentation.viewmodel.VerificationState
+import com.ekehi.network.domain.model.Resource
 import com.facebook.login.LoginManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import coil.compose.AsyncImage
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import java.net.URL
-
 // Brand Colors
 object BrandColors {
     val Primary = Color(0xFFffa000)
@@ -51,6 +56,7 @@ object BrandColors {
     val Warning = Color(0xFFf59e0b)
     val CardBackground = Color(0xFF0d0d0d)
     val CardBorder = Color(0x4DFFA000) // 30% opacity orange
+    val Gray = Color(0xFF6b7280) // Adding gray color for disabled buttons
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,10 +66,41 @@ fun SocialTasksScreen(
     authManager: SocialAuthManager
 ) {
     val context = LocalContext.current
-    var userId by remember { mutableStateOf("user_id_placeholder") }
+    var userId by remember { mutableStateOf("") }
     val socialTasksResource by viewModel.socialTasks.collectAsState()
     val verificationState by viewModel.verificationState.collectAsState()
     
+    // Declare these variables early so they can be accessed by the launcher
+    var selectedTask by remember { mutableStateOf<SocialTaskItem?>(null) }
+    var showVerificationDialog by remember { mutableStateOf(false) }
+    var taskActionCompleted by remember { mutableStateOf(false) }
+    
+    // Get AuthRepository through DI
+    val authRepository = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            AuthRepositoryEntryPoint::class.java
+        ).authRepository()
+    }
+    
+    // Get current user ID when screen initializes
+    LaunchedEffect(Unit) {
+        try {
+            // Get the current user from the auth repository
+            val result = authRepository.getCurrentUserIfLoggedIn()
+            if (result.isSuccess) {
+                val user = result.getOrNull()
+                if (user != null) {
+                    userId = user.id
+                    // Load user's social tasks
+                    viewModel.loadUserSocialTasks(userId)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("SocialTasksScreen", "Failed to get current user ID", e)
+        }
+    }
+
     val youtubeSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -83,7 +120,7 @@ fun SocialTasksScreen(
                 result.data?.let { data ->
                     try {
                         android.util.Log.d("SocialTasksScreen", "Processing sign-in result...")
-                        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                        val task: com.google.android.gms.tasks.Task<com.google.android.gms.auth.api.signin.GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
                         
                         task.addOnSuccessListener { account ->
                             android.util.Log.d("SocialTasksScreen", "Sign-in SUCCESS")
@@ -96,30 +133,20 @@ fun SocialTasksScreen(
                             
                             if (accessToken != null && accessToken.isNotEmpty()) {
                                 viewModel.setYouTubeAccessToken(accessToken)
-                                android.util.Log.d("SocialTasksScreen", "YouTube access token set successfully")
-                                
-                                // Show success toast
-                                android.widget.Toast.makeText(
-                                    context,
-                                    "YouTube account connected!",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
+                                // Trigger the verification flow
+                                if (selectedTask != null) {
+                                    showVerificationDialog = true
+                                }
                             } else {
+                                // Show error - couldn't get access token
                                 android.util.Log.e("SocialTasksScreen", "Failed to get YouTube access token")
-                                android.widget.Toast.makeText(
-                                    context,
-                                    "Failed to get access token. Please try again.",
-                                    android.widget.Toast.LENGTH_LONG
-                                ).show()
+                                // TODO: Show error to user
                             }
-                        }.addOnFailureListener { e ->
-                            android.util.Log.e("SocialTasksScreen", "Sign-in FAILED: ${e.message}", e)
-                            android.widget.Toast.makeText(
-                                context,
-                                "Sign-in failed: ${e.message}",
-                                android.widget.Toast.LENGTH_LONG
-                            ).show()
+                        }.addOnFailureListener { exception ->
+                            android.util.Log.e("SocialTasksScreen", "Sign-in FAILED", exception)
+                            // TODO: Show error to user
                         }
+
                     } catch (e: Exception) {
                         android.util.Log.e("SocialTasksScreen", "Error processing sign-in: ${e.message}", e)
                         android.widget.Toast.makeText(
@@ -143,7 +170,7 @@ fun SocialTasksScreen(
                 // Try to get the error details from the result
                 result.data?.let { data ->
                     try {
-                        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                        val task: com.google.android.gms.tasks.Task<com.google.android.gms.auth.api.signin.GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
                         task.addOnFailureListener { e ->
                             android.util.Log.e("SocialTasksScreen", "Sign-in error class: ${e.javaClass.name}")
                             android.util.Log.e("SocialTasksScreen", "Sign-in error message: ${e.message}")
@@ -238,10 +265,6 @@ fun SocialTasksScreen(
             ).show()
         }
     }
-    
-    var selectedTask by remember { mutableStateOf<SocialTaskItem?>(null) }
-    var showVerificationDialog by remember { mutableStateOf(false) }
-    var taskActionCompleted by remember { mutableStateOf(false) }
     
     LaunchedEffect(Unit) {
         viewModel.loadSocialTasks()
@@ -358,7 +381,8 @@ fun SocialTasksScreen(
                                 reward = task.rewardCoins,
                                 isCompleted = task.isCompleted,
                                 isVerified = task.isVerified,
-                                verificationMethod = task.verificationMethod
+                                verificationMethod = task.verificationMethod,
+                                status = task.status ?: "available"
                             )
                             
                             EnhancedSocialTaskCard(
@@ -418,17 +442,32 @@ fun SocialTasksScreen(
         
         // Task Action Dialog
         if (selectedTask != null && !showVerificationDialog) {
-            TaskActionDialog(
-                task = selectedTask!!,
-                onDismiss = { 
-                    selectedTask = null
-                    taskActionCompleted = false
-                },
-                onTaskCompleted = {
-                    taskActionCompleted = true
-                    showVerificationDialog = true
-                }
-            )
+            // Show pending task dialog if task is in review
+            if (selectedTask!!.status == "pending") {
+                PendingTaskDialog(
+                    task = selectedTask!!,
+                    onDeleteTask = { 
+                        // TODO: Implement delete task functionality
+                        viewModel.deletePendingTask(userId, selectedTask!!.id)
+                        selectedTask = null
+                    },
+                    onDismiss = { 
+                        selectedTask = null
+                    }
+                )
+            } else {
+                TaskActionDialog(
+                    task = selectedTask!!,
+                    onDismiss = { 
+                        selectedTask = null
+                        taskActionCompleted = false
+                    },
+                    onTaskCompleted = {
+                        taskActionCompleted = true
+                        showVerificationDialog = true
+                    }
+                )
+            }
         }
         
         // Verification Dialog
@@ -452,7 +491,7 @@ fun SocialTasksScreen(
             )
         }
         
-        // Verification State Snackbar
+        // Verification State Snackbar with explicit close buttons
         when (verificationState) {
             is VerificationState.Success -> {
                 Snackbar(
@@ -460,12 +499,26 @@ fun SocialTasksScreen(
                         .align(Alignment.BottomCenter)
                         .padding(16.dp),
                     containerColor = BrandColors.Success,
-                    contentColor = BrandColors.White
+                    contentColor = BrandColors.White,
+                    action = {
+                        TextButton(
+                            onClick = { viewModel.clearVerificationState() },
+                            colors = ButtonDefaults.textButtonColors(contentColor = BrandColors.White)
+                        ) {
+                            Text("Close")
+                        }
+                    }
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Icon(Icons.Default.CheckCircle, null, tint = BrandColors.White)
                         Spacer(Modifier.width(8.dp))
-                        Text((verificationState as VerificationState.Success).message)
+                        Text(
+                            text = (verificationState as VerificationState.Success).message,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
@@ -475,12 +528,26 @@ fun SocialTasksScreen(
                         .align(Alignment.BottomCenter)
                         .padding(16.dp),
                     containerColor = BrandColors.Error,
-                    contentColor = BrandColors.White
+                    contentColor = BrandColors.White,
+                    action = {
+                        TextButton(
+                            onClick = { viewModel.clearVerificationState() },
+                            colors = ButtonDefaults.textButtonColors(contentColor = BrandColors.White)
+                        ) {
+                            Text("Close")
+                        }
+                    }
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Icon(Icons.Default.Error, null, tint = BrandColors.White)
                         Spacer(Modifier.width(8.dp))
-                        Text((verificationState as VerificationState.Error).message)
+                        Text(
+                            text = (verificationState as VerificationState.Error).message,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
@@ -490,12 +557,26 @@ fun SocialTasksScreen(
                         .align(Alignment.BottomCenter)
                         .padding(16.dp),
                     containerColor = BrandColors.Warning,
-                    contentColor = BrandColors.Black
+                    contentColor = BrandColors.Black,
+                    action = {
+                        TextButton(
+                            onClick = { viewModel.clearVerificationState() },
+                            colors = ButtonDefaults.textButtonColors(contentColor = BrandColors.Black)
+                        ) {
+                            Text("Close")
+                        }
+                    }
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Icon(Icons.Default.Schedule, null, tint = BrandColors.Black)
                         Spacer(Modifier.width(8.dp))
-                        Text((verificationState as VerificationState.Pending).message)
+                        Text(
+                            text = (verificationState as VerificationState.Pending).message,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
@@ -609,8 +690,10 @@ fun EnhancedSocialTaskCard(
             .fillMaxWidth()
             .shadow(6.dp, RoundedCornerShape(20.dp))
             .then(
-                if (!task.isVerified) {
+                if (!task.isVerified && task.status != "pending") {
                     Modifier.clickable(onClick = onClick)
+                } else if (task.status == "pending") {
+                    Modifier.clickable(onClick = onClick) // Still clickable but will show dialog
                 } else {
                     Modifier
                 }
@@ -636,6 +719,8 @@ fun EnhancedSocialTaskCard(
                     )
             )
             
+            
+
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -854,6 +939,35 @@ fun EnhancedSocialTaskCard(
                             Text(
                                 "Completed",
                                 color = BrandColors.Success,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else if (task.status == "pending") {
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    BrandColors.Warning.copy(alpha = 0.15f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .border(
+                                    1.5.dp,
+                                    BrandColors.Warning.copy(alpha = 0.3f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Schedule,
+                                "Reviewing",
+                                tint = BrandColors.Warning,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                "Reviewing",
+                                color = BrandColors.Warning,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -1106,20 +1220,40 @@ fun TaskActionDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = onTaskCompleted,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = BrandColors.Success
-                ),
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-            ) {
-                Icon(Icons.Default.Check, "Done")
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    "I've Completed This",
-                    fontWeight = FontWeight.Bold
-                )
+            if (task.status == "pending") {
+                // Disable the button and show different text for pending tasks
+                Button(
+                    onClick = {}, // Disabled - no action
+                    enabled = false,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrandColors.Gray
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                ) {
+                    Icon(Icons.Default.Schedule, "Pending")
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Under Review",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            } else {
+                Button(
+                    onClick = onTaskCompleted,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrandColors.Primary
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                ) {
+                   
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Task Completed",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         },
         dismissButton = {
@@ -1305,59 +1439,74 @@ fun TaskVerificationDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    isLoading = true
-                    errorMessage = ""
-                    
-                    val proofData = buildProofData(
-                        platform = task.platform,
-                        telegramUserId = telegramUserId,
-                        username = username,
-                        proofUrl = proofUrl
-                    )
-                    
-                    val enhancedProofData = if (task.platform.lowercase() == "facebook" && facebookAccessToken != null) {
-                        proofData.toMutableMap().apply {
-                            put("facebook_access_token", facebookAccessToken!!)
-                        }
-                    } else {
-                        proofData
-                    }
-                    
-                    if (task.platform.lowercase() == "telegram" && !isValidTelegramUserId(telegramUserId)) {
-                        errorMessage = getTelegramUserIdErrorMessage(telegramUserId)
-                        if (errorMessage.isEmpty()) {
-                            errorMessage = "Please enter a valid Telegram User ID"
-                        }
-                        isLoading = false
-                    } else if (enhancedProofData.isEmpty()) {
-                        errorMessage = "Please provide required information"
-                        isLoading = false
-                    } else {
-                        onSubmit(enhancedProofData)
-                    }
-                },
-                enabled = !isLoading && isReadyToSubmit(
-                    platform = task.platform,
-                    telegramUserId = telegramUserId,
-                    username = username,
-                    proofUrl = proofUrl
-                ),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = BrandColors.Primary,
-                    disabledContainerColor = BrandColors.LightGray
-                ),
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
-            ) {
-                if (isLoading) {
+            if (isLoading) {
+                // Show loading state with message
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
                         color = BrandColors.White
                     )
-                } else {
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Submitting for Review...",
+                        color = BrandColors.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            } else {
+                Button(
+                    onClick = {
+                        isLoading = true
+                        errorMessage = ""
+                        
+                        val proofData = buildProofData(
+                            platform = task.platform,
+                            telegramUserId = telegramUserId,
+                            username = username,
+                            proofUrl = proofUrl
+                        )
+                        
+                        val enhancedProofData = if (task.platform.lowercase() == "facebook" && facebookAccessToken != null) {
+                            proofData.toMutableMap().apply {
+                                put("facebook_access_token", facebookAccessToken!!)
+                            }
+                        } else {
+                            proofData
+                        }
+                        
+                        if (task.platform.lowercase() == "telegram" && !isValidTelegramUserId(telegramUserId)) {
+                            errorMessage = getTelegramUserIdErrorMessage(telegramUserId)
+                            if (errorMessage.isEmpty()) {
+                                errorMessage = "Please enter a valid Telegram User ID"
+                            }
+                            isLoading = false
+                        } else if (enhancedProofData.isEmpty()) {
+                            errorMessage = "Please provide required information"
+                            isLoading = false
+                        } else {
+                            onSubmit(enhancedProofData)
+                        }
+                    },
+                    enabled = !isLoading && isReadyToSubmit(
+                        platform = task.platform,
+                        telegramUserId = telegramUserId,
+                        username = username,
+                        proofUrl = proofUrl
+                    ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrandColors.Primary,
+                        disabledContainerColor = BrandColors.LightGray
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                ) {
                     Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text("Submit Verification", fontWeight = FontWeight.Bold)
@@ -1951,6 +2100,10 @@ fun getTelegramUserIdErrorMessage(userId: String): String {
 
 fun buildProofData(platform: String, telegramUserId: String, username: String, proofUrl: String): Map<String, Any> {
     return buildMap {
+        // Always include platform and timestamp
+        put("platform", platform)
+        put("submitted_at", System.currentTimeMillis())
+        
         when (platform.lowercase()) {
             "telegram" -> {
                 telegramUserId.toLongOrNull()?.let { userId ->
@@ -1969,7 +2122,103 @@ fun buildProofData(platform: String, telegramUserId: String, username: String, p
                 if (proofUrl.isNotEmpty()) put("proof_url", proofUrl)
             }
         }
+        
+        // Always include all available data for debugging
+        if (username.isNotEmpty()) put("submitted_username", username)
+        if (proofUrl.isNotEmpty()) put("submitted_proof_url", proofUrl)
+        if (telegramUserId.isNotEmpty()) put("submitted_telegram_id", telegramUserId)
     }
+}
+
+@Composable
+fun PendingTaskDialog(
+    task: SocialTaskItem,
+    onDeleteTask: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = BrandColors.MediumGray,
+        shape = RoundedCornerShape(24.dp),
+        title = { 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            BrandColors.Warning.copy(alpha = 0.2f),
+                            RoundedCornerShape(12.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = null,
+                        tint = BrandColors.Warning,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Text(
+                    "Task Under Review",
+                    color = BrandColors.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Your submission for \"${task.title}\" is currently under review by our team. This usually takes 24-48 hours.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = BrandColors.White.copy(alpha = 0.8f),
+                    lineHeight = 22.sp
+                )
+                
+                Divider(color = BrandColors.LightGray.copy(alpha = 0.3f))
+                
+                Text(
+                    text = "What would you like to do?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = BrandColors.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    // Wait for review - just close the dialog
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BrandColors.Primary
+                ),
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            ) {
+                Text("Wait for Review", fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    // Show confirmation dialog before deleting
+                    onDeleteTask()
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = BrandColors.Error
+                )
+            ) {
+                Text("Delete Submission")
+            }
+        }
+    )
 }
 
 fun getPlatformColor(platform: String): Color {
@@ -2024,5 +2273,12 @@ data class SocialTaskItem(
     val reward: Double,
     val isCompleted: Boolean,
     val isVerified: Boolean,
-    val verificationMethod: String
+    val verificationMethod: String,
+    val status: String = "available" // "available", "pending_review", "verified", "rejected"
 )
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface AuthRepositoryEntryPoint {
+    fun authRepository(): AuthRepository
+}

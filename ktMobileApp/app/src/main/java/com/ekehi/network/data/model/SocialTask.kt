@@ -16,6 +16,7 @@ data class SocialTask(
     val isVerified: Boolean = false,
     val completedAt: String? = null,
     val verifiedAt: String? = null,
+    val status: String? = null, // User task status: "pending", "verified", "rejected"
     val createdAt: String,
     val updatedAt: String
 )

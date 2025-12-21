@@ -148,8 +148,31 @@ class SocialTasksViewModel @Inject constructor(
         }
     }
     
-    fun resetVerificationState() {
+    fun clearVerificationState() {
         _verificationState.value = VerificationState.Idle
+    }
+    
+    /**
+     * Delete a pending task submission and revert its status to available
+     */
+    fun deletePendingTask(userId: String, taskId: String) {
+        viewModelScope.launch {
+            try {
+                val result = socialTasksRepository.deletePendingTask(userId, taskId)
+                if (result.isSuccess) {
+                    // Refresh the tasks list to reflect the status change
+                    loadUserSocialTasks(userId)
+                    
+                    // Clear verification state to hide any dialogs
+                    _verificationState.value = VerificationState.Idle
+                } else {
+                    _verificationState.value = VerificationState.Error(result.exceptionOrNull()?.message ?: "Failed to delete task")
+                }
+            } catch (e: Exception) {
+                _verificationState.value = VerificationState.Error(e.message ?: "Failed to delete task")
+                e.printStackTrace()
+            }
+        }
     }
 }
 
