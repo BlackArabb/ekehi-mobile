@@ -11,10 +11,15 @@ interface SocialTask {
   title: string
   description: string
   platform: string
+  taskType: string
   rewardCoins: number
+  actionUrl?: string
+  verificationMethod: string
+  verificationData?: Record<string, string> | null
   isActive: boolean
   sortOrder: number
-  createdAt?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export default function SocialPage() {
@@ -30,8 +35,13 @@ export default function SocialPage() {
     title: '',
     description: '',
     platform: 'Twitter',
+    taskType: 'generic',
     rewardCoins: 50,
-    isActive: true
+    actionUrl: '',
+    verificationMethod: 'manual',
+    verificationData: {},
+    isActive: true,
+    sortOrder: 0
   })
 
   const [stats, setStats] = useState({
@@ -158,11 +168,8 @@ export default function SocialPage() {
 
   const handleAddTask = async () => {
     try {
-      const task: SocialTask = {
-        id: (tasks.length + 1).toString(),
-        ...newTask,
-        sortOrder: tasks.length + 1,
-        createdAt: new Date().toISOString()
+      const taskToAdd = {
+        ...newTask
       }
       
       const response = await fetch('/api/social', {
@@ -170,19 +177,25 @@ export default function SocialPage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(task)
+        body: JSON.stringify(taskToAdd)
       })
       
       const data = await response.json()
       
       if (data.success) {
-        setTasks([...tasks, task])
+        // Update tasks with the response from the server
+        setTasks([...tasks, data.data])
         setNewTask({
           title: '',
           description: '',
           platform: 'Twitter',
+          taskType: 'generic',
           rewardCoins: 50,
-          isActive: true
+          actionUrl: '',
+          verificationMethod: 'manual',
+          verificationData: {},
+          isActive: true,
+          sortOrder: 0
         })
         setShowAddModal(false)
         // Update stats
@@ -216,7 +229,7 @@ export default function SocialPage() {
       const data = await response.json()
       
       if (data.success) {
-        setTasks(tasks.map(t => t.id === selectedTask.id ? selectedTask : t))
+        setTasks(tasks.map(t => t.id === selectedTask.id ? data.data : t))
         setShowEditModal(false)
         setSelectedTask(null)
       } else {
@@ -305,7 +318,12 @@ export default function SocialPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-white">Social Tasks Management</h1>
-          <Button onClick={() => setShowAddModal(true)}>Add New Task</Button>
+          <div className="flex space-x-2">
+            <Button onClick={() => window.location.href = '/dashboard/social/validation'}>
+              Validate Submissions
+            </Button>
+            <Button onClick={() => setShowAddModal(true)}>Add New Task</Button>
+          </div>
         </div>
         
         {/* Stats */}
@@ -438,7 +456,13 @@ export default function SocialPage() {
                     Platform
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Reward
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Verification
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
@@ -461,7 +485,17 @@ export default function SocialPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      <span className="px-2 py-1 bg-gray-700/50 rounded text-xs">
+                        {task.taskType}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                       {task.rewardCoins} EKH
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      <span className={`px-2 py-1 rounded text-xs ${task.verificationMethod === 'auto' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                        {task.verificationMethod}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -519,6 +553,45 @@ export default function SocialPage() {
               className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
               placeholder="Enter task title"
             />
+          </div>
+                      
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Task Type</label>
+            <select
+              value={newTask.taskType}
+              onChange={(e) => setNewTask({...newTask, taskType: e.target.value})}
+              className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+            >
+              <option value="generic" className="bg-gray-800">Generic</option>
+              <option value="follow" className="bg-gray-800">Follow</option>
+              <option value="like" className="bg-gray-800">Like</option>
+              <option value="share" className="bg-gray-800">Share</option>
+              <option value="comment" className="bg-gray-800">Comment</option>
+              <option value="join" className="bg-gray-800">Join</option>
+            </select>
+          </div>
+                      
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Action URL</label>
+            <input
+              type="text"
+              value={newTask.actionUrl}
+              onChange={(e) => setNewTask({...newTask, actionUrl: e.target.value})}
+              className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+              placeholder="Enter action URL (optional)"
+            />
+          </div>
+                      
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Verification Method</label>
+            <select
+              value={newTask.verificationMethod}
+              onChange={(e) => setNewTask({...newTask, verificationMethod: e.target.value})}
+              className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+            >
+              <option value="manual" className="bg-gray-800">Manual</option>
+              <option value="auto" className="bg-gray-800">Auto</option>
+            </select>
           </div>
           
           <div>
@@ -595,6 +668,45 @@ export default function SocialPage() {
                 className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
                 placeholder="Enter task title"
               />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300">Task Type</label>
+              <select
+                value={selectedTask.taskType}
+                onChange={(e) => setSelectedTask({...selectedTask, taskType: e.target.value})}
+                className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+              >
+                <option value="generic" className="bg-gray-800">Generic</option>
+                <option value="follow" className="bg-gray-800">Follow</option>
+                <option value="like" className="bg-gray-800">Like</option>
+                <option value="share" className="bg-gray-800">Share</option>
+                <option value="comment" className="bg-gray-800">Comment</option>
+                <option value="join" className="bg-gray-800">Join</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300">Action URL</label>
+              <input
+                type="text"
+                value={selectedTask.actionUrl || ''}
+                onChange={(e) => setSelectedTask({...selectedTask, actionUrl: e.target.value})}
+                className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+                placeholder="Enter action URL (optional)"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300">Verification Method</label>
+              <select
+                value={selectedTask.verificationMethod}
+                onChange={(e) => setSelectedTask({...selectedTask, verificationMethod: e.target.value})}
+                className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+              >
+                <option value="manual" className="bg-gray-800">Manual</option>
+                <option value="auto" className="bg-gray-800">Auto</option>
+              </select>
             </div>
             
             <div>

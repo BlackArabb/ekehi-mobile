@@ -1,4 +1,4 @@
-import { Client, Databases, Account } from 'appwrite';
+import { Client, Databases, Account } from 'node-appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
 // Appwrite configuration
@@ -7,6 +7,11 @@ const client = new Client();
 client
   .setEndpoint(API_CONFIG.APPWRITE_ENDPOINT)
   .setProject(API_CONFIG.APPWRITE_PROJECT_ID);
+
+// Set API key if available
+if (API_CONFIG.APPWRITE_API_KEY) {
+  client.setKey(API_CONFIG.APPWRITE_API_KEY);
+}
 
 // Initialize services
 export const account = new Account(client);

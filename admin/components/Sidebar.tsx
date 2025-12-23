@@ -43,7 +43,7 @@ export default function Sidebar({
   return (
     <>
       <Transition.Root show={sidebarOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-40 md:hidden" onClose={setSidebarOpen}>
+        <Dialog as="div" className="relative z-50 md:hidden" onClose={setSidebarOpen}>
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -56,7 +56,7 @@ export default function Sidebar({
             <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" />
           </Transition.Child>
 
-          <div className="fixed inset-0 z-40 flex">
+          <div className="fixed inset-0 flex">
             <Transition.Child
               as={Fragment}
               enter="transition ease-in-out duration-300 transform"
@@ -66,7 +66,7 @@ export default function Sidebar({
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col glass-effect border-r border-purple-500/20">
+              <Dialog.Panel className="relative flex w-full max-w-xs flex-1 flex-col glass-effect border-r border-purple-500/20" style={{ zIndex: 50 }}>
                 <Transition.Child
                   as={Fragment}
                   enter="ease-in-out duration-300"
@@ -124,15 +124,14 @@ export default function Sidebar({
                 </div>
               </Dialog.Panel>
             </Transition.Child>
-            <div className="w-14 flex-shrink-0">{/* Force sidebar to shrink to fit close icon */}</div>
           </div>
         </Dialog>
       </Transition.Root>
 
       {/* Static sidebar for desktop - collapsed by default */}
-      <div className={`hidden md:fixed md:inset-y-0 md:flex md:flex-col transition-all duration-300 ease-in-out ${expanded ? 'md:w-64' : 'md:w-20'}`}>
+      <div className={`hidden md:fixed md:inset-y-0 md:left-0 md:flex md:flex-col transition-all duration-300 ease-in-out ${expanded ? 'md:w-64' : 'md:w-20'} z-30`} style={{ zIndex: 30 }}>
         {/* Sidebar component */}
-        <div className="flex min-h-0 flex-1 flex-col glass-effect border-r border-purple-500/20">
+        <div className="flex min-h-0 flex-1 flex-col glass-effect border-r border-purple-500/20" style={{ zIndex: 30 }}>
           <div className="flex flex-shrink-0 items-center p-4 justify-center">
             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-lg">E</span>

@@ -16,11 +16,11 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <div className="flex flex-col flex-1 w-full">
+      <div className="flex flex-col flex-1 w-full ml-0 md:ml-20">
         {/* Header */}
         <Header setSidebarOpen={setSidebarOpen} />
 
-        <main className="h-full overflow-y-auto">
+        <main className="h-full overflow-y-auto pt-4">
           <div className="container px-6 mx-auto grid">
             {children}
           </div>

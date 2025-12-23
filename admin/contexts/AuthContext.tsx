@@ -60,9 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const logout = () => {
-    setAdmin(null)
-    localStorage.removeItem('admin')
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      // Simulate a small delay for the logout process
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      setAdmin(null)
+      localStorage.removeItem('admin')
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

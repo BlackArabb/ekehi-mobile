@@ -80,9 +80,9 @@ export async function POST(request: Request) {
 }
 
 // DELETE /api/ads/[id] - Delete ad campaign from Appwrite
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<any> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     if (!id) {
       return NextResponse.json({ success: false, error: 'Campaign ID is required' }, { status: 400 });

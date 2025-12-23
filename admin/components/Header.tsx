@@ -4,20 +4,31 @@ import { Fragment } from 'react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Menu, Transition } from '@headlessui/react'
 import { classNames } from '@/lib/utils'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function Header({
   setSidebarOpen,
 }: {
   setSidebarOpen: (open: boolean) => void
 }) {
+  const { admin, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/auth/login');
+  };
+
   return (
-    <header className="z-10 py-4 glass-effect border-b border-gray-700/50 shadow-lg">
+    <header className="z-20 py-4 glass-effect border-b border-gray-700/50 shadow-lg" style={{ zIndex: 20 }}>
       <div className="container flex items-center justify-between h-full px-6 mx-auto">
         {/* Mobile hamburger */}
         <button
           className="p-2 mr-5 -ml-1 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-white md:hidden"
           onClick={() => setSidebarOpen(true)}
           aria-label="Menu"
+          style={{ zIndex: 25 }}
         >
           <Bars3Icon className="w-6 h-6" aria-hidden="true" />
         </button>
@@ -85,15 +96,15 @@ export default function Header({
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-xl glass-effect border border-gray-700/50 shadow-2xl">
+                <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-black  border border-gray-700/50 shadow-2xl">
                   <Menu.Item>
                     {({ active }: { active: boolean }) => (
                       <a
                         href="#"
-                        className={classNames(active ? 'bg-gray-700/50' : '', 'block px-4 py-3 text-sm text-white')}
+                        className={classNames(active ? 'bg-gray-700/10' : '', 'block px-4 py-3 text-sm text-white')}
                       >
-                        <div className="font-medium">Admin User</div>
-                        <div className="text-gray-300 text-xs">admin@ekehi.com</div>
+                        <div className="font-medium">{admin?.name || 'Admin User'}</div>
+                        <div className="text-gray-300 text-xs">{admin?.email || 'admin@ekehi.com'}</div>
                       </a>
                     )}
                   </Menu.Item>
@@ -123,7 +134,11 @@ export default function Header({
                     {({ active }: { active: boolean }) => (
                       <a
                         href="#"
-                        className={classNames(active ? 'bg-red-500/20' : '', 'block px-4 py-2 text-sm text-red-400')}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleLogout();
+                        }}
+                        className={classNames(active ? 'bg-red-500/20' : '', 'block px-4 py-2 text-sm text-red-400 cursor-pointer')}
                       >
                         Sign out
                       </a>

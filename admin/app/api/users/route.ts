@@ -132,9 +132,9 @@ export async function POST(request: Request) {
 }
 
 // DELETE /api/users/[id] - Delete user from Appwrite
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<any> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     if (!id) {
       return NextResponse.json({ success: false, error: 'User ID is required' }, { status: 400 });

@@ -1,15 +1,24 @@
 {
-  "name": "scripts",
+  "name": "ekehi-appwrite-scripts",
   "version": "1.0.0",
-  "description": "",
-  "main": "add-wallet-attribute.js",
+  "description": "Appwrite database management scripts for Ekehi Network",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup-collections": "node setup-appwrite-collections.js",
+    "update-user-social-tasks": "node update-user-social-tasks-collection.js",
+    "add-telegram-index": "node add-telegram-id-unique-index.js",
+    "verify-telegram-uniqueness": "node verify-telegram-uniqueness.js",
+    "test-connection": "node test-appwrite-connection.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "node-appwrite": "^21.0.0"
-  }
+    "node-appwrite": "^11.1.1"
+  },
+  "keywords": [
+    "appwrite",
+    "database",
+    "migration",
+    "ekehi"
+  ],
+  "author": "Ekehi Network",
+  "license": "MIT"
 }

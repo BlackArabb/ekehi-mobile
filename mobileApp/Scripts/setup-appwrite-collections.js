@@ -131,7 +131,8 @@ const COLLECTIONS_SCHEMA = {
       { key: 'userId', type: 'string', size: 255, required: true },
       { key: 'taskId', type: 'string', size: 255, required: true },
       { key: 'completedAt', type: 'datetime', required: true },
-      { key: 'username', type: 'string', size: 255, required: false }
+      { key: 'username', type: 'string', size: 255, required: false },
+      { key: 'telegram_user_id', type: 'integer', required: false } // Added for Telegram ID uniqueness
     ]
   },
 

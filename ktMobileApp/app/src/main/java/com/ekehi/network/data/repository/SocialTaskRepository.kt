@@ -85,7 +85,7 @@ open class SocialTaskRepository @Inject constructor(
                 val tasksWithStatus = allTasks.map { task ->
                     val userTask = userTaskMap[task.id]
                     task.copy(
-                        isCompleted = userTask != null,
+                        isCompleted = userTask != null && userTask.status == "verified", // Only completed when verified
                         isVerified = userTask?.status == "verified",
                         status = userTask?.status,
                         completedAt = userTask?.completedAt,
@@ -328,6 +328,24 @@ open class SocialTaskRepository @Inject constructor(
             // Add username if provided
             username?.let { data["username"] = it }
             
+            // Extract and add telegram_user_id if present in proofData for indexing
+            proofData?.let { pd ->
+                if (pd.containsKey("telegram_user_id")) {
+                    pd["telegram_user_id"]?.let { telegramId ->
+                        when (telegramId) {
+                            is Long -> data["telegram_user_id"] = telegramId
+                            is Int -> data["telegram_user_id"] = telegramId.toLong()
+                            is String -> {
+                                telegramId.toLongOrNull()?.let { data["telegram_user_id"] = it }
+                            }
+                            else -> {
+                                // Handle other types or null values
+                            }
+                        }
+                    }
+                }
+            }
+
             // Convert proofData to JSON string for Appwrite storage
             proofData?.let { 
                 data["proofData"] = gson.toJson(it)
@@ -362,6 +380,24 @@ open class SocialTaskRepository @Inject constructor(
             
             // Add username if provided
             username?.let { data["username"] = it }
+            
+            // Extract and add telegram_user_id if present in proofData for indexing
+            proofData?.let { pd ->
+                if (pd.containsKey("telegram_user_id")) {
+                    pd["telegram_user_id"]?.let { telegramId ->
+                        when (telegramId) {
+                            is Long -> data["telegram_user_id"] = telegramId
+                            is Int -> data["telegram_user_id"] = telegramId.toLong()
+                            is String -> {
+                                telegramId.toLongOrNull()?.let { data["telegram_user_id"] = it }
+                            }
+                            else -> {
+                                // Handle other types or null values
+                            }
+                        }
+                    }
+                }
+            }
             
             // Convert proofData to JSON string for Appwrite storage
             proofData?.let { 

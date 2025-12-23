@@ -132,7 +132,9 @@ class SocialVerificationService @Inject constructor(
     ): VerificationResult {
         val hasProof = proofData?.containsKey("screenshot_url") == true ||
                       proofData?.containsKey("proof_url") == true ||
-                      proofData?.containsKey("username") == true
+                      proofData?.containsKey("username") == true ||
+                      proofData?.containsKey("submitted_username") == true ||
+                      proofData?.containsKey("submitted_proof_url") == true
         
         return if (hasProof) {
             VerificationResult.Pending("⏳ Submitted for manual review. Usually takes 24-48 hours.")
