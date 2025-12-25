@@ -4,31 +4,54 @@ import type { NextRequest } from 'next/server'
 // List of paths that require authentication
 const protectedPaths = [
   '/dashboard',
-  '/api/users',
-  '/api/presale',
-  '/api/wallet',
-  '/api/social',
-  '/api/ads'
 ]
 
-export function middleware(request: NextRequest) {
+// Public paths that should always be accessible
+const publicPaths = [
+  '/auth/login',
+  '/auth/register',
+  '/',
+]
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  
+  // Allow public paths
+  const isPublicPath = publicPaths.some(path => pathname === path || pathname.startsWith(path))
+  if (isPublicPath) {
+    return NextResponse.next()
+  }
+  
+  // Allow all API routes (they handle their own auth)
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
   
   // Check if the path requires authentication
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
   
   if (isProtectedPath) {
-    // In a real implementation, you would check for a valid session/cookie
-    // For now, we'll allow access to all paths for demonstration purposes
-    // In a real app, you would redirect to login if not authenticated
-    const isAdminAuthenticated = true // Placeholder - replace with actual auth check
+    // Get all Appwrite session cookies
+    // Appwrite creates cookies with pattern: a_session_{projectId}_{sessionId}
+    const cookies = request.cookies.getAll()
+    const hasAppwriteSession = cookies.some(cookie => 
+      cookie.name.startsWith('a_session_')
+    )
     
-    if (!isAdminAuthenticated) {
-      // Redirect to login page
-      return NextResponse.redirect(new URL('/auth/login', request.url))
+    // If no Appwrite session cookie exists, redirect to login
+    if (!hasAppwriteSession) {
+      console.log('No Appwrite session found, redirecting to login')
+      const loginUrl = new URL('/auth/login', request.url)
+      return NextResponse.redirect(loginUrl)
     }
+    
+    // If session cookie exists, allow access
+    // Client-side will handle validation
+    console.log('Appwrite session found, allowing access')
+    return NextResponse.next()
   }
   
+  // Allow all other paths
   return NextResponse.next()
 }
 
@@ -37,11 +60,11 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - images, icons, and other static assets
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }

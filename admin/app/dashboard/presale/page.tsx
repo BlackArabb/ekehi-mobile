@@ -293,13 +293,108 @@ export default function PresalePage() {
 
   if (loading) {
     return (
-      <div className="py-6">
+      <div className="py-6 relative">
+        <div className="particles"></div>
+        
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Presale Management</h1>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+              Presale Management
+            </h1>
+            <div className="text-sm text-gray-400">
+              Loading...
+            </div>
+          </div>
         </div>
+        
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <div className="mt-8 flex justify-center items-center h-64 glass-effect rounded-2xl border border-purple-500/20">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
+          {/* Stats Skeletons */}
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+                <div className="p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
+                      <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <div className="h-4 bg-gray-700/50 rounded w-24 mb-3 animate-pulse"></div>
+                      <div className="h-8 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Charts Skeletons */}
+          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
+                <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
+              </div>
+              <div className="p-5">
+                <div className="h-80 bg-gray-700/50 rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
+              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
+                <div className="h-6 bg-gray-700/50 rounded w-40 animate-pulse"></div>
+              </div>
+              <div className="p-5">
+                <div className="h-80 bg-gray-700/50 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Settings Skeleton */}
+          <div className="mt-8 glass-effect rounded-2xl border border-purple-500/20 p-6 shadow-xl">
+            <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={`setting-skeleton-${index}`} className="animate-pulse">
+                  <div className="h-4 bg-gray-700/50 rounded w-24 mb-2"></div>
+                  <div className="h-10 bg-gray-700/50 rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Search Filter Skeleton */}
+          <div className="mt-8 glass-effect rounded-2xl border border-purple-500/20 p-6 shadow-xl">
+            <div className="h-40 bg-gray-700/50 rounded animate-pulse"></div>
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="mt-8 glass-effect rounded-2xl border border-purple-500/20 shadow-xl overflow-hidden">
+            <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
+              <div className="h-6 bg-gray-700/50 rounded w-40 animate-pulse"></div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-700/50">
+                <thead className="glass-effect">
+                  <tr>
+                    {Array.from({ length: 7 }).map((_, index) => (
+                      <th key={index} className="px-6 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">
+                        <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700/30">
+                  {Array.from({ length: 5 }).map((_, rowIndex) => (
+                    <tr key={rowIndex} className="hover:bg-white/5 transition-colors duration-200">
+                      {Array.from({ length: 7 }).map((_, colIndex) => (
+                        <td key={colIndex} className="px-6 py-5 whitespace-nowrap animate-pulse">
+                          <div className="h-4 bg-gray-700/50 rounded w-24"></div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -326,68 +421,90 @@ export default function PresalePage() {
         
         {/* Stats */}
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-            <div className="p-6 animated-gradient-slow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
-                  <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="truncate text-sm font-medium text-gray-300">Total Raised</dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-3xl font-bold text-white drop-shadow-lg">${stats.totalRaised.toLocaleString()}</div>
-                      <div className="ml-2 text-sm text-green-400">+15%</div>
-                    </dd>
-                  </dl>
+          {loading && stats.totalRaised === 0 ? (
+            // Show skeleton loaders when stats are loading
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+                <div className="p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
+                      <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <div className="h-4 bg-gray-700/50 rounded w-24 mb-3 animate-pulse"></div>
+                      <div className="h-8 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
-            <div className="p-6 animated-gradient-slow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-3 shadow-lg">
-                  <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="truncate text-sm font-medium text-gray-300">Tokens Sold</dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.tokensSold.toLocaleString()}</div>
-                      <div className="ml-2 text-sm text-green-400">+12%</div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
-            <div className="p-6 animated-gradient-slow">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg">
-                  <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="truncate text-sm font-medium text-gray-300">Participants</dt>
-                    <dd className="flex items-baseline">
-                      <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.participants}</div>
-                      <div className="ml-2 text-sm text-green-400">+8%</div>
-                    </dd>
-                  </dl>
+            ))
+          ) : (
+            // Show actual stats
+            <>
+              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+                <div className="p-6 animated-gradient-slow">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
+                      <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="truncate text-sm font-medium text-gray-300">Total Raised</dt>
+                        <dd className="flex items-baseline">
+                          <div className="text-3xl font-bold text-white drop-shadow-lg">${stats.totalRaised.toLocaleString()}</div>
+                          <div className="ml-2 text-sm text-green-400">+15%</div>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+              
+              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
+                <div className="p-6 animated-gradient-slow">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-3 shadow-lg">
+                      <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="truncate text-sm font-medium text-gray-300">Tokens Sold</dt>
+                        <dd className="flex items-baseline">
+                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.tokensSold.toLocaleString()}</div>
+                          <div className="ml-2 text-sm text-green-400">+12%</div>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
+                <div className="p-6 animated-gradient-slow">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg">
+                      <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="truncate text-sm font-medium text-gray-300">Participants</dt>
+                        <dd className="flex items-baseline">
+                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.participants}</div>
+                          <div className="ml-2 text-sm text-green-400">+8%</div>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
       
@@ -408,38 +525,64 @@ export default function PresalePage() {
         {/* Charts */}
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Sales Chart */}
-          <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-            <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
-              <h3 className="text-lg font-bold leading-6 text-white">Sales Trend</h3>
+          {loading && salesData.length === 0 ? (
+            // Show skeleton loader when chart is loading
+            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
+                <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
+              </div>
+              <div className="p-5">
+                <div className="h-80 bg-gray-700/50 rounded animate-pulse"></div>
+              </div>
             </div>
-            <div className="p-5">
-              <DashboardChart 
-                title="Sales Trend"
-                type="bar"
-                data={salesData}
-                dataKey="sales"
-                nameKey="name"
-                height={300}
-              />
+          ) : (
+            // Show actual chart
+            <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
+                <h3 className="text-lg font-bold leading-6 text-white">Sales Trend</h3>
+              </div>
+              <div className="p-5">
+                <DashboardChart 
+                  title="Sales Trend"
+                  type="bar"
+                  data={salesData}
+                  dataKey="sales"
+                  nameKey="name"
+                  height={300}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Status Distribution */}
-          <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
-            <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
-              <h3 className="text-lg font-bold leading-6 text-white">Status Distribution</h3>
+          {loading && statusData.length === 0 ? (
+            // Show skeleton loader when chart is loading
+            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
+              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
+                <div className="h-6 bg-gray-700/50 rounded w-40 animate-pulse"></div>
+              </div>
+              <div className="p-5">
+                <div className="h-80 bg-gray-700/50 rounded animate-pulse"></div>
+              </div>
             </div>
-            <div className="p-5">
-              <DashboardChart 
-                title="Status Distribution"
-                type="pie"
-                data={statusData}
-                dataKey="value"
-                nameKey="name"
-                height={300}
-              />
+          ) : (
+            // Show actual chart
+            <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
+              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
+                <h3 className="text-lg font-bold leading-6 text-white">Status Distribution</h3>
+              </div>
+              <div className="p-5">
+                <DashboardChart 
+                  title="Status Distribution"
+                  type="pie"
+                  data={statusData}
+                  dataKey="value"
+                  nameKey="name"
+                  height={300}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
         
         {/* Settings */}
@@ -564,69 +707,110 @@ export default function PresalePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/30">
-                {filteredAndSortedPresales.map((presale) => (
-                  <tr key={presale.id} className="hover:bg-white/5 transition-colors duration-200">
-                    <td className="px-6 py-5 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-12 w-12">
-                          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                            <span className="text-white font-bold text-lg">
-                              {presale.userName.charAt(0)}
-                            </span>
+                {loading && filteredAndSortedPresales.length === 0 ? (
+                  // Show skeleton loaders when loading
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <tr key={`skeleton-${index}`} className="hover:bg-white/5 transition-colors duration-200">
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-12 w-12">
+                            <div className="h-12 w-12 rounded-full bg-gray-700/50 animate-pulse"></div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="h-4 bg-gray-700/50 rounded w-24 mb-2 animate-pulse"></div>
+                            <div className="h-3 bg-gray-700/50 rounded w-16 animate-pulse"></div>
                           </div>
                         </div>
-                        <div className="ml-4">
-                          <div className="text-base font-bold text-white">{presale.userName}</div>
-                          <div className="text-sm text-gray-400">ID: {presale.userId}</div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="h-5 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700/50 rounded w-20 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700/50 rounded w-20 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap text-sm">
+                        <div className="flex space-x-4">
+                          <div className="h-5 bg-gray-700/50 rounded w-12 animate-pulse"></div>
+                          <div className="h-5 bg-gray-700/50 rounded w-12 animate-pulse"></div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 whitespace-nowrap text-base font-bold text-cyan-400">
-                      ${presale.amountUsd.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-5 whitespace-nowrap text-base font-bold text-purple-400">
-                      {presale.tokensAmount.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-5 whitespace-nowrap">
-                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        presale.status === 'completed' 
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                          : presale.status === 'pending'
-                          ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                          : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                      }`}>
-                        {presale.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-300">
-                      {presale.transactionHash ? (
-                        <span className="font-mono text-xs">{presale.transactionHash.substring(0, 10)}...</span>
-                      ) : (
-                        <span className="text-gray-500">N/A</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-400">
-                      {formatDate(presale.createdAt)}
-                    </td>
-                    <td className="px-6 py-5 whitespace-nowrap text-sm">
-                      <button 
-                        onClick={() => {
-                          setSelectedPresale(presale)
-                          setShowEditModal(true)
-                        }}
-                        className="text-cyan-400 hover:text-cyan-300 font-medium mr-4 transition-colors duration-200"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDeletePresale(presale.id)}
-                        className="text-red-500 hover:text-red-400 font-medium transition-colors duration-200"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  // Show actual presale data
+                  filteredAndSortedPresales.map((presale) => (
+                    <tr key={presale.id} className="hover:bg-white/5 transition-colors duration-200">
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-12 w-12">
+                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                              <span className="text-white font-bold text-lg">
+                                {presale.userName.charAt(0)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-base font-bold text-white">{presale.userName}</div>
+                            <div className="text-sm text-gray-400">ID: {presale.userId}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap text-base font-bold text-cyan-400">
+                        ${presale.amountUsd.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap text-base font-bold text-purple-400">
+                        {presale.tokensAmount.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          presale.status === 'completed' 
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                            : presale.status === 'pending'
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        }`}>
+                          {presale.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-300">
+                        {presale.transactionHash ? (
+                          <span className="font-mono text-xs">{presale.transactionHash.substring(0, 10)}...</span>
+                        ) : (
+                          <span className="text-gray-500">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-400">
+                        {formatDate(presale.createdAt)}
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap text-sm">
+                        <button 
+                          onClick={() => {
+                            setSelectedPresale(presale)
+                            setShowEditModal(true)
+                          }}
+                          className="text-cyan-400 hover:text-cyan-300 font-medium mr-4 transition-colors duration-200"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDeletePresale(presale.id)}
+                          className="text-red-500 hover:text-red-400 font-medium transition-colors duration-200"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

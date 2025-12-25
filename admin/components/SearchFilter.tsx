@@ -53,19 +53,19 @@ export default function SearchFilter({
   }
 
   return (
-    <div className="mb-6 bg-white rounded-lg shadow p-4">
+    <div className="mb-6 glass-effect rounded-2xl border border-purple-500/20 p-6 shadow-xl">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Search Input */}
         <div className="md:col-span-2">
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="search" className="block text-sm font-medium text-gray-300 mb-1">
             Search
           </label>
-          <div className="relative rounded-md shadow-sm">
+          <div className="relative rounded-lg">
             <input
               type="text"
               id="search"
-              className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 py-2 sm:text-sm border-gray-300 rounded-md"
-              placeholder="Search..."
+              className="block w-full py-3 px-4 bg-gray-800/50 border border-gray-700/50 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+              placeholder="Search users..."
               value={searchQuery}
               onChange={handleSearchChange}
             />
@@ -80,18 +80,18 @@ export default function SearchFilter({
         {/* Filter Options */}
         {filterOptions.map((filter) => (
           <div key={filter.name}>
-            <label htmlFor={filter.name} className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor={filter.name} className="block text-sm font-medium text-gray-300 mb-1">
               {filter.name}
             </label>
             <select
               id={filter.name}
-              className="focus:ring-indigo-500 focus:border-indigo-500 block w-full py-2 sm:text-sm border-gray-300 rounded-md"
+              className="block w-full py-3 px-3 bg-gray-800/50 border border-gray-700/50 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg"
               value={filters[filter.name] || ''}
               onChange={(e) => handleFilterChange(filter.name, e.target.value)}
             >
-              <option value="">All</option>
+              <option value="" className="bg-gray-800">All</option>
               {filter.options.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className="bg-gray-800">
                   {option.label}
                 </option>
               ))}
@@ -102,18 +102,18 @@ export default function SearchFilter({
         {/* Sort Options */}
         {sortOptions.length > 0 && (
           <div>
-            <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="sort" className="block text-sm font-medium text-gray-300 mb-1">
               Sort By
             </label>
             <select
               id="sort"
-              className="focus:ring-indigo-500 focus:border-indigo-500 block w-full py-2 sm:text-sm border-gray-300 rounded-md"
+              className="block w-full py-3 px-3 bg-gray-800/50 border border-gray-700/50 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg"
               value={`${sortBy}:${sortOrder}`}
               onChange={handleSortChange}
             >
-              <option value="">Default</option>
+              <option value="" className="bg-gray-800">Default</option>
               {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className="bg-gray-800">
                   {option.label}
                 </option>
               ))}
@@ -126,7 +126,7 @@ export default function SearchFilter({
       <div className="mt-4 flex justify-end">
         <button
           type="button"
-          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 rounded-lg transition-colors duration-200"
           onClick={clearFilters}
         >
           Clear Filters

@@ -15,15 +15,16 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { classNames } from '@/lib/utils'
+import { usePathname } from 'next/navigation'
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: true },
-  { name: 'Users', href: '/dashboard/users', icon: UsersIcon, current: false },
-  { name: 'Presale', href: '/dashboard/presale', icon: CurrencyDollarIcon, current: false },
-  { name: 'Wallet', href: '/dashboard/wallet', icon: WalletIcon, current: false },
-  { name: 'Social Tasks', href: '/dashboard/social', icon: MegaphoneIcon, current: false },
-  { name: 'Ads', href: '/dashboard/ads', icon: GiftIcon, current: false },
-  { name: 'Settings', href: '/dashboard/settings', icon: CogIcon, current: false },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Users', href: '/dashboard/users', icon: UsersIcon },
+  { name: 'Presale', href: '/dashboard/presale', icon: CurrencyDollarIcon },
+  { name: 'Wallet', href: '/dashboard/wallet', icon: WalletIcon },
+  { name: 'Social Tasks', href: '/dashboard/social', icon: MegaphoneIcon },
+  { name: 'Ads', href: '/dashboard/ads', icon: GiftIcon },
+  { name: 'Settings', href: '/dashboard/settings', icon: CogIcon },
 ]
 
 export default function Sidebar({
@@ -34,6 +35,7 @@ export default function Sidebar({
   setSidebarOpen: (open: boolean) => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const pathname = usePathname()
 
   // Function to toggle sidebar expansion
   const toggleExpansion = () => {
@@ -97,12 +99,14 @@ export default function Sidebar({
                     </div>
                   </div>
                   <nav className="mt-5 space-y-1 px-2">
-                    {navigation.map((item) => (
+                    {navigation.map((item) => {
+                    const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/dashboard')
+                    return (
                       <a
                         key={item.name}
                         href={item.href}
                         className={classNames(
-                          item.current
+                          isActive
                             ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-white border-l-4 border-purple-500'
                             : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
                           'group flex items-center px-2 py-3 text-base font-medium rounded-lg transition-all duration-200'
@@ -110,7 +114,7 @@ export default function Sidebar({
                       >
                         <item.icon
                           className={classNames(
-                            item.current
+                            isActive
                               ? 'text-purple-400'
                               : 'text-gray-400 group-hover:text-cyan-400',
                             'mr-4 h-6 w-6 flex-shrink-0'
@@ -119,7 +123,8 @@ export default function Sidebar({
                         />
                         {item.name}
                       </a>
-                    ))}
+                    )
+                  })}
                   </nav>
                 </div>
               </Dialog.Panel>
@@ -153,32 +158,35 @@ export default function Sidebar({
           </div>
           
           <nav className="mt-5 flex-1 px-2 space-y-1">
-            {navigation.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className={classNames(
-                  item.current
-                    ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-white'
-                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
-                  'group flex items-center rounded-lg transition-all duration-200 py-3',
-                  expanded ? 'px-3' : 'justify-center px-3'
-                )}
-              >
-                <item.icon
+            {navigation.map((item) => {
+              const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/dashboard')
+              return (
+                <a
+                  key={item.name}
+                  href={item.href}
                   className={classNames(
-                    item.current
-                      ? 'text-purple-400'
-                      : 'text-gray-400 group-hover:text-cyan-400',
-                    'h-6 w-6 flex-shrink-0'
+                    isActive
+                      ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-white'
+                      : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
+                    'group flex items-center rounded-lg transition-all duration-200 py-3',
+                    expanded ? 'px-3' : 'justify-center px-3'
                   )}
-                  aria-hidden="true"
-                />
-                {expanded && (
-                  <span className="ml-3 text-sm font-medium">{item.name}</span>
-                )}
-              </a>
-            ))}
+                >
+                  <item.icon
+                    className={classNames(
+                      isActive
+                        ? 'text-purple-400'
+                        : 'text-gray-400 group-hover:text-cyan-400',
+                      'h-6 w-6 flex-shrink-0'
+                    )}
+                    aria-hidden="true"
+                  />
+                  {expanded && (
+                    <span className="ml-3 text-sm font-medium">{item.name}</span>
+                  )}
+                </a>
+              )
+            })}
           </nav>
         </div>
       </div>

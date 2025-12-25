@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { databases } from '@/lib/appwrite';
+import { Query } from 'appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
 export async function GET(request: Request) {
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
     const pendingSubmissionsResponse = await databases.listDocuments(
       API_CONFIG.DATABASE_ID,
       userSocialTasksCollection,
-      ['equal("status", ["pending"])']
+      [Query.equal('status', ['pending'])]
     );
     const pendingSubmissions = pendingSubmissionsResponse.total;
 
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
     const verifiedSubmissionsResponse = await databases.listDocuments(
       API_CONFIG.DATABASE_ID,
       userSocialTasksCollection,
-      ['equal("status", ["verified"])']
+      [Query.equal('status', ['verified'])]
     );
     const verifiedSubmissions = verifiedSubmissionsResponse.total;
 
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
     const rejectedSubmissionsResponse = await databases.listDocuments(
       API_CONFIG.DATABASE_ID,
       userSocialTasksCollection,
-      ['equal("status", ["rejected"])']
+      [Query.equal('status', ['rejected'])]
     );
     const rejectedSubmissions = rejectedSubmissionsResponse.total;
 
@@ -60,7 +61,7 @@ export async function GET(request: Request) {
     const recentActivityResponse = await databases.listDocuments(
       API_CONFIG.DATABASE_ID,
       userSocialTasksCollection,
-      ['orderDesc("$createdAt")', 'limit(10)']
+      [Query.orderDesc('$createdAt'), Query.limit(10)]
     );
     
     const recentActivity = recentActivityResponse.documents.map(doc => ({
