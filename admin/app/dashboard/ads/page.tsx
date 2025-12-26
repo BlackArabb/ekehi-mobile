@@ -317,29 +317,90 @@ export default function AdsPage() {
             <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
               <div className="h-6 bg-gray-700/50 rounded w-40 animate-pulse"></div>
             </div>
+            
             <div className="overflow-x-auto max-w-full">
-              <table className="min-w-full divide-y divide-gray-700/50">
-                <thead className="glass-effect">
-                  <tr>
-                    {Array.from({ length: 8 }).map((_, index) => (
-                      <th key={index} className="px-6 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">
-                        <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700/30">
-                  {Array.from({ length: 5 }).map((_, rowIndex) => (
-                    <tr key={rowIndex} className="hover:bg-white/5 transition-colors duration-200">
-                      {Array.from({ length: 8 }).map((_, colIndex) => (
-                        <td key={colIndex} className="px-6 py-5 whitespace-nowrap animate-pulse">
-                          <div className="h-4 bg-gray-700/50 rounded w-24"></div>
-                        </td>
+              {/* Mobile view - Skeleton cards */}
+              <div className="block md:hidden">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div key={`skeleton-card-${index}`} className="bg-gray-800/30 m-4 p-4 rounded-lg border border-gray-700/50 animate-pulse">
+                    <div className="flex items-center mb-4">
+                      <div className="h-10 w-10 rounded-full bg-gray-700/50 mr-3"></div>
+                      <div>
+                        <div className="h-4 bg-gray-700/50 rounded w-24 mb-2"></div>
+                        <div className="h-3 bg-gray-700/50 rounded w-32"></div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                      <div><div className="h-3 bg-gray-700/50 rounded w-16"></div></div>
+                      <div><div className="h-3 bg-gray-700/50 rounded w-16"></div></div>
+                      <div><div className="h-3 bg-gray-700/50 rounded w-16"></div></div>
+                      <div><div className="h-3 bg-gray-700/50 rounded w-16"></div></div>
+                    </div>
+                    <div className="mt-3 flex justify-end space-x-2">
+                      <div className="h-5 bg-gray-700/50 rounded w-16"></div>
+                      <div className="h-5 bg-gray-700/50 rounded w-12"></div>
+                      <div className="h-5 bg-gray-700/50 rounded w-12"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Desktop view - Skeleton table */}
+              <div className="hidden md:block min-w-full">
+                <table className="min-w-full divide-y divide-gray-700/50">
+                  <thead className="glass-effect">
+                    <tr>
+                      {Array.from({ length: 8 }).map((_, index) => (
+                        <th key={index} className="px-6 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">
+                          <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700/30">
+                    {Array.from({ length: 5 }).map((_, rowIndex) => (
+                      <tr key={rowIndex} className="hover:bg-white/5 transition-colors duration-200">
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              <div className="h-10 w-10 rounded-full bg-gray-700/50 animate-pulse"></div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="h-4 bg-gray-700/50 rounded w-24 mb-2 animate-pulse"></div>
+                              <div className="h-3 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="h-4 bg-gray-700/50 rounded w-20 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="h-4 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="h-5 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap text-sm">
+                          <div className="flex space-x-4">
+                            <div className="h-5 bg-gray-700/50 rounded w-12 animate-pulse"></div>
+                            <div className="h-5 bg-gray-700/50 rounded w-12 animate-pulse"></div>
+                            <div className="h-5 bg-gray-700/50 rounded w-12 animate-pulse"></div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

@@ -209,7 +209,17 @@ open class SocialTaskRepository @Inject constructor(
                 
             } catch (e: Exception) {
                 Log.e("SocialTaskRepository", "Error completing task: ${e.message}", e)
-                Result.failure(e)
+                
+                // Check if this is a unique constraint error related to telegram_user_id
+                val errorMessage = e.message?.lowercase() ?: ""
+                if (errorMessage.contains("unique") || errorMessage.contains("duplicate") || 
+                    errorMessage.contains("telegram_user_id")) {
+                    // This might be the issue where the same telegram_user_id is being used
+                    // The error message could be more descriptive
+                    Result.failure(Exception("Telegram ID already used for this task type. You can't complete the same task twice, but if you're trying different tasks, please contact support."))
+                } else {
+                    Result.failure(e)
+                }
             }
         }
     }
@@ -328,7 +338,9 @@ open class SocialTaskRepository @Inject constructor(
             // Add username if provided
             username?.let { data["username"] = it }
             
-            // Extract and add telegram_user_id if present in proofData for indexing
+            // Extract and add telegram_user_id if present in proofData for verification
+            // NOTE: This field should NOT be part of a unique constraint alone
+            // The unique constraint should be on userId + taskId combination
             proofData?.let { pd ->
                 if (pd.containsKey("telegram_user_id")) {
                     pd["telegram_user_id"]?.let { telegramId ->
@@ -381,7 +393,9 @@ open class SocialTaskRepository @Inject constructor(
             // Add username if provided
             username?.let { data["username"] = it }
             
-            // Extract and add telegram_user_id if present in proofData for indexing
+            // Extract and add telegram_user_id if present in proofData for verification
+            // NOTE: This field should NOT be part of a unique constraint alone
+            // The unique constraint should be on userId + taskId combination
             proofData?.let { pd ->
                 if (pd.containsKey("telegram_user_id")) {
                     pd["telegram_user_id"]?.let { telegramId ->

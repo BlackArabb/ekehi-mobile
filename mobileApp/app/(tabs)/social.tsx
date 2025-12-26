@@ -156,6 +156,34 @@ export default function SocialPage() {
           );
           break;
           
+        case 'telegram':
+          // For Telegram tasks, we need to get the Telegram ID from the user
+          Alert.alert(
+            'Telegram Verification',
+            `Please complete the task "${task.title}" in Telegram, then provide your Telegram ID to verify completion.`,
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+                onPress: () => {
+                  setCompletingTasks(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(task.id);
+                    return newSet;
+                  });
+                }
+              },
+              {
+                text: 'Verify',
+                style: 'default',
+                onPress: () => {
+                  completeTask(task);
+                }
+              }
+            ]
+          );
+          break;
+          
         default:
           // Default to manual verification for unknown methods
           Alert.alert(
@@ -198,17 +226,40 @@ export default function SocialPage() {
     try {
       if (!user) return;
       
-      // Create user task completion record
-      await databases.createDocument(
-        appwriteConfig.databaseId,
-        appwriteConfig.collections.userSocialTasks,
-        ID.unique(),
-        {
-          userId: user.id,
-          taskId: task.id,
-          completedAt: new Date().toISOString()
+      // Check if it's a Telegram task that requires additional verification
+      if (task.platform.toLowerCase() === 'telegram') {
+        // For Telegram tasks, we need to get the Telegram ID from the user
+        const telegramUserId = await promptForTelegramUserId();
+        if (!telegramUserId) {
+          Alert.alert('Verification Required', 'Please provide your Telegram User ID to complete this task.');
+          return;
         }
-      );
+        
+        // Create user task completion record with Telegram ID
+        await databases.createDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.collections.userSocialTasks,
+          ID.unique(),
+          {
+            userId: user.id,
+            taskId: task.id,
+            completedAt: new Date().toISOString(),
+            telegram_user_id: parseInt(telegramUserId) // Store as integer as per database schema
+          }
+        );
+      } else {
+        // For non-Telegram tasks, create completion record without Telegram ID
+        await databases.createDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.collections.userSocialTasks,
+          ID.unique(),
+          {
+            userId: user.id,
+            taskId: task.id,
+            completedAt: new Date().toISOString()
+          }
+        );
+      }
 
       // Update user profile with reward
       // First, we need to get the current user profile
@@ -245,7 +296,14 @@ export default function SocialPage() {
       Alert.alert('Success!', `You earned ${task.rewardCoins} EKH tokens!`);
     } catch (error) {
       console.error('Failed to complete task:', error);
-      Alert.alert('Error', 'Failed to complete task. Please try again.');
+      
+      // Check if it's a unique constraint error (duplicate attempt)
+      const errorMessage = (error as Error).message || '';
+      if (errorMessage.includes('unique') || errorMessage.includes('duplicate')) {
+        Alert.alert('Already Completed', 'It appears you have already completed this task with this account.');
+      } else {
+        Alert.alert('Error', 'Failed to complete task. Please try again.');
+      }
     } finally {
       setCompletingTasks(prev => {
         const newSet = new Set(prev);
@@ -253,6 +311,37 @@ export default function SocialPage() {
         return newSet;
       });
     }
+  };
+  
+  // Function to prompt user for their Telegram User ID
+  const promptForTelegramUserId = (): Promise<string | null> => {
+    return new Promise((resolve) => {
+      Alert.prompt(
+        'Telegram Verification',
+        'Please enter your Telegram User ID to verify this task. You can get your ID by messaging @ekehi_network_bot and using the /id command:',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => resolve(null)
+          },
+          {
+            text: 'Submit',
+            onPress: (value) => {
+              if (value && /^[0-9]+$/.test(value.trim())) {
+                resolve(value.trim());
+              } else {
+                Alert.alert('Invalid Input', 'Please enter a valid Telegram User ID (numbers only).');
+                resolve(null);
+              }
+            }
+          }
+        ],
+        'plain-text',
+        '',
+        'numeric'
+      );
+    });
   };
 
   const getPlatformColors = (platform: string): [string, string] => {
