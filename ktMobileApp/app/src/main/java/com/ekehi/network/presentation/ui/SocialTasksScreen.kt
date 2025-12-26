@@ -400,14 +400,291 @@ fun SocialTasksScreen(
                     }
                 }
                 is Resource.Loading -> {
-                    Box(
+                    LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        CircularProgressIndicator(
-                            color = BrandColors.Primary,
-                            strokeWidth = 3.dp
-                        )
+                        // Skeleton for stats section
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(8.dp, RoundedCornerShape(20.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            colors = listOf(
+                                                BrandColors.CardBackground,
+                                                BrandColors.MediumGray
+                                            )
+                                        ),
+                                        RoundedCornerShape(20.dp)
+                                    )
+                                    .border(
+                                        width = 1.5.dp,
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                BrandColors.Primary,
+                                                BrandColors.PrimaryLight
+                                            )
+                                        ),
+                                        shape = RoundedCornerShape(20.dp)
+                                    )
+                                    .padding(20.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                // Completed tasks skeleton
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .background(
+                                                BrandColors.LightGray,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(60.dp)
+                                            .height(26.dp)
+                                            .background(
+                                                BrandColors.LightGray,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(50.dp)
+                                            .height(13.dp)
+                                            .background(
+                                                BrandColors.LightGray,
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                    )
+                                }
+                                
+                                Spacer(modifier = Modifier.width(16.dp))
+                                
+                                // EKH Earned skeleton
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .background(
+                                                BrandColors.LightGray,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(60.dp)
+                                            .height(26.dp)
+                                            .background(
+                                                BrandColors.LightGray,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(50.dp)
+                                            .height(13.dp)
+                                            .background(
+                                                BrandColors.LightGray,
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                    )
+                                }
+                            }
+                        }
+                        
+                        item {
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+                        
+                        // Skeleton for task cards
+                        items(5) { index ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(6.dp, RoundedCornerShape(20.dp)),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = BrandColors.CardBackground
+                                ),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Box {
+                                    // Gradient accent line at top
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(4.dp)
+                                            .background(
+                                                Brush.horizontalGradient(
+                                                    colors = listOf(
+                                                        BrandColors.Primary,
+                                                        BrandColors.PrimaryLight
+                                                    )
+                                                )
+                                            )
+                                    )
+                                    
+                                    Column(modifier = Modifier.padding(20.dp)) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.Top
+                                        ) {
+                                            // Platform icon skeleton
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(56.dp)
+                                                    .shadow(4.dp, RoundedCornerShape(16.dp))
+                                                    .background(
+                                                        BrandColors.LightGray,
+                                                        RoundedCornerShape(16.dp)
+                                                    )
+                                            )
+                                            
+                                            Spacer(Modifier.width(16.dp))
+                                            
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                // Title skeleton
+                                                Box(
+                                                    modifier = Modifier
+                                                        .width(120.dp)
+                                                        .height(20.dp)
+                                                        .background(
+                                                            BrandColors.LightGray,
+                                                            RoundedCornerShape(4.dp)
+                                                        )
+                                                )
+                                                
+                                                Spacer(Modifier.height(8.dp))
+                                                
+                                                // Description skeleton
+                                                repeat(2) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .height(14.dp)
+                                                            .background(
+                                                                BrandColors.LightGray,
+                                                                RoundedCornerShape(4.dp)
+                                                            )
+                                                            .padding(top = 2.dp)
+                                                    )
+                                                }
+                                                
+                                                Spacer(Modifier.height(8.dp))
+                                                
+                                                // Domain skeleton
+                                                Box(
+                                                    modifier = Modifier
+                                                        .width(80.dp)
+                                                        .height(12.dp)
+                                                        .background(
+                                                            BrandColors.LightGray,
+                                                            RoundedCornerShape(4.dp)
+                                                        )
+                                                )
+                                                
+                                                Spacer(Modifier.height(12.dp))
+                                                
+                                                // Verification badge skeleton
+                                                Box(
+                                                    modifier = Modifier
+                                                        .width(90.dp)
+                                                        .height(24.dp)
+                                                        .background(
+                                                            BrandColors.LightGray,
+                                                            RoundedCornerShape(8.dp)
+                                                        )
+                                                )
+                                            }
+                                        }
+                                        
+                                        Spacer(Modifier.height(16.dp))
+                                        
+                                        Divider(
+                                            color = BrandColors.LightGray.copy(alpha = 0.3f),
+                                            thickness = 1.dp
+                                        )
+                                        
+                                        Spacer(Modifier.height(16.dp))
+                                        
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // Reward badge skeleton
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(
+                                                        Brush.horizontalGradient(
+                                                            colors = listOf(
+                                                                BrandColors.Primary.copy(alpha = 0.2f),
+                                                                BrandColors.PrimaryLight.copy(alpha = 0.1f)
+                                                            )
+                                                        ),
+                                                        RoundedCornerShape(12.dp)
+                                                    )
+                                                    .border(
+                                                        1.5.dp,
+                                                        BrandColors.Primary.copy(alpha = 0.5f),
+                                                        RoundedCornerShape(12.dp)
+                                                    )
+                                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                            ) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(20.dp)
+                                                            .background(
+                                                                BrandColors.LightGray,
+                                                                RoundedCornerShape(4.dp)
+                                                            )
+                                                    )
+                                                    Spacer(Modifier.width(6.dp))
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .width(40.dp)
+                                                            .height(18.dp)
+                                                            .background(
+                                                                BrandColors.LightGray,
+                                                                RoundedCornerShape(4.dp)
+                                                            )
+                                                    )
+                                                }
+                                            }
+                                            
+                                            // Button skeleton
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(80.dp)
+                                                    .height(40.dp)
+                                                    .background(
+                                                        BrandColors.LightGray,
+                                                        RoundedCornerShape(12.dp)
+                                                    )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        item {
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
                     }
                 }
                 is Resource.Error -> {
