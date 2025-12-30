@@ -322,4 +322,5 @@ object AppModule {
     ): LoginViewModel {
         return LoginViewModel(authUseCase, userUseCase, analyticsManager, performanceMonitor)
     }
+
 }

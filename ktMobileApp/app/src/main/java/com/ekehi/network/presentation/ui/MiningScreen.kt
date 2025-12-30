@@ -29,12 +29,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.rememberCoroutineScope
 import com.ekehi.network.presentation.viewmodel.MiningViewModel
 import com.ekehi.network.service.MiningManager
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.data.model.UserProfile
+import com.ekehi.network.data.model.AdContent
+import com.ekehi.network.data.model.AdType
 import com.ekehi.network.domain.model.Resource
+import kotlinx.coroutines.launch
+import io.appwrite.Client
 import com.ekehi.network.presentation.ui.components.MiningScreenSkeleton
+import com.ekehi.network.presentation.ui.components.AdsCarousel
+import com.ekehi.network.presentation.ui.components.DualAdsCarousel
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -171,7 +178,43 @@ fun MiningScreen(
                 // Mining Stats - Pass the actual session earnings
                 MiningScreenStats(userProfile = userProfile, sessionEarnings = sessionEarnings)
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Dual Ads Carousel - Placeholder with Sample Data
+                // In a production implementation, this would fetch from Appwrite
+                DualAdsCarousel(
+                    imageAdsResource = Resource.Success(
+                        listOf(
+                            AdContent(
+                                id = "1",
+                                type = AdType.IMAGE,
+                                title = "Appwrite Banner",
+                                content = "https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k",
+                                actionUrl = "https://ekehi.xyz",
+                                isActive = true,
+                                priority = 1
+                            )
+                        )
+                    ),
+                    textAdsResource = Resource.Success(
+                        listOf(
+                            AdContent(
+                                id = "2",
+                                type = AdType.TEXT,
+                                title = "Join Our Community",
+                                content = "Join thousands of users earning EKH tokens daily!",
+                                actionUrl = "https://ekehi.xyz",
+                                isActive = true,
+                                priority = 1
+                            )
+                        )
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Enhanced Mining Button with Circular Progress
                 EnhancedMiningButton(
@@ -187,7 +230,7 @@ fun MiningScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Referral Card (invite/friend buttons only)
-                ReferralCard(navController = navController)
+                ReferralCard(navController = navController, userProfile = userProfile)
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -471,12 +514,6 @@ fun MiningScreenStats(userProfile: UserProfile?, sessionEarnings: Double) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 StatCard(
-                    value = "%.4f".format(userProfile?.autoMiningRate ?: 0.0833),
-                    label = "EKH/hour",
-                    icon = Icons.Default.Speed
-                )
-
-                StatCard(
                     value = "%.4f".format(userProfile?.totalCoins ?: 0.0),
                     label = "Total Mined",
                     iconPainter = painterResource(id = R.mipmap.ic_launcher)
@@ -542,7 +579,7 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
 
 
 @Composable
-fun ReferralCard(navController: NavHostController? = null) {
+fun ReferralCard(navController: NavHostController? = null, userProfile: UserProfile? = null) {
     val context = LocalContext.current
     
     Card(
@@ -617,10 +654,17 @@ fun ReferralCard(navController: NavHostController? = null) {
                 // Share Referral Link Button
                 Button(
                     onClick = { 
-                        // Share referral link outside the app
+                        // Share referral link outside the app with user's actual referral code
+                        val referralCode = userProfile?.referralCode ?: ""
+                        val message = if (referralCode.isNotEmpty()) {
+                            "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: $referralCode"
+                        } else {
+                            "Join Ekehi Network and earn EKH tokens! Download the app and start mining EKH!"
+                        }
+                        
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                            putExtra(Intent.EXTRA_TEXT, message)
                             type = "text/plain"
                         }
                         

@@ -78,15 +78,15 @@ open class UserUseCase @Inject constructor(
         emit(Resource.Loading)
         
         try {
-            // Get current date (normalized to start of day)
-            val todayCalendar = Calendar.getInstance().apply {
+            // Get current date (normalized to start of day) - USE UTC to match lastLoginCalendar
+            val todayCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
             }
             
-            Log.d(TAG, "Today's date: ${todayCalendar.time}")
+            Log.d(TAG, "Today's date (UTC): ${todayCalendar.time}")
             
             // Parse last login date if it exists
             val lastLoginCalendar = userProfile.lastLoginDate?.let { dateString ->
@@ -98,15 +98,16 @@ open class UserUseCase @Inject constructor(
                     Log.d(TAG, "Parsed date: $parsedDate")
                     
                     if (parsedDate != null) {
-                        Calendar.getInstance().apply {
-                            time = parsedDate
-                            set(Calendar.HOUR_OF_DAY, 0)
-                            set(Calendar.MINUTE, 0)
-                            set(Calendar.SECOND, 0)
-                            set(Calendar.MILLISECOND, 0)
-                        }.also {
-                            Log.d(TAG, "Normalized last login date: ${it.time}")
-                        }
+                        // Create calendar instance with UTC timezone to ensure consistency
+                        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                        calendar.time = parsedDate
+                        calendar.set(Calendar.HOUR_OF_DAY, 0)
+                        calendar.set(Calendar.MINUTE, 0)
+                        calendar.set(Calendar.SECOND, 0)
+                        calendar.set(Calendar.MILLISECOND, 0)
+                        
+                        Log.d(TAG, "Normalized last login date: ${calendar.time}")
+                        calendar
                     } else {
                         Log.w(TAG, "Parsed date is null")
                         null
@@ -123,8 +124,21 @@ open class UserUseCase @Inject constructor(
             var updatedStreakBonusClaimed = userProfile.streakBonusClaimed
             var bonusAwarded = false
             
-            // Check if this is a new day login - compare dates properly
-            val isNewDayLogin = lastLoginCalendar == null || lastLoginCalendar < todayCalendar
+            // Check if this is a new day login
+            val isNewDayLogin = when {
+                lastLoginCalendar == null -> {
+                    Log.d(TAG, "First login ever")
+                    true
+                }
+                isSameDay(lastLoginCalendar, todayCalendar) -> {
+                    Log.d(TAG, "Same day login detected")
+                    false
+                }
+                else -> {
+                    Log.d(TAG, "New day login detected")
+                    true
+                }
+            }
             
             Log.d(TAG, "isNewDayLogin: $isNewDayLogin")
             Log.d(TAG, "lastLoginCalendar: ${lastLoginCalendar?.time}")
@@ -161,8 +175,9 @@ open class UserUseCase @Inject constructor(
                         val newStreak = userProfile.currentStreak + 1
                         Log.d(TAG, "✅ Consecutive login! New streak: $newStreak")
                         
-                        // Check if user has reached 7 consecutive days for the first time
-                        if (newStreak == STREAK_BONUS_THRESHOLD && userProfile.streakBonusClaimed < 1) {
+                        // Check if user has reached 7 consecutive days
+                        // Award bonus when user completes 7 consecutive days and reset streak
+                        if (newStreak == STREAK_BONUS_THRESHOLD) {
                             // Award 5 EKH bonus
                             updatedTotalCoins += STREAK_BONUS_AMOUNT
                             updatedStreakBonusClaimed += 1
@@ -170,10 +185,14 @@ open class UserUseCase @Inject constructor(
                             
                             Log.d(TAG, "🎉🎉🎉 USER ACHIEVED 7-DAY STREAK!")
                             Log.d(TAG, "💰 Awarding $STREAK_BONUS_AMOUNT EKH bonus")
+                            
+                            // Reset streak to 1 after achieving 7-day streak
+                            Log.d(TAG, "🔄 Resetting streak from $newStreak to 1 after 7-day achievement")
+                            1
+                        } else {
+                            // Continue streak without resetting
+                            newStreak
                         }
-                        
-                        // Continue streak without resetting
-                        newStreak
                     }
                     diffDays > 1 -> {
                         // Missed days - reset streak to 1

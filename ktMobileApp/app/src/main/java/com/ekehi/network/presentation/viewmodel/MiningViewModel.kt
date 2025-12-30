@@ -57,7 +57,9 @@ class MiningViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    private var currentUserId: String? = null
+    private var _currentUserId: String? = null
+    val currentUserId: String?
+        get() = _currentUserId
     private var updateJob: Job? = null
     private var sessionStartTime: Long = 0 // Track when the session started
 
@@ -67,7 +69,7 @@ class MiningViewModel @Inject constructor(
             try {
                 val result = authRepository.getCurrentUser()
                 result.onSuccess { user ->
-                    currentUserId = user.id
+                    _currentUserId = user.id
                     loadUserProfile(user.id)
                     checkOngoingMiningSession()
                 }
@@ -105,7 +107,7 @@ class MiningViewModel @Inject constructor(
             resetMiningState()
             
             // Clear user data
-            currentUserId = null
+            _currentUserId = null
             _userProfile.value = Resource.Loading
             
             Log.d("MiningViewModel", "✅ Mining state reset complete")
@@ -190,7 +192,7 @@ class MiningViewModel @Inject constructor(
      */
     fun handleMine() {
         viewModelScope.launch {
-            val userId = currentUserId
+            val userId = _currentUserId
 
             if (userId == null) {
                 _errorMessage.value = "User not logged in"
@@ -425,7 +427,7 @@ class MiningViewModel @Inject constructor(
      */
     fun refreshUserProfile() {
         viewModelScope.launch {
-            val userId = currentUserId
+            val userId = _currentUserId
             if (userId != null) {
                 loadUserProfile(userId)
             }

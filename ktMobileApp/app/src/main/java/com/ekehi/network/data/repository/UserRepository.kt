@@ -202,12 +202,49 @@ open class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun getReferrals(): List<Referral> {
+    suspend fun getReferralsByReferrerId(referrerId: String): List<Referral> {
         return withContext(Dispatchers.IO) {
             try {
-                // This would need the current user ID to fetch their referrals
-                // For now, returning an empty list as we need to implement proper authentication context
-                emptyList()
+                Log.d("UserRepository", "Attempting to fetch referrals for referrerId: $referrerId")
+                
+                // Fetch user profile to get referral code
+                val response = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    queries = listOf(
+                        io.appwrite.Query.equal("referredBy", listOf(referrerId))
+                    )
+                )
+                
+                Log.d("UserRepository", "Found ${response.documents.size} referrals for referrerId: $referrerId")
+                
+                val referrals = response.documents.map { document ->
+                    @Suppress("UNCHECKED_CAST")
+                    val data = document.data as Map<String, Any>
+                    
+                    // Get user details
+                    val referredUserId = when (val userIdValue = data["userId"]) {
+                        is List<*> -> userIdValue.firstOrNull() as? String ?: ""
+                        is String -> userIdValue
+                        else -> ""
+                    }
+                    
+                    val referredUserName = data["username"] as? String
+                    
+                    Referral(
+                        id = document.id ?: "",
+                        referrerId = referrerId,
+                        referredUserId = referredUserId,
+                        referredUserName = referredUserName,
+                        referralCode = data["referralCode"] as? String ?: "",
+                        rewardAmount = 0.5, // Fixed reward amount
+                        rewardClaimed = true, // For now, marking as claimed
+                        createdAt = parseTimestamp(data["createdAt"] as? String ?: ""),
+                        claimedAt = parseTimestamp(data["updatedAt"] as? String ?: "")
+                    )
+                }
+                
+                referrals
             } catch (e: Exception) {
                 Log.e("UserRepository", "Error fetching referrals", e)
                 emptyList()

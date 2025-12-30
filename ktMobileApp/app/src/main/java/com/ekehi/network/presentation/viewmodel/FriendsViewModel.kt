@@ -13,7 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
-    private val referralUseCase: ReferralUseCase
+    private val referralUseCase: ReferralUseCase,
+    private val authRepository: com.ekehi.network.data.repository.AuthRepository
 ) : ViewModel() {
     
     private val _referrals = MutableStateFlow<Resource<List<Referral>>>(Resource.Loading)
@@ -23,9 +24,19 @@ class FriendsViewModel @Inject constructor(
         viewModelScope.launch {
             _referrals.value = Resource.Loading
             try {
-                // For now, we'll return an empty list since we don't have user context
-                // In a real implementation, we would get the current user ID and fetch their referrals
-                _referrals.value = Resource.Success(emptyList())
+                // Get current user ID from auth repository
+                val result = authRepository.getCurrentUser()
+                if (result.isSuccess) {
+                    val userId = result.getOrNull()?.id
+                    if (!userId.isNullOrEmpty()) {
+                        val referrals = referralUseCase.getReferralsByReferrerId(userId)
+                        _referrals.value = Resource.Success(referrals)
+                    } else {
+                        _referrals.value = Resource.Error("User not authenticated")
+                    }
+                } else {
+                    _referrals.value = Resource.Error("Failed to get user: ${result.exceptionOrNull()?.message}")
+                }
             } catch (e: Exception) {
                 _referrals.value = Resource.Error(e.message ?: "Failed to load referrals")
             }

@@ -155,7 +155,9 @@ fun FriendsScreen(
                     val error = (referralsResource as Resource.Error).message
                     ErrorView(
                         message = error ?: "Failed to load referrals",
-                        onRetry = { viewModel.loadReferrals() }
+                        onRetry = { 
+                            viewModel.loadReferrals()
+                        }
                     )
                 }
             }

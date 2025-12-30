@@ -37,5 +37,7 @@ class AppwriteService @Inject constructor(
         const val PRESALE_PURCHASES_COLLECTION = "presale_purchases"
         const val AD_VIEWS_COLLECTION = "ad_views"
         const val REFERRALS_COLLECTION = "referrals"
+        const val ADS_COLLECTION = "ads"
+        const val ADS_BANNERS_BUCKET = "694fe7980019d4fde1dd" // ad-banners bucket
     }
 }

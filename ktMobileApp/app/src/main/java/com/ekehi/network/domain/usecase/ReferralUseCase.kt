@@ -12,9 +12,9 @@ class ReferralUseCase @Inject constructor(
     private val userRepository: UserRepository
 ) {
     
-    suspend fun getReferrals(): List<Referral> {
+    suspend fun getReferralsByReferrerId(referrerId: String): List<Referral> {
         return try {
-            userRepository.getReferrals()
+            userRepository.getReferralsByReferrerId(referrerId)
         } catch (e: Exception) {
             emptyList()
         }
