@@ -370,6 +370,17 @@ private fun AdItem(
 ) {
     val context = LocalContext.current
     
+    // Enhanced logging
+    LaunchedEffect(ad.id) {
+        println("========================================")
+        println("Rendering Ad:")
+        println("  ID: ${ad.id}")
+        println("  Type: ${ad.type}")
+        println("  Title: ${ad.title}")
+        println("  Content: ${ad.content}")
+        println("========================================")
+    }
+    
     when (ad.type) {
         AdType.IMAGE, AdType.ANIMATED_IMAGE -> {
             Box(
@@ -383,12 +394,17 @@ private fun AdItem(
                             .data(ad.content)
                             .crossfade(true)
                             .listener(
+                                onStart = {
+                                    println("🔄 [${ad.title}] Image loading started...")
+                                },
                                 onError = { _, result ->
-                                    println("Image load error: ${result.throwable.message}")
-                                    println("URL: ${ad.content}")
+                                    println("❌ [${ad.title}] Image load error:")
+                                    println("   Message: ${result.throwable.message}")
+                                    println("   URL: ${ad.content}")
+                                    result.throwable.printStackTrace()
                                 },
                                 onSuccess = { _, _ ->
-                                    println("Image loaded successfully: ${ad.content}")
+                                    println("✅ [${ad.title}] Image loaded successfully!")
                                 }
                             )
                             .build()
@@ -409,16 +425,24 @@ private fun AdItem(
                         }
                 )
                 
-                // Debug overlay to show which ad is displayed
-                Text(
-                    text = "Ad ID: ${ad.id}",
-                    color = Color.White,
-                    fontSize = 10.sp,
+                // Debug overlay
+                Column(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .padding(4.dp)
-                )
+                        .background(Color.Black.copy(alpha = 0.7f))
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = "ID: ${ad.id}",
+                        color = Color.White,
+                        fontSize = 10.sp
+                    )
+                    Text(
+                        text = "Title: ${ad.title}",
+                        color = Color.White,
+                        fontSize = 10.sp
+                    )
+                }
             }
         }
         AdType.TEXT -> {
@@ -449,16 +473,9 @@ private fun AdItem(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = ad.content,
+                        text = ad.content, // This is now the actual text, not a URL
                         color = Color.White,
                         fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Ad ID: ${ad.id}",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 10.sp,
                         textAlign = TextAlign.Center
                     )
                 }

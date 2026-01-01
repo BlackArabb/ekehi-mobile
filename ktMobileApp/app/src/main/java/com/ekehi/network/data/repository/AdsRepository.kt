@@ -32,7 +32,7 @@ class AdsRepository @Inject constructor(
                 try {
                     val ad = parseAdDocument(doc)
                     Log.d("AdsRepository", "  [$index] ID: ${ad.id}, Type: ${ad.type}, Title: ${ad.title}")
-                    Log.d("AdsRepository", "      Content URL: ${ad.content}")
+                    Log.d("AdsRepository", "      Content: ${ad.content.take(100)}... (showing first 100 chars)")
                     ad
                 } catch (e: Exception) {
                     Log.e("AdsRepository", "❌ Failed to parse ad ${doc.id}", e)
@@ -48,33 +48,45 @@ class AdsRepository @Inject constructor(
     
     private fun parseAdDocument(doc: Document<Map<String, Any>>): AdContent {
         val rawContent = doc.data["content"] as? String ?: ""
+        val adTypeStr = doc.data["type"] as? String
         
-        // Log the raw content to see what we're getting
+        Log.d("AdsRepository", "    Raw type: $adTypeStr")
         Log.d("AdsRepository", "    Raw content from DB: $rawContent")
         
-        // Check if content is a full URL or just a file ID
-        val content = if (rawContent.startsWith("http")) {
-            // It's already a full URL
+        // Determine the ad type
+        val adType = when (adTypeStr) {
+            "TEXT" -> AdType.TEXT
+            "ANIMATED_IMAGE" -> AdType.ANIMATED_IMAGE
+            "IMAGE" -> AdType.IMAGE
+            else -> {
+                Log.w("AdsRepository", "Unknown ad type: $adTypeStr, defaulting to IMAGE")
+                AdType.IMAGE
+            }
+        }
+        
+        // Process content based on type
+        val content = if (adType == AdType.TEXT) {
+            // For TEXT ads, use the content as-is (it's the actual text to display)
             rawContent
         } else {
-            // It's a file ID, build the full Appwrite URL
-            val fileId = rawContent
-            val url = "https://fra.cloud.appwrite.io/v1/storage/buckets/${AppwriteService.ADS_BANNERS_BUCKET}/files/$fileId/view?project=68c2dd6e002112935ed2"
-            Log.d("AdsRepository", "    Built URL from file ID: $url")
-            url
+            // For IMAGE/ANIMATED_IMAGE ads, ensure it's a valid URL
+            if (rawContent.startsWith("http")) {
+                // Remove token parameter if it exists - tokens might be expired
+                val urlWithoutToken = rawContent.split("&token=")[0]
+                Log.d("AdsRepository", "    Cleaned URL (removed token): $urlWithoutToken")
+                urlWithoutToken
+            } else {
+                // It's a file ID, build the full Appwrite URL
+                val fileId = rawContent
+                val url = "https://fra.cloud.appwrite.io/v1/storage/buckets/${AppwriteService.ADS_BANNERS_BUCKET}/files/$fileId/view?project=68c2dd6e002112935ed2"
+                Log.d("AdsRepository", "    Built URL from file ID: $url")
+                url
+            }
         }
         
         return AdContent(
             id = doc.id,
-            type = when (doc.data["type"] as? String) {
-                "TEXT" -> AdType.TEXT
-                "ANIMATED_IMAGE" -> AdType.ANIMATED_IMAGE
-                "IMAGE" -> AdType.IMAGE
-                else -> {
-                    Log.w("AdsRepository", "Unknown ad type: ${doc.data["type"]}, defaulting to IMAGE")
-                    AdType.IMAGE
-                }
-            },
+            type = adType,
             title = doc.data["title"] as? String ?: "",
             content = content,
             actionUrl = doc.data["actionUrl"] as? String ?: "",
