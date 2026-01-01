@@ -28,34 +28,17 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
-fun DualAdsCarousel(
+fun ImageAdsCarousel(
     imageAdsResource: Resource<List<AdContent>>,
-    textAdsResource: Resource<List<AdContent>>,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        // Image Ads Carousel
-        AdsCarousel(
-            adsResource = imageAdsResource,
-            title = "Image Ads",
-            adTypeFilter = listOf(AdType.IMAGE, AdType.ANIMATED_IMAGE),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Text Ads Carousel
-        AdsCarousel(
-            adsResource = textAdsResource,
-            title = "Text Ads",
-            adTypeFilter = listOf(AdType.TEXT),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-        )
-    }
+    // Image Ads Carousel only
+    AdsCarousel(
+        adsResource = imageAdsResource,
+        title = "Image Ads",
+        adTypeFilter = listOf(AdType.IMAGE, AdType.ANIMATED_IMAGE),
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -130,7 +113,7 @@ fun AdsCarousel(
             }
             
             if (ads.isNotEmpty()) {
-                ImageTextAdsCarouselContent(
+                ImageAdsCarouselContent(
                     ads = ads,
                     title = title,
                     modifier = modifier
@@ -170,7 +153,7 @@ fun AdsCarousel(
 }
 
 @Composable
-private fun ImageTextAdsCarouselContent(
+private fun ImageAdsCarouselContent(
     ads: List<AdContent>,
     title: String,
     modifier: Modifier = Modifier
@@ -445,40 +428,10 @@ private fun AdItem(
                 }
             }
         }
-        AdType.TEXT -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color(0x1AFFFFFF))
-                    .padding(16.dp)
-                    .clickable {
-                        if (ad.actionUrl.isNotEmpty()) {
-                            try {
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.actionUrl))
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                println("Error opening URL: ${e.message}")
-                            }
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = ad.title,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = ad.content, // This is now the actual text, not a URL
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
+        else -> {
+            // Handle TEXT and any other ad types by not displaying them
+            Box(modifier = modifier) {
+                // Empty box for unsupported ad types
             }
         }
     }

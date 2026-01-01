@@ -20,42 +20,30 @@ class AdsViewModel @Inject constructor(
     private val _imageAds = MutableStateFlow<Resource<List<AdContent>>>(Resource.Loading)
     val imageAds: StateFlow<Resource<List<AdContent>>> = _imageAds
 
-    private val _textAds = MutableStateFlow<Resource<List<AdContent>>>(Resource.Loading)
-    val textAds: StateFlow<Resource<List<AdContent>>> = _textAds
-
     init {
-        loadAds()
+        loadImageAds()
     }
 
-    fun loadAds() {
+    fun loadImageAds() {
         viewModelScope.launch {
             _imageAds.value = Resource.Loading
-            _textAds.value = Resource.Loading
             
             try {
                 Log.d("AdsViewModel", "================================")
-                Log.d("AdsViewModel", "🔄 Loading ads from repository...")
+                Log.d("AdsViewModel", "🔄 Loading image ads from repository...")
                 
                 val images = adsRepository.getImageAds()
-                val texts = adsRepository.getTextAds()
                 
                 Log.d("AdsViewModel", "✅ Loaded ${images.size} image ads")
                 images.forEachIndexed { index, ad ->
                     Log.d("AdsViewModel", "  Image Ad $index: ${ad.title}")
                 }
-                
-                Log.d("AdsViewModel", "✅ Loaded ${texts.size} text ads")
-                texts.forEachIndexed { index, ad ->
-                    Log.d("AdsViewModel", "  Text Ad $index: ${ad.title}")
-                }
                 Log.d("AdsViewModel", "================================")
                 
                 _imageAds.value = Resource.Success(images)
-                _textAds.value = Resource.Success(texts)
             } catch (e: Exception) {
-                Log.e("AdsViewModel", "❌ Failed to load ads", e)
-                _imageAds.value = Resource.Error(e.message ?: "Failed to load ads")
-                _textAds.value = Resource.Error(e.message ?: "Failed to load ads")
+                Log.e("AdsViewModel", "❌ Failed to load image ads", e)
+                _imageAds.value = Resource.Error(e.message ?: "Failed to load image ads")
             }
         }
     }

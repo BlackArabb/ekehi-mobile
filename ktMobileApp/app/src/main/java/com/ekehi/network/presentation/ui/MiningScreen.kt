@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 import io.appwrite.Client
 import com.ekehi.network.presentation.ui.components.MiningScreenSkeleton
 import com.ekehi.network.presentation.ui.components.AdsCarousel
-import com.ekehi.network.presentation.ui.components.DualAdsCarousel
+import com.ekehi.network.presentation.ui.components.ImageAdsCarousel
 import com.ekehi.network.presentation.viewmodel.AdsViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.delay
@@ -181,22 +181,20 @@ fun MiningScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Dual Ads Carousel - Fetch real ads from Appwrite with debugging
+                // Image Ads Carousel - Fetch real ads from Appwrite with debugging
                 val adsViewModel: AdsViewModel = hiltViewModel()
                 val imageAdsResource by adsViewModel.imageAds.collectAsState()
-                val textAdsResource by adsViewModel.textAds.collectAsState()
                 
                 // Load ads when screen appears
                 LaunchedEffect(Unit) {
-                    adsViewModel.loadAds()
+                    adsViewModel.loadImageAds()
                 }
                 
-                DualAdsCarousel(
+                ImageAdsCarousel(
                     imageAdsResource = imageAdsResource,
-                    textAdsResource = textAdsResource,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(400.dp)
+                        .height(300.dp)
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))

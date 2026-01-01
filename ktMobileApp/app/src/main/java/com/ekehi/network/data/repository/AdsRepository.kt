@@ -105,8 +105,4 @@ class AdsRepository @Inject constructor(
             it.type == AdType.IMAGE || it.type == AdType.ANIMATED_IMAGE 
         }
     }
-    
-    suspend fun getTextAds(): List<AdContent> {
-        return getActiveAds().filter { it.type == AdType.TEXT }
-    }
 }
