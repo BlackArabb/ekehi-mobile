@@ -2,6 +2,7 @@ package com.ekehi.network.presentation.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -10,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -22,6 +22,10 @@ import coil.request.ImageRequest
 import com.ekehi.network.data.model.AdContent
 import com.ekehi.network.data.model.AdType
 import com.ekehi.network.domain.model.Resource
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
 fun DualAdsCarousel(
@@ -61,17 +65,31 @@ fun AdsCarousel(
     adTypeFilter: List<AdType>,
     modifier: Modifier = Modifier
 ) {
+    // Add logging at the start
+    LaunchedEffect(adsResource) {
+        println("==============================")
+        println("📺 $title - Resource State: ${adsResource.javaClass.simpleName}")
+        when (adsResource) {
+            is Resource.Success -> {
+            println("✅ Total ads in resource: ${adsResource.data.size}")
+            adsResource.data.forEachIndexed { index, ad ->
+                println("  Ad $index: ID=${ad.id}, Type=${ad.type}")
+            }
+        }
+        is Resource.Error -> println("❌ Error: ${(adsResource as Resource.Error).message}")
+        is Resource.Loading -> println("⏳ Loading...")
+        is Resource.Idle -> println("💤 Idle")
+    }
+    println("==============================")
+}
+    
     when (adsResource) {
         is Resource.Loading -> {
-            // Show loading indicator
             Box(
-                modifier = modifier
-                    .fillMaxWidth(),
+                modifier = modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(
                         color = Color(0xFFffa000),
                         modifier = Modifier.size(32.dp)
@@ -86,7 +104,6 @@ fun AdsCarousel(
             }
         }
         is Resource.Error -> {
-            // Show error message
             Box(
                 modifier = modifier
                     .fillMaxWidth()
@@ -103,6 +120,15 @@ fun AdsCarousel(
         }
         is Resource.Success -> {
             val ads = adsResource.data.filter { ad -> ad.type in adTypeFilter }
+            
+            // Add logging after filtering
+            LaunchedEffect(ads) {
+                println("🔍 $title - After filtering: ${ads.size} ads")
+                ads.forEachIndexed { index, ad ->
+                    println("  Filtered Ad $index: ID=${ad.id}, Type=${ad.type}")
+                }
+            }
+            
             if (ads.isNotEmpty()) {
                 ImageTextAdsCarouselContent(
                     ads = ads,
@@ -110,7 +136,6 @@ fun AdsCarousel(
                     modifier = modifier
                 )
             } else {
-                // Show empty state
                 Box(
                     modifier = modifier
                         .fillMaxWidth()
@@ -127,7 +152,6 @@ fun AdsCarousel(
             }
         }
         is Resource.Idle -> {
-            // Show empty state
             Box(
                 modifier = modifier
                     .fillMaxWidth()
@@ -152,6 +176,27 @@ private fun ImageTextAdsCarouselContent(
     modifier: Modifier = Modifier
 ) {
     var currentAdIndex by remember { mutableIntStateOf(0) }
+    var startX by remember { mutableFloatStateOf(0f) }
+    
+    val safeIndex = currentAdIndex.coerceIn(0, ads.size - 1)
+    
+    // Add comprehensive logging
+    LaunchedEffect(ads.size) {
+        println("================================")
+        println("📊 $title")
+        println("Total ads: ${ads.size}")
+        println("Show navigation: ${ads.size > 1}")
+        println("Current index: $currentAdIndex")
+        println("Safe index: $safeIndex")
+        ads.forEachIndexed { index, ad ->
+            println("  Ad $index: ID=${ad.id}, Title=${ad.title}")
+        }
+        println("================================")
+    }
+    
+    LaunchedEffect(currentAdIndex) {
+        println("🔄 $title - Index changed to: $currentAdIndex (safe: $safeIndex)")
+    }
     
     Column(modifier = modifier) {
         // Title
@@ -160,48 +205,88 @@ private fun ImageTextAdsCarouselContent(
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
         
-        // Ad content
+        // Ad content with swipe support
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .clip(RoundedCornerShape(12.dp))
-        ) {
-            ads.getOrNull(currentAdIndex)?.let { ad ->
-                AdItem(
-                    ad = ad,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable {
-                            // Handle ad click - could open URL or trigger action
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            startX = offset.x
+                        },
+                        onDragEnd = {
+                            startX = 0f
+                        },
+                        onDrag = { change, _ ->
+                            val endX = change.position.x
+                            val diffX = endX - startX
+                            
+                            // Require significant drag distance (at least 100 pixels)
+                            if (kotlin.math.abs(diffX) > 100) {
+                                if (diffX > 0) {
+                                    // Swiped right - go to previous
+                                    currentAdIndex = if (safeIndex > 0) {
+                                        safeIndex - 1
+                                    } else {
+                                        ads.size - 1
+                                    }
+                                } else {
+                                    // Swiped left - go to next
+                                    currentAdIndex = if (safeIndex < ads.size - 1) {
+                                        safeIndex + 1
+                                    } else {
+                                        0
+                                    }
+                                }
+                                // Reset start position to prevent multiple triggers
+                                startX = endX
+                            }
                         }
-                )
+                    )
+                }
+        ) {
+            // Display current ad
+            ads.getOrNull(safeIndex)?.let { ad ->
+                key(ad.id) { // Use ad.id as key to force recomposition
+                    AdItem(
+                        ad = ad,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
 
         // Dots indicator and controls
         if (ads.size > 1) {
+            LaunchedEffect(Unit) {
+                println("✅ Showing dots and buttons (ads.size = ${ads.size})")
+            }
+            
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 repeat(ads.size) { index ->
                     Box(
                         modifier = Modifier
-                            .size(8.dp)
+                            .size(if (index == safeIndex) 10.dp else 8.dp)
                             .clip(RoundedCornerShape(50))
                             .background(
-                                if (index == currentAdIndex) Color(0xFFffa000) else Color(0x80FFFFFF)
+                                if (index == safeIndex) Color(0xFFffa000) else Color(0x80FFFFFF)
                             )
-                            .padding(2.dp)
+                            .clickable {
+                                currentAdIndex = index
+                            }
                     )
                     
                     if (index < ads.size - 1) {
@@ -210,59 +295,69 @@ private fun ImageTextAdsCarouselContent(
                 }
             }
             
-            // Previous/Next buttons
+            // Previous/Next buttons with counter
             Spacer(modifier = Modifier.height(8.dp))
             
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Previous button
                 Button(
                     onClick = {
-                        val prevIndex = if (currentAdIndex == 0) ads.size - 1 else currentAdIndex - 1
-                        currentAdIndex = prevIndex
+                        currentAdIndex = if (safeIndex == 0) {
+                            ads.size - 1
+                        } else {
+                            safeIndex - 1
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF8b5cf6)
                     ),
-                    modifier = Modifier
-                        .size(40.dp)
-                        .aspectRatio(1f)
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
-                        text = "<",
+                        text = "‹",
                         color = Color.White,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 
+                // Counter
                 Text(
-                    text = "${currentAdIndex + 1} / ${ads.size}",
+                    text = "${safeIndex + 1} / ${ads.size}",
                     color = Color.White,
                     fontSize = 14.sp,
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                    fontWeight = FontWeight.Medium
                 )
                 
+                // Next button
                 Button(
                     onClick = {
-                        val nextIndex = (currentAdIndex + 1) % ads.size
-                        currentAdIndex = nextIndex
+                        currentAdIndex = (safeIndex + 1) % ads.size
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF8b5cf6)
                     ),
-                    modifier = Modifier
-                        .size(40.dp)
-                        .aspectRatio(1f)
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
-                        text = ">",
+                        text = "›",
                         color = Color.White,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
+            }
+        } else {
+            LaunchedEffect(Unit) {
+                println("❌ NOT showing dots and buttons (ads.size = ${ads.size})")
             }
         }
     }
@@ -273,42 +368,78 @@ private fun AdItem(
     ad: AdContent,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    
     when (ad.type) {
         AdType.IMAGE, AdType.ANIMATED_IMAGE -> {
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(ad.content)
-                        .crossfade(true)
-                        .listener(
-                            onError = { _, result ->
-                                println("Image load error: " + result.throwable.message)
-                                println("URL: " + ad.content)
-                            },
-                            onSuccess = { _, _ ->
-                                println("Image loaded successfully: " + ad.content)
-                            }
-                        )
-                        .build()
-                ),
-                contentDescription = ad.title,
-                contentScale = ContentScale.Crop,
+            Box(
                 modifier = modifier
                     .fillMaxSize()
                     .background(Color(0x1AFFFFFF))
-            )
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        ImageRequest.Builder(context)
+                            .data(ad.content)
+                            .crossfade(true)
+                            .listener(
+                                onError = { _, result ->
+                                    println("Image load error: ${result.throwable.message}")
+                                    println("URL: ${ad.content}")
+                                },
+                                onSuccess = { _, _ ->
+                                    println("Image loaded successfully: ${ad.content}")
+                                }
+                            )
+                            .build()
+                    ),
+                    contentDescription = ad.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            if (ad.actionUrl.isNotEmpty()) {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.actionUrl))
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    println("Error opening URL: ${e.message}")
+                                }
+                            }
+                        }
+                )
+                
+                // Debug overlay to show which ad is displayed
+                Text(
+                    text = "Ad ID: ${ad.id}",
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .padding(4.dp)
+                )
+            }
         }
         AdType.TEXT -> {
             Box(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxSize()
                     .background(Color(0x1AFFFFFF))
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .clickable {
+                        if (ad.actionUrl.isNotEmpty()) {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.actionUrl))
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                println("Error opening URL: ${e.message}")
+                            }
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = ad.title,
                         color = Color.White,
@@ -321,6 +452,13 @@ private fun AdItem(
                         text = ad.content,
                         color = Color.White,
                         fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Ad ID: ${ad.id}",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 10.sp,
                         textAlign = TextAlign.Center
                     )
                 }

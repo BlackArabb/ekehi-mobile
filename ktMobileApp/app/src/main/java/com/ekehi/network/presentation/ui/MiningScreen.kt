@@ -42,10 +42,8 @@ import io.appwrite.Client
 import com.ekehi.network.presentation.ui.components.MiningScreenSkeleton
 import com.ekehi.network.presentation.ui.components.AdsCarousel
 import com.ekehi.network.presentation.ui.components.DualAdsCarousel
+import com.ekehi.network.presentation.viewmodel.AdsViewModel
 import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.delay
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -58,6 +56,9 @@ import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import com.ekehi.network.service.StartIoService
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
 import com.startapp.sdk.adsbase.adlisteners.AdEventListener
 import com.startapp.sdk.adsbase.Ad
@@ -180,35 +181,19 @@ fun MiningScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Dual Ads Carousel - Placeholder with Sample Data
-                // In a production implementation, this would fetch from Appwrite
+                // Dual Ads Carousel - Fetch real ads from Appwrite with debugging
+                val adsViewModel: AdsViewModel = hiltViewModel()
+                val imageAdsResource by adsViewModel.imageAds.collectAsState()
+                val textAdsResource by adsViewModel.textAds.collectAsState()
+                
+                // Load ads when screen appears
+                LaunchedEffect(Unit) {
+                    adsViewModel.loadAds()
+                }
+                
                 DualAdsCarousel(
-                    imageAdsResource = Resource.Success(
-                        listOf(
-                            AdContent(
-                                id = "1",
-                                type = AdType.IMAGE,
-                                title = "Appwrite Banner",
-                                content = "https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k",
-                                actionUrl = "https://ekehi.xyz",
-                                isActive = true,
-                                priority = 1
-                            )
-                        )
-                    ),
-                    textAdsResource = Resource.Success(
-                        listOf(
-                            AdContent(
-                                id = "2",
-                                type = AdType.TEXT,
-                                title = "Join Our Community",
-                                content = "Join thousands of users earning EKH tokens daily!",
-                                actionUrl = "https://ekehi.xyz",
-                                isActive = true,
-                                priority = 1
-                            )
-                        )
-                    ),
+                    imageAdsResource = imageAdsResource,
+                    textAdsResource = textAdsResource,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(400.dp)
