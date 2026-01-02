@@ -194,7 +194,7 @@ fun MiningScreen(
                     imageAdsResource = imageAdsResource,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
+                        .height(200.dp)
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))

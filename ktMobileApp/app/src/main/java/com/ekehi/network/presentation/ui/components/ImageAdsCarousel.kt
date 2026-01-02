@@ -24,18 +24,26 @@ import com.ekehi.network.data.model.AdType
 import com.ekehi.network.domain.model.Resource
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ImageAdsCarousel(
     imageAdsResource: Resource<List<AdContent>>,
     modifier: Modifier = Modifier
 ) {
-    // Image Ads Carousel only
     AdsCarousel(
         adsResource = imageAdsResource,
-        title = "Image Ads",
         adTypeFilter = listOf(AdType.IMAGE, AdType.ANIMATED_IMAGE),
         modifier = modifier
     )
@@ -48,23 +56,22 @@ fun AdsCarousel(
     adTypeFilter: List<AdType>,
     modifier: Modifier = Modifier
 ) {
-    // Add logging at the start
     LaunchedEffect(adsResource) {
-        println("==============================")
-        println("📺 $title - Resource State: ${adsResource.javaClass.simpleName}")
+        Log.d("AdsCarousel", "==============================")
+        Log.d("AdsCarousel", "📺 $title - Resource State: ${adsResource.javaClass.simpleName}")
         when (adsResource) {
             is Resource.Success -> {
-            println("✅ Total ads in resource: ${adsResource.data.size}")
-            adsResource.data.forEachIndexed { index, ad ->
-                println("  Ad $index: ID=${ad.id}, Type=${ad.type}")
+                Log.d("AdsCarousel", "✅ Total ads in resource: ${adsResource.data.size}")
+                adsResource.data.forEachIndexed { index, ad ->
+                    Log.d("AdsCarousel", "  Ad $index: ID=${ad.id}, Type=${ad.type}")
+                }
             }
+            is Resource.Error -> Log.e("AdsCarousel", "❌ Error: ${adsResource.message}")
+            is Resource.Loading -> Log.d("AdsCarousel", "⏳ Loading...")
+            is Resource.Idle -> Log.d("AdsCarousel", "💤 Idle")
         }
-        is Resource.Error -> println("❌ Error: ${(adsResource as Resource.Error).message}")
-        is Resource.Loading -> println("⏳ Loading...")
-        is Resource.Idle -> println("💤 Idle")
+        Log.d("AdsCarousel", "==============================")
     }
-    println("==============================")
-}
     
     when (adsResource) {
         is Resource.Loading -> {
@@ -104,11 +111,10 @@ fun AdsCarousel(
         is Resource.Success -> {
             val ads = adsResource.data.filter { ad -> ad.type in adTypeFilter }
             
-            // Add logging after filtering
             LaunchedEffect(ads) {
-                println("🔍 $title - After filtering: ${ads.size} ads")
+                Log.d("AdsCarousel", "🔍 $title - After filtering: ${ads.size} ads")
                 ads.forEachIndexed { index, ad ->
-                    println("  Filtered Ad $index: ID=${ad.id}, Type=${ad.type}")
+                    Log.d("AdsCarousel", "  Filtered Ad $index: ID=${ad.id}, Type=${ad.type}")
                 }
             }
             
@@ -160,25 +166,37 @@ private fun ImageAdsCarouselContent(
 ) {
     var currentAdIndex by remember { mutableIntStateOf(0) }
     var startX by remember { mutableFloatStateOf(0f) }
+    var isUserInteracting by remember { mutableStateOf(false) }
     
+    val scope = rememberCoroutineScope()
     val safeIndex = currentAdIndex.coerceIn(0, ads.size - 1)
     
     // Add comprehensive logging
     LaunchedEffect(ads.size) {
-        println("================================")
-        println("📊 $title")
-        println("Total ads: ${ads.size}")
-        println("Show navigation: ${ads.size > 1}")
-        println("Current index: $currentAdIndex")
-        println("Safe index: $safeIndex")
+        Log.d("AdsCarouselContent", "================================")
+        Log.d("AdsCarouselContent", "📊 $title")
+        Log.d("AdsCarouselContent", "Total ads: ${ads.size}")
+        Log.d("AdsCarouselContent", "Show navigation: ${ads.size > 1}")
+        Log.d("AdsCarouselContent", "Current index: $currentAdIndex")
+        Log.d("AdsCarouselContent", "Safe index: $safeIndex")
         ads.forEachIndexed { index, ad ->
-            println("  Ad $index: ID=${ad.id}, Title=${ad.title}")
+            Log.d("AdsCarouselContent", "  Ad $index: ID=${ad.id}, Title=${ad.title}")
         }
-        println("================================")
+        Log.d("AdsCarouselContent", "================================")
     }
     
     LaunchedEffect(currentAdIndex) {
-        println("🔄 $title - Index changed to: $currentAdIndex (safe: $safeIndex)")
+        Log.d("AdsCarouselContent", "🔄 $title - Index changed to: $currentAdIndex (safe: $safeIndex)")
+    }
+    
+    // Auto-rotation effect - rotates every 8 seconds
+    LaunchedEffect(ads.size, isUserInteracting) {
+        if (ads.size > 1 && !isUserInteracting) {
+            while (true) {
+                kotlinx.coroutines.delay(8000) // Wait 8 seconds
+                currentAdIndex = (currentAdIndex + 1) % ads.size
+            }
+        }
     }
     
     Column(modifier = modifier) {
@@ -191,65 +209,113 @@ private fun ImageAdsCarouselContent(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
         
-        // Ad content with swipe support
+        // Ad content with swipe support and smooth cover transition
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .fillMaxHeight() // Use fillMaxHeight instead of weight to respect parent height
                 .clip(RoundedCornerShape(12.dp))
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { offset ->
+                            isUserInteracting = true
                             startX = offset.x
                         },
                         onDragEnd = {
                             startX = 0f
+                            // Delay before resuming auto-rotation
+                            scope.launch {
+                                kotlinx.coroutines.delay(8000)
+                                isUserInteracting = false
+                            }
                         },
                         onDrag = { change, _ ->
                             val endX = change.position.x
                             val diffX = endX - startX
                             
-                            // Require significant drag distance (at least 100 pixels)
                             if (kotlin.math.abs(diffX) > 100) {
                                 if (diffX > 0) {
-                                    // Swiped right - go to previous
                                     currentAdIndex = if (safeIndex > 0) {
                                         safeIndex - 1
                                     } else {
                                         ads.size - 1
                                     }
                                 } else {
-                                    // Swiped left - go to next
                                     currentAdIndex = if (safeIndex < ads.size - 1) {
                                         safeIndex + 1
                                     } else {
                                         0
                                     }
                                 }
-                                // Reset start position to prevent multiple triggers
                                 startX = endX
+                                
+                                // Mark as user interaction and delay auto-rotation
+                                isUserInteracting = true
+                                scope.launch {
+                                    kotlinx.coroutines.delay(8000)
+                                    isUserInteracting = false
+                                }
                             }
                         }
                     )
                 }
+                .clickable {
+                    // Mark as user interaction when clicked
+                    isUserInteracting = true
+                    scope.launch {
+                        kotlinx.coroutines.delay(8000)
+                        isUserInteracting = false
+                    }
+                }
         ) {
-            // Display current ad
-            ads.getOrNull(safeIndex)?.let { ad ->
-                key(ad.id) { // Use ad.id as key to force recomposition
-                    AdItem(
-                        ad = ad,
-                        modifier = Modifier.fillMaxSize()
-                    )
+            // Smooth cover transition animation
+            AnimatedContent(
+                targetState = safeIndex,
+                transitionSpec = {
+                    if (targetState > initialState) {
+                        // Next: slide in from right
+                        slideInHorizontally(
+                            initialOffsetX = { fullWidth -> fullWidth },
+                            animationSpec = tween(durationMillis = 1000) // 1 second transition
+                        ) + fadeIn(
+                            animationSpec = tween(durationMillis = 1000)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { fullWidth -> -fullWidth },
+                            animationSpec = tween(durationMillis = 1000)
+                        ) + fadeOut(
+                            animationSpec = tween(durationMillis = 1000)
+                        )
+                    } else {
+                        // Previous: slide in from left
+                        slideInHorizontally(
+                            initialOffsetX = { fullWidth -> -fullWidth },
+                            animationSpec = tween(durationMillis = 1000)
+                        ) + fadeIn(
+                            animationSpec = tween(durationMillis = 1000)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { fullWidth -> fullWidth },
+                            animationSpec = tween(durationMillis = 1000)
+                        ) + fadeOut(
+                            animationSpec = tween(durationMillis = 1000)
+                        )
+                    }
+                },
+                label = "AdCoverTransition",
+                modifier = Modifier.fillMaxSize()
+            ) { targetIndex ->
+                ads.getOrNull(targetIndex)?.let { ad ->
+                    key(ad.id) {
+                        AdItem(
+                            ad = ad,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }
 
         // Dots indicator and controls
         if (ads.size > 1) {
-            LaunchedEffect(Unit) {
-                println("✅ Showing dots and buttons (ads.size = ${ads.size})")
-            }
-            
             Spacer(modifier = Modifier.height(12.dp))
             
             Row(
@@ -268,7 +334,13 @@ private fun ImageAdsCarouselContent(
                                 if (index == safeIndex) Color(0xFFffa000) else Color(0x80FFFFFF)
                             )
                             .clickable {
+                                // Mark as user interaction when dot is clicked
                                 currentAdIndex = index
+                                isUserInteracting = true
+                                scope.launch {
+                                    kotlinx.coroutines.delay(8000)
+                                    isUserInteracting = false
+                                }
                             }
                     )
                     
@@ -278,70 +350,7 @@ private fun ImageAdsCarouselContent(
                 }
             }
             
-            // Previous/Next buttons with counter
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Previous button
-                Button(
-                    onClick = {
-                        currentAdIndex = if (safeIndex == 0) {
-                            ads.size - 1
-                        } else {
-                            safeIndex - 1
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8b5cf6)
-                    ),
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        text = "‹",
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                
-                // Counter
-                Text(
-                    text = "${safeIndex + 1} / ${ads.size}",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                
-                // Next button
-                Button(
-                    onClick = {
-                        currentAdIndex = (safeIndex + 1) % ads.size
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8b5cf6)
-                    ),
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        text = "›",
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        } else {
-            LaunchedEffect(Unit) {
-                println("❌ NOT showing dots and buttons (ads.size = ${ads.size})")
-            }
+
         }
     }
 }
@@ -353,15 +362,14 @@ private fun AdItem(
 ) {
     val context = LocalContext.current
     
-    // Enhanced logging
     LaunchedEffect(ad.id) {
-        println("========================================")
-        println("Rendering Ad:")
-        println("  ID: ${ad.id}")
-        println("  Type: ${ad.type}")
-        println("  Title: ${ad.title}")
-        println("  Content: ${ad.content}")
-        println("========================================")
+        Log.d("AdItem", "========================================")
+        Log.d("AdItem", "Rendering Ad:")
+        Log.d("AdItem", "  ID: ${ad.id}")
+        Log.d("AdItem", "  Type: ${ad.type}")
+        Log.d("AdItem", "  Title: ${ad.title}")
+        Log.d("AdItem", "  Content: ${ad.content}")
+        Log.d("AdItem", "========================================")
     }
     
     when (ad.type) {
@@ -378,16 +386,16 @@ private fun AdItem(
                             .crossfade(true)
                             .listener(
                                 onStart = {
-                                    println("🔄 [${ad.title}] Image loading started...")
+                                    Log.d("AdItem", "🔄 [${ad.title}] Image loading started...")
                                 },
                                 onError = { _, result ->
-                                    println("❌ [${ad.title}] Image load error:")
-                                    println("   Message: ${result.throwable.message}")
-                                    println("   URL: ${ad.content}")
+                                    Log.e("AdItem", "❌ [${ad.title}] Image load error:")
+                                    Log.e("AdItem", "   Message: ${result.throwable.message}")
+                                    Log.e("AdItem", "   URL: ${ad.content}")
                                     result.throwable.printStackTrace()
                                 },
                                 onSuccess = { _, _ ->
-                                    println("✅ [${ad.title}] Image loaded successfully!")
+                                    Log.d("AdItem", "✅ [${ad.title}] Image loaded successfully!")
                                 }
                             )
                             .build()
@@ -402,37 +410,33 @@ private fun AdItem(
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ad.actionUrl))
                                     context.startActivity(intent)
                                 } catch (e: Exception) {
-                                    println("Error opening URL: ${e.message}")
+                                    Log.e("AdItem", "Error opening URL: ${e.message}")
                                 }
                             }
                         }
                 )
                 
-                // Debug overlay
-                Column(
+                // Ads indicator
+                Box(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .background(Color.Black.copy(alpha = 0.7f))
-                        .padding(8.dp)
+                        .background(Color(0xFF8b5cf6))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "ID: ${ad.id}",
+                        text = "Ads",
                         color = Color.White,
-                        fontSize = 10.sp
-                    )
-                    Text(
-                        text = "Title: ${ad.title}",
-                        color = Color.White,
-                        fontSize = 10.sp
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
         }
         else -> {
-            // Handle TEXT and any other ad types by not displaying them
             Box(modifier = modifier) {
-                // Empty box for unsupported ad types
+                // Empty for unsupported ad types
             }
         }
     }
 }
+
