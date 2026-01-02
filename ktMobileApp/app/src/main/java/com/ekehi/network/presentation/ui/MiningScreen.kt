@@ -1060,45 +1060,64 @@ fun EnhancedMiningButton(
                     )
             ) {
                 // Button Content based on state
-                when {
-                    isMining && remainingTime > 0 -> {
-                        // Active mining: Show time countdown
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = formatTime(remainingTime),
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(clampedButtonSize * 0.8f) // Slightly smaller to ensure it fits well within the circular button
+                        .clip(CircleShape) // Clip the content area as well
+                ) {
+                    when {
+                        isMining && remainingTime > 0 -> {
+                            // Active mining: Show time countdown
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = formatTime(remainingTime),
+                                    color = Color.White,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
-                    }
-                    isCompleted -> {
-                        // Completed: Show claim text
-                        Text(
-                            text = "Claim\n${"%.2f".format(sessionReward)}\nEKH",
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    else -> {
-                        // Ready to start: Show start mining text
-                        Text(
-                            text = "Start\nMining",
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
+                        isCompleted -> {
+                            // Completed: Show reward amount only (like mining state shows time)
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "%.2f".format(sessionReward),
+                                    color = Color.White,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "EKH",
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                        else -> {
+                            // Ready to start: Show "Start Mining" without extra styling
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Start Mining",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
         
-        // Status Indicator with margin as requested - now just showing status
+        // Status Indicator with margin as requested
         Spacer(modifier = Modifier.height(16.dp))
         
         Box(

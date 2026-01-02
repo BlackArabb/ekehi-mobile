@@ -528,21 +528,7 @@ fun LeaderboardEntryItem(entry: LeaderboardEntry) {
                         maxLines = 1
                     )
                     
-                    Row(
-                        modifier = Modifier.padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Power: ${entry.miningPower}",
-                            color = Color(0xB3FFFFFF),
-                            fontSize = 12.sp
-                        )
-                        Text(
-                            text = "Streak: ${entry.streak}",
-                            color = Color(0xB3FFFFFF),
-                            fontSize = 12.sp
-                        )
-                    }
+
                 }
             }
             

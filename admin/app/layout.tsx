@@ -1,7 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { AuthProvider } from '@/contexts/AuthContext'
+import ClientWrapper from './ClientWrapper';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description: 'Admin Dashboard for Ekehi Mobile App',
 }
 
+// Root layout must be a server component
 export default function RootLayout({
   children,
 }: {
@@ -18,9 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
+        <ClientWrapper>
           {children}
-        </AuthProvider>
+        </ClientWrapper>
       </body>
     </html>
   )
