@@ -44,6 +44,7 @@ fun ImageAdsCarousel(
 ) {
     AdsCarousel(
         adsResource = imageAdsResource,
+        title = "Image Ads",
         adTypeFilter = listOf(AdType.IMAGE, AdType.ANIMATED_IMAGE),
         modifier = modifier
     )

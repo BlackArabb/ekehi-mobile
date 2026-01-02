@@ -46,12 +46,15 @@ import com.ekehi.network.presentation.viewmodel.AdsViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.delay
 import androidx.compose.animation.core.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextAlign
 import android.app.Activity
 import android.content.Intent
 import android.util.Log
@@ -998,12 +1001,32 @@ fun EnhancedMiningButton(
             modifier = Modifier
                 .size(progressSize)
         ) {
-            // Circular Progress Bar (Visible when mining is active and time remaining > 0)
-            if (isMining && remainingTime > 0) {
-                CircularProgressBar(
-                    progress = (progressPercentage / 100).toFloat()
-                    //isPulsating = false // Removed pulse animation as requested
-                )
+            // Circular Progress Bar for all states
+            when {
+                isMining && remainingTime > 0 -> {
+                    // Active mining progress
+                    CircularProgressBar(
+                        progress = (progressPercentage / 100).toFloat(),
+                        progressColor = Color(0xFF10b981),
+                        backgroundColor = Color(0x1AFFFFFF)
+                    )
+                }
+                isCompleted -> {
+                    // Claim state: full progress ring in orange
+                    CircularProgressBar(
+                        progress = 1.0f,
+                        progressColor = Color(0xFFffa000),
+                        backgroundColor = Color(0x1AFFFFFF)
+                    )
+                }
+                else -> {
+                    // Start mining: empty progress ring
+                    CircularProgressBar(
+                        progress = 0.0f,
+                        progressColor = Color(0xFF10b981),
+                        backgroundColor = Color(0x1AFFFFFF)
+                    )
+                }
             }
             
             // Main Button
@@ -1049,35 +1072,33 @@ fun EnhancedMiningButton(
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(
-                                text = "Remaining",
-                                color = Color.White.copy(alpha = 0.8f),
-                                fontSize = 12.sp
-                            )
                         }
                     }
                     isCompleted -> {
-                        // Completed: Show app logo from mipmap
-                        Image(
-                            painter = painterResource(id = R.mipmap.ic_launcher),
-                            contentDescription = "Claim Reward",
-                            modifier = Modifier.size(60.dp),
+                        // Completed: Show claim text
+                        Text(
+                            text = "Claim\n${"%.2f".format(sessionReward)}\nEKH",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
                     }
                     else -> {
-                        // Ready to start: Show construction icon for mining
-                        Icon(
-                            imageVector = Icons.Default.Construction,
-                            contentDescription = "Start Mining",
-                            tint = Color.White,
-                            modifier = Modifier.size(60.dp)
+                        // Ready to start: Show start mining text
+                        Text(
+                            text = "Start\nMining",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
             }
         }
         
-        // Status Indicator with margin as requested
+        // Status Indicator with margin as requested - now just showing status
         Spacer(modifier = Modifier.height(16.dp))
         
         Box(
@@ -1118,7 +1139,7 @@ fun EnhancedMiningButton(
                 else -> {
                     // Action text
                     Text(
-                        text = if (isCompleted) "Claim ${"%.2f".format(sessionReward)} EKH" else "Start Mining",
+                        text = if (isCompleted) "Ready to Claim" else "Ready to Start",
                         color = Color(0xFFffa000),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
@@ -1138,12 +1159,12 @@ fun formatTime(seconds: Int): String {
 
 @Composable
 fun CircularProgressBar(
-    progress: Float
+    progress: Float,
+    progressColor: Color = Color(0xFF10b981),
+    backgroundColor: Color = Color(0x1AFFFFFF) // 10% opacity white
     /*isPulsating: Boolean*/
 ) {
     val strokeWidth = 10.dp
-    val backgroundColor = Color(0x1AFFFFFF) // 10% opacity white
-    val progressColor = Color(0xFF10b981) // Green
     
     Canvas(
         modifier = Modifier
