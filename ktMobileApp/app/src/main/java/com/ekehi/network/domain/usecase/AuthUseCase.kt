@@ -34,10 +34,10 @@ class AuthUseCase @Inject constructor(
         emit(Resource.Error(errorMessage))
     }
 
-    fun register(email: String, password: String, name: String, referralCode: String = ""): Flow<Resource<Unit>> = flow {
+    fun register(email: String, password: String, name: String, referralCode: String = "", phoneNumber: String = "", country: String = ""): Flow<Resource<Unit>> = flow {
         Log.d("AuthUseCase", "Starting registration flow for email: $email")
         emit(Resource.Loading)
-        val result = authRepository.register(email, password, name, referralCode)
+        val result = authRepository.register(email, password, name, referralCode, phoneNumber, country)
         if (result.isSuccess) {
             Log.d("AuthUseCase", "Registration successful for email: $email")
             // Profile is created automatically in AuthRepository.register()
@@ -75,10 +75,10 @@ class AuthUseCase @Inject constructor(
         emit(Resource.Error(errorMessage))
     }
 
-    fun registerWithGoogle(idToken: String, name: String, email: String): Flow<Resource<Unit>> = flow {
+    fun registerWithGoogle(idToken: String, name: String, email: String, phoneNumber: String = "", country: String = ""): Flow<Resource<Unit>> = flow {
         Log.d("AuthUseCase", "Starting Google registration flow for email: $email")
         emit(Resource.Loading)
-        val result = authRepository.registerWithGoogle(idToken, name, email)
+        val result = authRepository.registerWithGoogle(idToken, name, email, phoneNumber, country)
         if (result.isSuccess) {
             Log.d("AuthUseCase", "Google registration successful for email: $email")
             // Profile is created automatically in AuthRepository.registerWithGoogle()
@@ -231,6 +231,28 @@ class AuthUseCase @Inject constructor(
         }
     }.catch { e ->
         val errorMessage = "Error updating password: ${e.message ?: "Unknown error"}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
+    
+    /**
+     * Creates a user profile if one doesn't exist for the current user
+     */
+    fun createUserProfileIfNotExists(): Flow<Resource<Unit>> = flow {
+        Log.d("AuthUseCase", "Starting create user profile if not exists flow")
+        emit(Resource.Loading)
+        
+        val result = authRepository.createUserProfileIfNotExists()
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "User profile verified/created successfully")
+            emit(Resource.Success(Unit))
+        } else {
+            val errorMessage = "Failed to create user profile: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error creating user profile: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }

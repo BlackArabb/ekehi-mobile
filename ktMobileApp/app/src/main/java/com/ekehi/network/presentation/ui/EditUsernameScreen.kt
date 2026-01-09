@@ -41,7 +41,7 @@ fun EditUsernameScreen(
     
     // Form state
     var username by remember { mutableStateOf(userProfile?.username ?: "") }
-    var phoneNumber by remember { mutableStateOf(userProfile?.phone_number ?: "") }
+    var phoneNumber by remember { mutableStateOf(userProfile?.phoneNumber ?: "") }
     var country by remember { mutableStateOf(userProfile?.country ?: "") }
     var isUpdating by remember { mutableStateOf(false) }
     var updateError by remember { mutableStateOf<String?>(null) }
@@ -68,7 +68,7 @@ fun EditUsernameScreen(
     LaunchedEffect(userProfile) {
         userProfile?.let {
             username = it.username ?: ""
-            phoneNumber = it.phone_number
+            phoneNumber = it.phoneNumber
             country = it.country
         }
     }
@@ -351,8 +351,8 @@ fun EditUsernameScreen(
                         }
                         
                         // Only add phone number if it has changed
-                        if (cleanedPhoneNumber != userProfile?.phone_number) {
-                            updates["phone_number"] = cleanedPhoneNumber
+                        if (cleanedPhoneNumber != userProfile?.phoneNumber) {
+                            updates["phoneNumber"] = cleanedPhoneNumber
                         }
                         
                         // Only add country if it has changed

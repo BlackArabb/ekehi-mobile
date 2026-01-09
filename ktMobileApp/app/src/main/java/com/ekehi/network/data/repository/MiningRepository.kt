@@ -128,7 +128,7 @@ open class MiningRepository @Inject constructor(
                 @Suppress("UNCHECKED_CAST")
                 val profileData = profile.data as Map<String, Any>
 
-                val currentBalance = (profileData["totalCoins"] as? Number)?.toDouble() ?: 0.0
+                val currentMiningReward = (profileData["miningReward"] as? Number)?.toDouble() ?: 0.0
                 val todayEarnings = (profileData["todayEarnings"] as? Number)?.toDouble() ?: 0.0
 
                 // Format date in ISO 8601 format for Appwrite
@@ -136,13 +136,13 @@ open class MiningRepository @Inject constructor(
                 dateFormat.timeZone = TimeZone.getTimeZone("UTC")
                 val currentDate = dateFormat.format(Date())
 
-                // Update user profile with reward
+                // Update user profile with mining reward
                 appwriteService.databases.updateDocument(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         documentId = profile.id,
                         data = mapOf(
-                                "totalCoins" to (currentBalance + reward),
+                                "miningReward" to (currentMiningReward + reward),
                                 "todayEarnings" to (todayEarnings + reward),
                                 "updatedAt" to currentDate
                         )

@@ -433,23 +433,34 @@ open class SocialTaskRepository @Inject constructor(
     
     private suspend fun awardCoinsToUser(userId: String, amount: Double) {
         try {
-            val userDoc = appwriteService.databases.getDocument(
+            // Get user profile document using userId field (which is stored as a list)
+            val response = appwriteService.databases.listDocuments(
                 databaseId = AppwriteService.DATABASE_ID,
-                collectionId = AppwriteService.USERS_COLLECTION,
-                documentId = userId
+                collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                queries = listOf(
+                    io.appwrite.Query.equal("userId", listOf(userId))
+                )
             )
             
-            @Suppress("UNCHECKED_CAST")
-            val userData = userDoc.data as Map<String, Any>
-            val currentBalance = (userData["balance"] as? Number)?.toDouble() ?: 0.0
-            val newBalance = currentBalance + amount
-            
-            appwriteService.databases.updateDocument(
-                databaseId = AppwriteService.DATABASE_ID,
-                collectionId = AppwriteService.USERS_COLLECTION,
-                documentId = userId,
-                data = mapOf("balance" to newBalance)
-            )
+            if (response.documents.isNotEmpty()) {
+                val profileDoc = response.documents[0]
+                val documentId = profileDoc.id
+                
+                @Suppress("UNCHECKED_CAST")
+                val profileData = profileDoc.data as Map<String, Any>
+                val currentTaskReward = (profileData["taskReward"] as? Number)?.toDouble() ?: 0.0
+                val newTaskReward = currentTaskReward + amount
+                
+                appwriteService.databases.updateDocument(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    documentId = documentId,
+                    data = mapOf(
+                        "taskReward" to newTaskReward,
+                        "updatedAt" to java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                    )
+                )
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -549,7 +560,28 @@ open class SocialTaskRepository @Inject constructor(
             username = data["username"] as? String
         )
     }
-    
+
+    suspend fun getUserCompletedTasksCount(userId: String): Result<Int> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Get all user social tasks that are verified/completed
+                val response = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
+                    queries = listOf(
+                        Query.equal("userId", userId),
+                        Query.equal("status", "verified")
+                    )
+                )
+                
+                // Return the count of verified tasks
+                Result.success(response.total.toInt())
+            } catch (e: AppwriteException) {
+                Result.failure(e)
+            }
+        }
+    }
+
     /**
      * Delete a pending task submission and revert its status to available
      */

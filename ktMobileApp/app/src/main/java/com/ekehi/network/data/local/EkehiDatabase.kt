@@ -16,7 +16,7 @@ import com.ekehi.network.data.local.entities.UserProfileEntity
         MiningSessionEntity::class,
         SocialTaskEntity::class
     ],
-    version = 1,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

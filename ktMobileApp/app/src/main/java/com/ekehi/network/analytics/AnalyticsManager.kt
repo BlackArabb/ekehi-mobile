@@ -49,8 +49,16 @@ class AnalyticsManager @Inject constructor(
     fun trackUserProperties(userId: String, userProfile: com.ekehi.network.data.model.UserProfile) {
         analyticsService.setUserId(userId)
         analyticsService.setUserProperty("total_coins", userProfile.totalCoins.toString())
-        analyticsService.setUserProperty("mining_power", userProfile.miningPower.toString())
+        analyticsService.setUserProperty("mining_power", "0.0")
         analyticsService.setUserProperty("current_streak", userProfile.currentStreak.toString())
         analyticsService.setUserProperty("total_referrals", userProfile.totalReferrals.toString())
+    }
+    
+    fun trackEvent(eventName: String, properties: Map<String, String> = emptyMap()) {
+        val bundle = android.os.Bundle()
+        properties.forEach { (key, value) ->
+            bundle.putString(key, value)
+        }
+        analyticsService.logEvent(eventName, bundle)
     }
 }

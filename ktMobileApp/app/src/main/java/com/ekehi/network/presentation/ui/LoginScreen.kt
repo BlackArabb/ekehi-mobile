@@ -344,6 +344,11 @@ fun LoginScreen(
                     // When OAuth is successful, check the current user
                     viewModel.checkCurrentUser()
                 },
+                onOAuthRegistrationSuccess = {
+                    // For login screen, this shouldn't happen as isRegistration is false
+                    // But just in case, we'll handle it by checking current user
+                    viewModel.checkCurrentUser()
+                },
                 isRegistration = false
             )
 

@@ -5,12 +5,13 @@ data class UserProfile(
         val userId: String, // This should remain as String since it's the first element of the array
         val username: String? = null,
         val email: String? = null,
-        val phone_number: String = "",
+        val phoneNumber: String = "",
         val country: String = "",
-        val totalCoins: Float = 0.0f,
+        val taskReward: Float = 0.0f,
+        val miningReward: Float = 0.0f,
+        val referralReward: Float = 0.0f,
         val autoMiningRate: Float = 0.0f,
         val miningPower: Float = 0.0f,
-        val referralBonusRate: Float = 0.0f,
         val currentStreak: Int = 0,
         val longestStreak: Int = 0,
         val lastLoginDate: String? = null,
@@ -25,4 +26,7 @@ data class UserProfile(
         val streakBonusClaimed: Int = 0,
         val createdAt: String,
         val updatedAt: String
-)
+) {
+    val totalCoins: Float
+        get() = taskReward + miningReward + referralReward
+}

@@ -2,6 +2,7 @@ package com.ekehi.network.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ekehi.network.analytics.AnalyticsManager
 import com.ekehi.network.data.local.EkehiDatabase
 import com.ekehi.network.data.local.CacheManager
@@ -50,7 +51,82 @@ object AppModule {
                 context,
                 EkehiDatabase::class.java,
                 "ekehi_database"
-        ).build()
+        )
+        .addMigrations(
+            object : androidx.room.migration.Migration(1, 2) {
+                override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                    // Add taskReward and miningReward columns to user_profiles table
+                    database.execSQL("ALTER TABLE user_profiles ADD COLUMN taskReward REAL NOT NULL DEFAULT 0.0")
+                    database.execSQL("ALTER TABLE user_profiles ADD COLUMN miningReward REAL NOT NULL DEFAULT 0.0")
+                }
+            },
+            object : androidx.room.migration.Migration(2, 3) {
+                override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                    // Create a new table without referralBonusRate column
+                    database.execSQL("""
+                        CREATE TABLE user_profiles_new (
+                            id TEXT PRIMARY KEY NOT NULL,
+                            userId TEXT NOT NULL,
+                            username TEXT,
+                            email TEXT,
+                            phone_number TEXT NOT NULL DEFAULT '',
+                            country TEXT NOT NULL DEFAULT '',
+                            taskReward REAL NOT NULL DEFAULT 0.0,
+                            miningReward REAL NOT NULL DEFAULT 0.0,
+                            autoMiningRate REAL NOT NULL DEFAULT 0.0,
+                            miningPower REAL NOT NULL DEFAULT 0.0,
+                            currentStreak INTEGER NOT NULL DEFAULT 0,
+                            longestStreak INTEGER NOT NULL DEFAULT 0,
+                            lastLoginDate TEXT,
+                            referralCode TEXT,
+                            referredBy TEXT,
+                            totalReferrals INTEGER NOT NULL DEFAULT 0,
+                            lifetimeEarnings REAL NOT NULL DEFAULT 0.0,
+                            dailyMiningRate REAL NOT NULL DEFAULT 0.0,
+                            maxDailyEarnings REAL NOT NULL DEFAULT 0.0,
+                            todayEarnings REAL NOT NULL DEFAULT 0.0,
+                            lastMiningDate TEXT,
+                            streakBonusClaimed INTEGER NOT NULL DEFAULT 0,
+                            createdAt TEXT NOT NULL,
+                            updatedAt TEXT NOT NULL
+                        )
+                    """)
+                    
+                    // Copy data from old table to new table
+                    database.execSQL("""
+                        INSERT INTO user_profiles_new (
+                            id, userId, username, email, phone_number, country,
+                            taskReward, miningReward, autoMiningRate, miningPower,
+                            currentStreak, longestStreak, lastLoginDate, referralCode,
+                            referredBy, totalReferrals, lifetimeEarnings, dailyMiningRate,
+                            maxDailyEarnings, todayEarnings, lastMiningDate, streakBonusClaimed,
+                            createdAt, updatedAt
+                        )
+                        SELECT
+                            id, userId, username, email, phone_number, country,
+                            taskReward, miningReward, autoMiningRate, miningPower,
+                            currentStreak, longestStreak, lastLoginDate, referralCode,
+                            referredBy, totalReferrals, lifetimeEarnings, dailyMiningRate,
+                            maxDailyEarnings, todayEarnings, lastMiningDate, streakBonusClaimed,
+                            createdAt, updatedAt
+                        FROM user_profiles
+                    """)
+                    
+                    // Drop the old table
+                    database.execSQL("DROP TABLE user_profiles")
+                    
+                    // Rename the new table
+                    database.execSQL("ALTER TABLE user_profiles_new RENAME TO user_profiles")
+                }
+            },
+            object : androidx.room.migration.Migration(3, 4) {
+                override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                    // Add referralReward column to user_profiles table
+                    database.execSQL("ALTER TABLE user_profiles ADD COLUMN referralReward REAL NOT NULL DEFAULT 0.0")
+                }
+            }
+        )
+        .build()
     }
 
     @Provides

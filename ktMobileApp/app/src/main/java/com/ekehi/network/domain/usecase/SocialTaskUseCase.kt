@@ -73,4 +73,21 @@ open class SocialTaskUseCase @Inject constructor(
     }.catch { e ->
         emit(Resource.Error("Error completing social task: ${e.message}"))
     }
+
+    fun getUserCompletedTasksCount(userId: String): Flow<Resource<Int>> = flow {
+        emit(Resource.Loading)
+        try {
+            val result = socialTaskRepository.getUserCompletedTasksCount(userId)
+            if (result.isSuccess) {
+                val count = result.getOrNull() ?: 0
+                emit(Resource.Success(count))
+            } else {
+                emit(Resource.Error("Failed to get completed tasks count: ${result.exceptionOrNull()?.message}"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error("Error getting completed tasks count: ${e.message}"))
+        }
+    }.catch { e ->
+        emit(Resource.Error("Error getting completed tasks count: ${e.message}"))
+    }
 }

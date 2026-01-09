@@ -500,8 +500,8 @@ fun MiningScreenStats(userProfile: UserProfile?, sessionEarnings: Double) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 StatCard(
-                    value = "%.4f".format(userProfile?.totalCoins ?: 0.0),
-                    label = "Total Mined",
+                    value = "%.4f".format(userProfile?.miningReward ?: 0.0),
+                    label = "Mining Reward",
                     iconPainter = painterResource(id = R.mipmap.ic_launcher)
                 )
 

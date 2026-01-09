@@ -10,6 +10,7 @@ import com.ekehi.network.data.sync.SyncManager
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.domain.usecase.UserUseCase
 import com.ekehi.network.domain.usecase.LeaderboardUseCase
+import com.ekehi.network.domain.usecase.SocialTaskUseCase
 import com.ekehi.network.performance.PerformanceMonitor
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
@@ -26,6 +27,7 @@ class ProfileViewModel @Inject constructor(
         private val authRepository: AuthRepository,
         private val userUseCase: UserUseCase,
         private val leaderboardUseCase: LeaderboardUseCase,
+        private val socialTaskUseCase: SocialTaskUseCase,
         private val syncManager: SyncManager,
         private val performanceMonitor: PerformanceMonitor
 ) : ViewModel() {
@@ -36,6 +38,10 @@ class ProfileViewModel @Inject constructor(
     // Add a state flow for user rank
     private val _userRank = MutableStateFlow<Resource<Int>>(Resource.Loading)
     val userRank: StateFlow<Resource<Int>> = _userRank
+
+    // Add a state flow for completed tasks count
+    private val _completedTasksCount = MutableStateFlow<Resource<Int>>(Resource.Loading)
+    val completedTasksCount: StateFlow<Resource<Int>> = _completedTasksCount
 
     private var currentUserId: String? = null
 
@@ -147,7 +153,7 @@ class ProfileViewModel @Inject constructor(
                 if (result.isSuccess) {
                     val profile = result.getOrNull()
                     if (profile != null) {
-                        Log.d("ProfileViewModel", "✅ Profile loaded successfully: ${profile.username}, Coins: ${profile.totalCoins}")
+                        Log.d("ProfileViewModel", "✅ Profile loaded successfully: ${profile.username}, Task Reward: ${profile.taskReward}, Mining Reward: ${profile.miningReward}")
                         
                         // Update streak when profile is loaded
                         Log.d("ProfileViewModel", "=== UPDATING STREAK ===")
@@ -159,6 +165,8 @@ class ProfileViewModel @Inject constructor(
                                     _userProfile.value = Resource.Success(streakResource.data)
                                     // Load user rank after profile is loaded
                                     loadUserRank(userId)
+                                    // Load completed tasks count after profile is loaded
+                                    loadCompletedTasksCount(userId)
                                 }
                                 is Resource.Error -> {
                                     Log.e("ProfileViewModel", "❌ Failed to update streak: ${streakResource.message}")
@@ -166,6 +174,8 @@ class ProfileViewModel @Inject constructor(
                                     _userProfile.value = Resource.Success(profile)
                                     // Load user rank after profile is loaded
                                     loadUserRank(userId)
+                                    // Load completed tasks count after profile is loaded
+                                    loadCompletedTasksCount(userId)
                                 }
                                 else -> {
                                     // For Loading or Idle states, show the original profile
@@ -173,6 +183,8 @@ class ProfileViewModel @Inject constructor(
                                     _userProfile.value = Resource.Success(profile)
                                     // Load user rank after profile is loaded
                                     loadUserRank(userId)
+                                    // Load completed tasks count after profile is loaded
+                                    loadCompletedTasksCount(userId)
                                 }
                             }
                         }
@@ -206,6 +218,19 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             leaderboardUseCase.getUserRank(userId).collect { resource ->
                 _userRank.value = resource
+            }
+        }
+    }
+
+    private fun loadCompletedTasksCount(userId: String) {
+        viewModelScope.launch {
+            try {
+                socialTaskUseCase.getUserCompletedTasksCount(userId).collect { resource ->
+                    _completedTasksCount.value = resource
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error loading completed tasks count", e)
+                _completedTasksCount.value = Resource.Error(e.message ?: "Error loading completed tasks")
             }
         }
     }
@@ -250,13 +275,16 @@ class ProfileViewModel @Inject constructor(
                 val userResult = authRepository.getCurrentUser()
                 userResult.onSuccess { user ->
                     val username = user.name.ifEmpty { "User${userId.take(6)}" }
-                    Log.d("ProfileViewModel", "Creating profile with username: $username")
+                    val email = user.email
+                    Log.d("ProfileViewModel", "Creating profile with username: $username, email: $email")
                     
-                    val createResult = userRepository.createUserProfile(userId, username)
+                    val createResult = userRepository.createUserProfile(userId, username, email, "", "")
                     if (createResult.isSuccess) {
                         val profile = createResult.getOrNull()
                         if (profile != null) {
                             Log.d("ProfileViewModel", "✅ New profile created successfully: ${profile.username}")
+                            Log.d("ProfileViewModel", "   Phone: ${profile.phoneNumber}")
+                            Log.d("ProfileViewModel", "   Country: ${profile.country}")
                             _userProfile.value = Resource.Success(profile)
                             
                             // Update streak for new profile

@@ -52,6 +52,8 @@ fun ProfileScreen(
     onLogout: () -> Unit
 ) {
     val userProfileResource by viewModel.userProfile.collectAsState()
+    val userRankResource by viewModel.userRank.collectAsState()
+    val completedTasksResource by viewModel.completedTasksCount.collectAsState()
     val scrollState = rememberScrollState()
     
     // Get StartIoService through DI
@@ -186,7 +188,11 @@ fun ProfileScreen(
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
-                ProfileStatsSection(userProfile = userProfile)
+                ProfileStatsSection(
+                    userProfile = userProfile,
+                    userRankResource = userRankResource,
+                    completedTasksResource = completedTasksResource
+                )
                 Spacer(modifier = Modifier.height(24.dp))
                 ProfileContentSection(userProfile = userProfile)
                 Spacer(modifier = Modifier.height(24.dp))
@@ -249,7 +255,7 @@ fun ProfileHeader(
             Text(
                 text = userProfile?.username ?: "User Name",
                 color = Color.White,
-                fontSize = 26.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
 
@@ -308,7 +314,11 @@ fun ProfileHeader(
 }
 
 @Composable
-fun ProfileStatsSection(userProfile: UserProfile?) {
+fun ProfileStatsSection(
+    userProfile: UserProfile?,
+    userRankResource: Resource<Int>?,
+    completedTasksResource: Resource<Int>?
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -340,18 +350,23 @@ fun ProfileStatsSection(userProfile: UserProfile?) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatCard(
-                        value = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
-                        label = "Total Mined",
-                        icon = Icons.Default.AccountBalance,
+                        value = "%.2f EKH".format(userProfile?.taskReward ?: 0.0),
+                        label = "Task Reward",
+                        icon = Icons.Default.TaskAlt,
                         iconColor = Color(0xFFffa000),
                         modifier = Modifier.weight(1f)
                     )
 
                     StatCard(
-                        value = (userProfile?.totalReferrals ?: 0).toString(),
-                        label = "Tasks Completed",
-                        icon = Icons.Default.Task,
-                        iconColor = Color(0xFF3b82f6),
+                        value = when (userRankResource) {
+                            is Resource.Success -> "#${userRankResource.data}"
+                            is Resource.Error -> "#0"
+                            is Resource.Loading -> "#..."
+                            else -> "#0"
+                        },
+                        label = "Current Rank",
+                        icon = Icons.Default.Leaderboard,
+                        iconColor = Color(0xFF10b981),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -362,10 +377,10 @@ fun ProfileStatsSection(userProfile: UserProfile?) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatCard(
-                        value = "#${userProfile?.miningPower?.toInt() ?: 0}",
-                        label = "Current Rank",
-                        icon = Icons.Default.Leaderboard,
-                        iconColor = Color(0xFF10b981),
+                        value = "%.2f EKH".format(userProfile?.referralReward ?: 0.0),
+                        label = "Referral Reward",
+                        icon = Icons.Default.CardGiftcard,
+                        iconColor = Color(0xFF8b5cf6),
                         modifier = Modifier.weight(1f)
                     )
 
@@ -448,7 +463,7 @@ fun ProfileContentSection(userProfile: UserProfile?) {
 
             ProfileDetailItem(
                 label = "Phone",
-                value = userProfile?.phone_number?.toString() ?: ""
+                value = userProfile?.phoneNumber?.toString() ?: ""
             )
 
             ProfileDetailItem(
@@ -459,59 +474,6 @@ fun ProfileContentSection(userProfile: UserProfile?) {
             ProfileDetailItem(
                 label = "Account Created",
                 value = userProfile?.createdAt?.substring(0, 10) ?: "N/A"
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Mining Statistics
-            Text(
-                text = "Mining Statistics",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            ProfileDetailItem(
-                label = "Total Mined",
-                value = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0)
-            )
-
-            ProfileDetailItem(
-                label = "Mining Rate",
-                value = "%.4f EKH/hour".format(userProfile?.autoMiningRate ?: 0.0)
-            )
-
-            ProfileDetailItem(
-                label = "Referral Bonus",
-                value = "%.4f EKH/hour".format(userProfile?.referralBonusRate ?: 0.0)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Activity
-            Text(
-                text = "Recent Activity",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            // Placeholder for recent mining sessions
-            Text(
-                text = "No recent mining sessions",
-                color = Color(0xB3FFFFFF),
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Placeholder for recent tasks
-            Text(
-                text = "No recent tasks completed",
-                color = Color(0xB3FFFFFF),
-                fontSize = 14.sp
             )
         }
     }
@@ -648,9 +610,11 @@ fun ProfileHeaderPreview() {
                 userId = "user1",
                 username = "John Doe",
                 email = "john@example.com",
-                phone_number = "1234567890",
+                phoneNumber = "1234567890",
                 country = "United States",
-                totalCoins = 125.50f,
+                taskReward = 75.50f,
+                miningReward = 50.00f,
+                referralReward = 10.00f,
                 miningPower = 2.5f,
                 autoMiningRate = 0.005f,
                 totalReferrals = 3,
@@ -673,14 +637,18 @@ fun ProfileStatsSectionPreview() {
                 userId = "user1",
                 username = "John Doe",
                 email = "john@example.com",
-                totalCoins = 125.50f,
+                taskReward = 75.50f,
+                miningReward = 50.00f,
+                referralReward = 10.00f,
                 miningPower = 2.5f,
                 autoMiningRate = 0.005f,
                 totalReferrals = 3,
                 maxDailyEarnings = 12.75f,
                 createdAt = "2023-01-15T10:30:00Z",
                 updatedAt = "2023-01-15T10:30:00Z"
-            )
+            ),
+            userRankResource = Resource.Success(5),
+            completedTasksResource = Resource.Success(12)
         )
     }
 }

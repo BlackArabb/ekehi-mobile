@@ -12,10 +12,11 @@ data class UserProfileEntity(
     val email: String? = null,
     val phone_number: String = "", // Add this line
     val country: String = "", // Add this line
-    val totalCoins: Float = 0.0f,
+    val taskReward: Float = 0.0f,
+    val miningReward: Float = 0.0f,
+    val referralReward: Float = 0.0f,
     val autoMiningRate: Float = 0.0f,
     val miningPower: Float = 0.0f,
-    val referralBonusRate: Float = 0.0f,
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,
     val lastLoginDate: String? = null,
@@ -30,4 +31,7 @@ data class UserProfileEntity(
     val streakBonusClaimed: Int = 0,
     val createdAt: String,
     val updatedAt: String
-)
+) {
+    val totalCoins: Float
+        get() = taskReward + miningReward + referralReward
+}

@@ -443,7 +443,7 @@ class MiningViewModel @Inject constructor(
         if (currentProfile is Resource.Success) {
             val profile = currentProfile.data
             val updatedProfile = profile.copy(
-                totalCoins = newBalance
+                taskReward = newBalance
             )
             _userProfile.value = Resource.Success(updatedProfile)
         }

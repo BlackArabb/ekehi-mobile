@@ -72,9 +72,10 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun register(email: String, password: String, name: String, referralCode: String = ""): Result<AppwriteUser<Map<String, Any>>> {
+    suspend fun register(email: String, password: String, name: String, referralCode: String = "", phoneNumber: String = "", country: String = ""): Result<AppwriteUser<Map<String, Any>>> {
+        android.util.Log.e("REGISTRATION_TEST", "===== REGISTRATION STARTED =====")
         Log.d(TAG, "=== REGISTRATION STARTED ===")
-        Log.d(TAG, "Email: $email, Name: $name")
+        Log.d(TAG, "Email: $email, Name: $name, Phone: $phoneNumber, Country: $country")
         return withContext(Dispatchers.IO) {
             try {
                 // Step 0: CRITICAL - Delete any existing session first
@@ -130,30 +131,34 @@ class AuthRepository @Inject constructor(
                 }
                 
                 // Step 4: Create user profile (now that user is authenticated)
+                Log.d(TAG, "About to create user profile for regular registration")
                 try {
                     Log.d(TAG, "Step 4: Creating user profile for userId: ${user.id}")
-                    val profileResult = userRepository.createUserProfile(user.id, name)
+                    val profileResult = userRepository.createUserProfile(user.id, name, email, phoneNumber, country)
                     if (profileResult.isSuccess) {
                         val profile = profileResult.getOrNull()
                         if (profile != null) {
                             Log.d(TAG, "✅ User profile created successfully")
                             Log.d(TAG, "   Username: ${profile.username}")
-                            Log.d(TAG, "   Coins: ${profile.totalCoins}")
+                            Log.d(TAG, "   Email: ${profile.email}")
+                            Log.d(TAG, "   Phone: ${profile.phoneNumber}")
+                            Log.d(TAG, "   Country: ${profile.country}")
+                            Log.d(TAG, "   Task Reward: ${profile.taskReward}")
                             Log.d(TAG, "   Referral Code: ${profile.referralCode}")
                         } else {
                             Log.e(TAG, "⚠️ Profile created but is null")
+                            return@withContext Result.failure(Exception("Profile created but is null"))
                         }
                     } else {
                         val error = profileResult.exceptionOrNull()
                         Log.e(TAG, "❌ Failed to create user profile: ${error?.message}")
-                        Log.e(TAG, "   This will be handled by ProfileViewModel on first login")
-                        // Don't fail registration - ProfileViewModel will create it later
+                        return@withContext Result.failure(Exception("Failed to create user profile: ${error?.message}"))
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ Exception while creating user profile: ${e.message}", e)
-                    Log.e(TAG, "   This will be handled by ProfileViewModel on first login")
-                    // Don't fail registration - ProfileViewModel will create it later
+                    return@withContext Result.failure(e)
                 }
+                Log.d(TAG, "Completed user profile creation attempt for regular registration")
                 
                 Log.d(TAG, "=== REGISTRATION COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(user)
@@ -204,9 +209,9 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun registerWithGoogle(idToken: String, name: String, email: String): Result<AppwriteUser<Map<String, Any>>> {
+    suspend fun registerWithGoogle(idToken: String, name: String, email: String, phoneNumber: String = "", country: String = ""): Result<AppwriteUser<Map<String, Any>>> {
         Log.d(TAG, "=== GOOGLE REGISTRATION STARTED ===")
-        Log.d(TAG, "Email: $email, Name: $name")
+        Log.d(TAG, "Email: $email, Name: $name, Phone: $phoneNumber, Country: $country")
         return withContext(Dispatchers.IO) {
             try {
                 // Step 1: Create the Appwrite account
@@ -229,28 +234,34 @@ class AuthRepository @Inject constructor(
                 }
                 
                 // Step 2: Create user profile
+                Log.d(TAG, "About to create user profile for Google registration")
                 try {
                     Log.d(TAG, "Step 2: Creating user profile for userId: ${user.id}")
-                    val profileResult = userRepository.createUserProfile(user.id, name)
+                    val profileResult = userRepository.createUserProfile(user.id, name, email, phoneNumber, country)
                     if (profileResult.isSuccess) {
                         val profile = profileResult.getOrNull()
                         if (profile != null) {
                             Log.d(TAG, "✅ User profile created successfully")
                             Log.d(TAG, "   Username: ${profile.username}")
-                            Log.d(TAG, "   Coins: ${profile.totalCoins}")
+                            Log.d(TAG, "   Email: ${profile.email}")
+                            Log.d(TAG, "   Phone: ${profile.phoneNumber}")
+                            Log.d(TAG, "   Country: ${profile.country}")
+                            Log.d(TAG, "   Task Reward: ${profile.taskReward}")
                             Log.d(TAG, "   Referral Code: ${profile.referralCode}")
                         } else {
                             Log.e(TAG, "⚠️ Profile created but is null")
+                            return@withContext Result.failure(Exception("Profile created but is null"))
                         }
                     } else {
                         val error = profileResult.exceptionOrNull()
                         Log.e(TAG, "❌ Failed to create user profile: ${error?.message}")
-                        Log.e(TAG, "   This will be handled by ProfileViewModel on first login")
+                        return@withContext Result.failure(Exception("Failed to create user profile: ${error?.message}"))
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ Exception while creating user profile: ${e.message}", e)
-                    Log.e(TAG, "   This will be handled by ProfileViewModel on first login")
+                    return@withContext Result.failure(e)
                 }
+                Log.d(TAG, "Completed user profile creation attempt for Google registration")
                 
                 Log.d(TAG, "=== GOOGLE REGISTRATION COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(user)
@@ -617,9 +628,12 @@ class AuthRepository @Inject constructor(
                         if (profileResult.isFailure) {
                             // Profile doesn't exist, create it
                             Log.d(TAG, "User profile not found, creating new profile for userId: ${currentUser.id}")
-                            val createResult = userRepository.createUserProfile(currentUser.id, currentUser.name)
+                            val createResult = userRepository.createUserProfile(currentUser.id, currentUser.name, currentUser.email, "", "")
                             if (createResult.isSuccess) {
                                 Log.d(TAG, "User profile created successfully")
+                                Log.d(TAG, "   Email: ${createResult.getOrNull()?.email}")
+                                Log.d(TAG, "   Phone: ${createResult.getOrNull()?.phoneNumber}")
+                                Log.d(TAG, "   Country: ${createResult.getOrNull()?.country}")
                                 return@withContext Result.success(Unit)
                             } else {
                                 val error = createResult.exceptionOrNull()

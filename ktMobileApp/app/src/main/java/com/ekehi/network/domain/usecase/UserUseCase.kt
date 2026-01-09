@@ -43,9 +43,9 @@ open class UserUseCase @Inject constructor(
         emit(Resource.Error("Error getting user profile: ${e.message}"))
     }
 
-    fun createUserProfile(userId: String, displayName: String): Flow<Resource<UserProfile>> = flow {
+    fun createUserProfile(userId: String, displayName: String, email: String? = null, phoneNumber: String = "", country: String = ""): Flow<Resource<UserProfile>> = flow {
         emit(Resource.Loading)
-        val result = userRepository.createUserProfile(userId, displayName)
+        val result = userRepository.createUserProfile(userId, displayName, email, phoneNumber, country)
         if (result.isSuccess) {
             emit(Resource.Success(result.getOrNull()!!))
         } else {
@@ -229,7 +229,9 @@ open class UserUseCase @Inject constructor(
                 
                 // Only update coins and streak bonus if they changed
                 if (updatedTotalCoins != userProfile.totalCoins) {
-                    updates["totalCoins"] = updatedTotalCoins
+                    // Since we removed totalCoins from the database, we need to update the individual reward fields
+                    // For streak bonus, we'll add to taskReward
+                    updates["taskReward"] = updatedTotalCoins
                     Log.d(TAG, "💰 Total coins updated: ${userProfile.totalCoins} -> $updatedTotalCoins")
                 }
                 
@@ -309,7 +311,7 @@ open class UserUseCase @Inject constructor(
                 
                 // Prepare updates
                 val updates = mapOf<String, Any>(
-                    "totalCoins" to newBalance,
+                    "taskReward" to newBalance,
                     "updatedAt" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
                         timeZone = TimeZone.getTimeZone("UTC")
                     }.format(Date())
@@ -347,4 +349,40 @@ open class UserUseCase @Inject constructor(
         emit(Resource.Error(errorMessage))
     }
 
+    /**
+     * Updates user profile with the provided fields
+     * @param userId The user ID
+     * @param updates Map of field names to values to update
+     * @return Flow<Resource<UserProfile>> with updated profile
+     */
+    fun updateUserProfile(userId: String, updates: Map<String, Any>): Flow<Resource<UserProfile>> = flow {
+        Log.d(TAG, "=== UPDATING USER PROFILE ===")
+        Log.d(TAG, "User ID: $userId")
+        Log.d(TAG, "Updates: $updates")
+        
+        emit(Resource.Loading)
+        
+        try {
+            val result = userRepository.updateUserProfile(userId, updates)
+            
+            if (result.isSuccess) {
+                val updatedProfile = result.getOrNull()!!
+                Log.d(TAG, "✅ User profile updated successfully")
+                emit(Resource.Success(updatedProfile))
+            } else {
+                val error = result.exceptionOrNull()
+                val errorMessage = "Failed to update user profile: ${error?.message ?: "Unknown error"}"
+                Log.e(TAG, "❌ $errorMessage", error)
+                emit(Resource.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            val errorMessage = "Error updating user profile: ${e.message ?: "Unknown error"}"
+            Log.e(TAG, "❌ PROFILE UPDATE ERROR", e)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Profile update error: ${e.message ?: "Unknown error"}"
+        Log.e(TAG, "❌ PROFILE UPDATE EXCEPTION", e)
+        emit(Resource.Error(errorMessage))
+    }
 }

@@ -56,20 +56,18 @@ open class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun createUserProfile(userId: String, username: String): Result<UserProfile> {
+    suspend fun createUserProfile(userId: String, username: String, email: String? = null, phoneNumber: String = "", country: String = ""): Result<UserProfile> {
+        Log.d("UserRepository", "Creating user profile for userId: $userId, username: $username, email: $email, phone: $phoneNumber, country: $country")
         return withContext(Dispatchers.IO) {
             try {
-                // Generate a unique referral code
-                val referralCode = "REF${Random.nextInt(100000, 999999)}"
-                
+                // Generate a unique referral code in EKH + 6-digit format
+                val referralCode = "EKH${Random.nextInt(100000, 999999)}"
+                    
                 // Get current timestamp
-                val currentTimestamp = java.text.SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", 
-                    java.util.Locale.getDefault()
-                ).apply {
-                    timeZone = java.util.TimeZone.getTimeZone("UTC")
-                }.format(java.util.Date())
-                
+                val currentTimestamp = java.time.Instant.now().toString()
+                    
+                Log.d("UserRepository", "About to create Appwrite document in database: ${AppwriteService.DATABASE_ID}, collection: ${AppwriteService.USER_PROFILES_COLLECTION}")
+                    
                 val document = appwriteService.databases.createDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
@@ -77,27 +75,36 @@ open class UserRepository @Inject constructor(
                     data = mapOf(
                         "userId" to listOf(userId),
                         "username" to username,
-                        "phone_number" to "",
-                        "country" to "",
-                        "totalCoins" to 0.0f,
-                        "autoMiningRate" to 0.0f,
-                        "miningPower" to 1.0f,
-                        "referralBonusRate" to 0.0f,
                         "currentStreak" to 0,
                         "longestStreak" to 0,
-                        "totalReferrals" to 0,
-                        "lifetimeEarnings" to 0.0f,
-                        "dailyMiningRate" to 2.0f,
-                        "maxDailyEarnings" to 10000.0f,
-                        "todayEarnings" to 0.0f,
-                        "streakBonusClaimed" to 0,
+                        "lastLoginDate" to null,
                         "referralCode" to listOf(referralCode),
+                        "referredBy" to null,
+                        "totalReferrals" to 0,
+                        "lastMiningDate" to null,
+                        "streakBonusClaimed" to 0,
+                        "dailyMiningRate" to 2.0,
+                        "walletAddress" to null,
+                        "country" to country,
+                        "phoneNumber" to phoneNumber,
+                        "taskReward" to 0.0,
+                        "miningReward" to 0,
+                        "referralReward" to 0.0,
+                        "autoMiningRate" to 0.0,
+                        "todayEarnings" to 0.0,
+                        "lifetimeEarnings" to 0.0,
+                        "maxDailyEarnings" to 10000.0,
+                        "email" to email,
                         "createdAt" to currentTimestamp,
                         "updatedAt" to currentTimestamp
                     )
                 )
+                    
+                Log.d("UserRepository", "Appwrite document created successfully with ID: ${document.id}")
                 
                 val profile = documentToUserProfile(document)
+                
+                Log.d("UserRepository", "Profile converted successfully, username: ${profile.username}")
                 
                 // Check if there's a stored referral code to claim
                 val storedReferralCode = securePreferences.getString("referral_code", null)
@@ -109,12 +116,15 @@ open class UserRepository @Inject constructor(
                     securePreferences.remove("referral_code")
                 }
                 
+                Log.d("UserRepository", "User profile creation completed successfully for userId: $userId")
                 Result.success(profile)
             } catch (e: AppwriteException) {
                 Log.e("UserRepository", "Appwrite exception while creating profile: ${e.message}", e)
+                Log.e("UserRepository", "Appwrite error details - Code: ${e.code}, Message: ${e.message}, Type: ${e.type}")
                 Result.failure(e)
             } catch (e: Exception) {
                 Log.e("UserRepository", "Unexpected exception while creating profile: ${e.message}", e)
+                Log.e("UserRepository", "Error type: ${e::class.simpleName}")
                 Result.failure(e)
             }
         }
@@ -142,7 +152,7 @@ open class UserRepository @Inject constructor(
                     
                     // Add updatedAt timestamp to the updates
                     val updatesWithTimestamp = updates.toMutableMap()
-                    updatesWithTimestamp["updatedAt"] = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                    updatesWithTimestamp["updatedAt"] = java.time.Instant.now().toString()
                     
                     val document = appwriteService.databases.updateDocument(
                         databaseId = AppwriteService.DATABASE_ID,
@@ -178,7 +188,7 @@ open class UserRepository @Inject constructor(
                 
                 // Add updatedAt timestamp to the updates
                 val updatesWithTimestamp = updates.toMutableMap()
-                updatesWithTimestamp["updatedAt"] = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                updatesWithTimestamp["updatedAt"] = java.time.Instant.now().toString()
                 
                 val document = appwriteService.databases.updateDocument(
                     databaseId = AppwriteService.DATABASE_ID,
@@ -186,7 +196,7 @@ open class UserRepository @Inject constructor(
                     documentId = documentId,
                     data = updatesWithTimestamp
                 )
-                
+                        
                 val profile = documentToUserProfile(document)
                 Log.d("UserRepository", "Successfully updated profile by document ID: $documentId")
                 Result.success(profile)
@@ -318,38 +328,40 @@ open class UserRepository @Inject constructor(
                     return@withContext Result.failure(Exception("You cannot refer yourself"))
                 }
                 
-                // Update referrer's profile with increased referral bonus rate and referral count
-                val currentReferralBonusRate = (referrerData["referralBonusRate"] as? Number)?.toDouble() ?: 0.0
+                // Update referrer's profile with referral count and fixed reward
                 val currentTotalReferrals = (referrerData["totalReferrals"] as? Number)?.toInt() ?: 0
+                val currentTaskReward = (referrerData["taskReward"] as? Number)?.toDouble() ?: 0.0
                 
                 // Check if referrer has reached max referrals (50)
                 if (currentTotalReferrals >= 50) {
                     return@withContext Result.failure(Exception("This referral code has reached the maximum number of referrals"))
                 }
                 
-                // Update referrer's profile
+                // Update referrer's profile - give fixed 2 EKH reward to referralReward
+                val currentReferrerReferralReward = (referrerData["referralReward"] as? Number)?.toDouble() ?: 0.0
+                
                 appwriteService.databases.updateDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     documentId = referrerDoc.id,
                     data = mapOf(
-                        "referralBonusRate" to (currentReferralBonusRate + 0.0083), // Increase referral bonus rate by 0.0083 EKH/hour per referral
+                        "referralReward" to (currentReferrerReferralReward + 2.0), // Fixed 2 EKH reward for referrer
                         "totalReferrals" to (currentTotalReferrals + 1),
-                        "updatedAt" to java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                        "updatedAt" to java.time.Instant.now().toString()
                     )
                 )
-                
-                // Update current user's profile with referredBy field and give them 2 EKH
-                val currentTotalCoins = (currentUserData["totalCoins"] as? Number)?.toDouble() ?: 0.0
-                
+                                    
+                // Update current user's profile with referredBy field and give them 2 EKH as referral reward
+                val currentUserReferralReward = (currentUserData["referralReward"] as? Number)?.toDouble() ?: 0.0
+                                    
                 appwriteService.databases.updateDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     documentId = currentUserDoc.id,
                     data = mapOf(
                         "referredBy" to referrerUserId,
-                        "totalCoins" to (currentTotalCoins + 2.0), // 2 EKH for referee
-                        "updatedAt" to java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                        "referralReward" to (currentUserReferralReward + 2.0), // 2 EKH for referee as referral reward
+                        "updatedAt" to java.time.Instant.now().toString()
                     )
                 )
                 
@@ -386,10 +398,14 @@ open class UserRepository @Inject constructor(
 
     private fun parseTimestamp(timestamp: String): Long? {
         return try {
-            val formatter = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault())
-            formatter.parse(timestamp)?.time
+            java.time.LocalDateTime.parse(timestamp.replace("Z", ""), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
         } catch (e: Exception) {
-            null
+            try {
+                // Alternative parsing for different formats
+                java.time.Instant.parse(timestamp).toEpochMilli()
+            } catch (ex: Exception) {
+                null
+            }
         }
     }
     
@@ -406,12 +422,13 @@ open class UserRepository @Inject constructor(
             },
             username = data["username"] as? String,
             email = data["email"] as? String,
-            phone_number = data["phone_number"] as? String ?: "",
+            phoneNumber = data["phoneNumber"] as? String ?: "",
             country = data["country"] as? String ?: "",
-            totalCoins = (data["totalCoins"] as? Number)?.toFloat() ?: 0.0f,
+            taskReward = (data["taskReward"] as? Number)?.toFloat() ?: 0.0f,
+            miningReward = (data["miningReward"] as? Number)?.toFloat() ?: 0.0f,
+            referralReward = (data["referralReward"] as? Number)?.toFloat() ?: 0.0f,
             autoMiningRate = (data["autoMiningRate"] as? Number)?.toFloat() ?: 0.0f,
-            miningPower = (data["miningPower"] as? Number)?.toFloat() ?: 1.0f,
-            referralBonusRate = (data["referralBonusRate"] as? Number)?.toFloat() ?: 0.0f,
+            miningPower = 0.0f,
             currentStreak = (data["currentStreak"] as? Number)?.toInt() ?: 0,
             longestStreak = (data["longestStreak"] as? Number)?.toInt() ?: 0,
             lastLoginDate = data["lastLoginDate"] as? String,
@@ -423,8 +440,8 @@ open class UserRepository @Inject constructor(
             referredBy = data["referredBy"] as? String,
             totalReferrals = (data["totalReferrals"] as? Number)?.toInt() ?: 0,
             lifetimeEarnings = (data["lifetimeEarnings"] as? Number)?.toFloat() ?: 0.0f,
-            dailyMiningRate = (data["dailyMiningRate"] as? Number)?.toFloat() ?: 0.0f,
-            maxDailyEarnings = (data["maxDailyEarnings"] as? Number)?.toFloat() ?: 100.0f,
+            dailyMiningRate = (data["dailyMiningRate"] as? Number)?.toFloat() ?: 2.0f,
+            maxDailyEarnings = (data["maxDailyEarnings"] as? Number)?.toFloat() ?: 10000.0f,
             todayEarnings = (data["todayEarnings"] as? Number)?.toFloat() ?: 0.0f,
             lastMiningDate = data["lastMiningDate"] as? String,
             streakBonusClaimed = (data["streakBonusClaimed"] as? Number)?.toInt() ?: 0,

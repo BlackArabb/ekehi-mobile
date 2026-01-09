@@ -31,9 +31,9 @@ class RegistrationViewModel @Inject constructor(
     // Fallback scope in case viewModelScope is cancelled
     private val fallbackScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun register(name: String, email: String, password: String, referralCode: String = "") {
+    fun register(name: String, email: String, password: String, referralCode: String = "", phoneNumber: String = "", country: String = "") {
         Log.d("RegistrationViewModel", "=== REGISTRATION ATTEMPT STARTED ===")
-        Log.d("RegistrationViewModel", "Email: $email, Name: $name")
+        Log.d("RegistrationViewModel", "Email: $email, Name: $name, Phone: $phoneNumber, Country: $country")
         
         // Set loading state immediately on main thread to ensure UI updates
         _registrationState.value = Resource.Loading
@@ -46,6 +46,8 @@ class RegistrationViewModel @Inject constructor(
                     // Validate inputs before proceeding
                     val nameValidation = InputValidator.validateAndSanitizeText(name, 50)
                     val emailValidation = InputValidator.validateAndSanitizeText(email, 255)
+                    val phoneNumberValidation = InputValidator.validateAndSanitizeText(phoneNumber, 20)
+                    val countryValidation = InputValidator.validateAndSanitizeText(country, 100)
                     val passwordValidation = InputValidator.validateAndSanitizeText(password, 100)
                     val referralCodeValidation = InputValidator.validateAndSanitizeText(referralCode, 50)
                     
@@ -61,6 +63,24 @@ class RegistrationViewModel @Inject constructor(
                     
                     if (!emailValidation.isValid) {
                         val errorMessage = "Invalid email: ${emailValidation.errorMessage}"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
+                        }
+                        return@launch
+                    }
+                    
+                    if (!phoneNumberValidation.isValid) {
+                        val errorMessage = "Invalid phone number: ${phoneNumberValidation.errorMessage}"
+                        Log.e("RegistrationViewModel", errorMessage)
+                        withContext(Dispatchers.Main) {
+                            _registrationState.value = Resource.Error(errorMessage)
+                        }
+                        return@launch
+                    }
+                    
+                    if (!countryValidation.isValid) {
+                        val errorMessage = "Invalid country: ${countryValidation.errorMessage}"
                         Log.e("RegistrationViewModel", errorMessage)
                         withContext(Dispatchers.Main) {
                             _registrationState.value = Resource.Error(errorMessage)
@@ -120,7 +140,9 @@ class RegistrationViewModel @Inject constructor(
                         emailValidation.sanitizedInput, 
                         passwordValidation.sanitizedInput, 
                         nameValidation.sanitizedInput,
-                        referralCodeValidation.sanitizedInput
+                        referralCodeValidation.sanitizedInput,
+                        phoneNumberValidation.sanitizedInput,
+                        countryValidation.sanitizedInput
                     ).collect { resource ->
                         withContext(Dispatchers.Main) {
                             _registrationState.value = resource
@@ -158,9 +180,9 @@ class RegistrationViewModel @Inject constructor(
         }
     }
     
-    fun registerWithGoogle(idToken: String, name: String, email: String) {
+    fun registerWithGoogle(idToken: String, name: String, email: String, phoneNumber: String = "", country: String = "") {
         Log.d("RegistrationViewModel", "=== GOOGLE REGISTRATION ATTEMPT STARTED ===")
-        Log.d("RegistrationViewModel", "Email: $email, Name: $name")
+        Log.d("RegistrationViewModel", "Email: $email, Name: $name, Phone: $phoneNumber, Country: $country")
         
         // Set loading state immediately on main thread to ensure UI updates
         _registrationState.value = Resource.Loading
@@ -180,7 +202,7 @@ class RegistrationViewModel @Inject constructor(
                     Log.d("RegistrationViewModel", "✅ Proceeding with Google registration")
                     
                     // Perform Google registration
-                    authUseCase.registerWithGoogle(idToken, name, email).collect { resource ->
+                    authUseCase.registerWithGoogle(idToken, name, email, phoneNumber, country).collect { resource ->
                         withContext(Dispatchers.Main) {
                             _registrationState.value = resource
                         }

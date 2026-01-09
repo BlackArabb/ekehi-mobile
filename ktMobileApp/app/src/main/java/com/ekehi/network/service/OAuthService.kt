@@ -75,7 +75,8 @@ class OAuthService @Inject constructor(
                 Log.d("OAuthService", "Step 2: Getting user info")
                 val appwriteUser = account.get()
                 val username = appwriteUser.name.ifEmpty { appwriteUser.email.substringBefore("@") }
-                Log.d("OAuthService", "✅ User info retrieved - Username: $username")
+                val email = appwriteUser.email
+                Log.d("OAuthService", "✅ User info retrieved - Username: $username, Email: $email")
                 
                 // Step 3: Check if user profile exists, create if it doesn't
                 Log.d("OAuthService", "Step 3: Checking/creating user profile")
@@ -83,9 +84,12 @@ class OAuthService @Inject constructor(
                 if (profileResult.isFailure) {
                     Log.d("OAuthService", "User profile not found, creating new profile")
                     
-                    val createProfileResult = userRepository.createUserProfile(userId, username)
+                    val createProfileResult = userRepository.createUserProfile(userId, username, email, "", "")
                     if (createProfileResult.isSuccess) {
                         Log.d("OAuthService", "✅ User profile created successfully")
+                        Log.d("OAuthService", "   Email: ${createProfileResult.getOrNull()?.email}")
+                        Log.d("OAuthService", "   Phone: ${createProfileResult.getOrNull()?.phoneNumber}")
+                        Log.d("OAuthService", "   Country: ${createProfileResult.getOrNull()?.country}")
                     } else {
                         Log.e("OAuthService", "❌ Failed to create user profile: ${createProfileResult.exceptionOrNull()?.message}")
                         return@withContext Result.failure(

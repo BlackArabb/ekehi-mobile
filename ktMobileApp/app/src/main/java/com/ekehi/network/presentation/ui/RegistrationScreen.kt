@@ -42,10 +42,13 @@ fun RegistrationScreen(
     oAuthViewModel: OAuthViewModel = hiltViewModel(),
     loginViewModel: LoginViewModel = hiltViewModel(),
     onRegistrationSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToSecondaryInfo: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var country by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var referralCode by remember { mutableStateOf("") }
@@ -62,10 +65,12 @@ fun RegistrationScreen(
     val errorMessage = (registrationState as? Resource.Error)?.message
 
     // Calculate if button should be enabled
-    val isSignUpButtonEnabled = remember(name, email, password, confirmPassword, isTermsAccepted, isLoading) {
+    val isSignUpButtonEnabled = remember(name, email, phoneNumber, country, password, confirmPassword, isTermsAccepted, isLoading) {
         !isLoading && 
         name.trim().isNotEmpty() && 
         email.trim().isNotEmpty() && 
+        phoneNumber.trim().isNotEmpty() &&
+        country.trim().isNotEmpty() &&
         password.trim().isNotEmpty() && 
         confirmPassword.trim().isNotEmpty() &&
         isTermsAccepted &&
@@ -199,6 +204,44 @@ fun RegistrationScreen(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email", color = Color(0xB3FFFFFF)) },
+                singleLine = true,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFFffa000),
+                    unfocusedBorderColor = Color(0x33FFFFFF),
+                    cursorColor = Color(0xFFffa000),
+                    focusedLabelColor = Color(0xFFffa000),
+                    unfocusedLabelColor = Color(0xB3FFFFFF)
+                )
+            )
+
+            // Phone Number Input
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Phone Number", color = Color(0xB3FFFFFF)) },
+                singleLine = true,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFFffa000),
+                    unfocusedBorderColor = Color(0x33FFFFFF),
+                    cursorColor = Color(0xFFffa000),
+                    focusedLabelColor = Color(0xFFffa000),
+                    unfocusedLabelColor = Color(0xB3FFFFFF)
+                )
+            )
+
+            // Country Input
+            OutlinedTextField(
+                value = country,
+                onValueChange = { country = it },
+                label = { Text("Country", color = Color(0xB3FFFFFF)) },
                 singleLine = true,
                 textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
                 modifier = Modifier
@@ -357,6 +400,8 @@ fun RegistrationScreen(
                     Log.d("RegistrationScreen", "=== SIGN UP BUTTON CLICKED ===")
                     Log.d("RegistrationScreen", "Name: '$name'")
                     Log.d("RegistrationScreen", "Email: '$email'")
+                    Log.d("RegistrationScreen", "Phone Number: '$phoneNumber'")
+                    Log.d("RegistrationScreen", "Country: '$country'")
                     Log.d("RegistrationScreen", "Password: '${password}'")
                     Log.d("RegistrationScreen", "Confirm Password: '${confirmPassword}'")
                     Log.d("RegistrationScreen", "Referral Code: '$referralCode'")
@@ -370,6 +415,8 @@ fun RegistrationScreen(
                     
                     val trimmedName = name.trim()
                     val trimmedEmail = email.trim()
+                    val trimmedPhoneNumber = phoneNumber.trim()
+                    val trimmedCountry = country.trim()
                     val trimmedPassword = password.trim()
                     val trimmedConfirmPassword = confirmPassword.trim()
                     val trimmedReferralCode = referralCode.trim()
@@ -377,6 +424,8 @@ fun RegistrationScreen(
                     // Validate inputs
                     val isValid = trimmedName.isNotEmpty() && 
                                 trimmedEmail.isNotEmpty() && 
+                                trimmedPhoneNumber.isNotEmpty() &&
+                                trimmedCountry.isNotEmpty() &&
                                 trimmedPassword.isNotEmpty() && 
                                 trimmedConfirmPassword.isNotEmpty() &&
                                 isTermsAccepted &&
@@ -387,12 +436,14 @@ fun RegistrationScreen(
                     if (isValid) {
                         Log.d("RegistrationScreen", "All inputs valid, proceeding with registration...")
                         showPasswordMismatch = false
-                        // Pass referral code to registration
-                        viewModel.register(trimmedName, trimmedEmail, trimmedPassword, trimmedReferralCode)
+                        // Pass phone number and country to registration
+                        viewModel.register(trimmedName, trimmedEmail, trimmedPassword, trimmedReferralCode, trimmedPhoneNumber, trimmedCountry)
                     } else {
                         Log.d("RegistrationScreen", "Validation failed:")
                         if (trimmedName.isEmpty()) Log.d("RegistrationScreen", "- Name is empty")
                         if (trimmedEmail.isEmpty()) Log.d("RegistrationScreen", "- Email is empty")
+                        if (trimmedPhoneNumber.isEmpty()) Log.d("RegistrationScreen", "- Phone number is empty")
+                        if (trimmedCountry.isEmpty()) Log.d("RegistrationScreen", "- Country is empty")
                         if (trimmedPassword.isEmpty()) Log.d("RegistrationScreen", "- Password is empty")
                         if (trimmedConfirmPassword.isEmpty()) Log.d("RegistrationScreen", "- Confirm password is empty")
                         if (!isTermsAccepted) Log.d("RegistrationScreen", "- Terms not accepted")
@@ -467,6 +518,11 @@ fun RegistrationScreen(
                     // Listen for login state changes to navigate to main screen
                     // This will be handled by the parent composable
                 },
+                onOAuthRegistrationSuccess = {
+                    // After Google OAuth registration, navigate to secondary info screen
+                    // to collect additional information like phone number and country
+                    onNavigateToSecondaryInfo()
+                },
                 isRegistration = true
             )
 
@@ -534,7 +590,8 @@ fun RegistrationScreenPreview() {
     EkehiMobileTheme {
         RegistrationScreen(
             onRegistrationSuccess = {},
-            onNavigateToLogin = {}
+            onNavigateToLogin = {},
+            onNavigateToSecondaryInfo = {}
         )
     }
 }

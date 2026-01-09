@@ -62,9 +62,9 @@ fun LandingScreen(
                 modifier = Modifier.padding(bottom = 48.dp)
             )
 
-            // Login Button
+            // Sign Up Button
             Button(
-                onClick = onNavigateToLogin,
+                onClick = onNavigateToRegister,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -74,16 +74,16 @@ fun LandingScreen(
                 )
             ) {
                 Text(
-                    text = "Login",
+                    text = "Sign Up",
                     color = Color.Black,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            // Register Button
+            // Sign In Button
             Button(
-                onClick = onNavigateToRegister,
+                onClick = onNavigateToLogin,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -94,7 +94,7 @@ fun LandingScreen(
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Text(
-                    text = "Create Account",
+                    text = "Sign In",
                     color = Color(0xFFffa000), // Orange color
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold

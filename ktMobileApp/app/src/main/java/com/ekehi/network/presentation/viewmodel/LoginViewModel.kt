@@ -263,7 +263,26 @@ class LoginViewModel @Inject constructor(
                                     when (userResource) {
                                         is Resource.Success -> {
                                             Log.d("LoginViewModel", "✅ User authenticated")
-                                            _loginState.value = Resource.Success(Unit)
+                                            
+                                            // Ensure user profile exists
+                                            authUseCase.createUserProfileIfNotExists().collect { profileResource ->
+                                                when (profileResource) {
+                                                    is Resource.Success -> {
+                                                        Log.d("LoginViewModel", "✅ User profile verified/created successfully")
+                                                        _loginState.value = Resource.Success(Unit)
+                                                    }
+                                                    is Resource.Error -> {
+                                                        Log.e("LoginViewModel", "❌ Failed to create/verify user profile: ${profileResource.message}")
+                                                        _loginState.value = Resource.Error("Failed to create user profile: ${profileResource.message}")
+                                                    }
+                                                    is Resource.Loading -> {
+                                                        Log.d("LoginViewModel", "⏳ Creating user profile...")
+                                                    }
+                                                    is Resource.Idle -> {
+                                                        // Do nothing
+                                                    }
+                                                }
+                                            }
                                             
                                             // No analytics tracking needed for auto-login check
                                         }

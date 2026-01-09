@@ -362,7 +362,7 @@ fun ReferralCodeScreen(
                         BenefitItem(
                             icon = Icons.Default.CardGiftcard,
                             title = "For You",
-                            description = "Earn 10% of your referrals' mining earnings forever"
+                            description = "Earn 2 EKH for each successful referral"
                         )
                         
                         Spacer(modifier = Modifier.height(12.dp))

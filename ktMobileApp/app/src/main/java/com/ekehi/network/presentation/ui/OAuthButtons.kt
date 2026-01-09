@@ -28,6 +28,7 @@ import com.ekehi.network.ui.theme.EkehiMobileTheme
 fun OAuthButtons(
         viewModel: OAuthViewModel = hiltViewModel(),
         onOAuthSuccess: () -> Unit = {},
+        onOAuthRegistrationSuccess: () -> Unit = {}, // New callback for registration success
         isRegistration: Boolean = false // Flag to determine if this is for registration
 ) {
     val context = LocalContext.current
@@ -91,7 +92,11 @@ fun OAuthButtons(
                 val success = (oauthState as Resource.Success<Boolean>).data
                 if (success) {
                     // OAuth was successful, notify the parent composable
-                    onOAuthSuccess()
+                    if (isRegistration) {
+                        onOAuthRegistrationSuccess() // Navigate to secondary info screen
+                    } else {
+                        onOAuthSuccess() // Navigate to main screen
+                    }
                 }
             }
             is Resource.Error -> {
@@ -166,6 +171,7 @@ fun OAuthButtonsPreview() {
     EkehiMobileTheme {
         OAuthButtons(
             onOAuthSuccess = {},
+            onOAuthRegistrationSuccess = {},
             isRegistration = false
         )
     }
@@ -177,6 +183,7 @@ fun OAuthButtonsRegistrationPreview() {
     EkehiMobileTheme {
         OAuthButtons(
             onOAuthSuccess = {},
+            onOAuthRegistrationSuccess = {},
             isRegistration = true
         )
     }

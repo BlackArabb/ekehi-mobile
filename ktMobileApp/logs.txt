@@ -1,0 +1,1040 @@
+
+C:\Users\KSA>adb logcat *:E
+--------- beginning of system
+01-09 03:34:21.250  1225  2620 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:34:29.515  1225  1331 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:34:33.833  1225  1238 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:34:57.851  1225  1238 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:34:59.426  1225  1331 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:35:38.850  1225  1761 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:35:39.122 26408 26474 E ActivityThread: Failed to find provider info for com.facebook.appmanager.nekodirect
+01-09 03:35:46.802 26309 26625 E ActivityThread: Failed to find provider info for com.facebook.appmanager.install.api
+01-09 03:37:39.080  1225  1238 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:38:12.615  1225  2620 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:38:15.018  1225  3547 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:38:17.845  1225  3104 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:38:18.589 26309 26363 E ActivityThread: Failed to find provider info for com.whatsapp.provider.phoneid
+01-09 03:38:18.593 26309 26363 E ActivityThread: Failed to find provider info for com.instagram.android.provider.phoneid
+01-09 03:38:18.597 26309 26363 E ActivityThread: Failed to find provider info for com.facebook.orca.provider.phoneid
+01-09 03:38:22.821  1225  3097 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:38:54.849  1225  1250 E AppIdleHistory: Error writing app idle file for user 0
+01-09 03:38:54.864  1225  1250 E AppIdleHistory: Error writing app idle file for user 999
+01-09 03:40:48.921  1225  3605 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:40:54.324  1225  2869 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:40:54.455  1225  1756 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:40:56.394  1225  3605 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:41:00.436  1225  1756 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:41:01.533  1225  1237 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:41:07.397  1225  3536 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:41:11.545  1225  3536 E ProcessStats: Executing service ServiceState{9da7fd2 org.chromium.content.app.SandboxedProcessService0 pkg=com.android.chrome proc=36698a3} without owner
+01-09 03:41:11.575  1225  3536 E ProcessStats: Binding service ServiceState{9da7fd2 org.chromium.content.app.SandboxedProcessService0 pkg=com.android.chrome proc=36698a3} without owner
+01-09 03:41:11.576  1225  3536 E ProcessStats: Starting service ServiceState{9da7fd2 org.chromium.content.app.SandboxedProcessService0 pkg=com.android.chrome proc=36698a3} without owner
+01-09 03:41:11.576  1225  3536 E ProcessStats: Binding service ServiceState{9da7fd2 org.chromium.content.app.SandboxedProcessService0 pkg=com.android.chrome proc=36698a3} without owner
+01-09 03:41:11.776  1225  1259 E KernelCpuUidUserSysTimeReader: Negative user/sys time delta for UID=10121
+01-09 03:41:11.776  1225  1259 E KernelCpuUidUserSysTimeReader: Prev times: u=26776 s=10592 Curr times: u=26401 s=10249
+01-09 03:41:18.516  1225  1237 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:41:24.940  1225  1259 E KernelCpuUidUserSysTimeReader: Negative user/sys time delta for UID=90001
+01-09 03:41:24.940  1225  1259 E KernelCpuUidUserSysTimeReader: Prev times: u=2788 s=859 Curr times: u=2763 s=783
+--------- beginning of main
+01-09 03:41:25.864   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:25.898   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:25.931   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:25.964   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.132   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.165   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.232   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.331   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.365   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.431   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.464   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.564   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:26.597   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.315 15038 15191 E libc    : Access denied finding property "ro.vendor.transsion.xml.support"
+01-09 03:41:27.332   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.366   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.399   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.404  1225  1761 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:41:27.433   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.499   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.532   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.566   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.599   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.632   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.733   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.748 15038 15038 E cr_CompositorSurfaceMgr: surfaceDestroyed format : -3
+01-09 03:41:27.766   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.799   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.833   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.866   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.899   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:27.933   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.000   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.333   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:28.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.000   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.020 27528 27651 E UserRepository: User profile not found for userId: 69606ad8b8879584b196
+01-09 03:41:29.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.434   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.457 27528 27651 E UserRepository: Appwrite exception while creating profile: Invalid document structure: Attribute "miningReward" has invalid format. Value must be a valid integer
+01-09 03:41:29.457 27528 27651 E UserRepository: io.appwrite.exceptions.AppwriteException: Invalid document structure: Attribute "miningReward" has invalid format. Value must be a valid integer
+01-09 03:41:29.457 27528 27651 E UserRepository:        at io.appwrite.Client$awaitResponse$2$1.onResponse(Client.kt:544)
+01-09 03:41:29.457 27528 27651 E UserRepository:        at okhttp3.internal.connection.RealCall$AsyncCall.run(RealCall.kt:519)
+01-09 03:41:29.457 27528 27651 E UserRepository:        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+01-09 03:41:29.457 27528 27651 E UserRepository:        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+01-09 03:41:29.457 27528 27651 E UserRepository:        at java.lang.Thread.run(Thread.java:919)
+01-09 03:41:29.458 27528 27651 E UserRepository: Appwrite error details - Code: 400, Message: Invalid document structure: Attribute "miningReward" has invalid format. Value must be a valid integer, Type: document_invalid_structure
+01-09 03:41:29.458 27528 27651 E OAuthService: ❌ Failed to create user profile: Invalid document structure: Attribute "miningReward" has invalid format. Value must be a valid integer
+01-09 03:41:29.458 27528 27528 E OAuthCallbackActivity: ❌ Failed to process OAuth callback: Invalid document structure: Attribute "miningReward" has invalid format. Value must be a valid integer
+01-09 03:41:29.458 27528 27528 E OAuthCallbackActivity: OAuth error: Invalid document structure: Attribute "miningReward" has invalid format. Value must be a valid integer
+01-09 03:41:29.467   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.533   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.547 27528 27528 E MainActivity: ❌ OAuth login failed: Invalid document structure: Attribute "miningReward" has invalid format. Value must be a valid integer
+01-09 03:41:29.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.569  1225  3583 E WindowManager: App trying to use insecure INPUT_FEATURE_NO_INPUT_CHANNEL flag. Ignoring
+01-09 03:41:29.600   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.633   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.666   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.700   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.733   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.766   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.833   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.866   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.933   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.966   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:29.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:30.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:30.499   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:30.566   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:30.599   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.132   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.332   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.365   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.731   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.764   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.930   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:31.963   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:32.867   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:32.900   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.433   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.600   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:33.633   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.467   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.600   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.634   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.667   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.700   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.734   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.834   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:34.867   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:35.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:35.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:35.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:35.633   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:35.666   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:36.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:36.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.866   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.899   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.966   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:37.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:38.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:38.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:38.300   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:38.533   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:38.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:39.534   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:39.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:39.586 25803 25803 E adbd    : failed to send command to abb: Success
+01-09 03:41:39.601   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:39.634   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:39.667   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:39.767   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:39.800   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:40.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:40.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:40.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:40.232   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:40.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:40.962   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:40.995   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:41.165   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:41.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:41.232   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.198   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.232   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.298   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.331   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.364   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.378  7570 28125 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:42.398   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.431   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.436  7570  7676 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:42.464   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.663   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.696   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.708   427   427 E beanpodkeymaster: Received 4 byte response
+01-09 03:41:42.709   427   427 E beanpodkeymaster: Received 48 byte response
+01-09 03:41:42.711   427   427 E beanpodkeymaster: Received 34 byte response
+01-09 03:41:42.712   427   427 E beanpodkeymaster: Received 36 byte response
+01-09 03:41:42.715   427   427 E beanpodkeymaster: Received 24 byte response
+01-09 03:41:42.716   427   427 E beanpodkeymaster: Received 34 byte response
+01-09 03:41:42.717   427   427 E beanpodkeymaster: Received 20 byte response
+01-09 03:41:42.720   427   427 E beanpodkeymaster: Received 24 byte response
+01-09 03:41:42.722   427   427 E beanpodkeymaster: Received 132 byte response
+01-09 03:41:42.723   427   427 E beanpodkeymaster: Received 20 byte response
+01-09 03:41:42.729   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.736  7570  7670 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:42.761 28144 28144 E entsScanServic: Not starting debugger since process cannot load the jdwp agent.
+01-09 03:41:42.763   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.779 28144 28144 E libc    : Access denied finding property "persist.vendor.sys.os.typeface.defaultfont.hash"
+01-09 03:41:42.780   427   427 E beanpodkeymaster: Received 4 byte response
+01-09 03:41:42.781 28144 28144 E libc    : Access denied finding property "persist.vendor.sys.os.typeface.defaultfont.hash"
+01-09 03:41:42.781   427   427 E beanpodkeymaster: Received 48 byte response
+01-09 03:41:42.784   427   427 E beanpodkeymaster: Received 34 byte response
+01-09 03:41:42.787   427   427 E beanpodkeymaster: Received 36 byte response
+01-09 03:41:42.791   427   427 E beanpodkeymaster: Received 24 byte response
+01-09 03:41:42.792   427   427 E beanpodkeymaster: Received 34 byte response
+01-09 03:41:42.795   427   427 E beanpodkeymaster: Received 20 byte response
+01-09 03:41:42.796   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.804   427   427 E beanpodkeymaster: Received 24 byte response
+01-09 03:41:42.805   427   427 E beanpodkeymaster: Received 130 byte response
+01-09 03:41:42.807   427   427 E beanpodkeymaster: Received 20 byte response
+01-09 03:41:42.829   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.830 28144 28144 E libc    : Access denied finding property "persist.vendor.sys.os.typeface.defaultfont.hash"
+01-09 03:41:42.863   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.896   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:42.908  7570  7570 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:42.929   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:43.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:43.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:43.631   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:43.664   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.132   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.172  7570  7678 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:44.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.232   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.298   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.331   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.465   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.498   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.963   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:44.996   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:45.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:45.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:45.864   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:45.897   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:45.931   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:45.964   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:46.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:46.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:46.465   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:46.499   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:46.765   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:46.798   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.000   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.564   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.597   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.763   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.796   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.830   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.863   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.896   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.929   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.962   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:47.996   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.132   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.165   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.198   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.298   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.464   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.483  7570  7670 E bjbj    : Input Future failed with Error
+01-09 03:41:48.483  7570  7670 E bjbj    : java.lang.OutOfMemoryError: Failed to allocate a 356515848 byte allocation with 100663296 free bytes and 142MB until OOM, target footprint 354264624, growth limit 402653184
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.util.Arrays.copyOf(Arrays.java:3257)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.lang.AbstractStringBuilder.ensureCapacityInternal(AbstractStringBuilder.java:124)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.lang.AbstractStringBuilder.append(AbstractStringBuilder.java:448)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.lang.StringBuilder.append(StringBuilder.java:137)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.util.Arrays.deepToString(Arrays.java:4578)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.util.Arrays.deepToString(Arrays.java:4597)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.util.Arrays.deepToString(Arrays.java:4550)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at aynr.a(PG:275)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at uhw.apply(PG:162)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbf.d(PG:3)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbg.run(PG:38)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at po.execute(PG:8)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bioe.aO(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjdj.execute(PG:5)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbx.g(PG:43)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbj.f(PG:53)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbj.w(PG:18)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbh.run(PG:7)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at a.az(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjcc.execute(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbf.e(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbg.run(PG:44)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at po.execute(PG:8)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bioe.aO(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjdj.execute(PG:5)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbx.g(PG:43)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbj.f(PG:53)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbj.w(PG:18)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbh.run(PG:7)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at a.az(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjcc.execute(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbf.e(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbg.run(PG:44)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at po.execute(PG:8)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bioe.aO(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjdj.execute(PG:5)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbx.g(PG:43)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbj.f(PG:53)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbj.w(PG:18)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbh.run(PG:7)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at a.az(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjcc.execute(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbf.e(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbg.run(PG:44)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at po.execute(PG:8)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bioe.aO(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjdj.execute(PG:5)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbf.e(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjbg.run(PG:44)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at po.execute(PG:8)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bioe.aO(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjdj.execute(PG:5)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.f(PG:1)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.k(PG:93)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bjau.o(PG:13)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at ayoa.a(PG:38)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at aymz.a(PG:14)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bcco.a(PG:166)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at ayhs.c(PG:308)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at ayhn.b(PG:366)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bwox.os(PG:6)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at bwvz.run(PG:109)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at usp.run(PG:615)
+01-09 03:41:48.483  7570  7670 E bjbj    :      at java.lang.Thread.run(Thread.java:919)
+01-09 03:41:48.487  7570  7670 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:48.491  7570 28125 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:48.495  7570 28125 E Finsky  : [754] Package name null is not an installed package
+01-09 03:41:48.496  7570  7678 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:48.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.533   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.566   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.599   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.732   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.736  7570  7676 E AbstractLogEventBuilder: The provided ProductIdOrigin 3 is not one of the process-level expected values: 1 or 2
+01-09 03:41:48.754   629   663 E         : Couldn't opendir /data/app/vmdl1340040329.tmp: No such file or directory
+01-09 03:41:48.754   629   663 E installd: Failed to delete /data/app/vmdl1340040329.tmp: No such file or directory
+01-09 03:41:48.765   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.792   488 28194 E ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+01-09 03:41:48.793   488 28196 E ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+01-09 03:41:48.793   488 28197 E ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+01-09 03:41:48.793   488 28195 E ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+01-09 03:41:48.794   488 28198 E ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+01-09 03:41:48.795   488 28199 E ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+01-09 03:41:48.799   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.832   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.865   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.877  7570  7678 E Finsky  : [604] [Counters] attempted to use a non-positive increment for: 4752
+01-09 03:41:48.877  7570  7678 E Finsky  : [604] [Counters] attempted to use a non-positive increment for: 4753
+01-09 03:41:48.898   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.909  7570  7670 E Finsky  : [596] [Counters] attempted to use a non-positive increment for: 4752
+01-09 03:41:48.918  7570  7676 E Finsky  : [601] [Counters] attempted to use a non-positive increment for: 4753
+01-09 03:41:48.932   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.966   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.968   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.968   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.968   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.968   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.990   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.991   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.995   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.995   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:48.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.103   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.136   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.170   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.174  7570  7678 E Finsky  : [604] [Counters] attempted to use a non-positive increment for: 4752
+01-09 03:41:49.182  7570  7676 E Finsky  : [601] [Counters] attempted to use a non-positive increment for: 4753
+01-09 03:41:49.203   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.210  7570  7673 E Finsky  : [599] [Counters] attempted to use a non-positive increment for: 4752
+01-09 03:41:49.216  7570  7673 E Finsky  : [599] [Counters] attempted to use a non-positive increment for: 4753
+01-09 03:41:49.236   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.243  1225  3690 E ActivityManager: Sending non-protected broadcast refresh_beeline from system 3225:com.transsion.smartpanel/1000 pkg com.transsion.smartpanel
+01-09 03:41:49.243  1225  3690 E ActivityManager: java.lang.Throwable
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at com.android.server.am.ActivityManagerService.checkBroadcastFromSystem(ActivityManagerService.java:16570)
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:17244)
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16587)
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at com.android.server.am.ActivityManagerService.broadcastIntent(ActivityManagerService.java:17427)
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:2189)
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:3151)
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at android.os.Binder.execTransactInternal(Binder.java:1046)
+01-09 03:41:49.243  1225  3690 E ActivityManager:       at android.os.Binder.execTransact(Binder.java:997)
+01-09 03:41:49.270   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.287  1569  1569 E PhoneInterfaceManager: [PhoneIntfMgr] getCarrierPackageNamesForIntent: No UICC
+01-09 03:41:49.299  1569  1569 E PhoneInterfaceManager: [PhoneIntfMgr] getCarrierPackageNamesForIntent: No UICC
+01-09 03:41:49.303   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.336   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.371   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.404   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.437   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.470   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.504   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.537   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.570   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.604   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.637   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.670   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.703   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.736   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.770   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.803   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.836   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.869   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.903   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.936   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.969   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.969   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.973   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.973   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.978   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:49.978   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:50.000   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:50.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:50.165   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:50.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:50.566   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:50.599   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:51.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:51.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:51.467   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:51.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:52.734   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:52.767   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:52.834   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:52.868   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:53.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:53.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:53.901   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:53.935   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:54.965   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:54.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:55.333   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:55.366   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.569   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.602   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.703   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.736   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.769   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:56.803   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:57.934   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:57.967   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:58.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:58.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:58.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:58.499   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:59.000   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:59.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:41:59.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:00.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:00.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:00.565   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:00.599   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.973   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.975   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.980   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.980   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.980   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.981   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.983   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.985   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.986   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.986   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.989   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:01.989   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:02.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:02.434   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:02.768   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:02.801   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:03.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:03.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:03.399   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:03.433   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:03.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:03.600   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.433   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.533   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.566   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.733   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:04.766   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:05.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:05.433   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:05.467   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:05.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:05.733   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:05.767   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.432   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.698   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.732   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.765   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.932   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.942 26309 26552 E msys    : E[N WA]WCCXMPPStreamDisconnectImmediately(756)=>[WARNING] xmpp/disconnect/immediate in state=2 reason=xmpp/idle/timeout
+01-09 03:42:06.944 26309 26552 E msys    : E[N WA]_WCCXMPPStreamDisconnectHandler(322)=>xmpp/disconnect - WCIStreamStateErrorCode: 1, domain: WCIStreamState, subdomain: happyeyeballs: Error Domain=WCIStreamState Code=1 UserInfo=0x75c383b0c0 {MCFErrorDirectUnderlyingErrorKey=0x7655221780 "Error Domain=happyeyeballs Code=1"}
+01-09 03:42:06.944 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultLifecycleEventHandler(2067)=>[INFO] connection/xmpp/lifecycle_event/not-connected, [190.6581s]
+01-09 03:42:06.944 26309 26552 E msys    : E[N WA]_WCCXMPPStreamDoDisconnect(1136)=>xmpp/disconnect - flags: 0
+01-09 03:42:06.944 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultEmitStateChange(3039)=>[INFO] connection/new_state/not-connected [connection_id=741776058, wcc_source=1, wcc_reason=0]
+01-09 03:42:06.947 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultDisconnectHandler(2190)=>[INFO] connection/disconnected/[did-connect, did-read-bytes]
+01-09 03:42:06.948 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultEmitStateChange(3039)=>[INFO] connection/new_state/connecting [connection_id=741776059, wcc_source=1, wcc_reason=0]
+01-09 03:42:06.954 26309 26577 E msys    : E[C mem.context]_NetworkStateChangedCallbackOnExecutionContext(7773)=>[INFO]skip the network state change source=4
+01-09 03:42:06.965   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.970 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultDoConnectWithAuthKeys(1491)=>[INFO] connection/connect/start/[host=chat-e2ee.facebook.com port=5222]/[102.132.101.2:5222]
+01-09 03:42:06.971 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultLifecycleEventHandler(2059)=>[INFO] connection/xmpp/lifecycle_event/will-connect
+01-09 03:42:06.998   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:06.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.016   488 28278 E ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+01-09 03:42:07.027 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultLifecycleEventHandler(2067)=>[INFO] connection/xmpp/lifecycle_event/did-connect, [0.0560s]
+01-09 03:42:07.032 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultLifecycleEventHandler(2067)=>[INFO] connection/xmpp/lifecycle_event/did-send-initial-payload, [0.0039s]
+01-09 03:42:07.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.193 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultLifecycleEventHandler(2067)=>[INFO] connection/xmpp/lifecycle_event/will-handshake, [0.1612s]
+01-09 03:42:07.197 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultLifecycleEventHandler(2067)=>[INFO] connection/xmpp/lifecycle_event/did-handshake, [0.0035s]
+01-09 03:42:07.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.202 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultReceiveHandler(2219)=>[INFO] connection/receive/login-success
+01-09 03:42:07.203 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultEmitStateChange(3039)=>[INFO] connection/new_state/connected [connection_id=741776059, wcc_source=1, wcc_reason=0]
+01-09 03:42:07.206 26309 26577 E msys    : E[C mem.context]_ScheduleBackgroundDisconnectionTaskIfNeededOnExecutionContext(3632)=>[INFO] background/disconnect_schedule/duration/600
+01-09 03:42:07.210 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultReconnectFromWeakRef(1358)=>[INFO] connection/reconnect reconnection aborted, already logged in
+01-09 03:42:07.211 26309 26577 E msys    : E[C mem.context]_NetworkStateChangedCallbackOnExecutionContext(7773)=>[INFO]skip the network state change source=4
+01-09 03:42:07.232   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.532   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.561 26309 26552 E msys    : E[N WA]_WCCConnectionDefaultReconnectFromWeakRef(1358)=>[INFO] connection/reconnect reconnection aborted, already logged in
+01-09 03:42:07.565   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.598   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.632   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.665   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.698   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.798   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:07.831   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.332   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.365   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.465   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.498   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.531   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.964   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:08.997   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:09.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:09.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:11.000   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:11.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:11.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:11.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:12.433   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:12.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:12.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:13.600   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:13.633   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:14.366   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:14.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:15.434   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:15.467   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:15.868   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:15.901   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:16.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:16.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:18.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:18.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:18.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:18.977   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:18.977  1671  1671 E Athena  : ------------------------------------------------------------
+01-09 03:42:18.977  1671  1671 E Athena  :
+01-09 03:42:18.977  1671  1671 E Athena  : Athena is in DEBUG or TEST mode，should not release this APK
+01-09 03:42:18.977  1671  1671 E Athena  :
+01-09 03:42:18.977  1671  1671 E Athena  : ------------------------------------------------------------
+01-09 03:42:18.977   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:19.502   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:19.535   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:19.937   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:19.971   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:21.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:21.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:22.536   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:22.569   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:23.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:23.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:23.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:23.300   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:23.334   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:23.368   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:23.401   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:24.602   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:24.635   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:25.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:25.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:26.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:26.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:26.367   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:26.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:26.766   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:26.799   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:26.832   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:27.867   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:27.901   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:28.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:28.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:29.735   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:29.768   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:30.535   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:30.569   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:31.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:31.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:31.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:32.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:33.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:33.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:33.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:33.534   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:34.705   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:34.738   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:34.839   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:34.872   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:36.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:36.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:36.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:36.202   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:37.502   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:37.535   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:37.868   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:37.902   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:38.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:38.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:38.499   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:38.532   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:38.566   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:38.766   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:38.799   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:39.979   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:39.979   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:40.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:40.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:40.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:40.867   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:40.900   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:41.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:41.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:41.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:41.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:41.434   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:42.300   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:42.334   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:43.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:43.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:44.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:44.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:45.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:45.132   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:46.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:46.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:46.670   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:46.704   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:47.770   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:47.803   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:48.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:48.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:49.300   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:49.333   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:49.367   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:49.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:50.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:50.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:51.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:51.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:51.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:52.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:53.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:53.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:54.634   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:54.668   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:55.334   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:55.368   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:56.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:56.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:57.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:57.301   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:58.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:58.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:58.871   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:58.904   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:59.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:59.034 27940 27962 E chromium: [ERROR:base/android/self_compaction_manager.cc:71] Unexpected return from madvise: Invalid argument (22)
+01-09 03:42:59.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:59.904   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:59.938   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:42:59.999   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:00.036   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:00.069   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:00.437   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:00.470   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:01.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:01.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:01.867   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:01.900   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:01.934   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:01.967   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:02.536   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:02.570   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:02.604   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:02.637   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:03.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:03.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:04.735   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:04.769   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:05.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:05.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:05.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:05.600   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:06.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:06.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:07.769   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:07.803   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:08.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:08.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:08.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:10.433   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:10.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:10.700   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:10.733   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:11.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:11.301   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:13.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:13.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:13.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:14.401   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:14.435   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:15.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:15.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:15.669   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:15.703   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:15.804   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:15.837   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:16.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:16.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:18.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:18.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:18.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:18.334   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:18.368   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.035  1671  1671 E Athena  : ------------------------------------------------------------
+01-09 03:43:19.035  1671  1671 E Athena  :
+01-09 03:43:19.035  1671  1671 E Athena  : Athena is in DEBUG or TEST mode，should not release this APK
+01-09 03:43:19.035  1671  1671 E Athena  :
+01-09 03:43:19.035  1671  1671 E Athena  : ------------------------------------------------------------
+01-09 03:43:19.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.266   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.665   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:19.699   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:20.667   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:20.700   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:20.933   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:20.967   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:20.994   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:20.994   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:21.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:21.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:23.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:23.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:23.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:23.633   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:23.666   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.300   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.334   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.345 28351 28351 E keyguardgestur: Not starting debugger since process cannot load the jdwp agent.
+01-09 03:43:26.367   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.401   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.434   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.467   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.470  1225  1253 E NotificationService: Suppressing notification from package by user request.
+01-09 03:43:26.480 28351 28351 E libc    : Access denied finding property "sys.boot.reason"
+01-09 03:43:26.500   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.533   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.600   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.605   613  1369 E flp     : flp_screen_monitor_thread: Screen off
+01-09 03:43:26.618  1225  1381 E WifiClientModeImpl: getWifiLinkLayerStats called without an interface
+01-09 03:43:26.633   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.667   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.700   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.734   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.769   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.802   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.835   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.869   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.883 28378 28378 E at.appupdate.u: Not starting debugger since process cannot load the jdwp agent.
+01-09 03:43:26.902   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.935   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.969   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.971   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.971   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.974   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:26.977   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.000   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.037 28378 28404 E TMS_Athena: ReportExceptionJob
+01-09 03:43:27.044 28378 28404 E TMS_Athena: ReportExceptionJob start work
+01-09 03:43:27.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.132   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.265   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.366   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.399   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:27.661  1225  1275 E PowerManagerService: start VideoActivity failed: android.content.ActivityNotFoundException: Unable to find explicit activity class {com.transsion.demomode/com.transsion.demomode.activity.VideoActivity}; have you declared this activity in your AndroidManifest.xml?
+01-09 03:43:30.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:30.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:30.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.134   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.268   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.301   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.311  1225  2045 E StatusBarManagerService: Disable StatusBar & NavigationBar!!!java.lang.Throwable
+01-09 03:43:31.311  1225  2045 E StatusBarManagerService:       at com.android.server.statusbar.StatusBarManagerService.disableLocked(StatusBarManagerService.java:758)
+01-09 03:43:31.311  1225  2045 E StatusBarManagerService:       at com.android.server.statusbar.StatusBarManagerService.disableForUser(StatusBarManagerService.java:706)
+01-09 03:43:31.311  1225  2045 E StatusBarManagerService:       at com.android.internal.statusbar.IStatusBarService$Stub.onTransact(IStatusBarService.java:469)
+01-09 03:43:31.311  1225  2045 E StatusBarManagerService:       at android.os.Binder.execTransactInternal(Binder.java:1046)
+01-09 03:43:31.311  1225  2045 E StatusBarManagerService:       at android.os.Binder.execTransact(Binder.java:997)
+01-09 03:43:31.334   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.368   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.401   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.435   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.468   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.501   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.535   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.568   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.602   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.635   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.668   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.869   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:31.902   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:33.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:33.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:33.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:33.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:33.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:34.537   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:34.571   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:34.705   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:34.739   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:36.503   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:36.537   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:36.570   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:36.604   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:36.872   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:36.906   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:37.268   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:37.302   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:38.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:38.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:38.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:38.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:40.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:40.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.200   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.233   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.300   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.333   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.533   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.567   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.971   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:41.972   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:42.367   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:42.400   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:43.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:43.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:43.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:43.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:47.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:47.133   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:48.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:48.067   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:48.134   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:48.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:51.301   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:51.335   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.101   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.134   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.234   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.267   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.300   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.334   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:53.367   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:57.368   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:57.401   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:58.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:58.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:58.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:43:58.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:00.033   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:00.067   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:00.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:01.335   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:01.369   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:02.503   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:02.537   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:02.604   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:02.637   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.099   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.166   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.199   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.299   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.333   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.366   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.399   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.432   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.466   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.833   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:03.866   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:08.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:08.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:08.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:08.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:08.403   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:08.444   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:11.335   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:11.369   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:11.903   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:11.937   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:13.067   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:13.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:13.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:13.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:14.871   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:14.905   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:14.938   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:18.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:18.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:18.168   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:18.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:19.066   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:19.083  1671  1671 E Athena  : ------------------------------------------------------------
+01-09 03:44:19.084  1671  1671 E Athena  :
+01-09 03:44:19.084  1671  1671 E Athena  : Athena is in DEBUG or TEST mode，should not release this APK
+01-09 03:44:19.084  1671  1671 E Athena  :
+01-09 03:44:19.084  1671  1671 E Athena  : ------------------------------------------------------------
+01-09 03:44:19.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:20.401   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:20.434   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:21.368   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:21.401   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:23.067   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:23.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:23.168   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:23.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:28.067   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:28.100   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:28.167   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:28.201   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:31.369   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:31.403   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:31.841   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:31.877   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+01-09 03:44:31.910   641 24047 E MtkV4L2Device: [0xecb26f5c] [dequeueFrameBuffer] ioctl failed. error = Broken pipe
+^C
+C:\Users\KSA>adb logcat *:E

@@ -87,6 +87,28 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                     } catch (e: Exception) {
                         Log.e("AppNavigation", "Navigation error", e)
                     }
+                },
+                onNavigateToSecondaryInfo = {
+                    try {
+                        navController.navigate("secondary_info")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                }
+            )
+        }
+        
+        // Secondary info screen for additional information after OAuth registration
+        composable("secondary_info") {
+            SecondaryInfoScreen(
+                onSecondaryInfoSuccess = {
+                    try {
+                        navController.navigate("main") {
+                            popUpTo("landing") { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
                 }
             )
         }
