@@ -93,86 +93,100 @@ fun SecondaryInfoScreen(
             )
             .padding(16.dp)
     ) {
-        val scrollState = rememberScrollState()
-        
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(vertical = 32.dp),
+                .padding(bottom = 120.dp), // Space for bottom button
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
-            // Ekehi Logo
-            Image(
-                painter = painterResource(id = R.mipmap.ic_launcher),
-                contentDescription = "Ekehi Logo",
+            // Content area with scrolling
+            Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .padding(bottom = 16.dp)
-            )
-
-            Text(
-                text = "Ekehi Network",
-                color = Color.White,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            Text(
-                text = "Additional Information",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Text(
-                text = "Please provide additional information to complete your registration",
-                color = Color(0xB3FFFFFF),
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            // Phone Number Input
-            OutlinedTextField(
-                value = phoneNumber,
-                onValueChange = { phoneNumber = it },
-                label = { Text("Phone Number", color = Color(0xB3FFFFFF)) },
-                singleLine = true,
-                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-                modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFffa000),
-                    unfocusedBorderColor = Color(0x33FFFFFF),
-                    cursorColor = Color(0xFFffa000),
-                    focusedLabelColor = Color(0xFFffa000),
-                    unfocusedLabelColor = Color(0xB3FFFFFF)
-                )
-            )
+            ) {
+                val scrollState = rememberScrollState()
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    // Ekehi Logo
+                    Image(
+                        painter = painterResource(id = R.mipmap.ic_launcher),
+                        contentDescription = "Ekehi Logo",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .padding(bottom = 16.dp)
+                    )
 
-            // Country Input
-            OutlinedTextField(
-                value = country,
-                onValueChange = { country = it },
-                label = { Text("Country", color = Color(0xB3FFFFFF)) },
-                singleLine = true,
-                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFffa000),
-                    unfocusedBorderColor = Color(0x33FFFFFF),
-                    cursorColor = Color(0xFFffa000),
-                    focusedLabelColor = Color(0xFFffa000),
-                    unfocusedLabelColor = Color(0xB3FFFFFF)
-                )
-            )
+                    Text(
+                        text = "Complete your registration",
+                        color = Color.White,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
 
+                    Text(
+                        text = "Please provide additional information to complete your registration",
+                        color = Color(0xB3FFFFFF),
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 32.dp)
+                    )
+
+                    // Phone Number Input
+                    OutlinedTextField(
+                        value = phoneNumber,
+                        onValueChange = { phoneNumber = it },
+                        label = { Text("Phone Number", color = Color(0xB3FFFFFF)) },
+                        singleLine = true,
+                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFffa000),
+                            unfocusedBorderColor = Color(0x33FFFFFF),
+                            cursorColor = Color(0xFFffa000),
+                            focusedLabelColor = Color(0xFFffa000),
+                            unfocusedLabelColor = Color(0xB3FFFFFF)
+                        )
+                    )
+
+                    // Country Input
+                    OutlinedTextField(
+                        value = country,
+                        onValueChange = { country = it },
+                        label = { Text("Country", color = Color(0xB3FFFFFF)) },
+                        singleLine = true,
+                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFffa000),
+                            unfocusedBorderColor = Color(0x33FFFFFF),
+                            cursorColor = Color(0xFFffa000),
+                            focusedLabelColor = Color(0xFFffa000),
+                            unfocusedLabelColor = Color(0xB3FFFFFF)
+                        )
+                    )
+                }
+            }
+        }
+
+        // Bottom-anchored Submit Button for thumb-friendly access
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        ) {
             // Submit Button
             Button(
                 onClick = {
@@ -204,8 +218,7 @@ fun SecondaryInfoScreen(
                 enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(70.dp)
-                    .padding(bottom = 16.dp),
+                    .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFffa000),
                     disabledContainerColor = Color(0x33FFFFFF)
@@ -220,22 +233,24 @@ fun SecondaryInfoScreen(
                     )
                 } else {
                     Text(
-                        text = "Submit",
+                        text = "Continue",
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
             }
+        }
 
-            // Error Message
-            errorMessage?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-            }
+        // Error Message
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 80.dp)
+            )
         }
     }
 }

@@ -50,7 +50,44 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
         }
         
         composable("login") {
-            LoginScreen(
+            LoginOptionsScreen(
+                onGoogleLogin = {
+                    try {
+                        // Handle Google login - this would trigger OAuth flow
+                        navController.navigate("main") {
+                            popUpTo("landing") { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onNavigateToGoogleSecondaryInfo = {
+                    try {
+                        // Navigate to secondary info screen after Google OAuth if needed
+                        navController.navigate("secondary_info")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onEmailLogin = {
+                    try {
+                        navController.navigate("login_email")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onNavigateToSignup = {
+                    try {
+                        navController.navigate("register")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                }
+            )
+        }
+        
+        composable("login_email") {
+            EmailLoginScreen(
                 onLoginSuccess = {
                     try {
                         navController.navigate("main") {
@@ -71,7 +108,44 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
         }
         
         composable("register") {
-            RegistrationScreen(
+            SignupOptionsScreen(
+                onGoogleSignup = {
+                    try {
+                        // This is called after successful OAuth, navigate to main
+                        navController.navigate("main") {
+                            popUpTo("landing") { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onNavigateToSecondaryInfo = {
+                    try {
+                        // This is called when additional info is needed after OAuth
+                        navController.navigate("secondary_info")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onEmailSignup = {
+                    try {
+                        navController.navigate("email_register")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                },
+                onNavigateToLogin = {
+                    try {
+                        navController.navigate("login")
+                    } catch (e: Exception) {
+                        Log.e("AppNavigation", "Navigation error", e)
+                    }
+                }
+            )
+        }
+        
+        composable("email_register") {
+            EmailSignupScreen(
                 onRegistrationSuccess = {
                     try {
                         navController.navigate("main") {
@@ -84,13 +158,6 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
                 onNavigateToLogin = {
                     try {
                         navController.navigate("login")
-                    } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
-                    }
-                },
-                onNavigateToSecondaryInfo = {
-                    try {
-                        navController.navigate("secondary_info")
                     } catch (e: Exception) {
                         Log.e("AppNavigation", "Navigation error", e)
                     }

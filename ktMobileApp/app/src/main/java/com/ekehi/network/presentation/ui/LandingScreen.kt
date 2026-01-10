@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material3.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,10 +29,12 @@ fun LandingScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .padding(16.dp)
     ) {
         Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 120.dp), // Space for bottom button
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -62,44 +66,46 @@ fun LandingScreen(
                 modifier = Modifier.padding(bottom = 48.dp)
             )
 
-            // Sign Up Button
+        }
+
+        // Bottom-anchored buttons for thumb-friendly access
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Primary Get Started Button
             Button(
                 onClick = onNavigateToRegister,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .height(50.dp),
+                    .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFffa000) // Orange color
-                )
+                ),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
-                    text = "Sign Up",
+                    text = "Get Started",
                     color = Color.Black,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            // Sign In Button
-            Button(
-                onClick = onNavigateToLogin,
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Secondary Sign In Text Button
+            Text(
+                text = "I already have an account",
+                color = Color(0xFF3b82f6),
+                fontSize = 16.sp,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color(0xFFffa000) // Orange color
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-            ) {
-                Text(
-                    text = "Sign In",
-                    color = Color(0xFFffa000), // Orange color
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                    .clickable { onNavigateToLogin() }
+                    .padding(vertical = 8.dp)
+            )
         }
     }
 }

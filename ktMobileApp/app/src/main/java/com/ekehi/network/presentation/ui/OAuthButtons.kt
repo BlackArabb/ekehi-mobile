@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
@@ -13,7 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -125,11 +128,13 @@ fun OAuthButtons(
                 },
                 modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
+                        .height(56.dp)
+                        .padding(horizontal = 16.dp),
                 colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF4285F4) // Google blue color
                 ),
-                enabled = !isLoading
+                enabled = !isLoading,
+                shape = RoundedCornerShape(12.dp)
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
@@ -148,8 +153,10 @@ fun OAuthButtons(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isRegistration) "Sign up with Google" else "Sign in with Google",
-                        color = Color.White
+                        text = if (isRegistration) "Continue with Google" else "Continue with Google",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }

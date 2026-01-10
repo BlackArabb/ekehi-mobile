@@ -34,6 +34,30 @@ class OAuthViewModel @Inject constructor(
         }
     }
     
+    fun initiateGoogleOAuthForRegistration(activity: ComponentActivity) {
+        Log.d("OAuthViewModel", "Initiating Google OAuth for registration")
+        // This method initiates Google OAuth specifically for registration
+        _oauthState.value = Resource.Loading
+        // Call the actual OAuth service
+        initiateGoogleOAuth(activity)
+    }
+    
+    fun initiateGoogleOAuthForLogin(activity: ComponentActivity) {
+        Log.d("OAuthViewModel", "Initiating Google OAuth for login")
+        // This method initiates Google OAuth specifically for login
+        _oauthState.value = Resource.Loading
+        // Call the actual OAuth service
+        initiateGoogleOAuth(activity)
+    }
+    
+    // Variable to track if additional info is needed after OAuth
+    private val _requiresAdditionalInfo = MutableStateFlow(false)
+    val requiresAdditionalInfo: StateFlow<Boolean> = _requiresAdditionalInfo
+    
+    fun setRequiresAdditionalInfo(requires: Boolean) {
+        _requiresAdditionalInfo.value = requires
+    }
+    
     fun handleOAuthResult(success: Boolean, errorMessage: String? = null) {
         Log.d("OAuthViewModel", "Handling OAuth result: success=$success, error=$errorMessage")
         viewModelScope.launch {
