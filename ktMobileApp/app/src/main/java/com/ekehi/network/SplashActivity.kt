@@ -32,6 +32,12 @@ class SplashActivity : ComponentActivity() {
     
     private val loginViewModel: LoginViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
+    
+    @Inject
+    lateinit var authUseCase: com.ekehi.network.domain.usecase.AuthUseCase
+    @Inject
+    lateinit var userUseCase: com.ekehi.network.domain.usecase.UserUseCase
+    
     private var isAuthCheckComplete = false
     private var isAuthenticated: Boolean? = null
     private var isProfileLoaded = false
@@ -95,13 +101,42 @@ class SplashActivity : ComponentActivity() {
                 
                 when (state) {
                     is Resource.Success -> {
-                        Log.d("SplashActivity", "✅ User is authenticated")
+                        Log.d("SplashActivity", "✅ User is authenticated, checking profile completeness")
                         isAuthenticated = true
-                        isAuthCheckComplete = true
                         
-                        // Small delay to show splash screen properly
-                        delay(500)
-                        navigateToMainActivity(isAuthenticated = true)
+                        // Check profile completeness before navigating
+                        lifecycleScope.launch {
+                            try {
+                                val currentUserResult = authUseCase.getCurrentUserIfLoggedIn().collect { authResource ->
+                                    if (authResource is Resource.Success && authResource.data != null) {
+                                        val user = authResource.data
+                                        userUseCase.getUserProfile(user!!.id).collect { profileResource ->
+                                            if (profileResource is Resource.Success) {
+                                                val profile = profileResource.data
+                                                val isIncomplete = profile.phoneNumber.isEmpty() || profile.country.isEmpty()
+                                                Log.d("SplashActivity", "Profile completeness check: isIncomplete=$isIncomplete")
+                                                
+                                                isAuthCheckComplete = true
+                                                delay(500)
+                                                navigateToMainActivity(isAuthenticated = true, requiresAdditionalInfo = isIncomplete)
+                                            } else if (profileResource is Resource.Error) {
+                                                Log.e("SplashActivity", "Error loading profile: ${profileResource.message}")
+                                                isAuthCheckComplete = true
+                                                navigateToMainActivity(isAuthenticated = true, requiresAdditionalInfo = true) // Assume incomplete on error
+                                            }
+                                        }
+                                    } else if (authResource is Resource.Error) {
+                                        Log.e("SplashActivity", "Error getting user: ${authResource.message}")
+                                        isAuthCheckComplete = true
+                                        navigateToMainActivity(isAuthenticated = false)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("SplashActivity", "Exception during profile check: ${e.message}")
+                                isAuthCheckComplete = true
+                                navigateToMainActivity(isAuthenticated = true, requiresAdditionalInfo = true)
+                            }
+                        }
                     }
                     is Resource.Error -> {
                         Log.d("SplashActivity", "❌ User is NOT authenticated: ${state.message}")
@@ -124,7 +159,7 @@ class SplashActivity : ComponentActivity() {
         }
     }
     
-    private fun navigateToMainActivity(isAuthenticated: Boolean) {
+    private fun navigateToMainActivity(isAuthenticated: Boolean, requiresAdditionalInfo: Boolean = false) {
         // Prevent multiple navigations
         if (isFinishing) {
             Log.d("SplashActivity", "Activity is finishing, skipping navigation")
@@ -132,13 +167,14 @@ class SplashActivity : ComponentActivity() {
         }
         
         Log.d("SplashActivity", "=== NAVIGATING TO MAIN ACTIVITY ===")
-        Log.d("SplashActivity", "Authenticated: $isAuthenticated")
+        Log.d("SplashActivity", "Authenticated: $isAuthenticated, RequiresAdditionalInfo: $requiresAdditionalInfo")
         
         // Reset the login state before navigating
         loginViewModel.resetState()
         
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("IS_AUTHENTICATED", isAuthenticated)
+            putExtra("REQUIRES_ADDITIONAL_INFO", requiresAdditionalInfo)
             putExtra("FROM_SPLASH", true)
             // Clear the splash activity from back stack
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

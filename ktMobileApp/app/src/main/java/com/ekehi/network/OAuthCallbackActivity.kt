@@ -57,8 +57,18 @@ class OAuthCallbackActivity : ComponentActivity() {
                                             if (result.isSuccess) {
                                                 Log.d("OAuthCallbackActivity", "✅ OAuth callback processed successfully")
                                                 
-                                                // Navigate to MainActivity with authenticated state
-                                                navigateToMainActivity(isAuthenticated = true, userId = userId)
+                                                val resultData = result.getOrNull()
+                                                val isProfileComplete = resultData?.get("isProfileComplete") as? Boolean ?: false
+                                                
+                                                Log.d("OAuthCallbackActivity", "Profile completeness: $isProfileComplete")
+                                                
+                                                if (isProfileComplete) {
+                                                    // Profile is complete, go directly to main
+                                                    navigateToMainActivity(isAuthenticated = true, userId = userId, showProfileCompletion = false)
+                                                } else {
+                                                    // Profile is incomplete, go to profile completion
+                                                    navigateToMainActivity(isAuthenticated = true, userId = userId, showProfileCompletion = true)
+                                                }
                                             } else {
                                                 Log.e("OAuthCallbackActivity", "❌ Failed to process OAuth callback: ${result.exceptionOrNull()?.message}")
                                                 showErrorAndFinish(result.exceptionOrNull()?.message ?: "Authentication failed")
@@ -98,13 +108,14 @@ class OAuthCallbackActivity : ComponentActivity() {
         }
     }
     
-    private fun navigateToMainActivity(isAuthenticated: Boolean, userId: String? = null) {
-        Log.d("OAuthCallbackActivity", "Navigating to MainActivity - authenticated: $isAuthenticated")
+    private fun navigateToMainActivity(isAuthenticated: Boolean, userId: String? = null, showProfileCompletion: Boolean = false) {
+        Log.d("OAuthCallbackActivity", "Navigating to MainActivity - authenticated: $isAuthenticated, showProfileCompletion: $showProfileCompletion")
         
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("IS_AUTHENTICATED", isAuthenticated)
             putExtra("USER_ID", userId)
             putExtra("FROM_OAUTH", true)
+            putExtra("SHOW_PROFILE_COMPLETION", showProfileCompletion)
             // Clear the entire task stack and start fresh
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -113,7 +124,25 @@ class OAuthCallbackActivity : ComponentActivity() {
         finish()
     }
     
-    private fun showErrorAndFinish(errorMessage: String) {
+
+
+    private fun navigateToProfileCompletion(userId: String) {
+        Log.d("OAuthCallbackActivity", "Navigating to profile completion screen for userId: $userId")
+        
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("IS_AUTHENTICATED", true)
+            putExtra("USER_ID", userId)
+            putExtra("FROM_OAUTH", true)
+            putExtra("SHOW_PROFILE_COMPLETION", true)  // Flag to show profile completion
+            // Clear the entire task stack and start fresh
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        
+        startActivity(intent)
+        finish()
+    }
+    
+     private fun showErrorAndFinish(errorMessage: String) {
         Log.e("OAuthCallbackActivity", "OAuth error: $errorMessage")
         
         // Navigate back to MainActivity with error

@@ -4,8 +4,10 @@ import android.content.Context
 import android.util.Log
 import androidx.activity.ComponentActivity
 import com.ekehi.network.data.repository.UserRepository
+import com.ekehi.network.util.DebugLogger
 import io.appwrite.Client
-import io.appwrite.services.Account
+import io.appwrite.models.User as AppwriteUser
+import io.appwrite.services.Account as AccountService
 import io.appwrite.enums.OAuthProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +22,7 @@ class OAuthService @Inject constructor(
     private val client: Client,
     private val userRepository: UserRepository
 ) {
-    private val account: Account = Account(client)
+    private val account: AccountService = AccountService(client)
     private val scope = CoroutineScope(Dispatchers.Main)
 
     companion object {
@@ -29,18 +31,18 @@ class OAuthService @Inject constructor(
     }
 
     fun initiateGoogleOAuth(activity: ComponentActivity) {
-        Log.d("OAuthService", "Initiating Google OAuth flow")
+        DebugLogger.logStep("INITIATE_GOOGLE_OAUTH", "Starting OAuth flow")
         scope.launch {
             try {
                 // Delete any existing session before starting OAuth
                 try {
-                    Log.d("OAuthService", "Checking for existing session before OAuth")
+                    DebugLogger.logStep("CHECK_EXISTING_SESSION")
                     account.getSession("current")
-                    Log.d("OAuthService", "Existing session found, deleting it")
+                    DebugLogger.logStep("DELETE_EXISTING_SESSION", "Session found, deleting")
                     account.deleteSession("current")
-                    Log.d("OAuthService", "✅ Existing session deleted")
+                    DebugLogger.logStep("SESSION_DELETED", "✅ Success")
                 } catch (e: Exception) {
-                    Log.d("OAuthService", "No existing session to delete")
+                    DebugLogger.logStep("NO_EXISTING_SESSION", "No session to delete")
                 }
                 
                 // Start the OAuth flow
@@ -50,62 +52,101 @@ class OAuthService @Inject constructor(
                     failure = FAILURE_URL,
                     activity = activity
                 )
-                Log.d("OAuthService", "Google OAuth flow initiated successfully")
+                DebugLogger.logStep("OAUTH_FLOW_INITIATED", "✅ Successfully triggered")
             } catch (e: Exception) {
-                Log.e("OAuthService", "Failed to initiate Google OAuth: ${e.message}", e)
+                DebugLogger.logError("OAUTH_INITIATION", "Failed to initiate OAuth", e)
             }
         }
     }
     
-    suspend fun handleOAuthCallback(userId: String, secret: String): Result<Boolean> {
+    suspend fun handleOAuthCallback(userId: String, secret: String): Result<Map<String, Any>> {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d("OAuthService", "=== HANDLING OAUTH CALLBACK ===")
-                Log.d("OAuthService", "UserId: $userId")
+                DebugLogger.logStep("OAUTH_CALLBACK_START", "UserId: $userId")
                 
-                // Step 1: Create session using the OAuth token
-                Log.d("OAuthService", "Step 1: Creating OAuth session")
+                // Step 1: Create session
+                DebugLogger.logStep("CREATE_SESSION", "Creating OAuth session")
                 account.createSession(
                     userId = userId,
                     secret = secret
                 )
-                Log.d("OAuthService", "✅ OAuth session created successfully")
+                DebugLogger.logStep("SESSION_CREATED", "✅ Success")
                 
                 // Step 2: Get user info
-                Log.d("OAuthService", "Step 2: Getting user info")
+                DebugLogger.logStep("GET_USER_INFO", "Fetching user details")
                 val appwriteUser = account.get()
                 val username = appwriteUser.name.ifEmpty { appwriteUser.email.substringBefore("@") }
                 val email = appwriteUser.email
-                Log.d("OAuthService", "✅ User info retrieved - Username: $username, Email: $email")
+                DebugLogger.logState("USER_INFO", "Retrieved", mapOf(
+                    "userId" to userId,
+                    "username" to username,
+                    "email" to email
+                ))
                 
-                // Step 3: Check if user profile exists, create if it doesn't
-                Log.d("OAuthService", "Step 3: Checking/creating user profile")
+                // Step 3: Check/create user profile
+                DebugLogger.logStep("CHECK_PROFILE", "Checking if profile exists")
                 val profileResult = userRepository.getUserProfile(userId)
-                if (profileResult.isFailure) {
-                    Log.d("OAuthService", "User profile not found, creating new profile")
+                var userProfile = if (profileResult.isFailure) {
+                    DebugLogger.logStep("CREATE_PROFILE", "Profile not found, creating new")
                     
-                    val createProfileResult = userRepository.createUserProfile(userId, username, email, "", "")
+                    val createProfileResult = userRepository.createUserProfile(
+                        userId, username, email, "", ""
+                    )
+                    
                     if (createProfileResult.isSuccess) {
-                        Log.d("OAuthService", "✅ User profile created successfully")
-                        Log.d("OAuthService", "   Email: ${createProfileResult.getOrNull()?.email}")
-                        Log.d("OAuthService", "   Phone: ${createProfileResult.getOrNull()?.phoneNumber}")
-                        Log.d("OAuthService", "   Country: ${createProfileResult.getOrNull()?.country}")
+                        val profile = createProfileResult.getOrThrow()
+                        DebugLogger.logState("PROFILE_CREATED", "Success", mapOf(
+                            "email" to profile.email,
+                            "phoneNumber" to profile.phoneNumber,
+                            "country" to profile.country
+                        ))
+                        profile
                     } else {
-                        Log.e("OAuthService", "❌ Failed to create user profile: ${createProfileResult.exceptionOrNull()?.message}")
+                        val exception = createProfileResult.exceptionOrNull()
+                        DebugLogger.logError("CREATE_PROFILE", "Failed", exception as? Exception ?: Exception(exception?.message ?: "Unknown error"))
                         return@withContext Result.failure(
-                            createProfileResult.exceptionOrNull() ?: Exception("Failed to create user profile")
+                            createProfileResult.exceptionOrNull() ?: Exception("Failed to create profile")
                         )
                     }
                 } else {
-                    Log.d("OAuthService", "✅ User profile already exists")
+                    val profile = profileResult.getOrThrow()
+                    DebugLogger.logState("PROFILE_EXISTS", "Found", mapOf(
+                        "phoneNumber" to profile.phoneNumber,
+                        "country" to profile.country
+                    ))
+                    profile
                 }
                 
-                Log.d("OAuthService", "=== OAUTH CALLBACK COMPLETED SUCCESSFULLY ===")
-                return@withContext Result.success(true)
+                // Step 4: Check completeness
+                val isProfileComplete = userProfile.phoneNumber.isNotEmpty() && 
+                                       userProfile.country.isNotEmpty()
+                
+                DebugLogger.logState("PROFILE_COMPLETENESS", "Checked", mapOf(
+                    "isComplete" to isProfileComplete,
+                    "phoneNumber" to userProfile.phoneNumber,
+                    "country" to userProfile.country
+                ))
+                
+                DebugLogger.logStep("OAUTH_CALLBACK_COMPLETE", "✅ All steps successful")
+                
+                return@withContext Result.success(mapOf(
+                    "success" to true,
+                    "userId" to userId,
+                    "isProfileComplete" to isProfileComplete
+                ))
             } catch (e: Exception) {
-                Log.e("OAuthService", "❌ Failed to process OAuth callback: ${e.message}", e)
+                DebugLogger.logError("OAUTH_CALLBACK", "Failed at some step", e)
                 return@withContext Result.failure(e)
             }
+        }
+    }
+    
+    suspend fun getAccount(): AppwriteUser<Map<String, Any>>? {
+        return try {
+            account.get()
+        } catch (e: Exception) {
+            DebugLogger.logError("GET_ACCOUNT", "Failed", e)
+            null
         }
     }
 }

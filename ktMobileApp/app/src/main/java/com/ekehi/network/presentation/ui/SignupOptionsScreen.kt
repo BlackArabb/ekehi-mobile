@@ -30,8 +30,8 @@ import com.ekehi.network.R
 @Composable
 fun SignupOptionsScreen(
     oAuthViewModel: OAuthViewModel = hiltViewModel(),
-    onGoogleSignup: () -> Unit,  // This will be called after successful OAuth
-    onNavigateToSecondaryInfo: () -> Unit,  // This will be called if secondary info is needed
+    onGoogleSignup: () -> Unit = {},  // This will be called after successful OAuth
+    onNavigateToSecondaryInfo: () -> Unit = {},  // This will be called if secondary info is needed
     onEmailSignup: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
@@ -56,12 +56,8 @@ fun SignupOptionsScreen(
                 isLoading = false
                 val success = (oauthState as Resource.Success<Boolean>).data
                 if (success) {
-                    if (requiresAdditionalInfo) {
-                        onNavigateToSecondaryInfo()
-                    } else {
-                        // If no additional info needed, navigate to main
-                        onGoogleSignup()
-                    }
+                    // Instead of navigating directly, check profile completeness via ViewModel
+                    oAuthViewModel.onOAuthSuccess()
                 }
             }
             is Resource.Error -> {

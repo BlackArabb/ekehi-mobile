@@ -1,107 +1,184 @@
-C:\Users\KSA>adb logcat | findstr "AdsRepository AdsViewModel AdsCarousel"
-01-01 07:50:08.596  2068  2068 D AdsViewModel: ================================
-01-01 07:50:08.596  2068  2068 D AdsViewModel: ≡ƒöä Loading ads from repository...
-01-01 07:50:08.596  2068  2068 D AdsRepository: ≡ƒöä Fetching ads from Appwrite...
-01-01 07:50:08.962  2068  2068 D AdsViewModel: ================================
-01-01 07:50:08.962  2068  2068 D AdsViewModel: ≡ƒöä Loading ads from repository...
-01-01 07:50:08.962  2068  2068 D AdsRepository: ≡ƒöä Fetching ads from Appwrite...
-01-01 07:50:09.296  2068  2068 D AdsRepository: Γ£à Fetched 6 ads from database
-01-01 07:50:09.296  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.296  2068  2068 D AdsRepository:   [0] ID: 69504d48003b0df42b73, Type: IMAGE, Title: Ekehi Network
-01-01 07:50:09.296  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.296  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.296  2068  2068 D AdsRepository:   [1] ID: 69536e13003a5a5eb863, Type: IMAGE, Title: Presale
-01-01 07:50:09.296  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.296  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.296  2068  2068 D AdsRepository:   [2] ID: 69536e6a00167f44dc0c, Type: IMAGE, Title: Tokenization
-01-01 07:50:09.296  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.297  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.297  2068  2068 D AdsRepository:   [3] ID: 69536ec0001a311ce28f, Type: IMAGE, Title: TechVile
-01-01 07:50:09.297  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.297  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.297  2068  2068 D AdsRepository:   [4] ID: 69536f1a002d8d0da7d1, Type: IMAGE, Title: Alfalaah
-01-01 07:50:09.297  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.297  2068  2068 D AdsRepository:     Raw content from DB: Join Ekehi Network and Mine while you sleep
-01-01 07:50:09.297  2068  2068 D AdsRepository:     Built URL from file ID: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.297  2068  2068 D AdsRepository:   [5] ID: 69536f920029938302f8, Type: TEXT, Title: Ekehi
-01-01 07:50:09.297  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.297  2068  2068 D AdsRepository: ≡ƒöä Fetching ads from Appwrite...
-01-01 07:50:09.326  2068  2068 D AdsRepository: Γ£à Fetched 6 ads from database
-01-01 07:50:09.326  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.326  2068  2068 D AdsRepository:   [0] ID: 69504d48003b0df42b73, Type: IMAGE, Title: Ekehi Network
-01-01 07:50:09.326  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.326  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.326  2068  2068 D AdsRepository:   [1] ID: 69536e13003a5a5eb863, Type: IMAGE, Title: Presale
-01-01 07:50:09.326  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.326  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.326  2068  2068 D AdsRepository:   [2] ID: 69536e6a00167f44dc0c, Type: IMAGE, Title: Tokenization
-01-01 07:50:09.326  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.326  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.326  2068  2068 D AdsRepository:   [3] ID: 69536ec0001a311ce28f, Type: IMAGE, Title: TechVile
-01-01 07:50:09.326  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.326  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.326  2068  2068 D AdsRepository:   [4] ID: 69536f1a002d8d0da7d1, Type: IMAGE, Title: Alfalaah
-01-01 07:50:09.326  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.326  2068  2068 D AdsRepository:     Raw content from DB: Join Ekehi Network and Mine while you sleep
-01-01 07:50:09.326  2068  2068 D AdsRepository:     Built URL from file ID: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.326  2068  2068 D AdsRepository:   [5] ID: 69536f920029938302f8, Type: TEXT, Title: Ekehi
-01-01 07:50:09.326  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.326  2068  2068 D AdsRepository: ≡ƒöä Fetching ads from Appwrite...
-01-01 07:50:09.524  2068  2068 D AdsRepository: Γ£à Fetched 6 ads from database
-01-01 07:50:09.524  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.524  2068  2068 D AdsRepository:   [0] ID: 69504d48003b0df42b73, Type: IMAGE, Title: Ekehi Network
-01-01 07:50:09.524  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.524  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.524  2068  2068 D AdsRepository:   [1] ID: 69536e13003a5a5eb863, Type: IMAGE, Title: Presale
-01-01 07:50:09.524  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.524  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.524  2068  2068 D AdsRepository:   [2] ID: 69536e6a00167f44dc0c, Type: IMAGE, Title: Tokenization
-01-01 07:50:09.524  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.524  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.524  2068  2068 D AdsRepository:   [3] ID: 69536ec0001a311ce28f, Type: IMAGE, Title: TechVile
-01-01 07:50:09.524  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.524  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.524  2068  2068 D AdsRepository:   [4] ID: 69536f1a002d8d0da7d1, Type: IMAGE, Title: Alfalaah
-01-01 07:50:09.524  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.524  2068  2068 D AdsRepository:     Raw content from DB: Join Ekehi Network and Mine while you sleep
-01-01 07:50:09.524  2068  2068 D AdsRepository:     Built URL from file ID: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.524  2068  2068 D AdsRepository:   [5] ID: 69536f920029938302f8, Type: TEXT, Title: Ekehi
-01-01 07:50:09.524  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.524  2068  2068 D AdsViewModel: Γ£à Loaded 5 image ads
-01-01 07:50:09.524  2068  2068 D AdsViewModel:   Image Ad 0: Ekehi Network
-01-01 07:50:09.524  2068  2068 D AdsViewModel:   Image Ad 1: Presale
-01-01 07:50:09.524  2068  2068 D AdsViewModel:   Image Ad 2: Tokenization
-01-01 07:50:09.524  2068  2068 D AdsViewModel:   Image Ad 3: TechVile
-01-01 07:50:09.524  2068  2068 D AdsViewModel:   Image Ad 4: Alfalaah
-01-01 07:50:09.524  2068  2068 D AdsViewModel: Γ£à Loaded 1 text ads
-01-01 07:50:09.525  2068  2068 D AdsViewModel:   Text Ad 0: Ekehi
-01-01 07:50:09.525  2068  2068 D AdsViewModel: ================================
-01-01 07:50:09.715  2068  2068 D AdsRepository: Γ£à Fetched 6 ads from database
-01-01 07:50:09.715  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.715  2068  2068 D AdsRepository:   [0] ID: 69504d48003b0df42b73, Type: IMAGE, Title: Ekehi Network
-01-01 07:50:09.715  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/ekehiToken/view?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MmNiMDVjODE1MTNmNTU2MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6ZWtlaGlUb2tlbiIsInJlc291cmNlVHlwZSI6ImZpbGVzIiwicmVzb3VyY2VJbnRlcm5hbElkIjoiNTY3ODM6MSIsImlhdCI6MTc2NzAzMzYwNX0.aUTzZ4Um2ddkTx-eiUr28URQDa1Bc8WiuEK2fcRa42k
-01-01 07:50:09.715  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.715  2068  2068 D AdsRepository:   [1] ID: 69536e13003a5a5eb863, Type: IMAGE, Title: Presale
-01-01 07:50:09.715  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c4a0025f9599cee/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZkYzM4NDc2ZjlkM2VlZDAiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNGEwMDI1Zjk1OTljZWUiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjIiLCJpYXQiOjE3NjcwNzUyNjd9.PS65KHnuwYpketfANWMnHiYTxnCQuMUad7ET0uBxHD0
-01-01 07:50:09.716  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.716  2068  2068 D AdsRepository:   [2] ID: 69536e6a00167f44dc0c, Type: IMAGE, Title: Tokenization
-01-01 07:50:09.716  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c610008aa312087/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlMzc0YmRhZGViOWU4OTgiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjEwMDA4YWEzMTIwODciLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjMiLCJpYXQiOjE3NjcwNzUzODN9._kzjm2N9nyvplux5ZQNBlulYgZR_fXdtnrwkFOI3YXY
-01-01 07:50:09.716  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.716  2068  2068 D AdsRepository:   [3] ID: 69536ec0001a311ce28f, Type: IMAGE, Title: TechVile
-01-01 07:50:09.716  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c69001b66f46408/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlN2ZhYmQ3MGEwMTc0MGIiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNjkwMDFiNjZmNDY0MDgiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjQiLCJpYXQiOjE3NjcwNzU0NTV9.JU2geF0gxE39K6InRiBF-f0GgZ37R8MwFXuAYumwuXw
-01-01 07:50:09.716  2068  2068 D AdsRepository:     Raw content from DB: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.716  2068  2068 D AdsRepository:   [4] ID: 69536f1a002d8d0da7d1, Type: IMAGE, Title: Alfalaah
-01-01 07:50:09.716  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/69536c70002fd706e806/preview?project=68c2dd6e002112935ed2&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbklkIjoiNjk1MzZlZGM3MTIyYmIyY2QzM2IiLCJyZXNvdXJjZUlkIjoiNjk0ZmU3OTgwMDE5ZDRmZGUxZGQ6Njk1MzZjNzAwMDJmZDcwNmU4MDYiLCJyZXNvdXJjZVR5cGUiOiJmaWxlcyIsInJlc291cmNlSW50ZXJuYWxJZCI6IjU2NzgzOjUiLCJpYXQiOjE3NjcwNzU1NDh9.CsajlgmOEtwUOEt1tuKoEKU_ARc-EXoR9E_sBI7K3JU
-01-01 07:50:09.716  2068  2068 D AdsRepository:     Raw content from DB: Join Ekehi Network and Mine while you sleep
-01-01 07:50:09.716  2068  2068 D AdsRepository:     Built URL from file ID: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.716  2068  2068 D AdsRepository:   [5] ID: 69536f920029938302f8, Type: TEXT, Title: Ekehi
-01-01 07:50:09.716  2068  2068 D AdsRepository:       Content URL: https://fra.cloud.appwrite.io/v1/storage/buckets/694fe7980019d4fde1dd/files/Join Ekehi Network and Mine while you sleep/view?project=68c2dd6e002112935ed2
-01-01 07:50:09.716  2068  2068 D AdsViewModel: Γ£à Loaded 5 image ads
-01-01 07:50:09.716  2068  2068 D AdsViewModel:   Image Ad 0: Ekehi Network
-01-01 07:50:09.716  2068  2068 D AdsViewModel:   Image Ad 1: Presale
-01-01 07:50:09.716  2068  2068 D AdsViewModel:   Image Ad 2: Tokenization
-01-01 07:50:09.716  2068  2068 D AdsViewModel:   Image Ad 3: TechVile
-01-01 07:50:09.716  2068  2068 D AdsViewModel:   Image Ad 4: Alfalaah
-01-01 07:50:09.716  2068  2068 D AdsViewModel: Γ£à Loaded 1 text ads
-01-01 07:50:09.716  2068  2068 D AdsViewModel:   Text Ad 0: Ekehi
-01-01 07:50:09.716  2068  2068 D AdsViewModel: ================================
+C:\Users\KSA>adb logcat -s OAUTH_FLOW_DEBUG OAuthService OAuthViewModel AppNavigation SecondaryInfoViewModel
+--------- beginning of system
+--------- beginning of main
+01-11 10:05:07.654 21150 21150 D OAUTH_FLOW_DEBUG: 🚀 NAVIGATION: landing -> register | Reason: User clicked register
+01-11 10:05:07.688 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:07.688 21150 21150 D OAUTH_FLOW_DEBUG: [1768122307688] STEP: NAV_LANDING | DETAILS: Landing screen displayed
+01-11 10:05:07.688 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:07.700 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:07.700 21150 21150 D OAUTH_FLOW_DEBUG: [1768122307700] STEP: NAV_REGISTER | DETAILS: Register screen displayed
+01-11 10:05:07.700 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:07.866 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:07.866 21150 21150 D OAUTH_FLOW_DEBUG: [1768122307866] STEP: NAV_LANDING | DETAILS: Landing screen displayed
+01-11 10:05:07.866 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:07.875 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:07.875 21150 21150 D OAUTH_FLOW_DEBUG: [1768122307875] STEP: NAV_REGISTER | DETAILS: Register screen displayed
+01-11 10:05:07.875 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:08.551 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:08.552 21150 21150 D OAUTH_FLOW_DEBUG: [1768122308551] STEP: NAV_REGISTER | DETAILS: Register screen displayed
+01-11 10:05:08.552 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:08.593 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:08.593 21150 21150 D OAUTH_FLOW_DEBUG: [1768122308593] STEP: NAV_REGISTER | DETAILS: Register screen displayed
+01-11 10:05:08.593 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.898 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.898 21150 21150 D OAUTH_FLOW_DEBUG: [1768122311898] STEP: VM_INITIATE_GOOGLE_OAUTH_REG | DETAILS: Initiating Google OAuth for registration
+01-11 10:05:11.898 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.898 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.898 21150 21150 D OAUTH_FLOW_DEBUG: [1768122311898] STEP: VM_INITIATE_GOOGLE_OAUTH | DETAILS: Initiating Google OAuth
+01-11 10:05:11.898 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.899 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.899 21150 21150 D OAUTH_FLOW_DEBUG: [1768122311899] STEP: INITIATE_GOOGLE_OAUTH | DETAILS: Starting OAuth flow
+01-11 10:05:11.900 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.901 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.901 21150 21150 D OAUTH_FLOW_DEBUG: [1768122311900] STEP: VM_GOOGLE_OAUTH_INITIATED | DETAILS: Google OAuth flow initiated, waiting for callback
+01-11 10:05:11.901 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.933 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:11.933 21150 21150 D OAUTH_FLOW_DEBUG: [1768122311933] STEP: CHECK_EXISTING_SESSION
+01-11 10:05:11.933 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:12.666 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:12.667 21150 21150 D OAUTH_FLOW_DEBUG: [1768122312666] STEP: NO_EXISTING_SESSION | DETAILS: No session to delete
+01-11 10:05:12.667 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.249 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.249 21150 21272 D OAUTH_FLOW_DEBUG: [1768122323249] STEP: OAUTH_CALLBACK_START | DETAILS: UserId: 696367d4a560d09c8254
+01-11 10:05:23.249 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.249 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.250 21150 21272 D OAUTH_FLOW_DEBUG: [1768122323249] STEP: CREATE_SESSION | DETAILS: Creating OAuth session
+01-11 10:05:23.250 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.852 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.852 21150 21272 D OAUTH_FLOW_DEBUG: [1768122323852] STEP: SESSION_CREATED | DETAILS: ✅ Success
+01-11 10:05:23.852 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.852 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:23.852 21150 21272 D OAUTH_FLOW_DEBUG: [1768122323852] STEP: GET_USER_INFO | DETAILS: Fetching user details
+01-11 10:05:23.852 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:24.314 21150 21272 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: USER_INFO -> Retrieved
+01-11 10:05:24.314 21150 21272 D OAUTH_FLOW_DEBUG:     userId: 696367d4a560d09c8254
+01-11 10:05:24.314 21150 21272 D OAUTH_FLOW_DEBUG:     username: Muhammad Kamaludeen
+01-11 10:05:24.314 21150 21272 D OAUTH_FLOW_DEBUG:     email: alghareeb.mk@gmail.com
+01-11 10:05:24.314 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:24.314 21150 21272 D OAUTH_FLOW_DEBUG: [1768122324314] STEP: CHECK_PROFILE | DETAILS: Checking if profile exists
+01-11 10:05:24.314 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:24.779 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:24.779 21150 21272 D OAUTH_FLOW_DEBUG: [1768122324779] STEP: CREATE_PROFILE | DETAILS: Profile not found, creating new
+01-11 10:05:24.779 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.254 21150 21272 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: PROFILE_CREATED -> Success
+01-11 10:05:25.255 21150 21272 D OAUTH_FLOW_DEBUG:     email: alghareeb.mk@gmail.com
+01-11 10:05:25.255 21150 21272 D OAUTH_FLOW_DEBUG:     phoneNumber:
+01-11 10:05:25.255 21150 21272 D OAUTH_FLOW_DEBUG:     country:
+01-11 10:05:25.255 21150 21272 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: PROFILE_COMPLETENESS -> Checked
+01-11 10:05:25.255 21150 21272 D OAUTH_FLOW_DEBUG:     isComplete: false
+01-11 10:05:25.255 21150 21272 D OAUTH_FLOW_DEBUG:     phoneNumber:
+01-11 10:05:25.255 21150 21272 D OAUTH_FLOW_DEBUG:     country:
+01-11 10:05:25.256 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.256 21150 21272 D OAUTH_FLOW_DEBUG: [1768122325255] STEP: OAUTH_CALLBACK_COMPLETE | DETAILS: ✅ All steps successful
+01-11 10:05:25.256 21150 21272 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.343 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.343 21150 21150 D OAUTH_FLOW_DEBUG: [1768122325343] STEP: VM_HANDLE_OAUTH_RESULT | DETAILS: Handling OAuth result: success=true, error=null, requiresAdditionalInfo=true
+01-11 10:05:25.343 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.344 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.344 21150 21150 D OAUTH_FLOW_DEBUG: [1768122325344] STEP: VM_OAUTH_SUCCESS | DETAILS: Checking profile completeness after OAuth
+01-11 10:05:25.344 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.345 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.345 21150 21150 D OAUTH_FLOW_DEBUG: [1768122325345] STEP: VM_GET_USER | DETAILS: Fetching current user
+01-11 10:05:25.345 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.425 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.425 21150 21150 D OAUTH_FLOW_DEBUG: [1768122325425] STEP: NAV_MAIN | DETAILS: Main screen displayed
+01-11 10:05:25.425 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.839 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: AppNavigation -> AuthResolution Changed
+01-11 10:05:25.839 21150 21150 D OAUTH_FLOW_DEBUG:     resolution: null
+01-11 10:05:25.839 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: AppNavigation -> AuthResolution
+01-11 10:05:25.840 21150 21150 D OAUTH_FLOW_DEBUG:     value: null
+01-11 10:05:25.896 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: VM_USER_FOUND -> Success
+01-11 10:05:25.896 21150 21150 D OAUTH_FLOW_DEBUG:     userId: 696367d4a560d09c8254
+01-11 10:05:25.896 21150 21150 D OAUTH_FLOW_DEBUG:     email: alghareeb.mk@gmail.com
+01-11 10:05:25.896 21150 21150 D OAUTH_FLOW_DEBUG:     name: Muhammad Kamaludeen
+01-11 10:05:25.897 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:25.897 21150 21150 D OAUTH_FLOW_DEBUG: [1768122325896] STEP: VM_FETCH_PROFILE | DETAILS: Getting user profile
+01-11 10:05:25.897 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.406 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: VM_PROFILE_CHECK -> Complete
+01-11 10:05:26.407 21150 21150 D OAUTH_FLOW_DEBUG:     isIncomplete: true
+01-11 10:05:26.407 21150 21150 D OAUTH_FLOW_DEBUG:     phoneNumber:
+01-11 10:05:26.407 21150 21150 D OAUTH_FLOW_DEBUG:     country:
+01-11 10:05:26.407 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.407 21150 21150 D OAUTH_FLOW_DEBUG: [1768122326407] STEP: VM_RESOLUTION | DETAILS: Setting resolution to AuthenticatedIncomplete
+01-11 10:05:26.407 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.427 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.427 21150 21150 D OAUTH_FLOW_DEBUG: [1768122326427] STEP: NAV_MAIN | DETAILS: Main screen displayed
+01-11 10:05:26.427 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.433 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: AppNavigation -> AuthResolution Changed
+01-11 10:05:26.434 21150 21150 D OAUTH_FLOW_DEBUG:     resolution: AuthenticatedIncomplete
+01-11 10:05:26.434 21150 21150 D OAUTH_FLOW_DEBUG: 🚀 NAVIGATION: current -> secondary_info | Reason: Profile incomplete
+01-11 10:05:26.454 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.454 21150 21150 D OAUTH_FLOW_DEBUG: [1768122326454] STEP: NAV_MAIN | DETAILS: Main screen displayed
+01-11 10:05:26.454 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.459 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.459 21150 21150 D OAUTH_FLOW_DEBUG: [1768122326459] STEP: NAV_SECONDARY_INFO | DETAILS: Secondary info screen displayed
+01-11 10:05:26.459 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.735 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: AppNavigation -> AuthResolution Changed
+01-11 10:05:26.735 21150 21150 D OAUTH_FLOW_DEBUG:     resolution: null
+01-11 10:05:26.735 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: AppNavigation -> AuthResolution
+01-11 10:05:26.735 21150 21150 D OAUTH_FLOW_DEBUG:     value: null
+01-11 10:05:26.736 21150 21150 D SecondaryInfoViewModel: Resetting secondary info state
+01-11 10:05:26.756 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.756 21150 21150 D OAUTH_FLOW_DEBUG: [1768122326756] STEP: NAV_MAIN | DETAILS: Main screen displayed
+01-11 10:05:26.756 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.759 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:26.759 21150 21150 D OAUTH_FLOW_DEBUG: [1768122326759] STEP: NAV_SECONDARY_INFO | DETAILS: Secondary info screen displayed
+01-11 10:05:26.759 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:27.459 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:27.459 21150 21150 D OAUTH_FLOW_DEBUG: [1768122327459] STEP: NAV_SECONDARY_INFO | DETAILS: Secondary info screen displayed
+01-11 10:05:27.459 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:27.509 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:05:27.509 21150 21150 D OAUTH_FLOW_DEBUG: [1768122327509] STEP: NAV_SECONDARY_INFO | DETAILS: Secondary info screen displayed
+01-11 10:05:27.509 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:38.180 21150 21150 D SecondaryInfoViewModel: === SECONDARY INFO SUBMISSION STARTED ===
+01-11 10:06:38.180 21150 21150 D SecondaryInfoViewModel: Phone: +2348167574897, Country: Nigeria
+01-11 10:06:38.181 21150 21150 D SecondaryInfoViewModel: ✅ All validations passed, proceeding with secondary info submission
+01-11 10:06:38.181 21150 21150 D SecondaryInfoViewModel: ⏳ Getting current user...
+01-11 10:06:39.022 21150 21150 D SecondaryInfoViewModel: ⏳ Secondary info submission in progress...
+01-11 10:06:40.022 21150 21150 D SecondaryInfoViewModel: ✅ Secondary info submitted successfully!
+01-11 10:06:40.050 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:40.050 21150 21150 D OAUTH_FLOW_DEBUG: [1768122400050] STEP: VM_OAUTH_SUCCESS | DETAILS: Checking profile completeness after OAuth
+01-11 10:06:40.050 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:40.050 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:40.050 21150 21150 D OAUTH_FLOW_DEBUG: [1768122400050] STEP: VM_GET_USER | DETAILS: Fetching current user
+01-11 10:06:40.050 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:40.478 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: VM_USER_FOUND -> Success
+01-11 10:06:40.478 21150 21150 D OAUTH_FLOW_DEBUG:     userId: 696367d4a560d09c8254
+01-11 10:06:40.478 21150 21150 D OAUTH_FLOW_DEBUG:     email: alghareeb.mk@gmail.com
+01-11 10:06:40.478 21150 21150 D OAUTH_FLOW_DEBUG:     name: Muhammad Kamaludeen
+01-11 10:06:40.478 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:40.478 21150 21150 D OAUTH_FLOW_DEBUG: [1768122400478] STEP: VM_FETCH_PROFILE | DETAILS: Getting user profile
+01-11 10:06:40.478 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:40.974 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: VM_PROFILE_CHECK -> Complete
+01-11 10:06:40.974 21150 21150 D OAUTH_FLOW_DEBUG:     isIncomplete: false
+01-11 10:06:40.974 21150 21150 D OAUTH_FLOW_DEBUG:     phoneNumber: +2348167574897
+01-11 10:06:40.974 21150 21150 D OAUTH_FLOW_DEBUG:     country: Nigeria
+01-11 10:06:40.974 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:40.974 21150 21150 D OAUTH_FLOW_DEBUG: [1768122400974] STEP: VM_RESOLUTION | DETAILS: Setting resolution to AuthenticatedComplete
+01-11 10:06:40.974 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:57.866 21150 21150 D SecondaryInfoViewModel: === SECONDARY INFO SUBMISSION STARTED ===
+01-11 10:06:57.866 21150 21150 D SecondaryInfoViewModel: Phone: +2348167574897, Country: Nigeria
+01-11 10:06:57.866 21150 21150 D SecondaryInfoViewModel: ✅ All validations passed, proceeding with secondary info submission
+01-11 10:06:57.867 21150 21150 D SecondaryInfoViewModel: ⏳ Getting current user...
+01-11 10:06:58.776 21150 21150 D SecondaryInfoViewModel: ⏳ Secondary info submission in progress...
+01-11 10:06:59.725 21150 21150 D SecondaryInfoViewModel: ✅ Secondary info submitted successfully!
+01-11 10:06:59.757 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:59.757 21150 21150 D OAUTH_FLOW_DEBUG: [1768122419757] STEP: VM_OAUTH_SUCCESS | DETAILS: Checking profile completeness after OAuth
+01-11 10:06:59.757 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:59.758 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:06:59.758 21150 21150 D OAUTH_FLOW_DEBUG: [1768122419758] STEP: VM_GET_USER | DETAILS: Fetching current user
+01-11 10:06:59.758 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:07:00.186 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: VM_USER_FOUND -> Success
+01-11 10:07:00.186 21150 21150 D OAUTH_FLOW_DEBUG:     userId: 696367d4a560d09c8254
+01-11 10:07:00.186 21150 21150 D OAUTH_FLOW_DEBUG:     email: alghareeb.mk@gmail.com
+01-11 10:07:00.186 21150 21150 D OAUTH_FLOW_DEBUG:     name: Muhammad Kamaludeen
+01-11 10:07:00.187 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:07:00.187 21150 21150 D OAUTH_FLOW_DEBUG: [1768122420186] STEP: VM_FETCH_PROFILE | DETAILS: Getting user profile
+01-11 10:07:00.187 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:07:00.733 21150 21150 D OAUTH_FLOW_DEBUG: >>> STATE CHANGE: VM_PROFILE_CHECK -> Complete
+01-11 10:07:00.733 21150 21150 D OAUTH_FLOW_DEBUG:     isIncomplete: false
+01-11 10:07:00.734 21150 21150 D OAUTH_FLOW_DEBUG:     phoneNumber: +2348167574897
+01-11 10:07:00.734 21150 21150 D OAUTH_FLOW_DEBUG:     country: Nigeria
+01-11 10:07:00.734 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================
+01-11 10:07:00.734 21150 21150 D OAUTH_FLOW_DEBUG: [1768122420734] STEP: VM_RESOLUTION | DETAILS: Setting resolution to AuthenticatedComplete
+01-11 10:07:00.734 21150 21150 D OAUTH_FLOW_DEBUG: ================================================================================

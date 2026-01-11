@@ -21,66 +21,118 @@ import com.ekehi.network.presentation.ui.components.BottomNavigationBar
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
 import com.ekehi.network.auth.SocialAuthManager
+import com.ekehi.network.presentation.viewmodel.AuthResolution
+import com.ekehi.network.presentation.viewmodel.OAuthViewModel
+import androidx.compose.runtime.collectAsState
+import com.ekehi.network.util.DebugLogger
 
 @Composable
-fun AppNavigation(isAuthenticated: Boolean = false) {
+fun AppNavigation(
+    isAuthenticated: Boolean = false,
+    requiresAdditionalInfo: Boolean = false
+) {
     val navController = rememberNavController()
+    val oAuthViewModel: OAuthViewModel = hiltViewModel()
+    
+    val authResolution by oAuthViewModel.authResolution.collectAsState()
+    
+    // Debug: Log auth resolution changes
+    LaunchedEffect(authResolution) {
+        DebugLogger.logState("AppNavigation", "AuthResolution Changed", mapOf(
+            "resolution" to (authResolution?.javaClass?.simpleName ?: "null")
+        ))
+        
+        when (authResolution) {
+            AuthResolution.AuthenticatedComplete -> {
+                DebugLogger.logNavigation("current", "main", "AuthResolution: Profile complete - navigating to main")
+                navController.navigate("main") {
+                    popUpTo(0) { inclusive = true }
+                }
+                oAuthViewModel.resetResolution()
+            }
+            AuthResolution.AuthenticatedIncomplete -> {
+                DebugLogger.logNavigation("current", "secondary_info", "Profile incomplete")
+                navController.navigate("secondary_info")
+                oAuthViewModel.resetResolution()
+            }
+            AuthResolution.Unauthenticated -> {
+                DebugLogger.logNavigation("current", "landing", "Not authenticated")
+                navController.navigate("landing") {
+                    popUpTo(0) { inclusive = true }
+                }
+                oAuthViewModel.resetResolution()
+            }
+            null -> {
+                DebugLogger.logState("AppNavigation", "AuthResolution", mapOf("value" to "null"))
+            }
+        }
+    }
     
     NavHost(
         navController = navController,
-        startDestination = if (isAuthenticated) "main" else "landing"
+        startDestination = when {
+            requiresAdditionalInfo -> "secondary_info"
+            isAuthenticated -> "main"
+            else -> "landing"
+        }
     ) {
         composable("landing") {
+            DebugLogger.logStep("NAV_LANDING", "Landing screen displayed")
             LandingScreen(
                 onNavigateToLogin = {
                     try {
+                        DebugLogger.logNavigation("landing", "login", "User clicked login")
                         navController.navigate("login")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_LANDING", "Navigation to login failed", e)
                     }
                 },
                 onNavigateToRegister = {
                     try {
+                        DebugLogger.logNavigation("landing", "register", "User clicked register")
                         navController.navigate("register")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_LANDING", "Navigation to register failed", e)
                     }
                 }
             )
         }
         
         composable("login") {
+            DebugLogger.logStep("NAV_LOGIN", "Login screen displayed")
             LoginOptionsScreen(
                 onGoogleLogin = {
+                    DebugLogger.logStep("NAV_LOGIN", "Google login completed - navigating to main")
                     try {
-                        // Handle Google login - this would trigger OAuth flow
                         navController.navigate("main") {
                             popUpTo("landing") { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
                     }
                 },
                 onNavigateToGoogleSecondaryInfo = {
+                    DebugLogger.logStep("NAV_LOGIN", "Need secondary info - navigating")
                     try {
-                        // Navigate to secondary info screen after Google OAuth if needed
                         navController.navigate("secondary_info")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
                     }
                 },
                 onEmailLogin = {
+                    DebugLogger.logNavigation("login", "login_email", "Email login clicked")
                     try {
                         navController.navigate("login_email")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
                     }
                 },
                 onNavigateToSignup = {
+                    DebugLogger.logNavigation("login", "register", "Signup clicked")
                     try {
                         navController.navigate("register")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
                     }
                 }
             )
@@ -108,37 +160,40 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
         }
         
         composable("register") {
+            DebugLogger.logStep("NAV_REGISTER", "Register screen displayed")
             SignupOptionsScreen(
                 onGoogleSignup = {
+                    DebugLogger.logStep("NAV_REGISTER", "Google signup completed - navigating to main")
                     try {
-                        // This is called after successful OAuth, navigate to main
                         navController.navigate("main") {
                             popUpTo("landing") { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
                     }
                 },
                 onNavigateToSecondaryInfo = {
+                    DebugLogger.logStep("NAV_REGISTER", "Need secondary info - navigating")
                     try {
-                        // This is called when additional info is needed after OAuth
                         navController.navigate("secondary_info")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
                     }
                 },
                 onEmailSignup = {
+                    DebugLogger.logNavigation("register", "email_register", "Email signup clicked")
                     try {
                         navController.navigate("email_register")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
                     }
                 },
                 onNavigateToLogin = {
+                    DebugLogger.logNavigation("register", "login", "Login clicked")
                     try {
                         navController.navigate("login")
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
                     }
                 }
             )
@@ -167,29 +222,39 @@ fun AppNavigation(isAuthenticated: Boolean = false) {
         
         // Secondary info screen for additional information after OAuth registration
         composable("secondary_info") {
-            SecondaryInfoScreen(
-                onSecondaryInfoSuccess = {
+            DebugLogger.logStep("NAV_SECONDARY_INFO", "Secondary info screen displayed")
+            
+            // CRITICAL: Use activity-scoped ViewModel so it's shared with AppNavigation and MainActivity
+            val activity = androidx.compose.ui.platform.LocalContext.current as androidx.activity.ComponentActivity
+            val sharedOAuthViewModel: OAuthViewModel = hiltViewModel(activity)
+            
+            OAuthCompletionScreen(
+                oAuthViewModel = sharedOAuthViewModel,
+                onComplete = {
+                    DebugLogger.logNavigation("secondary_info", "main", "Profile completion finished - navigating to main")
                     try {
                         navController.navigate("main") {
-                            popUpTo("landing") { inclusive = true }
+                            // Clear the entire backstack and make main the new root
+                            popUpTo(0) { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_SECONDARY_INFO", "Navigation error", e)
                     }
                 }
             )
         }
 
         composable("main") {
+            DebugLogger.logStep("NAV_MAIN", "Main screen displayed")
             MainScreen(
                 onLogout = {
                     try {
-                        Log.d("AppNavigation", "Logging out - clearing session and navigating to landing")
+                        DebugLogger.logNavigation("main", "landing", "User logged out")
                         navController.navigate("landing") {
                             popUpTo(0) { inclusive = true }
                         }
                     } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
+                        DebugLogger.logError("NAV_MAIN", "Navigation error", e)
                     }
                 }
             )

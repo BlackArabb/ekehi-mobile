@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
     
     private var isAuthenticated by mutableStateOf(false)
     private var isAuthChecked by mutableStateOf(false)
+    private var requiresAdditionalInfo by mutableStateOf(false)
     private var oauthError by mutableStateOf<String?>(null)
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,8 +55,9 @@ class MainActivity : ComponentActivity() {
             fromSplash -> {
                 // Coming from SplashActivity - use the authentication state it determined
                 isAuthenticated = intent.getBooleanExtra("IS_AUTHENTICATED", false)
+                requiresAdditionalInfo = intent.getBooleanExtra("REQUIRES_ADDITIONAL_INFO", false)
                 isAuthChecked = true
-                Log.d("MainActivity", "From Splash - Authenticated: $isAuthenticated")
+                Log.d("MainActivity", "From Splash - Authenticated: $isAuthenticated, RequiresAdditionalInfo: $requiresAdditionalInfo")
             }
             else -> {
                 // Direct launch (shouldn't happen normally, but handle it)
@@ -71,7 +73,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (isAuthChecked) {
-                        AppNavigation(isAuthenticated = isAuthenticated)
+                        AppNavigation(
+                            isAuthenticated = isAuthenticated,
+                            requiresAdditionalInfo = requiresAdditionalInfo
+                        )
                     }
                 }
             }
@@ -103,6 +108,7 @@ class MainActivity : ComponentActivity() {
                 Log.d("MainActivity", "=== HANDLING OAUTH CALLBACK ===")
                 
                 isAuthenticated = it.getBooleanExtra("IS_AUTHENTICATED", false)
+                requiresAdditionalInfo = it.getBooleanExtra("SHOW_PROFILE_COMPLETION", false)
                 oauthError = it.getStringExtra("OAUTH_ERROR")
                 isAuthChecked = true
                 
@@ -112,7 +118,12 @@ class MainActivity : ComponentActivity() {
                 
                 if (isAuthenticated && userId != null) {
                     Log.d("MainActivity", "✅ OAuth login successful")
-                    oAuthViewModel.handleOAuthResult(success = true)
+                    
+                    val showProfileCompletion = it.getBooleanExtra("SHOW_PROFILE_COMPLETION", false)
+                    oAuthViewModel.handleOAuthResult(success = true, requiresAdditionalInfo = showProfileCompletion)
+                    
+                    // CRITICAL: Call onOAuthSuccess to set the authResolution which triggers navigation
+                    oAuthViewModel.onOAuthSuccess()
                     
                     // Refresh login state
                     lifecycleScope.launch {

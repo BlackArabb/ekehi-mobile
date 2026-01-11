@@ -30,8 +30,8 @@ import com.ekehi.network.R
 @Composable
 fun LoginOptionsScreen(
     oAuthViewModel: OAuthViewModel = hiltViewModel(),
-    onGoogleLogin: () -> Unit,
-    onNavigateToGoogleSecondaryInfo: () -> Unit,  // Navigate to secondary info after Google OAuth
+    onGoogleLogin: () -> Unit = {},
+    onNavigateToGoogleSecondaryInfo: () -> Unit = {},  // Navigate to secondary info after Google OAuth
     onEmailLogin: () -> Unit,
     onNavigateToSignup: () -> Unit
 ) {
@@ -56,12 +56,8 @@ fun LoginOptionsScreen(
                 isLoading = false
                 val success = (oauthState as Resource.Success<Boolean>).data
                 if (success) {
-                    if (requiresAdditionalInfo) {
-                        // For login flow, navigate to secondary info screen if additional info is needed
-                        onNavigateToGoogleSecondaryInfo()
-                    } else {
-                        onGoogleLogin()
-                    }
+                    // Instead of navigating directly, check profile completeness via ViewModel
+                    oAuthViewModel.onOAuthSuccess()
                 }
             }
             is Resource.Error -> {

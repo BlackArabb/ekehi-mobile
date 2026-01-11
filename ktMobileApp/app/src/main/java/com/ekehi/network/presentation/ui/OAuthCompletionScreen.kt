@@ -24,22 +24,27 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.SecondaryInfoViewModel
+import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.R
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun OAuthCompletionScreen(
-    viewModel: SecondaryInfoViewModel = hiltViewModel(),
-    onComplete: () -> Unit
+    secondaryInfoViewModel: SecondaryInfoViewModel = hiltViewModel(),
+    oAuthViewModel: OAuthViewModel = hiltViewModel(),
+    onComplete: () -> Unit = {}
 ) {
     var phoneNumber by remember { mutableStateOf("") }
     var country by remember { mutableStateOf("")}
     
     // Collect state properly
-    val secondaryInfoState by viewModel.secondaryInfoState.collectAsState()
+    val secondaryInfoState by secondaryInfoViewModel.secondaryInfoState.collectAsState()
     
     // Derive UI states from the collected state
     val isLoading = secondaryInfoState is Resource.Loading
@@ -50,7 +55,10 @@ fun OAuthCompletionScreen(
         Log.d("OAuthCompletionScreen", "Secondary info state changed: ${secondaryInfoState.javaClass.simpleName}")
         when (secondaryInfoState) {
             is Resource.Success -> {
-                Log.d("OAuthCompletionScreen", "Secondary info submission successful, navigating to main screen")
+                Log.d("OAuthCompletionScreen", "Secondary info submission successful, updating auth state and navigating")
+                // Update the shared auth resolution state
+                oAuthViewModel.onOAuthSuccess()
+                // Trigger the navigation callback
                 onComplete()
             }
             is Resource.Error -> {
@@ -72,7 +80,7 @@ fun OAuthCompletionScreen(
     // Reset the state when the screen is first displayed
     LaunchedEffect(Unit) {
         Log.d("OAuthCompletionScreen", "Screen mounted - resetting state")
-        viewModel.resetState()
+        secondaryInfoViewModel.resetState()
     }
     
     // Get focus manager and keyboard controller
@@ -125,25 +133,31 @@ fun OAuthCompletionScreen(
                     )
 
                     Text(
-                        text = "Complete your registration",
+                        text = "Complete Your Profile",
                         color = Color.White,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
 
                     Text(
-                        text = "Please provide additional information to complete your registration",
+                        text = "We need a few more details to get you started",
                         color = Color(0xB3FFFFFF),
                         fontSize = 16.sp,
                         modifier = Modifier.padding(bottom = 32.dp)
                     )
 
-                    // Phone Number Input
+                    // Phone Number Input with validation
                     OutlinedTextField(
                         value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
+                        onValueChange = { 
+                            // Only allow digits, plus sign, and spaces
+                            if (it.all { char -> char.isDigit() || char == '+' || char == ' ' }) {
+                                phoneNumber = it
+                            }
+                        },
                         label = { Text("Phone Number", color = Color(0xB3FFFFFF)) },
+                        placeholder = { Text("+234 xxx xxx xxxx", color = Color(0x66FFFFFF)) },
                         singleLine = true,
                         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
                         modifier = Modifier
@@ -158,23 +172,13 @@ fun OAuthCompletionScreen(
                         )
                     )
 
-                    // Country Input
-                    OutlinedTextField(
-                        value = country,
-                        onValueChange = { country = it },
-                        label = { Text("Country", color = Color(0xB3FFFFFF)) },
-                        singleLine = true,
-                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                    // Country Dropdown
+                    CountryDropdownField(
+                        selectedCountry = country,
+                        onCountrySelected = { country = it },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFffa000),
-                            unfocusedBorderColor = Color(0x33FFFFFF),
-                            cursorColor = Color(0xFFffa000),
-                            focusedLabelColor = Color(0xFFffa000),
-                            unfocusedLabelColor = Color(0xB3FFFFFF)
-                        )
+                            .padding(bottom = 16.dp)
                     )
                 }
             }
@@ -208,7 +212,7 @@ fun OAuthCompletionScreen(
                     
                     if (isValid) {
                         Log.d("OAuthCompletionScreen", "All inputs valid, proceeding with secondary info submission...")
-                        viewModel.submitSecondaryInfo(trimmedPhoneNumber, trimmedCountry)
+                        secondaryInfoViewModel.submitSecondaryInfo(trimmedPhoneNumber, trimmedCountry)
                     } else {
                         Log.d("OAuthCompletionScreen", "Validation failed:")
                         if (trimmedPhoneNumber.isEmpty()) Log.d("OAuthCompletionScreen", "- Phone number is empty")
@@ -233,7 +237,7 @@ fun OAuthCompletionScreen(
                     )
                 } else {
                     Text(
-                        text = "Continue",
+                        text = "Continue to Mining",
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
@@ -251,6 +255,80 @@ fun OAuthCompletionScreen(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 80.dp)
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CountryDropdownField(
+    selectedCountry: String,
+    onCountrySelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    // List of countries
+    val countries = listOf(
+        "Nigeria",
+        "Ghana",
+        "Kenya",
+        "South Africa",
+        "Egypt",
+        "United States",
+        "United Kingdom",
+        "Canada",
+        "Australia",
+        "Germany",
+        "France",
+        "India",
+        "China",
+        "Japan",
+        "Brazil"
+    ).sorted()
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedCountry,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Country", color = Color(0xB3FFFFFF)) },
+            singleLine = true,
+            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFffa000),
+                unfocusedBorderColor = Color(0x33FFFFFF),
+                cursorColor = Color(0xFFffa000),
+                focusedLabelColor = Color(0xFFffa000),
+                unfocusedLabelColor = Color(0xB3FFFFFF)
+            ),
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            }
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            countries.forEach { country ->
+                DropdownMenuItem(
+                    text = { Text(country, color = Color.White) },
+                    onClick = {
+                        onCountrySelected(country)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
