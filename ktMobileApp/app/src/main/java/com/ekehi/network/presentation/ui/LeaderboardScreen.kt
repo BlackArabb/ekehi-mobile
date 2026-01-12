@@ -20,7 +20,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -175,7 +177,7 @@ fun LeaderboardScreen(
                                 Text(
                                     text = message,
                                     color = Color.White,
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(top = 16.dp)
                                 )
                                 Button(
@@ -254,231 +256,196 @@ fun LeaderboardScreen(
 
 @Composable
 fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
-    // Ensure we have exactly 3 entries, padding with placeholders if needed
     val sortedEntries = entries.sortedBy { it.rank }
-    val firstPlace = sortedEntries.find { it.rank == 1 }
-    val secondPlace = sortedEntries.find { it.rank == 2 }
-    val thirdPlace = sortedEntries.find { it.rank == 3 }
-    
-    // Create placeholders for missing ranks
-    val first = firstPlace ?: LeaderboardEntry(1, "No user", 0.0, 0.0, 0, 0)
-    val second = secondPlace ?: LeaderboardEntry(2, "No user", 0.0, 0.0, 0, 0)
-    val third = thirdPlace ?: LeaderboardEntry(3, "No user", 0.0, 0.0, 0, 0)
-    
-    Box(
+    val first = sortedEntries.find { it.rank == 1 } ?: LeaderboardEntry(1, "No user", 0.0, 0.0, 0, 0)
+    val second = sortedEntries.find { it.rank == 2 } ?: LeaderboardEntry(2, "No user", 0.0, 0.0, 0, 0)
+    val third = sortedEntries.find { it.rank == 3 } ?: LeaderboardEntry(3, "No user", 0.0, 0.0, 0, 0)
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0x1AFFFF00),
-                        Color(0x0DFFFF00)
-                    )
-                ),
-                shape = RoundedCornerShape(24.dp)
-            )
-            .border(
-                width = 1.dp,
-                color = Color(0x4DFFFF00),
-                shape = RoundedCornerShape(24.dp)
-            )
-            .padding(24.dp)
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+        // Section Header with glow effect
+        Text(
+            text = "HALL OF LEGENDS",
+            color = Color(0xFFFFD700),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 4.sp,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Bottom
         ) {
-            Text(
-                text = "HALL OF LEGENDS",
-                color = Color(0xFFFFD700),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.5.sp,
-                modifier = Modifier.padding(bottom = 24.dp)
+            // Second Place
+            PodiumMember(
+                entry = second,
+                height = 160.dp,
+                color = Color(0xFFC0C0C0),
+                modifier = Modifier.weight(1f),
+                rank = "2"
             )
-            
-            // Podium arrangement
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.Bottom
+
+            // First Place
+            PodiumMember(
+                entry = first,
+                height = 220.dp,
+                color = Color(0xFFFFD700),
+                isFirst = true,
+                modifier = Modifier.weight(1.2f),
+                rank = "1"
+            )
+
+            // Third Place
+            PodiumMember(
+                entry = third,
+                height = 140.dp,
+                color = Color(0xFFCD7F32),
+                modifier = Modifier.weight(1f),
+                rank = "3"
+            )
+        }
+    }
+}
+
+@Composable
+fun PodiumMember(
+    entry: LeaderboardEntry,
+    height: androidx.compose.ui.unit.Dp,
+    color: Color,
+    modifier: Modifier = Modifier,
+    isFirst: Boolean = false,
+    rank: String
+) {
+    Column(
+        modifier = modifier.fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        // Avatar / Badge Area
+        Box(contentAlignment = Alignment.TopCenter) {
+            if (isFirst) {
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700),
+                    modifier = Modifier
+                        .size(32.dp)
+                        .offset(y = (-28).dp)
+                )
+            }
+
+            // Glass Circle for User
+            Box(
+                modifier = Modifier
+                    .size(if (isFirst) 80.dp else 64.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(color.copy(alpha = 0.2f), Color.Transparent)
+                        ),
+                        shape = CircleShape
+                    )
+                    .border(
+                        width = if (isFirst) 3.dp else 2.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(color, color.copy(alpha = 0.1f))
+                        ),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                // Second Place (left)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 4.dp)
-                ) {
-                    // Rank badge
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .background(
-                                color = Color(0x1AC0C0C0),
-                                shape = CircleShape
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = Color(0x80C0C0C0),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "2",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    
-                    Text(
-                        text = second.username,
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 8.dp),
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                    )
-                    
-                    Text(
-                        text = "${second.totalCoins.toInt()}",
-                        color = Color(0xFFFFA000),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                    
-                    Text(
-                        text = "EKH",
-                        color = Color(0xB3FFFFFF),
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
-                
-                // First Place (center)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1.2f)
-                        .padding(horizontal = 4.dp)
-                ) {
-                    // Rank badge
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .background(
-                                color = Color(0x1AFFFF00),
-                                shape = CircleShape
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = Color(0x80FFFF00),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "1",
-                            color = Color(0xFFFFD700),
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    
-                    Text(
-                        text = "CHAMPION",
-                        color = Color(0xFFFFD700),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                    
-                    Text(
-                        text = first.username,
-                        color = Color(0xFFFFD700),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 4.dp),
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                    )
-                    
-                    Text(
-                        text = "${first.totalCoins.toInt()}",
-                        color = Color(0xFFFFD700),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                    
-                    Text(
-                        text = "EKH",
-                        color = Color(0xB3FFFFFF),
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
-                
-                // Third Place (right)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 4.dp)
-                ) {
-                    // Rank badge
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .background(
-                                color = Color(0x1ACD7F32),
-                                shape = CircleShape
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = Color(0x80CD7F32),
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "3",
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    
-                    Text(
-                        text = third.username,
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 8.dp),
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                    )
-                    
-                    Text(
-                        text = "${third.totalCoins.toInt()}",
-                        color = Color(0xFFFFA000),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                    
-                    Text(
-                        text = "EKH",
-                        color = Color(0xB3FFFFFF),
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
+                Text(
+                    text = entry.username.take(1).uppercase(),
+                    color = color,
+                    fontSize = if (isFirst) 32.sp else 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            // Small Rank Badge
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = 10.dp)
+                    .size(24.dp)
+                    .background(color, CircleShape)
+                    .border(1.dp, Color(0xFF0F172A), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = rank,
+                    color = if (isFirst) Color.Black else Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black
+                )
             }
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Username
+        Text(
+            text = entry.username,
+            color = Color.White,
+            fontSize = if (isFirst) 15.sp else 13.sp,
+            fontWeight = if (isFirst) FontWeight.Bold else FontWeight.SemiBold,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+
+        // Balance
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 4.dp)
+        ) {
+            Text(
+                text = entry.totalCoins.toInt().toString(),
+                color = if (isFirst) Color(0xFFFFD700) else Color(0xFFFFA000),
+                fontSize = if (isFirst) 18.sp else 16.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+            Spacer(modifier = Modifier.width(2.dp))
+            Text(
+                text = "EKH",
+                color = Color.White.copy(alpha = 0.5f),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Modern Podium Pillar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            color.copy(alpha = 0.25f),
+                            color.copy(alpha = 0.05f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(color.copy(alpha = 0.5f), Color.Transparent)
+                    ),
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                )
+        )
     }
 }
 
