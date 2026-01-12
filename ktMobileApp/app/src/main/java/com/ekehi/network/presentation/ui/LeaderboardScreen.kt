@@ -307,12 +307,12 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .weight(1f)
-                        .scale(0.95f)
+                        .padding(horizontal = 4.dp)
                 ) {
                     // Rank badge
                     Box(
                         modifier = Modifier
-                            .size(65.dp)
+                            .size(60.dp)
                             .background(
                                 color = Color(0x1AC0C0C0),
                                 shape = CircleShape
@@ -327,7 +327,7 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                         Text(
                             text = "2",
                             color = Color.White,
-                            fontSize = 24.sp,
+                            fontSize = 22.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -335,10 +335,11 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                     Text(
                         text = second.username,
                         color = Color.White,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(top = 8.dp),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     
                     Text(
@@ -361,13 +362,13 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .weight(1f)
-                        .scale(1.1f)
+                        .weight(1.2f)
+                        .padding(horizontal = 4.dp)
                 ) {
                     // Rank badge
                     Box(
                         modifier = Modifier
-                            .size(75.dp)
+                            .size(80.dp)
                             .background(
                                 color = Color(0x1AFFFF00),
                                 shape = CircleShape
@@ -382,7 +383,7 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                         Text(
                             text = "1",
                             color = Color(0xFFFFD700),
-                            fontSize = 28.sp,
+                            fontSize = 32.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -398,10 +399,11 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                     Text(
                         text = first.username,
                         color = Color(0xFFFFD700),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(top = 4.dp),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     
                     Text(
@@ -425,12 +427,12 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .weight(1f)
-                        .scale(0.95f)
+                        .padding(horizontal = 4.dp)
                 ) {
                     // Rank badge
                     Box(
                         modifier = Modifier
-                            .size(65.dp)
+                            .size(60.dp)
                             .background(
                                 color = Color(0x1ACD7F32),
                                 shape = CircleShape
@@ -445,7 +447,7 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                         Text(
                             text = "3",
                             color = Color.White,
-                            fontSize = 24.sp,
+                            fontSize = 22.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -453,10 +455,11 @@ fun ChampionThroneSection(entries: List<LeaderboardEntry>) {
                     Text(
                         text = third.username,
                         color = Color.White,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(top = 8.dp),
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                     
                     Text(
