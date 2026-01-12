@@ -145,6 +145,15 @@ fun UpdateDialog(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
+                if (downloadProgress is DownloadProgress.Failed) {
+                    Text(
+                        text = "Error: ${(downloadProgress as DownloadProgress.Failed).error}",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
                 if (isDownloading) {
                     val progress = when (downloadProgress) {
                         is DownloadProgress.Downloading -> downloadProgress.progress / 100f

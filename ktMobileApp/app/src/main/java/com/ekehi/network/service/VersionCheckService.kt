@@ -100,9 +100,17 @@ class VersionCheckService @Inject constructor(
                 // Safely extract values with defaults
                 val latestVerName = document.data["latestVersion"] as? String ?: "1.0.0"
                 val latestVerCode = (document.data["latestVersionCode"] as? Number)?.toInt() ?: 0
-                val minVerName = (document.data["minimumVersion"] as? String) ?: latestVerName
-                val minVerCode = ((document.data["minimumVersionCode"] as? Number)?.toInt()) ?: latestVerCode
-                val mandatory = (document.data["isMandatory"] as? Boolean) ?: false
+                val minVerName = (document.data["minimumVersion"] as? String) ?: "1.0.0"
+                val minVerCode = ((document.data["minimumVersionCode"] as? Number)?.toInt()) ?: 0
+                
+                // Flexible parsing for isMandatory (handles Boolean, Number, or String)
+                val mandatory = when (val raw = document.data["isMandatory"]) {
+                    is Boolean -> raw
+                    is Number -> raw.toInt() != 0
+                    is String -> raw.lowercase() == "true" || raw == "1"
+                    else -> false
+                }
+                
                 val url = document.data["downloadUrl"] as? String ?: ""
                 val notes = (document.data["releaseNotes"] as? String) ?: ""
                 val date = (document.data["releaseDate"] as? String) ?: ""

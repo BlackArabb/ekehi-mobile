@@ -158,7 +158,35 @@ fun LeaderboardScreen(
                         }
                     }
                     is Resource.Error -> {
-                        // Error handling
+                        val message = (leaderboardResource as Resource.Error).message
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = Color.Red,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Text(
+                                    text = message,
+                                    color = Color.White,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    modifier = Modifier.padding(top = 16.dp)
+                                )
+                                Button(
+                                    onClick = { viewModel.loadLeaderboard() },
+                                    modifier = Modifier.padding(top = 16.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA000))
+                                ) {
+                                    Text("Retry")
+                                }
+                            }
+                        }
                     }
                     else -> {
                         // Idle state

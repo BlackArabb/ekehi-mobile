@@ -43,6 +43,10 @@ class ProfileViewModel @Inject constructor(
     private val _completedTasksCount = MutableStateFlow<Resource<Int>>(Resource.Loading)
     val completedTasksCount: StateFlow<Resource<Int>> = _completedTasksCount
 
+    // Add a state flow for referral claiming status
+    private val _claimReferralStatus = MutableStateFlow<Resource<String>>(Resource.Idle)
+    val claimReferralStatus: StateFlow<Resource<String>> = _claimReferralStatus
+
     private var currentUserId: String? = null
 
     init {
@@ -432,26 +436,35 @@ class ProfileViewModel @Inject constructor(
             // Validate input
             if (userId.isEmpty()) {
                 Log.e("ProfileViewModel", "User ID is required to claim referral")
+                _claimReferralStatus.value = Resource.Error("User ID is required")
                 return@launch
             }
             
             if (referralCode.isBlank()) {
                 Log.e("ProfileViewModel", "Referral code cannot be empty")
+                _claimReferralStatus.value = Resource.Error("Referral code cannot be empty")
                 return@launch
             }
             
+            _claimReferralStatus.value = Resource.Loading
             val result = userRepository.claimReferral(userId, referralCode.trim())
             if (result.isSuccess) {
-                val message = result.getOrNull()
+                val message = result.getOrNull() ?: "Referral claimed successfully!"
                 Log.d("ProfileViewModel", "Referral claimed successfully: $message")
+                _claimReferralStatus.value = Resource.Success(message)
                 // Refresh user profile to reflect changes
                 refreshUserProfile()
             } else {
                 val error = result.exceptionOrNull()
-                Log.e("ProfileViewModel", "Failed to claim referral: ${error?.message}")
-                // Handle error - in a real implementation, you might want to emit this to the UI
+                val errorMessage = error?.message ?: "Failed to claim referral"
+                Log.e("ProfileViewModel", "Failed to claim referral: $errorMessage")
+                _claimReferralStatus.value = Resource.Error(errorMessage)
             }
         }
+    }
+    
+    fun resetClaimStatus() {
+        _claimReferralStatus.value = Resource.Idle
     }
     
     override fun onCleared() {

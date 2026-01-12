@@ -1,5 +1,6 @@
 package com.ekehi.network.data.repository
 
+import android.util.Log
 import com.ekehi.network.service.AppwriteService
 import io.appwrite.Query
 import io.appwrite.exceptions.AppwriteException
@@ -82,36 +83,85 @@ class LeaderboardRepository @Inject constructor(
         }
     }
     
-    // Add a method to get verified users only
     suspend fun getVerifiedLeaderboard(): Result<List<Map<String, Any>>> {
         return withContext(Dispatchers.IO) {
             try {
-                // Fetch top 50 verified users ordered by taskReward + miningReward + referralReward (totalCoins) descending
-                // Assuming users with taskReward + miningReward + referralReward > 0 are considered verified
+                Log.d("Leaderboard", "Fetching leaderboard from Appwrite...")
+                // Try fetching with totalCoins sorting
                 val response = appwriteService.databases.listDocuments(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         queries = listOf(
-                                Query.greaterThan("totalCoins", 0.0),
                                 Query.orderDesc("totalCoins"),
                                 Query.limit(50)
                         )
                 )
 
+                Log.d("Leaderboard", "Fetched ${response.documents.size} documents")
+
                 // Convert documents to leaderboard entries
                 val leaderboardEntries = response.documents.mapIndexed { index, document ->
+                    val taskReward = (document.data["taskReward"] as? Number)?.toDouble() ?: 0.0
+                    val miningReward = (document.data["miningReward"] as? Number)?.toDouble() ?: 0.0
+                    val referralReward = (document.data["referralReward"] as? Number)?.toDouble() ?: 0.0
+                    
+                    // Use totalCoins from DB if available, otherwise calculate it
+                    val totalCoins = (document.data["totalCoins"] as? Number)?.toDouble() 
+                        ?: (taskReward + miningReward + referralReward)
+
                     buildMap<String, Any> {
                         put("rank", index + 1)
                         put("username", document.data["username"] as? String ?: "user_${document.id.take(8)}")
-                        put("totalCoins", (document.data["totalCoins"] as? Number)?.toDouble() ?: 0.0)
-                        put("miningPower", 0.0)
+                        put("totalCoins", totalCoins)
+                        put("miningPower", (document.data["miningPower"] as? Number)?.toDouble() ?: 0.0)
                         put("currentStreak", (document.data["currentStreak"] as? Number)?.toInt() ?: 0)
                         put("totalReferrals", (document.data["totalReferrals"] as? Number)?.toInt() ?: 0)
                     }
                 }
 
+                // If no one has totalCoins > 0, we might want to still show them? 
+                // Or maybe the query failed because of missing index.
+                
                 Result.success(leaderboardEntries)
             } catch (e: AppwriteException) {
+                Log.e("Leaderboard", "Appwrite error fetching leaderboard: ${e.message}, code: ${e.code}")
+                // Fallback: If totalCoins index is missing, try sorting by taskReward or just get users
+                if (e.code == 400 || e.message?.contains("index", ignoreCase = true) == true) {
+                    try {
+                        Log.d("Leaderboard", "Attempting fallback fetch by taskReward...")
+                        val fallbackResponse = appwriteService.databases.listDocuments(
+                            databaseId = AppwriteService.DATABASE_ID,
+                            collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                            queries = listOf(
+                                Query.orderDesc("taskReward"),
+                                Query.limit(50)
+                            )
+                        )
+                        
+                        val fallbackEntries = fallbackResponse.documents.mapIndexed { index, document ->
+                            val taskReward = (document.data["taskReward"] as? Number)?.toDouble() ?: 0.0
+                            val miningReward = (document.data["miningReward"] as? Number)?.toDouble() ?: 0.0
+                            val referralReward = (document.data["referralReward"] as? Number)?.toDouble() ?: 0.0
+                            val totalCoins = (document.data["totalCoins"] as? Number)?.toDouble() 
+                                ?: (taskReward + miningReward + referralReward)
+
+                            buildMap<String, Any> {
+                                put("rank", index + 1)
+                                put("username", document.data["username"] as? String ?: "user_${document.id.take(8)}")
+                                put("totalCoins", totalCoins)
+                                put("miningPower", (document.data["miningPower"] as? Number)?.toDouble() ?: 0.0)
+                                put("currentStreak", (document.data["currentStreak"] as? Number)?.toInt() ?: 0)
+                                put("totalReferrals", (document.data["totalReferrals"] as? Number)?.toInt() ?: 0)
+                            }
+                        }
+                        return@withContext Result.success(fallbackEntries)
+                    } catch (e2: Exception) {
+                        Log.e("Leaderboard", "Fallback fetch also failed", e2)
+                    }
+                }
+                Result.failure(e)
+            } catch (e: Exception) {
+                Log.e("Leaderboard", "Unexpected error fetching leaderboard", e)
                 Result.failure(e)
             }
         }

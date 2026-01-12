@@ -330,22 +330,25 @@ open class UserRepository @Inject constructor(
                 
                 // Update referrer's profile with referral count and fixed reward
                 val currentTotalReferrals = (referrerData["totalReferrals"] as? Number)?.toInt() ?: 0
-                val currentTaskReward = (referrerData["taskReward"] as? Number)?.toDouble() ?: 0.0
+                val currentReferrerReferralReward = (referrerData["referralReward"] as? Number)?.toDouble() ?: 0.0
+                val currentReferrerMiningReward = (referrerData["miningReward"] as? Number)?.toDouble() ?: 0.0
+                val currentReferrerTaskReward = (referrerData["taskReward"] as? Number)?.toDouble() ?: 0.0
+                val currentReferrerTotalCoins = (referrerData["totalCoins"] as? Number)?.toDouble() 
+                    ?: (currentReferrerReferralReward + currentReferrerMiningReward + currentReferrerTaskReward)
                 
                 // Check if referrer has reached max referrals (50)
                 if (currentTotalReferrals >= 50) {
                     return@withContext Result.failure(Exception("This referral code has reached the maximum number of referrals"))
                 }
                 
-                // Update referrer's profile - give fixed 2 EKH reward to referralReward
-                val currentReferrerReferralReward = (referrerData["referralReward"] as? Number)?.toDouble() ?: 0.0
-                
+                // Update referrer's profile - give fixed 2 EKH reward to referralReward and totalCoins
                 appwriteService.databases.updateDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     documentId = referrerDoc.id,
                     data = mapOf(
-                        "referralReward" to (currentReferrerReferralReward + 2.0), // Fixed 2 EKH reward for referrer
+                        "referralReward" to (currentReferrerReferralReward + 2.0), 
+                        "totalCoins" to (currentReferrerTotalCoins + 2.0),
                         "totalReferrals" to (currentTotalReferrals + 1),
                         "updatedAt" to java.time.Instant.now().toString()
                     )
@@ -353,6 +356,10 @@ open class UserRepository @Inject constructor(
                                     
                 // Update current user's profile with referredBy field and give them 2 EKH as referral reward
                 val currentUserReferralReward = (currentUserData["referralReward"] as? Number)?.toDouble() ?: 0.0
+                val currentUserMiningReward = (currentUserData["miningReward"] as? Number)?.toDouble() ?: 0.0
+                val currentUserTaskReward = (currentUserData["taskReward"] as? Number)?.toDouble() ?: 0.0
+                val currentUserTotalCoins = (currentUserData["totalCoins"] as? Number)?.toDouble() 
+                    ?: (currentUserReferralReward + currentUserMiningReward + currentUserTaskReward)
                                     
                 appwriteService.databases.updateDocument(
                     databaseId = AppwriteService.DATABASE_ID,
@@ -360,7 +367,8 @@ open class UserRepository @Inject constructor(
                     documentId = currentUserDoc.id,
                     data = mapOf(
                         "referredBy" to referrerUserId,
-                        "referralReward" to (currentUserReferralReward + 2.0), // 2 EKH for referee as referral reward
+                        "referralReward" to (currentUserReferralReward + 2.0),
+                        "totalCoins" to (currentUserTotalCoins + 2.0),
                         "updatedAt" to java.time.Instant.now().toString()
                     )
                 )
