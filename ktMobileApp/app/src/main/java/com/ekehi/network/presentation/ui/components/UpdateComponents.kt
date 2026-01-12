@@ -1,11 +1,19 @@
 package com.ekehi.network.presentation.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,6 +60,8 @@ fun UpdateDialog(
     onUpdate: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+
     Dialog(
         onDismissRequest = { if (!isMandatory && !isDownloading) onDismiss() },
         properties = DialogProperties(
@@ -61,7 +71,7 @@ fun UpdateDialog(
     ) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
+            color = Color(0xFF1E293B), // Explicit dark background
             tonalElevation = 8.dp,
             modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
@@ -73,30 +83,64 @@ fun UpdateDialog(
                     text = if (isMandatory) "Update Required" else "Update Available",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color(0xFFFFA000) // Vibrant orange
                 )
                 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
                     text = "Version ${config.latestVersion} is now available.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White // Explicit white for contrast
                 )
                 
                 if (config.releaseNotes.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "What's New:",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                    Text(
-                        text = config.releaseNotes,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.align(Alignment.Start).padding(top = 4.dp)
-                    )
+                    
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = Color(0x1AFFFFFF),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { isExpanded = !isExpanded },
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "What's New",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF4ECDC4) // Teal color
+                            )
+                            Icon(
+                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+
+                        if (isExpanded) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .heightIn(max = 200.dp)
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                Text(
+                                    text = config.releaseNotes,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.9f)
+                                )
+                            }
+                        }
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -110,14 +154,18 @@ fun UpdateDialog(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         LinearProgressIndicator(
                             progress = progress,
-                            modifier = Modifier.fillMaxWidth().height(8.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(12.dp) // Taller progress bar
+                                .clip(RoundedCornerShape(6.dp)),
+                            color = Color(0xFF10B981), // Bright green
+                            trackColor = Color(0x33FFFFFF)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Downloading... ${(progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.labelMedium
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White
                         )
                     }
                 } else {
@@ -127,16 +175,20 @@ fun UpdateDialog(
                     ) {
                         if (!isMandatory) {
                             TextButton(onClick = onDismiss) {
-                                Text("Later")
+                                Text("Later", color = Color.White.copy(alpha = 0.7f))
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                         }
                         
                         Button(
                             onClick = onUpdate,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFFA000),
+                                contentColor = Color.White
+                            )
                         ) {
-                            Text("Update Now")
+                            Text("Update Now", fontWeight = FontWeight.Bold)
                         }
                     }
                 }

@@ -49,11 +49,13 @@ class ApkDownloadManager @Inject constructor(
                         
                         when (status) {
                             DownloadManager.STATUS_SUCCESSFUL -> {
-                                val uriString = cursor.getString(
-                                    cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
-                                )
-                                trySend(DownloadProgress.Completed(uriString))
-                                installApk(uriString)
+                                val downloadUri = downloadManager.getUriForDownloadedFile(downloadId)
+                                if (downloadUri != null) {
+                                    trySend(DownloadProgress.Completed(downloadUri.toString()))
+                                    installApk(downloadUri)
+                                } else {
+                                    trySend(DownloadProgress.Failed("Could not get download URI"))
+                                }
                                 close()
                             }
                             DownloadManager.STATUS_FAILED -> {
@@ -121,21 +123,10 @@ class ApkDownloadManager @Inject constructor(
         }
     }
     
-    private fun installApk(uriString: String) {
+    private fun installApk(uri: Uri) {
         try {
-            val contentUri = if (uriString.startsWith("content://")) {
-                Uri.parse(uriString)
-            } else {
-                val file = File(Uri.parse(uriString).path!!)
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file
-                )
-            }
-            
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(contentUri, "application/vnd.android.package-archive")
+                setDataAndType(uri, "application/vnd.android.package-archive")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }

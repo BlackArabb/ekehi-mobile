@@ -7,6 +7,7 @@ import android.util.Log
 import com.ekehi.network.data.model.AppVersionConfig
 import com.ekehi.network.data.model.UpdateStatus
 import io.appwrite.Client
+import io.appwrite.Query
 import io.appwrite.services.Databases
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -73,51 +74,72 @@ class VersionCheckService @Inject constructor(
     suspend fun checkForUpdate(): UpdateStatus {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d("VersionCheck", "Checking for updates...")
+                Log.d("VersionCheck", "=== Starting Update Check ===")
+                val currentCode = getCurrentVersionCode()
+                Log.d("VersionCheck", "Current app version code: $currentCode")
                 
-                // Fetch version config from Appwrite
-                val document = databases.getDocument(
+                // Fetch the latest version config document from Appwrite
+                val response = databases.listDocuments(
                     databaseId = DATABASE_ID,
                     collectionId = VERSION_CONFIG_COLLECTION_ID,
-                    documentId = VERSION_CONFIG_DOCUMENT_ID
+                    queries = listOf(
+                        Query.orderDesc("$" + "createdAt"),
+                        Query.limit(1)
+                    )
                 )
+
+                if (response.documents.isEmpty()) {
+                    Log.w("VersionCheck", "No version config found in collection: $VERSION_CONFIG_COLLECTION_ID")
+                    return@withContext UpdateStatus.NoUpdateNeeded
+                }
+
+                val document = response.documents[0]
+                Log.d("VersionCheck", "Fetched document: ${document.id}")
+                Log.d("VersionCheck", "Document data: ${document.data}")
+                
+                // Safely extract values with defaults
+                val latestVerName = document.data["latestVersion"] as? String ?: "1.0.0"
+                val latestVerCode = (document.data["latestVersionCode"] as? Number)?.toInt() ?: 0
+                val minVerName = (document.data["minimumVersion"] as? String) ?: latestVerName
+                val minVerCode = ((document.data["minimumVersionCode"] as? Number)?.toInt()) ?: latestVerCode
+                val mandatory = (document.data["isMandatory"] as? Boolean) ?: false
+                val url = document.data["downloadUrl"] as? String ?: ""
+                val notes = (document.data["releaseNotes"] as? String) ?: ""
+                val date = (document.data["releaseDate"] as? String) ?: ""
                 
                 val config = AppVersionConfig(
-                    latestVersion = document.data["latestVersion"] as String,
-                    latestVersionCode = (document.data["latestVersionCode"] as Number).toInt(),
-                    minimumVersion = (document.data["minimumVersion"] as? String) ?: "1.0.0",
-                    minimumVersionCode = ((document.data["minimumVersionCode"] as? Number) ?: 0).toInt(),
-                    isMandatory = document.data["isMandatory"] as Boolean,
-                    downloadUrl = document.data["downloadUrl"] as String,
-                    releaseNotes = (document.data["releaseNotes"] as? String) ?: "",
-                    releaseDate = (document.data["releaseDate"] as? String) ?: ""
+                    latestVersion = latestVerName,
+                    latestVersionCode = latestVerCode,
+                    minimumVersion = minVerName,
+                    minimumVersionCode = minVerCode,
+                    isMandatory = mandatory,
+                    downloadUrl = url,
+                    releaseNotes = notes,
+                    releaseDate = date
                 )
                 
-                val currentVersionCode = getCurrentVersionCode()
-                
-                Log.d("VersionCheck", "Current version: $currentVersionCode")
-                Log.d("VersionCheck", "Latest version: ${config.latestVersionCode}")
-                Log.d("VersionCheck", "Minimum version: ${config.minimumVersionCode}")
+                Log.d("VersionCheck", "Target version: $latestVerCode (Mandatory: $mandatory)")
+                Log.d("VersionCheck", "Minimum required version: $minVerCode")
                 
                 when {
                     // Current version is below minimum - MANDATORY UPDATE
-                    currentVersionCode < config.minimumVersionCode -> {
-                        Log.d("VersionCheck", "Mandatory update required (below minimum)")
+                    currentCode < minVerCode -> {
+                        Log.d("VersionCheck", ">>> TRIGGERING MANDATORY UPDATE (Current $currentCode < Min $minVerCode)")
                         UpdateStatus.UpdateAvailable(config, isMandatory = true)
                     }
-                    // Update available
-                    currentVersionCode < config.latestVersionCode -> {
-                        Log.d("VersionCheck", "Update available. Mandatory: ${config.isMandatory}")
-                        UpdateStatus.UpdateAvailable(config, isMandatory = config.isMandatory)
+                    // Update available but not necessarily below minimum
+                    currentCode < latestVerCode -> {
+                        Log.d("VersionCheck", ">>> TRIGGERING UPDATE (Current $currentCode < Latest $latestVerCode). Mandatory: $mandatory")
+                        UpdateStatus.UpdateAvailable(config, isMandatory = mandatory)
                     }
                     // Up to date
                     else -> {
-                        Log.d("VersionCheck", "App is up to date")
+                        Log.d("VersionCheck", "App is up to date ($currentCode >= $latestVerCode)")
                         UpdateStatus.NoUpdateNeeded
                     }
                 }
             } catch (e: Exception) {
-                Log.e("VersionCheck", "Error checking for updates", e)
+                Log.e("VersionCheck", "CRITICAL ERROR during update check", e)
                 UpdateStatus.Error("Failed to check for updates: ${e.message}")
             }
         }
