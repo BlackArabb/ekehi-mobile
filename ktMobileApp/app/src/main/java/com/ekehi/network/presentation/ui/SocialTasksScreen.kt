@@ -1,11 +1,8 @@
 ﻿package com.ekehi.network.presentation.ui
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,8 +31,6 @@ import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
 import com.ekehi.network.presentation.viewmodel.VerificationState
 import com.ekehi.network.domain.model.Resource
-import com.facebook.login.LoginManager
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -101,171 +96,6 @@ fun SocialTasksScreen(
         }
     }
 
-    val youtubeSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        android.util.Log.d("SocialTasksScreen", "=== YouTube OAuth Result ===")
-        android.util.Log.d("SocialTasksScreen", "Result code: ${result.resultCode}")
-        android.util.Log.d("SocialTasksScreen", "RESULT_OK: ${Activity.RESULT_OK}")
-        android.util.Log.d("SocialTasksScreen", "RESULT_CANCELED: ${Activity.RESULT_CANCELED}")
-        android.util.Log.d("SocialTasksScreen", "Has data: ${result.data != null}")
-        
-        // Log all extras to debug
-        result.data?.extras?.keySet()?.forEach { key ->
-            android.util.Log.d("SocialTasksScreen", "Result data extras keys: $key")
-        }
-        
-        when (result.resultCode) {
-            Activity.RESULT_OK -> {
-                result.data?.let { data ->
-                    try {
-                        android.util.Log.d("SocialTasksScreen", "Processing sign-in result...")
-                        val task: com.google.android.gms.tasks.Task<com.google.android.gms.auth.api.signin.GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
-                        
-                        task.addOnSuccessListener { account ->
-                            android.util.Log.d("SocialTasksScreen", "Sign-in SUCCESS")
-                            android.util.Log.d("SocialTasksScreen", "Account email: ${account.email}")
-                            android.util.Log.d("SocialTasksScreen", "Has serverAuthCode: ${account.serverAuthCode != null}")
-                            android.util.Log.d("SocialTasksScreen", "Has idToken: ${account.idToken != null}")
-                            
-                            // Get the access token
-                            val accessToken = authManager.getYouTubeAccessToken(account)
-                            
-                            if (accessToken != null && accessToken.isNotEmpty()) {
-                                viewModel.setYouTubeAccessToken(accessToken)
-                                // Trigger the verification flow
-                                if (selectedTask != null) {
-                                    showVerificationDialog = true
-                                }
-                            } else {
-                                // Show error - couldn't get access token
-                                android.util.Log.e("SocialTasksScreen", "Failed to get YouTube access token")
-                                // TODO: Show error to user
-                            }
-                        }.addOnFailureListener { exception ->
-                            android.util.Log.e("SocialTasksScreen", "Sign-in FAILED", exception)
-                            // TODO: Show error to user
-                        }
-
-                    } catch (e: Exception) {
-                        android.util.Log.e("SocialTasksScreen", "Error processing sign-in: ${e.message}", e)
-                        android.widget.Toast.makeText(
-                            context,
-                            "Error: ${e.message}",
-                            android.widget.Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } ?: run {
-                    android.util.Log.e("SocialTasksScreen", "Result data is NULL")
-                    android.widget.Toast.makeText(
-                        context,
-                        "No data received from Google",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-            Activity.RESULT_CANCELED -> {
-                android.util.Log.w("SocialTasksScreen", "User cancelled sign-in")
-                
-                // Try to get the error details from the result
-                result.data?.let { data ->
-                    try {
-                        val task: com.google.android.gms.tasks.Task<com.google.android.gms.auth.api.signin.GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
-                        task.addOnFailureListener { e ->
-                            android.util.Log.e("SocialTasksScreen", "Sign-in error class: ${e.javaClass.name}")
-                            android.util.Log.e("SocialTasksScreen", "Sign-in error message: ${e.message}")
-                            
-                            // Check for specific Google Sign-In errors
-                            if (e is com.google.android.gms.common.api.ApiException) {
-                                val statusCode = e.statusCode
-                                android.util.Log.e("SocialTasksScreen", "ApiException - Status code: $statusCode")
-                                android.util.Log.e("SocialTasksScreen", "ApiException - Status message: ${e.statusMessage}")
-                                
-                                val errorMessage = when (statusCode) {
-                                    10 -> // DEVELOPER_ERROR
-                                        "Configuration error! Check:\n1. OAuth Client ID in BuildConfig\n2. SHA-1 fingerprint in Google Cloud Console\n3. Package name matches"
-                                    7 -> // NETWORK_ERROR
-                                        "Network error. Check your internet connection"
-                                    12501 -> // SIGN_IN_CANCELLED
-                                        "Sign-in was cancelled"
-                                    12500 -> // SIGN_IN_FAILED
-                                        "Sign-in failed. Please try again"
-                                    else -> "Error code: $statusCode${if (e.statusMessage != null) " - ${e.statusMessage}" else ""}"
-                                }
-                                
-                                android.util.Log.e("SocialTasksScreen", "Showing error: $errorMessage")
-                                android.widget.Toast.makeText(
-                                    context,
-                                    errorMessage,
-                                    android.widget.Toast.LENGTH_LONG
-                                ).show()
-                            } else {
-                                android.util.Log.e("SocialTasksScreen", "Not an ApiException: ${e.javaClass.name}")
-                                android.widget.Toast.makeText(
-                                    context,
-                                    "Sign-in error: ${e.message}",
-                                    android.widget.Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        }.addOnCompleteListener {
-                            android.util.Log.d("SocialTasksScreen", "Task completion listener called")
-                        }
-                    } catch (e: Exception) {
-                        android.util.Log.e("SocialTasksScreen", "Exception parsing cancellation: ${e.message}", e)
-                        e.printStackTrace()
-                        android.widget.Toast.makeText(
-                            context,
-                            "Sign-in error: ${e.message}",
-                            android.widget.Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } ?: run {
-                    android.util.Log.w("SocialTasksScreen", "No data in cancelled result")
-                    android.widget.Toast.makeText(
-                        context,
-                        "Sign-in cancelled",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-            else -> {
-                android.util.Log.e("SocialTasksScreen", "Unknown result code: ${result.resultCode}")
-                android.widget.Toast.makeText(
-                    context,
-                    "Unexpected result: ${result.resultCode}",
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-        android.util.Log.d("SocialTasksScreen", "=== End YouTube OAuth Result ===")
-    }
-    
-    val facebookLoginLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        try {
-            android.util.Log.d("SocialTasksScreen", "=== Facebook OAuth Result ===")
-            android.util.Log.d("SocialTasksScreen", "Result code: ${result.resultCode}")
-            android.util.Log.d("SocialTasksScreen", "Has data: ${result.data != null}")
-            
-            authManager.handleFacebookResult(
-                requestCode = result.resultCode,
-                resultCode = Activity.RESULT_OK,
-                data = result.data
-            )
-            
-            android.util.Log.d("SocialTasksScreen", "Facebook result handled")
-            android.util.Log.d("SocialTasksScreen", "=== End Facebook OAuth Result ===")
-        } catch (e: Exception) {
-            android.util.Log.e("SocialTasksScreen", "Facebook login error in launcher: ${e.message}", e)
-            android.widget.Toast.makeText(
-                context,
-                "Facebook error: ${e.message}",
-                android.widget.Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-    
     LaunchedEffect(Unit) {
         viewModel.loadSocialTasks()
         viewModel.loadUserSocialTasks(userId)
@@ -753,7 +583,6 @@ fun SocialTasksScreen(
                 task = selectedTask!!,
                 viewModel = viewModel,
                 authManager = authManager,
-                youtubeSignInLauncher = youtubeSignInLauncher,
                 onDismiss = { 
                     selectedTask = null
                     showVerificationDialog = false
@@ -1551,7 +1380,6 @@ fun TaskVerificationDialog(
     task: SocialTaskItem,
     viewModel: SocialTasksViewModel,
     authManager: SocialAuthManager,
-    youtubeSignInLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
     onDismiss: () -> Unit,
     onSubmit: (Map<String, Any>) -> Unit
 ) {
@@ -1559,7 +1387,6 @@ fun TaskVerificationDialog(
     var telegramUserId by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var proofUrl by remember { mutableStateOf("") }
-    var facebookAccessToken by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     
@@ -1618,58 +1445,6 @@ fun TaskVerificationDialog(
                             TelegramVerificationUI(
                                 telegramUserId = telegramUserId,
                                 onTelegramUserIdChange = { telegramUserId = it }
-                            )
-                        }
-                        
-                        task.platform.lowercase() == "youtube" -> {
-                            val lastSignedInAccount = authManager.getLastSignedInGoogleAccount()
-                            val hasYouTubePermissions = if (lastSignedInAccount != null) {
-                                authManager.checkYouTubePermissions()
-                            } else {
-                                false
-                            }
-                            
-                            YouTubeVerificationUI(
-                                taskType = task.taskType,
-                                actionUrl = task.link,
-                                isAlreadySignedIn = hasYouTubePermissions,
-                                onConnectYouTube = {
-                                    try {
-                                        android.util.Log.d("SocialTasksScreen", "Launching YouTube sign-in...")
-                                        val signInClient = authManager.getYouTubeSignInClient()
-                                        android.util.Log.d("SocialTasksScreen", "Got sign-in client")
-                                        val signInIntent = signInClient.signInIntent
-                                        android.util.Log.d("SocialTasksScreen", "Got sign-in intent")
-                                        youtubeSignInLauncher.launch(signInIntent)
-                                        android.util.Log.d("SocialTasksScreen", "Launched sign-in intent")
-                                    } catch (e: Exception) {
-                                        android.util.Log.e("SocialTasksScreen", "Error launching YouTube sign-in: ${e.message}", e)
-                                        android.widget.Toast.makeText(
-                                            context,
-                                            "Error launching sign-in: ${e.message}",
-                                            android.widget.Toast.LENGTH_LONG
-                                        ).show()
-                                    }
-                                }
-                            )
-                        }
-                        
-                        task.platform.lowercase() == "facebook" -> {
-                            FacebookVerificationUI(
-                                actionUrl = task.link,
-                                onConnectFacebook = {
-                                    authManager.loginWithFacebook(
-                                        loginManager = LoginManager.getInstance(),
-                                        onSuccess = { accessToken ->
-                                            facebookAccessToken = accessToken
-                                        },
-                                        onError = { error -> }
-                                    )
-                                    LoginManager.getInstance().logInWithReadPermissions(
-                                        context as Activity,
-                                        listOf("user_likes")
-                                    )
-                                }
                             )
                         }
                         
@@ -1750,25 +1525,17 @@ fun TaskVerificationDialog(
                             proofUrl = proofUrl
                         )
                         
-                        val enhancedProofData = if (task.platform.lowercase() == "facebook" && facebookAccessToken != null) {
-                            proofData.toMutableMap().apply {
-                                put("facebook_access_token", facebookAccessToken!!)
-                            }
-                        } else {
-                            proofData
-                        }
-                        
                         if (task.platform.lowercase() == "telegram" && !isValidTelegramUserId(telegramUserId)) {
                             errorMessage = getTelegramUserIdErrorMessage(telegramUserId)
                             if (errorMessage.isEmpty()) {
                                 errorMessage = "Please enter a valid Telegram User ID"
                             }
                             isLoading = false
-                        } else if (enhancedProofData.isEmpty()) {
+                        } else if (proofData.isEmpty()) {
                             errorMessage = "Please provide required information"
                             isLoading = false
                         } else {
-                            onSubmit(enhancedProofData)
+                            onSubmit(proofData)
                         }
                     },
                     enabled = !isLoading && isReadyToSubmit(
@@ -2352,7 +2119,6 @@ fun getTaskInstructions(platform: String, taskType: String): String {
 fun isReadyToSubmit(platform: String, telegramUserId: String, username: String, proofUrl: String): Boolean {
     return when (platform.lowercase()) {
         "telegram" -> telegramUserId.isNotEmpty() && telegramUserId.all { it.isDigit() } && telegramUserId.length >= 8
-        "youtube", "facebook" -> true
         else -> username.isNotEmpty() || proofUrl.isNotEmpty()
     }
 }
@@ -2387,12 +2153,6 @@ fun buildProofData(platform: String, telegramUserId: String, username: String, p
                     put("telegram_user_id", userId)
                     put("user_id", userId) // Alternative key some backends expect
                 }
-            }
-            "youtube" -> {
-                put("requires_youtube_oauth", true)
-            }
-            "facebook" -> {
-                put("requires_facebook_oauth", true)
             }
             else -> {
                 if (username.isNotEmpty()) put("username", username)

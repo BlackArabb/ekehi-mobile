@@ -21,9 +21,7 @@ class SocialVerificationService @Inject constructor(
         
         return when (task.platform.lowercase()) {
             "telegram" -> verifyTelegramTask(task, proofData)
-            "youtube" -> verifyYouTubeTask(task, proofData)
-            "facebook" -> verifyFacebookTask(task, proofData)
-            "twitter", "x" -> verifyManualTask(task, proofData)
+            "youtube", "facebook", "twitter", "x" -> verifyManualTask(task, proofData)
             else -> verifyManualTask(task, proofData)
         }
     }
