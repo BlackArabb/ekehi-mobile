@@ -5,6 +5,9 @@
     <!-- Internet permission for Appwrite -->
     <uses-permission android:name="android.permission.INTERNET" />
     
+    <!-- Required for custom app updates -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    
     <!-- Network state permission -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     
@@ -165,6 +168,17 @@
 <meta-data 
     android:name="com.startapp.sdk.APPLICATION_ID" 
     android:value="210617452" />
+    
+        <!-- FileProvider for APK installation -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     
         <!-- Enable splash ads (enabled by default) -->
         <!-- <meta-data android:name="com.startapp.sdk.SPLASH_ENABLED" android:value="true" /> -->

@@ -88,7 +88,7 @@ open class UserRepository @Inject constructor(
                         "country" to country,
                         "phoneNumber" to phoneNumber,
                         "taskReward" to 0.0,
-                        "miningReward" to 0,
+                        "miningReward" to 0L,
                         "referralReward" to 0.0,
                         "autoMiningRate" to 0.0,
                         "todayEarnings" to 0.0,
@@ -247,7 +247,7 @@ open class UserRepository @Inject constructor(
                         referredUserId = referredUserId,
                         referredUserName = referredUserName,
                         referralCode = data["referralCode"] as? String ?: "",
-                        rewardAmount = 0.5, // Fixed reward amount
+                        rewardAmount = 2.0, // Fixed reward amount
                         rewardClaimed = true, // For now, marking as claimed
                         createdAt = parseTimestamp(data["createdAt"] as? String ?: ""),
                         claimedAt = parseTimestamp(data["updatedAt"] as? String ?: "")
@@ -389,7 +389,7 @@ open class UserRepository @Inject constructor(
                 is String -> referralCodeValue
                 else -> ""
             },
-            rewardAmount = (data["rewardAmount"] as? Number)?.toDouble() ?: 0.5,
+            rewardAmount = (data["rewardAmount"] as? Number)?.toDouble() ?: 2.0,
             rewardClaimed = data["rewardClaimed"] as? Boolean ?: false,
             createdAt = (data["createdAt"] as? String)?.let { parseTimestamp(it) },
             claimedAt = (data["claimedAt"] as? String)?.let { parseTimestamp(it) }

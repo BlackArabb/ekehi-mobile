@@ -142,7 +142,7 @@ open class MiningRepository @Inject constructor(
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         documentId = profile.id,
                         data = mapOf(
-                                "miningReward" to (currentMiningReward + reward),
+                                "miningReward" to (currentMiningReward + reward).toLong(),
                                 "todayEarnings" to (todayEarnings + reward),
                                 "updatedAt" to currentDate
                         )

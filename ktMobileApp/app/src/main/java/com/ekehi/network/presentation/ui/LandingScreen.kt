@@ -100,7 +100,7 @@ fun LandingScreen(
             // Secondary Sign In Text Button
             Text(
                 text = "I already have an account",
-                color = Color(0xFF3b82f6),
+                color = Color(0xB3FFFFFF),
                 fontSize = 16.sp,
                 modifier = Modifier
                     .clickable { onNavigateToLogin() }

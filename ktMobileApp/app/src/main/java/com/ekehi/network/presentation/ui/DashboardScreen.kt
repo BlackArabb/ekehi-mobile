@@ -206,7 +206,7 @@ fun DashboardAdBonusButton() {
                     tint = Color.White
                 )
                 Text(
-                    text = "Watch Ad for +0.5 EKH",
+                    text = "Watch Ad for +2 EKH",
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,

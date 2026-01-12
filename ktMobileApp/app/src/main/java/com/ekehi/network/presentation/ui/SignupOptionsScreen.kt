@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
+import com.ekehi.network.presentation.ui.GoogleSignInButton
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.R
 
@@ -146,43 +147,19 @@ fun SignupOptionsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Google Sign Up Button (Primary)
-            Button(
+            GoogleSignInButton(
                 onClick = {
                     Log.d("SignupOptionsScreen", "Google signup clicked")
-                    // Get the current activity to initiate Google OAuth
                     val activity = context as? androidx.activity.ComponentActivity
                     if (activity != null) {
-                        // Initiate Google OAuth for registration
                         oAuthViewModel.initiateGoogleOAuthForRegistration(activity)
                     } else {
                         Log.e("SignupOptionsScreen", "Could not get activity context for OAuth")
                     }
                 },
-                enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4285F4), // Google blue color
-                    disabledContainerColor = Color(0x33FFFFFF)
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else {
-                    Text(
-                        text = "Continue with Google",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
+                isLoading = isLoading,
+                enabled = !isLoading
+            )
 
             // Divider with "OR"
             Row(
@@ -236,7 +213,7 @@ fun SignupOptionsScreen(
             // Login Link (part of the column)
             Text(
                 text = "Already have an account? Sign in",
-                color = Color(0xFF3b82f6),
+                color = Color(0xB3FFFFFF),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier

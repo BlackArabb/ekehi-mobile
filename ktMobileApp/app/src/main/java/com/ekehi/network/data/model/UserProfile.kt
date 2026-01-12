@@ -4,6 +4,7 @@ data class UserProfile(
         val id: String,
         val userId: String, // This should remain as String since it's the first element of the array
         val username: String? = null,
+        val name: String? = null,
         val email: String? = null,
         val phoneNumber: String = "",
         val country: String = "",

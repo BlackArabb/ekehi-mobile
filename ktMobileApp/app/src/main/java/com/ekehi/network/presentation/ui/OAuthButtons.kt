@@ -4,16 +4,17 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.ekehi.network.R
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
@@ -118,49 +120,17 @@ fun OAuthButtons(
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Google Sign In Button
-        Button(
-                onClick = {
-                    activity?.let {
-                        viewModel.initiateGoogleOAuth(it)
-                    } ?: run {
-                        errorMessage = "Activity not available"
-                    }
-                },
-                modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4285F4) // Google blue color
-                ),
-                enabled = !isLoading,
-                shape = RoundedCornerShape(12.dp)
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = Color.White
-                )
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Google",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (isRegistration) "Continue with Google" else "Continue with Google",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+        GoogleSignInButton(
+            onClick = {
+                activity?.let {
+                    viewModel.initiateGoogleOAuth(it)
+                } ?: run {
+                    errorMessage = "Activity not available"
                 }
-            }
-        }
+            },
+            isLoading = isLoading,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         
         errorMessage?.let {
             Text(
@@ -168,6 +138,62 @@ fun OAuthButtons(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 16.dp)
             )
+        }
+    }
+}
+
+@Composable
+fun GoogleSignInButton(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    isLoading: Boolean = false,
+    text: String = "Continue with Google",
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(44.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Color(0xFF1f1f1f)
+        ),
+        border = BorderStroke(1.dp, Color(0xFF747775)),
+        enabled = enabled,
+        shape = RoundedCornerShape(24.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 1.dp,
+            pressedElevation = 2.dp,
+            focusedElevation = 1.dp,
+            hoveredElevation = 1.dp
+        )
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = Color(0xFF4285F4),
+                strokeWidth = 2.dp
+            )
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = "Google Logo",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = text,
+                    color = Color(0xFF1f1f1f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }

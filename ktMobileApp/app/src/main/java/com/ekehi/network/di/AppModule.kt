@@ -390,6 +390,23 @@ object AppModule {
     
     @Provides
     @Singleton
+    fun provideVersionCheckService(
+        @ApplicationContext context: Context,
+        client: Client
+    ): VersionCheckService {
+        return VersionCheckService(context, client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideApkDownloadManager(
+        @ApplicationContext context: Context
+    ): ApkDownloadManager {
+        return ApkDownloadManager(context)
+    }
+
+    @Provides
+    @Singleton
     fun provideLoginViewModel(
         authUseCase: AuthUseCase,
         userUseCase: UserUseCase,

@@ -24,19 +24,27 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ekehi.network.domain.model.Resource
-import com.ekehi.network.presentation.viewmodel.SecondaryInfoViewModel
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import com.ekehi.network.domain.model.Country
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.R
+import com.ekehi.network.domain.model.CountryData
+import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.presentation.viewmodel.SecondaryInfoViewModel
+import com.ekehi.network.presentation.ui.components.CountryDropdownField
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SecondaryInfoScreen(
     viewModel: SecondaryInfoViewModel = hiltViewModel(),
     onSecondaryInfoSuccess: () -> Unit
 ) {
-    var phoneNumber by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("") }
+    val phoneNumber by viewModel.phoneNumber.collectAsState()
+    val selectedCountry by viewModel.selectedCountry.collectAsState()
+    val countries by viewModel.countries.collectAsState()
     
     // Collect state properly
     val secondaryInfoState by viewModel.secondaryInfoState.collectAsState()
@@ -136,14 +144,55 @@ fun SecondaryInfoScreen(
                         text = "Please provide additional information to complete your registration",
                         color = Color(0xB3FFFFFF),
                         fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 32.dp)
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    
+                    // Warning about phone number
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0x33ffa000)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "Warning",
+                                tint = Color(0xFFffa000),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Important: Your phone number is the only way to recover your password. Please ensure it is active and reachable.",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    // Country Selection Dropdown
+                    CountryDropdownField(
+                        countries = countries,
+                        selectedCountry = selectedCountry,
+                        onCountrySelected = { viewModel.onCountrySelected(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
                     )
 
                     // Phone Number Input
                     OutlinedTextField(
                         value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
+                        onValueChange = { viewModel.onPhoneNumberChanged(it) },
                         label = { Text("Phone Number", color = Color(0xB3FFFFFF)) },
+                        placeholder = { Text("e.g. +234 800 000 0000", color = Color(0x66FFFFFF)) },
                         singleLine = true,
                         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
                         modifier = Modifier
@@ -155,25 +204,9 @@ fun SecondaryInfoScreen(
                             cursorColor = Color(0xFFffa000),
                             focusedLabelColor = Color(0xFFffa000),
                             unfocusedLabelColor = Color(0xB3FFFFFF)
-                        )
-                    )
-
-                    // Country Input
-                    OutlinedTextField(
-                        value = country,
-                        onValueChange = { country = it },
-                        label = { Text("Country", color = Color(0xB3FFFFFF)) },
-                        singleLine = true,
-                        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFffa000),
-                            unfocusedBorderColor = Color(0x33FFFFFF),
-                            cursorColor = Color(0xFFffa000),
-                            focusedLabelColor = Color(0xFFffa000),
-                            unfocusedLabelColor = Color(0xB3FFFFFF)
+                        ),
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone
                         )
                     )
                 }
@@ -192,7 +225,7 @@ fun SecondaryInfoScreen(
                 onClick = {
                     Log.d("SecondaryInfoScreen", "=== SUBMIT BUTTON CLICKED ===")
                     Log.d("SecondaryInfoScreen", "Phone Number: '$phoneNumber'")
-                    Log.d("SecondaryInfoScreen", "Country: '$country'")
+                    Log.d("SecondaryInfoScreen", "Country: '${selectedCountry?.name}'")
                     Log.d("SecondaryInfoScreen", "isLoading: $isLoading")
                     
                     // Clear focus and hide keyboard
@@ -200,19 +233,19 @@ fun SecondaryInfoScreen(
                     keyboardController?.hide()
                     
                     val trimmedPhoneNumber = phoneNumber.trim()
-                    val trimmedCountry = country.trim()
+                    val countryName = selectedCountry?.name ?: ""
                     
                     // Validate inputs
                     val isValid = trimmedPhoneNumber.isNotEmpty() && 
-                                trimmedCountry.isNotEmpty()
+                                countryName.isNotEmpty()
                     
                     if (isValid) {
                         Log.d("SecondaryInfoScreen", "All inputs valid, proceeding with secondary info submission...")
-                        viewModel.submitSecondaryInfo(trimmedPhoneNumber, trimmedCountry)
+                        viewModel.submitSecondaryInfo(trimmedPhoneNumber, countryName)
                     } else {
                         Log.d("SecondaryInfoScreen", "Validation failed:")
                         if (trimmedPhoneNumber.isEmpty()) Log.d("SecondaryInfoScreen", "- Phone number is empty")
-                        if (trimmedCountry.isEmpty()) Log.d("SecondaryInfoScreen", "- Country is empty")
+                        if (countryName.isEmpty()) Log.d("SecondaryInfoScreen", "- Country is empty")
                     }
                 },
                 enabled = !isLoading,

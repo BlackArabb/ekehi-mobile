@@ -226,27 +226,36 @@ fun ProfileHeader(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // User Avatar
+            // User Total Balance in Glassmorphism Container
             Box(
                 modifier = Modifier
-                    .size(90.dp)
+                    .fillMaxWidth()
+                    .height(100.dp)
                     .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(0xFF8b5cf6),
-                                Color(0xFFa855f7)
-                            )
-                        ),
-                        shape = CircleShape
-                    ),
+                        color = Color(0x33FFFFFF), // 20% white for glass effect
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .clip(RoundedCornerShape(20.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "User Avatar",
-                    tint = Color.White,
-                    modifier = Modifier.size(45.dp)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "TOTAL BALANCE",
+                        color = Color(0xB3FFFFFF),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
+                        color = Color(0xFFffa000),
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -255,9 +264,11 @@ fun ProfileHeader(
             Text(
                 text = userProfile?.username ?: "User Name",
                 color = Color.White,
-                fontSize = 18.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -277,13 +288,13 @@ fun ProfileHeader(
                 Icon(
                     imageVector = Icons.Default.Verified,
                     contentDescription = "Verified",
-                    tint = Color(0xFF3b82f6),
+                    tint = Color(0xFF10b981),
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Verified Account",
-                    color = Color(0xFF3b82f6),
+                    color = Color(0xFF10b981),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 )

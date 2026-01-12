@@ -302,7 +302,7 @@ fun ReferralItem(referral: Referral) {
                         )
                     }
                     Text(
-                        text = "+0.5 EKH",
+                        text = "+2 EKH",
                         color = Color(0xFF10b981),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold

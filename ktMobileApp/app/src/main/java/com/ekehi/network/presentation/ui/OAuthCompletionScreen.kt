@@ -27,21 +27,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.ekehi.network.R
+import com.ekehi.network.domain.model.Country
+import com.ekehi.network.domain.model.CountryData
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.SecondaryInfoViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
-import com.ekehi.network.ui.theme.EkehiMobileTheme
-import com.ekehi.network.R
+import com.ekehi.network.presentation.ui.components.CountryDropdownField
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun OAuthCompletionScreen(
     secondaryInfoViewModel: SecondaryInfoViewModel = hiltViewModel(),
     oAuthViewModel: OAuthViewModel = hiltViewModel(),
     onComplete: () -> Unit = {}
 ) {
-    var phoneNumber by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("")}
+    val phoneNumber by secondaryInfoViewModel.phoneNumber.collectAsState()
+    val selectedCountry by secondaryInfoViewModel.selectedCountry.collectAsState()
+    val countries by secondaryInfoViewModel.countries.collectAsState()
     
     // Collect state properly
     val secondaryInfoState by secondaryInfoViewModel.secondaryInfoState.collectAsState()
@@ -144,20 +148,55 @@ fun OAuthCompletionScreen(
                         text = "We need a few more details to get you started",
                         color = Color(0xB3FFFFFF),
                         fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 32.dp)
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Phone Number Input with validation
+                    // Warning about phone number
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0x33ffa000)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "Warning",
+                                tint = Color(0xFFffa000),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Important: Your phone number is the only way to recover your password. Please ensure it is active and reachable.",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    // Country Selection Dropdown
+                    CountryDropdownField(
+                        countries = countries,
+                        selectedCountry = selectedCountry,
+                        onCountrySelected = { secondaryInfoViewModel.onCountrySelected(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
+
+                    // Phone Number Input
                     OutlinedTextField(
                         value = phoneNumber,
-                        onValueChange = { 
-                            // Only allow digits, plus sign, and spaces
-                            if (it.all { char -> char.isDigit() || char == '+' || char == ' ' }) {
-                                phoneNumber = it
-                            }
-                        },
+                        onValueChange = { secondaryInfoViewModel.onPhoneNumberChanged(it) },
                         label = { Text("Phone Number", color = Color(0xB3FFFFFF)) },
-                        placeholder = { Text("+234 xxx xxx xxxx", color = Color(0x66FFFFFF)) },
+                        placeholder = { Text("e.g. +234 800 000 0000", color = Color(0x66FFFFFF)) },
                         singleLine = true,
                         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
                         modifier = Modifier
@@ -169,16 +208,10 @@ fun OAuthCompletionScreen(
                             cursorColor = Color(0xFFffa000),
                             focusedLabelColor = Color(0xFFffa000),
                             unfocusedLabelColor = Color(0xB3FFFFFF)
+                        ),
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone
                         )
-                    )
-
-                    // Country Dropdown
-                    CountryDropdownField(
-                        selectedCountry = country,
-                        onCountrySelected = { country = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
                     )
                 }
             }
@@ -196,7 +229,7 @@ fun OAuthCompletionScreen(
                 onClick = {
                     Log.d("OAuthCompletionScreen", "=== SUBMIT BUTTON CLICKED ===")
                     Log.d("OAuthCompletionScreen", "Phone Number: '$phoneNumber'")
-                    Log.d("OAuthCompletionScreen", "Country: '$country'")
+                    Log.d("OAuthCompletionScreen", "Country: '${selectedCountry?.name}'")
                     Log.d("OAuthCompletionScreen", "isLoading: $isLoading")
                     
                     // Clear focus and hide keyboard
@@ -204,19 +237,19 @@ fun OAuthCompletionScreen(
                     keyboardController?.hide()
                     
                     val trimmedPhoneNumber = phoneNumber.trim()
-                    val trimmedCountry = country.trim()
+                    val countryName = selectedCountry?.name ?: ""
                     
                     // Validate inputs
                     val isValid = trimmedPhoneNumber.isNotEmpty() && 
-                                trimmedCountry.isNotEmpty()
+                                countryName.isNotEmpty()
                     
                     if (isValid) {
                         Log.d("OAuthCompletionScreen", "All inputs valid, proceeding with secondary info submission...")
-                        secondaryInfoViewModel.submitSecondaryInfo(trimmedPhoneNumber, trimmedCountry)
+                        secondaryInfoViewModel.submitSecondaryInfo(trimmedPhoneNumber, countryName)
                     } else {
                         Log.d("OAuthCompletionScreen", "Validation failed:")
                         if (trimmedPhoneNumber.isEmpty()) Log.d("OAuthCompletionScreen", "- Phone number is empty")
-                        if (trimmedCountry.isEmpty()) Log.d("OAuthCompletionScreen", "- Country is empty")
+                        if (countryName.isEmpty()) Log.d("OAuthCompletionScreen", "- Country is empty")
                     }
                 },
                 enabled = !isLoading,
@@ -255,80 +288,6 @@ fun OAuthCompletionScreen(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 80.dp)
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CountryDropdownField(
-    selectedCountry: String,
-    onCountrySelected: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var expanded by remember { mutableStateOf(false) }
-    
-    // List of countries
-    val countries = listOf(
-        "Nigeria",
-        "Ghana",
-        "Kenya",
-        "South Africa",
-        "Egypt",
-        "United States",
-        "United Kingdom",
-        "Canada",
-        "Australia",
-        "Germany",
-        "France",
-        "India",
-        "China",
-        "Japan",
-        "Brazil"
-    ).sorted()
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it },
-        modifier = modifier
-    ) {
-        OutlinedTextField(
-            value = selectedCountry,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Country", color = Color(0xB3FFFFFF)) },
-            singleLine = true,
-            textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFffa000),
-                unfocusedBorderColor = Color(0x33FFFFFF),
-                cursorColor = Color(0xFFffa000),
-                focusedLabelColor = Color(0xFFffa000),
-                unfocusedLabelColor = Color(0xB3FFFFFF)
-            ),
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
-                )
-            }
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            countries.forEach { country ->
-                DropdownMenuItem(
-                    text = { Text(country, color = Color.White) },
-                    onClick = {
-                        onCountrySelected(country)
-                        expanded = false
-                    }
-                )
-            }
         }
     }
 }

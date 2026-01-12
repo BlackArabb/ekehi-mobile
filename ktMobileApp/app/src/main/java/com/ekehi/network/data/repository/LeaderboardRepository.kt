@@ -19,7 +19,7 @@ class LeaderboardRepository @Inject constructor(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         queries = listOf(
-                                Query.orderDesc("taskReward"),
+                                Query.orderDesc("totalCoins"),
                                 Query.limit(50)
                         )
                 )
@@ -29,9 +29,7 @@ class LeaderboardRepository @Inject constructor(
                     buildMap<String, Any> {
                         put("rank", index + 1)
                         put("username", document.data["username"] as? String ?: "user_${document.id.take(8)}")
-                        put("totalCoins", ((document.data["taskReward"] as? Number)?.toDouble() ?: 0.0) + 
-                               ((document.data["miningReward"] as? Number)?.toDouble() ?: 0.0) + 
-                               ((document.data["referralReward"] as? Number)?.toDouble() ?: 0.0))
+                        put("totalCoins", (document.data["totalCoins"] as? Number)?.toDouble() ?: 0.0)
                         put("miningPower", 0.0)
                         put("currentStreak", (document.data["currentStreak"] as? Number)?.toInt() ?: 0)
                         put("totalReferrals", (document.data["totalReferrals"] as? Number)?.toInt() ?: 0)
@@ -63,16 +61,14 @@ class LeaderboardRepository @Inject constructor(
                 }
                 
                 val userDoc = userResponse.documents[0]
-                val userTotalCoins = ((userDoc.data["taskReward"] as? Number)?.toDouble() ?: 0.0) + 
-                               ((userDoc.data["miningReward"] as? Number)?.toDouble() ?: 0.0) + 
-                               ((userDoc.data["referralReward"] as? Number)?.toDouble() ?: 0.0)
+                val userTotalCoins = (userDoc.data["totalCoins"] as? Number)?.toDouble() ?: 0.0
 
                 // Then count how many users have more coins than this user
                 val response = appwriteService.databases.listDocuments(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         queries = listOf(
-                                Query.greaterThan("taskReward", (userTotalCoins / 3)), // Approximate comparison
+                                Query.greaterThan("totalCoins", userTotalCoins),
                                 Query.limit(1000) // Limit to reasonable number
                         )
                 )
@@ -96,8 +92,8 @@ class LeaderboardRepository @Inject constructor(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         queries = listOf(
-                                Query.greaterThan("taskReward", 0.0),
-                                Query.orderDesc("taskReward"),
+                                Query.greaterThan("totalCoins", 0.0),
+                                Query.orderDesc("totalCoins"),
                                 Query.limit(50)
                         )
                 )
@@ -107,9 +103,7 @@ class LeaderboardRepository @Inject constructor(
                     buildMap<String, Any> {
                         put("rank", index + 1)
                         put("username", document.data["username"] as? String ?: "user_${document.id.take(8)}")
-                        put("totalCoins", ((document.data["taskReward"] as? Number)?.toDouble() ?: 0.0) + 
-                               ((document.data["miningReward"] as? Number)?.toDouble() ?: 0.0) + 
-                               ((document.data["referralReward"] as? Number)?.toDouble() ?: 0.0))
+                        put("totalCoins", (document.data["totalCoins"] as? Number)?.toDouble() ?: 0.0)
                         put("miningPower", 0.0)
                         put("currentStreak", (document.data["currentStreak"] as? Number)?.toInt() ?: 0)
                         put("totalReferrals", (document.data["totalReferrals"] as? Number)?.toInt() ?: 0)

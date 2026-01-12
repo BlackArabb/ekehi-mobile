@@ -35,7 +35,11 @@ import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.R
 
-@OptIn(ExperimentalComposeUiApi::class)
+import androidx.compose.material3.ExperimentalMaterial3Api
+import com.ekehi.network.presentation.ui.components.CountryDropdownField
+import com.ekehi.network.domain.model.Country
+
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun EmailSignupScreen(
     viewModel: RegistrationViewModel = hiltViewModel(),
@@ -52,6 +56,10 @@ fun EmailSignupScreen(
     var showPasswordMismatch by remember { mutableStateOf(false) }
     var isTermsAccepted by remember { mutableStateOf(false) }
     
+    val phoneNumber by viewModel.phoneNumber.collectAsState()
+    val selectedCountry by viewModel.selectedCountry.collectAsState()
+    val countries by viewModel.countries.collectAsState()
+    
     // Collect state properly
     val registrationState by viewModel.registrationState.collectAsState()
     
@@ -60,12 +68,14 @@ fun EmailSignupScreen(
     val errorMessage = (registrationState as? Resource.Error)?.message
 
     // Calculate if button should be enabled
-    val isSignUpButtonEnabled = remember(name, email, password, confirmPassword, isTermsAccepted, isLoading) {
+    val isSignUpButtonEnabled = remember(name, email, password, confirmPassword, isTermsAccepted, isLoading, phoneNumber, selectedCountry) {
         !isLoading && 
         name.trim().isNotEmpty() && 
         email.trim().isNotEmpty() && 
         password.trim().isNotEmpty() && 
         confirmPassword.trim().isNotEmpty() &&
+        phoneNumber.trim().isNotEmpty() &&
+        selectedCountry != null &&
         isTermsAccepted &&
         password.trim() == confirmPassword.trim()
     }
@@ -188,6 +198,69 @@ fun EmailSignupScreen(
                     cursorColor = Color(0xFFffa000),
                     focusedLabelColor = Color(0xFFffa000),
                     unfocusedLabelColor = Color(0xB3FFFFFF)
+                )
+            )
+
+            // Warning about phone number
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0x33ffa000)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = "Warning",
+                        tint = Color(0xFFffa000),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Important: Your phone number is the only way to recover your password. Please ensure it is active and reachable.",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            // Country Selection Dropdown
+            CountryDropdownField(
+                countries = countries,
+                selectedCountry = selectedCountry,
+                onCountrySelected = { viewModel.onCountrySelected(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Phone Number Input
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { viewModel.onPhoneNumberChanged(it) },
+                label = { Text("Phone Number", color = Color(0xB3FFFFFF)) },
+                placeholder = { Text("e.g. +234 800 000 0000", color = Color(0x66FFFFFF)) },
+                singleLine = true,
+                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFFffa000),
+                    unfocusedBorderColor = Color(0x33FFFFFF),
+                    cursorColor = Color(0xFFffa000),
+                    focusedLabelColor = Color(0xFFffa000),
+                    unfocusedLabelColor = Color(0xB3FFFFFF)
+                ),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone
                 )
             )
 
@@ -365,8 +438,15 @@ fun EmailSignupScreen(
                     if (isValid) {
                         Log.d("EmailSignupScreen", "All inputs valid, proceeding with registration...")
                         showPasswordMismatch = false
-                        // Pass only the email registration data to registration
-                        viewModel.register(trimmedName, trimmedEmail, trimmedPassword, trimmedReferralCode, "", "")
+                        // Pass registration data including phone and country
+                        viewModel.register(
+                            trimmedName, 
+                            trimmedEmail, 
+                            trimmedPassword, 
+                            trimmedReferralCode, 
+                            phoneNumber.trim(), 
+                            selectedCountry?.name ?: ""
+                        )
                     } else {
                         Log.d("EmailSignupScreen", "Validation failed:")
                         if (trimmedName.isEmpty()) Log.d("EmailSignupScreen", "- Name is empty")

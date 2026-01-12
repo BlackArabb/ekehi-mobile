@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.ekehi.network.presentation.navigation.AppNavigation
+import com.ekehi.network.presentation.ui.components.UpdateCheckWrapper
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
@@ -68,15 +69,17 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             EkehiMobileTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    if (isAuthChecked) {
-                        AppNavigation(
-                            isAuthenticated = isAuthenticated,
-                            requiresAdditionalInfo = requiresAdditionalInfo
-                        )
+                UpdateCheckWrapper {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        if (isAuthChecked) {
+                            AppNavigation(
+                                isAuthenticated = isAuthenticated,
+                                requiresAdditionalInfo = requiresAdditionalInfo
+                            )
+                        }
                     }
                 }
             }

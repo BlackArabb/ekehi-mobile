@@ -8,8 +8,11 @@ import com.ekehi.network.domain.usecase.UserUseCase
 import com.ekehi.network.domain.usecase.AuthUseCase
 import com.ekehi.network.domain.model.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.ekehi.network.domain.model.Country
+import com.ekehi.network.domain.model.CountryData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,6 +28,42 @@ class SecondaryInfoViewModel @Inject constructor(
     private val _secondaryInfoState = MutableStateFlow<Resource<Unit>>(Resource.Idle)
     val secondaryInfoState: StateFlow<Resource<Unit>> = _secondaryInfoState
 
+    private val _countries = MutableStateFlow(CountryData.allCountries)
+    val countries: StateFlow<List<Country>> = _countries.asStateFlow()
+
+    private val _selectedCountry = MutableStateFlow<Country?>(null)
+    val selectedCountry: StateFlow<Country?> = _selectedCountry.asStateFlow()
+
+    private val _phoneNumber = MutableStateFlow("")
+    val phoneNumber: StateFlow<String> = _phoneNumber.asStateFlow()
+
+    fun onCountrySelected(country: Country) {
+        val previousCountry = _selectedCountry.value
+        _selectedCountry.value = country
+        
+        val currentPhone = _phoneNumber.value
+        if (currentPhone.isEmpty()) {
+            _phoneNumber.value = country.code + " "
+        } else if (previousCountry != null && currentPhone.startsWith(previousCountry.code)) {
+            // Replace old country code with new one
+            _phoneNumber.value = currentPhone.replaceFirst(previousCountry.code, country.code)
+        } else if (!currentPhone.startsWith("+")) {
+            // Prepend if no country code exists
+            _phoneNumber.value = country.code + " " + currentPhone
+        } else if (currentPhone.startsWith("+")) {
+            // Try to identify the old code and replace it, or just replace the first part
+            val parts = currentPhone.split(" ", limit = 2)
+            if (parts.isNotEmpty() && parts[0].startsWith("+")) {
+                val remainder = if (parts.size > 1) " " + parts[1] else " "
+                _phoneNumber.value = country.code + remainder
+            }
+        }
+    }
+
+    fun onPhoneNumberChanged(newNumber: String) {
+        _phoneNumber.value = newNumber
+    }
+
     fun submitSecondaryInfo(phoneNumber: String, country: String) {
         Log.d("SecondaryInfoViewModel", "=== SECONDARY INFO SUBMISSION STARTED ===")
         Log.d("SecondaryInfoViewModel", "Phone: $phoneNumber, Country: $country")
@@ -35,8 +74,8 @@ class SecondaryInfoViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Validate inputs before proceeding
-                if (phoneNumber.isEmpty()) {
-                    val errorMessage = "Phone number is required"
+                if (phoneNumber.isEmpty() || phoneNumber.length < 7) {
+                    val errorMessage = "Please enter a valid phone number for account recovery"
                     Log.e("SecondaryInfoViewModel", errorMessage)
                     _secondaryInfoState.value = Resource.Error(errorMessage)
                     return@launch

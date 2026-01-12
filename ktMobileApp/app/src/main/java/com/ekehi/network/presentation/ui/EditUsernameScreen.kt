@@ -95,7 +95,7 @@ fun EditUsernameScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Edit Username",
+                        text = "Edit Profile",
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
@@ -121,63 +121,6 @@ fun EditUsernameScreen(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // Profile Picture Section
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0x1AFFFFFF) // 10% opacity white
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // User Avatar
-                        Box(
-                            modifier = Modifier
-                                .size(80.dp)
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color(0xFF8b5cf6),
-                                            Color(0xFFa855f7)
-                                        )
-                                    ),
-                                    shape = RoundedCornerShape(40.dp)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "User Avatar",
-                                tint = Color.White,
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        Button(
-                            onClick = { /* Handle profile picture change */ },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFffa000)
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = "Change Photo",
-                                color = Color.White,
-                                fontSize = 14.sp
-                            )
-                        }
-                    }
-                }
-                
                 // Form Fields
                 Card(
                     modifier = Modifier

@@ -6,7 +6,7 @@ data class Referral(
     val referredUserId: String,
     val referredUserName: String? = null,
     val referralCode: String,
-    val rewardAmount: Double = 0.5,
+    val rewardAmount: Double = 2.0,
     val rewardClaimed: Boolean = false,
     val createdAt: Long? = null,
     val claimedAt: Long? = null

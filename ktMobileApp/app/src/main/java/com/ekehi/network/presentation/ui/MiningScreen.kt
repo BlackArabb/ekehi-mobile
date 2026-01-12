@@ -308,25 +308,10 @@ fun UserProfileCard(
                     Text(
                         text = userProfile?.username ?: "User Name",
                         color = Color.White,
-                        fontSize = 14.sp, // Further reduced from 16.sp
+                        fontSize = 12.sp, // Further reduced from 16.sp
                         fontWeight = FontWeight.Bold,
                         maxLines = 1 // Prevent text overflow
                     )
-                    Spacer(modifier = Modifier.width(4.dp)) // Reduced spacing
-                    
-                    // Verification Badge (smaller)
-                    Box(
-                        modifier = Modifier
-                            .size(14.dp) // Reduced size
-                            .background(Color(0xFF3b82f6), CircleShape), // Blue circle
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(5.dp) // Reduced size
-                                .background(Color.White, CircleShape) // White dot inside
-                        )
-                    }
                 }
                 Text(
                     text = "Total Balance",
@@ -337,7 +322,7 @@ fun UserProfileCard(
                 Text(
                     text = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
                     color = Color(0xFFffa000), // Orange
-                    fontSize = 12.sp, // Further reduced from 14.sp
+                    fontSize = 12.sp, // Further reduced from 12.sp
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
@@ -601,7 +586,7 @@ fun ReferralCard(navController: NavHostController? = null, userProfile: UserProf
             Spacer(modifier = Modifier.height(12.dp))
             
             Text(
-                text = "Earn 0.5 EKH for each friend who joins",
+                text = "Earn 2 EKH for each friend who joins",
                 color = Color.Gray,
                 fontSize = 14.sp
             )
