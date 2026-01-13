@@ -18,6 +18,10 @@ class SocialVerificationService @Inject constructor(
         userTask: UserSocialTask,
         proofData: Map<String, Any>?
     ): VerificationResult {
+        // Special handling for blog platform - no validation required
+        if (task.platform.lowercase() == "blog") {
+            return VerificationResult.Success("✅ Blog task completed!")
+        }
         
         return when (task.platform.lowercase()) {
             "telegram" -> verifyTelegramTask(task, proofData)

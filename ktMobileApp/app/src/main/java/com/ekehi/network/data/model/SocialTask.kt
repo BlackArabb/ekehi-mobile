@@ -17,6 +17,10 @@ data class SocialTask(
     val completedAt: String? = null,
     val verifiedAt: String? = null,
     val status: String? = null, // User task status: "pending", "verified", "rejected"
+    val maxCompletionsPerDay: Int = 1,
+    val cooldownMinutes: Int = 0,
+    val completionCountToday: Int = 0,
+    val nextAvailableAt: String? = null,
     val createdAt: String,
     val updatedAt: String
 )

@@ -80,6 +80,7 @@ fun SocialTasksScreen(
     
     // Get current user ID when screen initializes
     LaunchedEffect(Unit) {
+        Log.i("EKEHI_DEBUG", "SocialTasksScreen initialized, fetching user...")
         try {
             // Get the current user from the auth repository
             val result = authRepository.getCurrentUserIfLoggedIn()
@@ -87,34 +88,32 @@ fun SocialTasksScreen(
                 val user = result.getOrNull()
                 if (user != null) {
                     userId = user.id
-                    // Load user's social tasks
+                    Log.i("EKEHI_DEBUG", "Found userId: $userId, loading tasks...")
+                    // Load user's social tasks (which handles status)
                     viewModel.loadUserSocialTasks(userId)
+                } else {
+                    Log.w("EKEHI_DEBUG", "User is null despite successful auth check")
+                    viewModel.loadSocialTasks()
                 }
+            } else {
+                Log.w("EKEHI_DEBUG", "Auth check failed, loading tasks without user status")
+                viewModel.loadSocialTasks()
             }
         } catch (e: Exception) {
-            Log.e("SocialTasksScreen", "Failed to get current user ID", e)
+            Log.e("EKEHI_DEBUG", "Failed to get current user ID", e)
+            viewModel.loadSocialTasks()
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadSocialTasks()
-        viewModel.loadUserSocialTasks(userId)
-    }
-    
     // Handle verification state changes and refresh
     LaunchedEffect(verificationState) {
-        when (verificationState) {
-            is VerificationState.Success -> {
-                // Refresh tasks after success
+        if (verificationState is VerificationState.Success || verificationState is VerificationState.Error) {
+            Log.i("EKEHI_DEBUG", "Verification state changed: $verificationState, refreshing...")
+            if (userId.isNotEmpty()) {
                 viewModel.loadUserSocialTasks(userId)
+            } else {
                 viewModel.loadSocialTasks()
             }
-            is VerificationState.Error -> {
-                // Also refresh on error to show updated status
-                viewModel.loadUserSocialTasks(userId)
-                viewModel.loadSocialTasks()
-            }
-            else -> {}
         }
     }
     
@@ -212,7 +211,11 @@ fun SocialTasksScreen(
                                 isCompleted = task.isCompleted,
                                 isVerified = task.isVerified,
                                 verificationMethod = task.verificationMethod,
-                                status = task.status ?: "available"
+                                status = task.status ?: "available",
+                                maxCompletionsPerDay = task.maxCompletionsPerDay,
+                                cooldownMinutes = task.cooldownMinutes,
+                                completionCountToday = task.completionCountToday,
+                                nextAvailableAt = task.nextAvailableAt
                             )
                             
                             EnhancedSocialTaskCard(
@@ -796,7 +799,11 @@ fun EnhancedSocialTaskCard(
             .fillMaxWidth()
             .shadow(6.dp, RoundedCornerShape(20.dp))
             .then(
-                if (!task.isVerified && task.status != "pending") {
+                if (task.platform.lowercase() == "blog" && task.nextAvailableAt != null) {
+                    Modifier // Disable clicking during blog cooldown
+                } else if (task.platform.lowercase() == "blog" && task.completionCountToday >= task.maxCompletionsPerDay) {
+                    Modifier // Disable clicking when blog limit reached
+                } else if (!task.isVerified && task.status != "pending") {
                     Modifier.clickable(onClick = onClick)
                 } else if (task.status == "pending") {
                     Modifier.clickable(onClick = onClick) // Still clickable but will show dialog
@@ -827,29 +834,55 @@ fun EnhancedSocialTaskCard(
             
             
 
+            // Blog Progress Badge in Top Right
+            if (task.platform.lowercase() == "blog") {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 16.dp, end = 16.dp),
+                    color = BrandColors.Primary.copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(8.dp),
+                    shadowElevation = 4.dp
+                ) {
+                    Text(
+                        text = "${task.completionCountToday}/${task.maxCompletionsPerDay}",
+                        color = BrandColors.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
                 ) {
                     // Platform icon with gradient background or favicon
-                    if (task.link.isNotEmpty()) {
-                        // Try to load favicon
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .shadow(4.dp, RoundedCornerShape(16.dp))
-                                .background(
-                                    Brush.radialGradient(
-                                        colors = listOf(
-                                            getPlatformColor(task.platform),
-                                            getPlatformColor(task.platform).copy(alpha = 0.7f)
-                                        )
-                                    ),
-                                    RoundedCornerShape(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .shadow(4.dp, RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        getPlatformColor(task.platform),
+                                        getPlatformColor(task.platform).copy(alpha = 0.7f)
+                                    )
                                 ),
-                            contentAlignment = Alignment.Center
-                        ) {
+                                RoundedCornerShape(16.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (task.platform.lowercase() == "blog") {
+                            Icon(
+                                imageVector = Icons.Default.Repeat,
+                                contentDescription = "Blog",
+                                tint = BrandColors.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        } else if (task.link.isNotEmpty()) {
                             AsyncImage(
                                 model = getFaviconUrl(task.link),
                                 contentDescription = task.platform,
@@ -857,25 +890,7 @@ fun EnhancedSocialTaskCard(
                                 placeholder = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_help),
                                 error = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_help)
                             )
-
-                        }
-                    } else {
-                        // Fallback to platform icon if no link
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .shadow(4.dp, RoundedCornerShape(16.dp))
-                                .background(
-                                    Brush.radialGradient(
-                                        colors = listOf(
-                                            getPlatformColor(task.platform),
-                                            getPlatformColor(task.platform).copy(alpha = 0.7f)
-                                        )
-                                    ),
-                                    RoundedCornerShape(16.dp)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        } else {
                             Icon(
                                 imageVector = getPlatformIcon(task.platform),
                                 contentDescription = task.platform,
@@ -883,7 +898,7 @@ fun EnhancedSocialTaskCard(
                                 modifier = Modifier.size(28.dp)
                             )
                         }
-                    }                    
+                    }
                     Spacer(Modifier.width(16.dp))
                     
                     Column(modifier = Modifier.weight(1f)) {
@@ -918,7 +933,9 @@ fun EnhancedSocialTaskCard(
                         Row(
                             modifier = Modifier
                                 .background(
-                                    color = if (task.verificationMethod == "api") 
+                                    color = if (task.platform.lowercase() == "blog")
+                                        BrandColors.Primary.copy(alpha = 0.15f)
+                                    else if (task.verificationMethod == "api") 
                                         BrandColors.Success.copy(alpha = 0.15f)
                                     else 
                                         BrandColors.Warning.copy(alpha = 0.15f),
@@ -926,7 +943,9 @@ fun EnhancedSocialTaskCard(
                                 )
                                 .border(
                                     1.dp,
-                                    if (task.verificationMethod == "api") 
+                                    if (task.platform.lowercase() == "blog")
+                                        BrandColors.Primary.copy(alpha = 0.3f)
+                                    else if (task.verificationMethod == "api") 
                                         BrandColors.Success.copy(alpha = 0.3f)
                                     else 
                                         BrandColors.Warning.copy(alpha = 0.3f),
@@ -936,12 +955,16 @@ fun EnhancedSocialTaskCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = if (task.verificationMethod == "api") 
+                                imageVector = if (task.platform.lowercase() == "blog")
+                                    Icons.Default.Repeat
+                                else if (task.verificationMethod == "api") 
                                     Icons.Default.Verified 
                                 else 
                                     Icons.Default.Schedule,
                                 contentDescription = null,
-                                tint = if (task.verificationMethod == "api") 
+                                tint = if (task.platform.lowercase() == "blog")
+                                    BrandColors.Primary
+                                else if (task.verificationMethod == "api") 
                                     BrandColors.Success 
                                 else 
                                     BrandColors.Warning,
@@ -949,11 +972,15 @@ fun EnhancedSocialTaskCard(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = if (task.verificationMethod == "api") 
+                                text = if (task.platform.lowercase() == "blog")
+                                    "Daily Limit: ${task.maxCompletionsPerDay}"
+                                else if (task.verificationMethod == "api") 
                                     "Auto-verification" 
                                 else 
                                     "Manual review",
-                                color = if (task.verificationMethod == "api") 
+                                color = if (task.platform.lowercase() == "blog")
+                                    BrandColors.Primary
+                                else if (task.verificationMethod == "api") 
                                     BrandColors.Success 
                                 else 
                                     BrandColors.Warning,
@@ -1020,7 +1047,39 @@ fun EnhancedSocialTaskCard(
                         )
                     }
                     
-                    if (task.isVerified) {
+                    if (task.platform.lowercase() == "blog" && task.nextAvailableAt != null) {
+                        // Cooldown state for blog - Styled as a disabled button to maintain layout
+                        Button(
+                            onClick = {},
+                            enabled = false,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                disabledContainerColor = BrandColors.Gray.copy(alpha = 0.2f),
+                                disabledContentColor = BrandColors.Gray
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.Timer,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            val remainingTime = remember(task.nextAvailableAt) {
+                                calculateRemainingCooldown(task.nextAvailableAt)
+                            }
+                            Text(
+                                text = if (remainingTime.isNotEmpty()) remainingTime else "Cooldown",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                        }
+                    } else if (task.isVerified) {
                         Row(
                             modifier = Modifier
                                 .background(
@@ -1441,6 +1500,14 @@ fun TaskVerificationDialog(
                 
                 item {
                     when {
+                        task.platform.lowercase() == "blog" -> {
+                            Text(
+                                text = "Click submit below to claim your reward. You can do this up to ${task.maxCompletionsPerDay} times every 24 hours.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = BrandColors.White.copy(alpha = 0.8f)
+                            )
+                        }
+                        
                         task.platform.lowercase() == "telegram" -> {
                             TelegramVerificationUI(
                                 telegramUserId = telegramUserId,
@@ -1542,7 +1609,8 @@ fun TaskVerificationDialog(
                         platform = task.platform,
                         telegramUserId = telegramUserId,
                         username = username,
-                        proofUrl = proofUrl
+                        proofUrl = proofUrl,
+                        taskType = task.taskType
                     ),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = BrandColors.Primary,
@@ -2116,10 +2184,46 @@ fun getTaskInstructions(platform: String, taskType: String): String {
     }
 }
 
-fun isReadyToSubmit(platform: String, telegramUserId: String, username: String, proofUrl: String): Boolean {
+fun isReadyToSubmit(platform: String, telegramUserId: String, username: String, proofUrl: String, taskType: String = ""): Boolean {
+    if (platform.lowercase() == "blog") return true
     return when (platform.lowercase()) {
         "telegram" -> telegramUserId.isNotEmpty() && telegramUserId.all { it.isDigit() } && telegramUserId.length >= 8
         else -> username.isNotEmpty() || proofUrl.isNotEmpty()
+    }
+}
+
+fun calculateRemainingCooldown(nextAvailableAt: String?): String {
+    if (nextAvailableAt == null) return ""
+    return try {
+        val nextTime = parseIsoDate(nextAvailableAt)
+        val now = System.currentTimeMillis()
+        val diffMs = nextTime - now
+        if (diffMs <= 0) return ""
+        
+        val minutes = (diffMs / (60 * 1000)) % 60
+        val hours = (diffMs / (60 * 60 * 1000))
+        
+        if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+fun parseIsoDate(dateStr: String?): Long {
+    if (dateStr.isNullOrEmpty()) return 0L
+    // Normalize: Instant.parse only likes 'Z', but Appwrite sometimes returns +00:00
+    val normalizedDate = dateStr.replace("+00:00", "Z")
+    return try {
+        java.time.Instant.parse(normalizedDate).toEpochMilli()
+    } catch (e: Exception) {
+        try {
+            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).apply {
+                timeZone = java.util.TimeZone.getTimeZone("UTC")
+            }
+            format.parse(normalizedDate)?.time ?: 0L
+        } catch (e2: Exception) {
+            0L
+        }
     }
 }
 
@@ -2311,7 +2415,11 @@ data class SocialTaskItem(
     val isCompleted: Boolean,
     val isVerified: Boolean,
     val verificationMethod: String,
-    val status: String = "available" // "available", "pending_review", "verified", "rejected"
+    val status: String = "available", // "available", "pending_review", "verified", "rejected"
+    val maxCompletionsPerDay: Int = 1,
+    val cooldownMinutes: Int = 0,
+    val completionCountToday: Int = 0,
+    val nextAvailableAt: String? = null
 )
 
 @EntryPoint

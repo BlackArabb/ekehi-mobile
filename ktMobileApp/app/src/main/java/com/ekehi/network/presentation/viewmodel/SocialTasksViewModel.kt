@@ -2,6 +2,7 @@ package com.ekehi.network.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.ekehi.network.data.model.SocialTask
 import com.ekehi.network.data.repository.SocialTaskRepository
 import com.ekehi.network.domain.usecase.SocialTaskUseCase
@@ -68,6 +69,7 @@ class SocialTasksViewModel @Inject constructor(
     }
 
     fun completeSocialTask(userId: String, taskId: String, proofData: Map<String, Any>?) {
+        Log.i("EKEHI_DEBUG", "ViewModel completeSocialTask: userId=$userId, taskId=$taskId")
         viewModelScope.launch {
             try {
                 _verificationState.value = VerificationState.Loading

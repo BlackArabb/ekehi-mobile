@@ -15,6 +15,10 @@ import io.appwrite.Query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import javax.inject.Inject
 
 open class SocialTaskRepository @Inject constructor(
@@ -42,11 +46,14 @@ open class SocialTaskRepository @Inject constructor(
     suspend fun getUserSocialTasks(userId: String): Result<List<UserSocialTask>> {
         return withContext(Dispatchers.IO) {
             try {
+                // Increase limit to 100 to handle repetitive tasks history
                 val response = appwriteService.databases.listDocuments(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_SOCIAL_TASKS_COLLECTION,
                     queries = listOf(
-                        Query.equal("userId", userId)
+                        Query.equal("userId", userId),
+                        Query.limit(100),
+                        Query.orderDesc("completedAt")
                     )
                 )
                 
@@ -62,35 +69,94 @@ open class SocialTaskRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 // Get all social tasks
+                Log.i("EKEHI_DEBUG", "getSocialTasksWithUserStatus called for userId: $userId")
                 val allTasksResult = getAllSocialTasks()
                 if (allTasksResult.isFailure) {
+                    Log.e("EKEHI_DEBUG", "Failed to get all tasks: ${allTasksResult.exceptionOrNull()?.message}")
                     return@withContext Result.failure(allTasksResult.exceptionOrNull() ?: Exception("Failed to get social tasks"))
                 }
                 
                 val allTasks = allTasksResult.getOrNull() ?: emptyList()
+                Log.i("EKEHI_DEBUG", "Loaded ${allTasks.size} total tasks")
                 
                 // Get user's completed tasks
                 val userTasksResult = getUserSocialTasks(userId)
                 if (userTasksResult.isFailure) {
+                    Log.w("EKEHI_DEBUG", "Failed to get user tasks for $userId: ${userTasksResult.exceptionOrNull()?.message}")
                     // Return all tasks without user status if we can't get user tasks
                     return@withContext Result.success(allTasks)
                 }
                 
                 val userTasks = userTasksResult.getOrNull() ?: emptyList()
+                Log.i("EKEHI_DEBUG", "Loaded ${userTasks.size} user task records for $userId")
                 
-                // Create a map of user tasks by task ID for quick lookup
-                val userTaskMap = userTasks.associateBy { it.taskId }
+                // Group user tasks by task ID
+                val userTasksByTaskId = userTasks.groupBy { it.taskId }
+                
+                val now = System.currentTimeMillis()
+                val oneDayAgo = now - (24 * 60 * 60 * 1000L)
                 
                 // Combine all tasks with user status
                 val tasksWithStatus = allTasks.map { task ->
-                    val userTask = userTaskMap[task.id]
-                    task.copy(
-                        isCompleted = userTask != null && userTask.status == "verified", // Only completed when verified
-                        isVerified = userTask?.status == "verified",
-                        status = userTask?.status,
-                        completedAt = userTask?.completedAt,
-                        verifiedAt = userTask?.verifiedAt
-                    )
+                    val userTasksForThisTask = userTasksByTaskId[task.id] ?: emptyList()
+                    
+                    if (task.platform.lowercase() == "blog") {
+                        // Detailed logging for blog tasks to find why count is 0
+                        Log.i("EKEHI_DEBUG", "Filtering ${userTasksForThisTask.size} records for Blog Task: ${task.title}")
+                        userTasksForThisTask.forEachIndexed { index, ut ->
+                            val compTime = parseIsoDate(ut.completedAt)
+                            val isRecent = compTime > oneDayAgo
+                            Log.i("EKEHI_DEBUG", "  Record #$index: status=${ut.status}, completedAt=${ut.completedAt}, isRecent=$isRecent")
+                        }
+
+                        val verifiedTasksInLast24h = userTasksForThisTask.filter { ut ->
+                            ut.status == "verified" && parseIsoDate(ut.completedAt) > oneDayAgo
+                        }
+                        
+                        val latestUserTask = userTasksForThisTask.maxByOrNull { 
+                            parseIsoDate(it.completedAt)
+                        }
+                        
+                        val completionCountToday = verifiedTasksInLast24h.size
+                        val latestVerifiedTask = verifiedTasksInLast24h.maxByOrNull {
+                            parseIsoDate(it.completedAt)
+                        }
+                        
+                        val lastVerifiedTime = parseIsoDate(latestVerifiedTask?.completedAt)
+                        
+                        val cooldownMs = task.cooldownMinutes * 60 * 1000L
+                        val nextAvailableTime = lastVerifiedTime + cooldownMs
+                        val isCooldownActive = lastVerifiedTime > 0 && now < nextAvailableTime
+                        val isLimitReached = completionCountToday >= task.maxCompletionsPerDay
+                        
+                        val nextAvailableAt = if (isCooldownActive) {
+                            java.time.Instant.ofEpochMilli(nextAvailableTime).toString()
+                        } else null
+                        
+                        Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, cooldown=$isCooldownActive")
+                        
+                        task.copy(
+                            isCompleted = isLimitReached || isCooldownActive,
+                            isVerified = isLimitReached,
+                            status = if (isLimitReached) "verified" else if (isCooldownActive) "pending" else null,
+                            completionCountToday = completionCountToday,
+                            nextAvailableAt = nextAvailableAt,
+                            completedAt = latestUserTask?.completedAt,
+                            verifiedAt = latestUserTask?.verifiedAt
+                        )
+                    } else {
+                        val latestUserTask = userTasksForThisTask.maxByOrNull { 
+                            parseIsoDate(it.completedAt)
+                        }
+                        // Standard task handling
+                        task.copy(
+                            isCompleted = latestUserTask != null && latestUserTask.status == "verified",
+                            isVerified = latestUserTask?.status == "verified",
+                            status = latestUserTask?.status,
+                            completedAt = latestUserTask?.completedAt,
+                            verifiedAt = latestUserTask?.verifiedAt
+                        )
+                    }
                 }
                 
                 Result.success(tasksWithStatus)
@@ -105,6 +171,7 @@ open class SocialTaskRepository @Inject constructor(
         taskId: String,
         proofData: Map<String, Any>?
     ): Result<Pair<UserSocialTask, VerificationResult>> {
+        Log.i("EKEHI_DEBUG", "completeSocialTask called: userId=$userId, taskId=$taskId")
         return withContext(Dispatchers.IO) {
             try {
                 // 1. Get task details
@@ -115,9 +182,7 @@ open class SocialTaskRepository @Inject constructor(
                 )
                 val task = documentToSocialTask(taskDoc)
                 
-                // Log the task details for debugging
-                Log.d("SocialTaskRepository", "Task platform: ${task.platform}")
-                Log.d("SocialTaskRepository", "Verification data: ${task.verificationData}")
+                Log.i("EKEHI_DEBUG", "Processing task: ${task.title} [${task.platform}]")
                 
                 // 2. Get user profile to get username
                 var username: String? = null
@@ -133,82 +198,140 @@ open class SocialTaskRepository @Inject constructor(
                     if (userResponse.documents.isNotEmpty()) {
                         val userData = userResponse.documents[0].data as Map<String, Any>
                         username = userData["username"] as? String
+                        Log.i("EKEHI_DEBUG", "Found username: $username")
                     }
                 } catch (e: Exception) {
-                    Log.e("SocialTaskRepository", "Failed to get username: ${e.message}")
+                    Log.e("EKEHI_DEBUG", "Failed to get username: ${e.message}")
                 }
                 
-                // 3. Check if already completed
-                val existingTaskResult = getUserTaskByTaskId(userId, taskId)
-                if (existingTaskResult.isSuccess) {
-                    val existing = existingTaskResult.getOrNull()
-                    if (existing?.status == "verified") {
-                        return@withContext Result.failure(
-                            Exception("Task already completed")
-                        )
+                // 3. Check completion rules
+                val userTasksResult = getUserSocialTasks(userId)
+                val userTasks = userTasksResult.getOrNull() ?: emptyList()
+                val userTasksForThisTask = userTasks.filter { it.taskId == taskId }
+                val now = System.currentTimeMillis()
+                
+                if (task.platform.lowercase() == "blog") {
+                    Log.i("EKEHI_DEBUG", "Executing blog-specific logic")
+                    // Blog task: check 24h limit and cooldown
+                    val oneDayAgo = now - (24 * 60 * 60 * 1000L)
+                    val verifiedTasksInLast24h = userTasksForThisTask.filter { ut ->
+                        ut.status == "verified" && parseIsoDate(ut.completedAt) > oneDayAgo
                     }
-                }
-                
-                // 4. Create or update user task
-                val userTask = if (existingTaskResult.isSuccess && existingTaskResult.getOrNull() != null) {
-                    updateUserTaskStatus(
-                        documentId = existingTaskResult.getOrNull()!!.id,
-                        status = "pending",
-                        proofData = proofData,
-                        username = username
-                    ).getOrThrow()
-                } else {
-                    createUserTask(userId, taskId, proofData, username).getOrThrow()
-                }
-                
-                // 5. Verify task
-                Log.d("SocialTaskRepository", "Starting verification with proofData: $proofData")
-                val verificationResult = verificationService.verifyTask(
-                    task = task,
-                    userTask = userTask,
-                    proofData = proofData
-                )
-                Log.d("SocialTaskRepository", "Verification result: $verificationResult")
-                
-                // 6. Update based on verification result - ONLY award coins on SUCCESS
-                val finalUserTask = when (verificationResult) {
-                    is VerificationResult.Success -> {
-                        Log.d("SocialTaskRepository", "Verification SUCCESS - awarding coins")
+                    
+                    Log.i("EKEHI_DEBUG", "Blog completions in last 24h: ${verifiedTasksInLast24h.size}")
+                    
+                    if (verifiedTasksInLast24h.size >= task.maxCompletionsPerDay) {
+                        Log.w("EKEHI_DEBUG", "Blog limit reached: ${verifiedTasksInLast24h.size}/${task.maxCompletionsPerDay}")
+                        return@withContext Result.failure(Exception("Daily limit reached. Try again tomorrow."))
+                    }
+                    
+                    val latestVerifiedTask = verifiedTasksInLast24h.maxByOrNull {
+                        parseIsoDate(it.completedAt)
+                    }
+                    
+                    val lastVerifiedTime = parseIsoDate(latestVerifiedTask?.completedAt)
+                    
+                    val cooldownMs = task.cooldownMinutes * 60 * 1000L
+                    if (lastVerifiedTime > 0 && now < lastVerifiedTime + cooldownMs) {
+                        val remainingMs = (lastVerifiedTime + cooldownMs) - now
+                        val remainingMinutes = (remainingMs / (60 * 1000)) + 1
+                        Log.w("EKEHI_DEBUG", "Blog cooldown active: $remainingMinutes mins left")
+                        return@withContext Result.failure(Exception("Cooldown active. Available in $remainingMinutes minutes."))
+                    }
+                    
+                    // Blog tasks ALWAYS create a NEW document to track history
+                    Log.i("EKEHI_DEBUG", "Creating new record for blog completion")
+                    val userTask = createUserTask(userId, taskId, proofData, username).getOrThrow()
+                    
+                    // 5. Verify task
+                    Log.i("EKEHI_DEBUG", "Starting auto-verification for blog")
+                    val verificationResult = verificationService.verifyTask(
+                        task = task,
+                        userTask = userTask,
+                        proofData = proofData
+                    )
+                    
+                    // 6. Update based on verification result
+                    val finalUserTask = if (verificationResult is VerificationResult.Success) {
+                        Log.i("EKEHI_DEBUG", "Blog verification SUCCESS, awarding coins")
                         val verified = updateUserTaskStatus(
                             documentId = userTask.id,
                             status = "verified",
-                            verifiedAt = java.time.Instant.ofEpochMilli(System.currentTimeMillis()).toString(),
+                            verifiedAt = java.time.Instant.now().toString(),
                             username = username
                         ).getOrThrow()
-                        
-                        // Award coins ONLY on success
                         awardCoinsToUser(userId, task.rewardCoins)
                         verified
+                    } else {
+                        Log.w("EKEHI_DEBUG", "Blog verification FAILED")
+                        userTask
                     }
-                    is VerificationResult.Pending -> {
-                        Log.d("SocialTaskRepository", "Verification PENDING - no coins awarded yet")
+                    
+                    return@withContext Result.success(Pair(finalUserTask, verificationResult))
+                    
+                } else {
+                    // Standard task: check if already completed
+                    val latestUserTask = userTasksForThisTask.maxByOrNull {
+                        parseIsoDate(it.completedAt)
+                    }
+                    
+                    if (latestUserTask?.status == "verified") {
+                        return@withContext Result.failure(Exception("Task already completed"))
+                    }
+                    
+                    // 4. Create or update user task
+                    val userTask = if (latestUserTask != null) {
                         updateUserTaskStatus(
-                            documentId = userTask.id,
+                            documentId = latestUserTask.id,
                             status = "pending",
+                            proofData = proofData,
                             username = username
                         ).getOrThrow()
+                    } else {
+                        createUserTask(userId, taskId, proofData, username).getOrThrow()
                     }
-                    is VerificationResult.Failure -> {
-                        Log.e("SocialTaskRepository", "Verification FAILED: ${verificationResult.reason}")
-                        // Mark as rejected, DO NOT award coins
-                        updateUserTaskStatus(
-                            documentId = userTask.id,
-                            status = "rejected",
-                            rejectionReason = verificationResult.reason,
-                            username = username
-                        ).getOrThrow()
+                    
+                    // 5. Verify task
+                    val verificationResult = verificationService.verifyTask(
+                        task = task,
+                        userTask = userTask,
+                        proofData = proofData
+                    )
+                    
+                    // 6. Update based on verification result
+                    val finalUserTask = when (verificationResult) {
+                        is VerificationResult.Success -> {
+                            val verified = updateUserTaskStatus(
+                                documentId = userTask.id,
+                                status = "verified",
+                                verifiedAt = java.time.Instant.now().toString(),
+                                username = username
+                            ).getOrThrow()
+                            awardCoinsToUser(userId, task.rewardCoins)
+                            verified
+                        }
+                        is VerificationResult.Pending -> {
+                            updateUserTaskStatus(
+                                documentId = userTask.id,
+                                status = "pending",
+                                username = username
+                            ).getOrThrow()
+                        }
+                        is VerificationResult.Failure -> {
+                            updateUserTaskStatus(
+                                documentId = userTask.id,
+                                status = "rejected",
+                                rejectionReason = verificationResult.reason,
+                                username = username
+                            ).getOrThrow()
+                        }
                     }
+                    
+                    return@withContext Result.success(Pair(finalUserTask, verificationResult))
                 }
                 
-                Result.success(Pair(finalUserTask, verificationResult))
-                
             } catch (e: Exception) {
-                Log.e("SocialTaskRepository", "Error completing task: ${e.message}", e)
+                Log.e("EKEHI_DEBUG", "Error completing task: ${e.message}", e)
                 
                 // Check if this is a unique constraint error related to telegram_user_id
                 val errorMessage = e.message?.lowercase() ?: ""
@@ -275,7 +398,7 @@ open class SocialTaskRepository @Inject constructor(
                         documentId = documentId,
                         data = mapOf(
                             "status" to "verified",
-                            "verifiedAt" to java.time.Instant.ofEpochMilli(System.currentTimeMillis()).toString(),
+                            "verifiedAt" to java.time.Instant.now().toString(),
                             "username" to username
                         )
                     )
@@ -331,7 +454,7 @@ open class SocialTaskRepository @Inject constructor(
                 "userId" to userId,
                 "taskId" to taskId,
                 "status" to "pending",
-                "completedAt" to java.time.Instant.ofEpochMilli(System.currentTimeMillis()).toString(),
+                "completedAt" to java.time.Instant.now().toString(),
                 "verificationAttempts" to 1
             )
             
@@ -433,6 +556,7 @@ open class SocialTaskRepository @Inject constructor(
     
     private suspend fun awardCoinsToUser(userId: String, amount: Double) {
         try {
+            Log.i("EKEHI_DEBUG", "Awarding $amount coins to user $userId")
             // Get user profile document using userId field (which is stored as a list)
             val response = appwriteService.databases.listDocuments(
                 databaseId = AppwriteService.DATABASE_ID,
@@ -451,18 +575,42 @@ open class SocialTaskRepository @Inject constructor(
                 val currentTaskReward = (profileData["taskReward"] as? Number)?.toDouble() ?: 0.0
                 val newTaskReward = currentTaskReward + amount
                 
+                Log.i("EKEHI_DEBUG", "Updating user profile $documentId: old=$currentTaskReward, new=$newTaskReward")
+                
                 appwriteService.databases.updateDocument(
                     databaseId = AppwriteService.DATABASE_ID,
                     collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                     documentId = documentId,
                     data = mapOf(
                         "taskReward" to newTaskReward,
-                        "updatedAt" to java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).format(java.util.Date())
+                        "updatedAt" to java.time.Instant.now().toString()
                     )
                 )
+                Log.i("EKEHI_DEBUG", "Coins awarded successfully")
+            } else {
+                Log.e("EKEHI_DEBUG", "User profile not found for userId $userId")
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("EKEHI_DEBUG", "Failed to award coins: ${e.message}", e)
+        }
+    }
+
+    private fun parseIsoDate(dateStr: String?): Long {
+        if (dateStr.isNullOrEmpty()) return 0L
+        // Normalize: Instant.parse only likes 'Z', but Appwrite sometimes returns +00:00
+        val normalizedDate = dateStr.replace("+00:00", "Z")
+        return try {
+            java.time.Instant.parse(normalizedDate).toEpochMilli()
+        } catch (e: Exception) {
+            try {
+                // Fallback to SimpleDateFormat for older/custom formats
+                val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
+                format.parse(normalizedDate)?.time ?: 0L
+            } catch (e2: Exception) {
+                0L
+            }
         }
     }
 
@@ -520,11 +668,14 @@ open class SocialTaskRepository @Inject constructor(
             verificationData = verificationDataMap,
             isActive = data["isActive"] as? Boolean ?: false,
             sortOrder = (data["sortOrder"] as? Number)?.toInt() ?: 0,
+            // Frequency-based attributes (primarily used for 'blog' platform)
+            maxCompletionsPerDay = (data["maxCompletionsPerDay"] as? Number)?.toInt() ?: 1,
+            cooldownMinutes = (data["cooldownMinutes"] as? Number)?.toInt() ?: 0,
             createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",
             updatedAt = document.updatedAt ?: "1970-01-01T00:00:00.000Z"
         )
         
-        Log.d("SocialTaskRepository", "Created task: id=${task.id}, platform=${task.platform}, verificationData=${task.verificationData}")
+        Log.i("EKEHI_DEBUG", "Created task object: id=${task.id}, title=${task.title}, platform=${task.platform}")
         return task
     }
 
