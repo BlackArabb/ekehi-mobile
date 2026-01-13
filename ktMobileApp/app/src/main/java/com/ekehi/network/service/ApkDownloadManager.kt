@@ -32,6 +32,8 @@ class ApkDownloadManager @Inject constructor(
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
             setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+            setAllowedOverRoaming(true)
+            setAllowedOverMetered(true)
         }
         
         val downloadId = downloadManager.enqueue(request)
