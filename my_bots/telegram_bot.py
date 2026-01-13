@@ -1,7 +1,14 @@
 import asyncio
 import logging
+import os
+import threading
+from flask import Flask
+from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+
+# Load environment variables
+load_dotenv()
 
 # Enable logging
 logging.basicConfig(
@@ -9,8 +16,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Replace with your actual bot token
-BOT_TOKEN = "7969520183:AAGFM4gNVTqnPC_byBfclj--EBw7ytmL_JE"
+# Replace with your actual bot token or use environment variable
+BOT_TOKEN = os.getenv('BOT_TOKEN', "7969520183:AAGFM4gNVTqnPC_byBfclj--EBw7ytmL_JE")
+
+# Flask app for health check
+app = Flask(__name__)
+
+@app.route('/health')
+def health():
+    return 'OK', 200
+
+def run_flask():
+    # Railway provides the PORT environment variable
+    port = int(os.getenv('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send welcome message with user's Telegram ID"""
@@ -69,6 +88,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     """Start the bot"""
+    # Start health check server in a separate thread
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
+    
     # Create the Application and pass it your bot's token
     application = Application.builder().token(BOT_TOKEN).build()
     
