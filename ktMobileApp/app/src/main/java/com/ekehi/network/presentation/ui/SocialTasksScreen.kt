@@ -29,12 +29,16 @@ import com.ekehi.network.auth.SocialAuthManager
 import com.ekehi.network.data.model.SocialTask
 import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
+import com.ekehi.network.presentation.ui.EkhLogo
 import com.ekehi.network.presentation.viewmodel.VerificationState
 import com.ekehi.network.domain.model.Resource
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import com.ekehi.network.util.EventBus
+import com.ekehi.network.util.Event
+import kotlinx.coroutines.delay
 import java.net.URL
 // Brand Colors
 object BrandColors {
@@ -113,6 +117,22 @@ fun SocialTasksScreen(
                 viewModel.loadUserSocialTasks(userId)
             } else {
                 viewModel.loadSocialTasks()
+            }
+        }
+    }
+
+    // Auto-refresh list every minute if any task is in cooldown or limit reached
+    LaunchedEffect(socialTasksResource) {
+        val tasks = (socialTasksResource as? Resource.Success)?.data ?: emptyList()
+        val hasAnyCooldown = tasks.any { it.nextAvailableAt != null }
+        
+        if (hasAnyCooldown) {
+            while(true) {
+                delay(60000) // 1 minute
+                Log.i("EKEHI_DEBUG", "Auto-refreshing social tasks list...")
+                if (userId.isNotEmpty()) {
+                    viewModel.loadUserSocialTasks(userId)
+                }
             }
         }
     }
@@ -747,9 +767,10 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
         EnhancedStatCard(
             icon = Icons.Default.Toll,
             value = String.format("%.1f", totalRewards),
-            label = "EKH Earned",
+            label = "Earned",
             modifier = Modifier.weight(1f),
-            isHighlight = true
+            isHighlight = true,
+            showLogoInLabel = true
         )
     }
 }
@@ -760,7 +781,8 @@ fun EnhancedStatCard(
     value: String,
     label: String,
     modifier: Modifier = Modifier,
-    isHighlight: Boolean = false
+    isHighlight: Boolean = false,
+    showLogoInLabel: Boolean = false
 ) {
     Column(
         modifier = modifier,
@@ -779,12 +801,20 @@ fun EnhancedStatCard(
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold
         )
-        Text(
-            text = label,
-            color = BrandColors.White.copy(alpha = 0.7f),
-            fontSize = 13.sp,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(top = 4.dp)
-        )
+        ) {
+            if (showLogoInLabel) {
+                EkhLogo(size = 14.dp)
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Text(
+                text = label,
+                color = BrandColors.White.copy(alpha = 0.7f),
+                fontSize = 13.sp
+            )
+        }
     }
 }
 
@@ -1039,12 +1069,7 @@ fun EnhancedSocialTaskCard(
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = "EKH",
-                            color = BrandColors.Primary.copy(alpha = 0.8f),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        EkhLogo(size = 14.dp)
                     }
                     
                     if (task.platform.lowercase() == "blog" && task.nextAvailableAt != null) {

@@ -3,6 +3,7 @@ package com.ekehi.network.service
 import android.content.Context
 import android.util.Log
 import androidx.activity.ComponentActivity
+import com.ekehi.network.auth.SocialAuthManager
 import com.ekehi.network.data.repository.UserRepository
 import com.ekehi.network.util.DebugLogger
 import io.appwrite.Client
@@ -20,7 +21,8 @@ import javax.inject.Singleton
 class OAuthService @Inject constructor(
     private val context: Context,
     private val client: Client,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val socialAuthManager: SocialAuthManager
 ) {
     private val account: AccountService = AccountService(client)
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -28,10 +30,25 @@ class OAuthService @Inject constructor(
     companion object {
         const val SUCCESS_URL = "appwrite-callback-68c2dd6e002112935ed2://oauth2/success"
         const val FAILURE_URL = "appwrite-callback-68c2dd6e002112935ed2://oauth2/failure"
+        const val GOOGLE_SIGN_IN_REQUEST_CODE = 1001
     }
 
-    fun initiateGoogleOAuth(activity: ComponentActivity) {
-        DebugLogger.logStep("INITIATE_GOOGLE_OAUTH", "Starting OAuth flow")
+    fun initiateGoogleOAuth(activity: ComponentActivity, forceBrowser: Boolean = false) {
+        DebugLogger.logStep("INITIATE_GOOGLE_OAUTH", "Starting OAuth flow (forceBrowser=$forceBrowser)")
+        
+        if (!forceBrowser) {
+            // Try Native Google Sign-In first for a better "in-app popup" experience
+            try {
+                Log.d("OAuthService", "Attempting Native Google Sign-In")
+                socialAuthManager.signInWithGoogle(activity, GOOGLE_SIGN_IN_REQUEST_CODE)
+                DebugLogger.logStep("NATIVE_OAUTH_TRIGGERED", "✅ Success")
+                return
+            } catch (e: Exception) {
+                Log.e("OAuthService", "Native Google Sign-In failed, falling back to browser", e)
+            }
+        }
+        
+        // Browser-based OAuth flow
         scope.launch {
             try {
                 // Delete any existing session before starting OAuth
@@ -46,19 +63,73 @@ class OAuthService @Inject constructor(
                 }
                 
                 // Start the OAuth flow
+                // Note: SUCCESS_URL can be modified to include prompt=consent if the Appwrite server supports it
+                // and correctly passes it to Google.
                 account.createOAuth2Token(
                     provider = OAuthProvider.GOOGLE,
                     success = SUCCESS_URL,
                     failure = FAILURE_URL,
                     activity = activity
                 )
-                DebugLogger.logStep("OAUTH_FLOW_INITIATED", "✅ Successfully triggered")
+                DebugLogger.logStep("OAUTH_FLOW_INITIATED", "✅ Successfully triggered browser")
             } catch (e: Exception) {
                 DebugLogger.logError("OAUTH_INITIATION", "Failed to initiate OAuth", e)
             }
         }
     }
+
+    suspend fun handleNativeGoogleLogin(idToken: String): Result<Map<String, Any>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                DebugLogger.logStep("NATIVE_GOOGLE_LOGIN", "Processing idToken")
+                
+                // Create session using Appwrite's native OAuth session method
+                // For native Google sign-in, use "google" as the userId and the idToken as the secret
+                account.createSession(
+                    userId = "google",
+                    secret = idToken
+                )
+                DebugLogger.logStep("SESSION_CREATED", "✅ Success")
+                
+                // Fetch the user to finalize the login process
+                val appwriteUser = account.get()
+                val userId = appwriteUser.id
+                
+                return@withContext finalizeLogin(userId, appwriteUser)
+            } catch (e: Exception) {
+                DebugLogger.logError("NATIVE_GOOGLE_LOGIN", "Failed", e)
+                return@withContext Result.failure(e)
+            }
+        }
+    }
     
+    private suspend fun finalizeLogin(userId: String, appwriteUser: io.appwrite.models.User<Map<String, Any>>): Result<Map<String, Any>> {
+        try {
+            val name = appwriteUser.name
+            val email = appwriteUser.email
+            
+            val username = if (!name.isNullOrEmpty()) name else email.substringBefore("@")
+            
+            // Check/create user profile
+            val profileResult = userRepository.getUserProfile(userId)
+            var userProfile = if (profileResult.isFailure) {
+                userRepository.createUserProfile(userId, username, email, "", "").getOrThrow()
+            } else {
+                profileResult.getOrThrow()
+            }
+            
+            val isProfileComplete = userProfile.phoneNumber.isNotEmpty() && userProfile.country.isNotEmpty()
+            
+            return Result.success(mapOf(
+                "success" to true,
+                "userId" to userId,
+                "isProfileComplete" to isProfileComplete
+            ))
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
+
     suspend fun handleOAuthCallback(userId: String, secret: String): Result<Map<String, Any>> {
         return withContext(Dispatchers.IO) {
             try {
@@ -75,8 +146,10 @@ class OAuthService @Inject constructor(
                 // Step 2: Get user info
                 DebugLogger.logStep("GET_USER_INFO", "Fetching user details")
                 val appwriteUser = account.get()
-                val username = appwriteUser.name.ifEmpty { appwriteUser.email.substringBefore("@") }
+                val name = appwriteUser.name
                 val email = appwriteUser.email
+                val username = if (!name.isNullOrEmpty()) name else email.substringBefore("@")
+                
                 DebugLogger.logState("USER_INFO", "Retrieved", mapOf(
                     "userId" to userId,
                     "username" to username,

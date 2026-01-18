@@ -15,6 +15,7 @@ data class UserProfileEntity(
     val taskReward: Float = 0.0f,
     val miningReward: Float = 0.0f,
     val referralReward: Float = 0.0f,
+    val totalCoins: Float = 0.0f,
     val autoMiningRate: Float = 0.0f,
     val miningPower: Float = 0.0f,
     val currentStreak: Int = 0,
@@ -31,7 +32,4 @@ data class UserProfileEntity(
     val streakBonusClaimed: Int = 0,
     val createdAt: String,
     val updatedAt: String
-) {
-    val totalCoins: Float
-        get() = taskReward + miningReward + referralReward
-}
+)

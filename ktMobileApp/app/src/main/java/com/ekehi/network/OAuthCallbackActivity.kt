@@ -28,14 +28,23 @@ class OAuthCallbackActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        Log.d("OAuthCallbackActivity", "onCreate: intent=$intent")
+        
         setContent {
             OAuthCallbackScreen()
         }
         
-        handleOAuthCallback()
+        handleOAuthCallback(intent)
     }
     
-    private fun handleOAuthCallback() {
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        Log.d("OAuthCallbackActivity", "onNewIntent: intent=$intent")
+        handleOAuthCallback(intent)
+    }
+    
+    private fun handleOAuthCallback(intent: Intent?) {
         try {
             intent?.data?.let { uri ->
                 Log.d("OAuthCallbackActivity", "Received OAuth callback: $uri")
@@ -100,7 +109,8 @@ class OAuthCallbackActivity : ComponentActivity() {
                 }
             } ?: run {
                 Log.w("OAuthCallbackActivity", "No data in OAuth callback")
-                showErrorAndFinish("No authentication data received")
+                // Don't finish immediately, maybe wait for next intent if this was a cold start without data
+                // But normally this should have data if started via deep link
             }
         } catch (e: Exception) {
             Log.e("OAuthCallbackActivity", "Error handling OAuth callback: ${e.message}", e)

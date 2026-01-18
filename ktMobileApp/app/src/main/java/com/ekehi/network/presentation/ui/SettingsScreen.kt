@@ -22,6 +22,7 @@ import com.ekehi.network.presentation.ui.components.NotificationSettings
 import com.ekehi.network.presentation.viewmodel.SettingsViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import android.util.Log
+import com.ekehi.network.BuildConfig
 
 
 @Composable
@@ -497,9 +498,9 @@ fun AboutSection(
                 }
             )
             
-            // Version info at the bottom without dropdown arrow
+      
             SettingItemWithoutArrow(
-                text = "Version 1.0.0",
+                text = "Version ${BuildConfig.VERSION_NAME}",
                 icon = Icons.Default.Info
             )
         }

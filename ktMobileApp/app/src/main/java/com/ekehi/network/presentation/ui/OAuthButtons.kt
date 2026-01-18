@@ -31,7 +31,7 @@ import com.ekehi.network.ui.theme.EkehiMobileTheme
 
 @Composable
 fun OAuthButtons(
-        viewModel: OAuthViewModel = hiltViewModel(),
+        viewModel: OAuthViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
         onOAuthSuccess: () -> Unit = {},
         onOAuthRegistrationSuccess: () -> Unit = {}, // New callback for registration success
         isRegistration: Boolean = false // Flag to determine if this is for registration

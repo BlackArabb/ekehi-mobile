@@ -131,8 +131,6 @@ open class MiningRepository @Inject constructor(
                 val currentMiningReward = (profileData["miningReward"] as? Number)?.toDouble() ?: 0.0
                 val currentTaskReward = (profileData["taskReward"] as? Number)?.toDouble() ?: 0.0
                 val currentReferralReward = (profileData["referralReward"] as? Number)?.toDouble() ?: 0.0
-                val currentTotalCoins = (profileData["totalCoins"] as? Number)?.toDouble() 
-                    ?: (currentMiningReward + currentTaskReward + currentReferralReward)
                 val todayEarnings = (profileData["todayEarnings"] as? Number)?.toDouble() ?: 0.0
 
                 // Format date in ISO 8601 format for Appwrite
@@ -140,14 +138,18 @@ open class MiningRepository @Inject constructor(
                 dateFormat.timeZone = TimeZone.getTimeZone("UTC")
                 val currentDate = dateFormat.format(Date())
 
-                // Update user profile with mining reward AND totalCoins
+                // Calculate new totals
+                val newMiningReward = currentMiningReward + reward
+                val newTotalCoins = newMiningReward + currentTaskReward + currentReferralReward
+
+                // Update user profile with mining reward
                 appwriteService.databases.updateDocument(
                         databaseId = AppwriteService.DATABASE_ID,
                         collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                         documentId = profile.id,
                         data = mapOf(
-                                "miningReward" to (currentMiningReward + reward),
-                                "totalCoins" to (currentTotalCoins + reward),
+                                "miningReward" to newMiningReward,
+                                "totalCoins" to newTotalCoins,
                                 "todayEarnings" to (todayEarnings + reward),
                                 "updatedAt" to currentDate
                         )
@@ -325,7 +327,7 @@ open class MiningRepository @Inject constructor(
                         documentId = ID.unique(),
                         data = mapOf(
                                 "userId" to userId,
-                                "amount" to 2.0,
+                                "amount" to 2L,
                                 "timestamp" to currentDate,
                                 "status" to "pending",
                                 "duration" to 30

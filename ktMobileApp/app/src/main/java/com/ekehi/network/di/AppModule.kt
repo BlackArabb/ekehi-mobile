@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ekehi.network.analytics.AnalyticsManager
+import com.ekehi.network.auth.SocialAuthManager
 import com.ekehi.network.data.local.EkehiDatabase
 import com.ekehi.network.data.local.CacheManager
 import com.ekehi.network.data.local.dao.MiningSessionDao
@@ -124,6 +125,12 @@ object AppModule {
                     // Add referralReward column to user_profiles table
                     database.execSQL("ALTER TABLE user_profiles ADD COLUMN referralReward REAL NOT NULL DEFAULT 0.0")
                 }
+            },
+            object : androidx.room.migration.Migration(4, 5) {
+                override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                    // Add totalCoins column to user_profiles table
+                    database.execSQL("ALTER TABLE user_profiles ADD COLUMN totalCoins REAL NOT NULL DEFAULT 0.0")
+                }
             }
         )
         .build()
@@ -210,9 +217,10 @@ object AppModule {
     fun provideOAuthService(
             @ApplicationContext context: Context,
             client: Client,
-            userRepository: UserRepository
+            userRepository: UserRepository,
+            socialAuthManager: SocialAuthManager
     ): OAuthService {
-        return OAuthService(context, client, userRepository)
+        return OAuthService(context, client, userRepository, socialAuthManager)
     }
 
     @Provides

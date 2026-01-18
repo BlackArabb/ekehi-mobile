@@ -229,10 +229,14 @@ open class UserUseCase @Inject constructor(
                 
                 // Only update coins and streak bonus if they changed
                 if (updatedTotalCoins != userProfile.totalCoins) {
-                    // Since we removed totalCoins from the database, we need to update the individual reward fields
-                    // For streak bonus, we'll add to taskReward
-                    updates["taskReward"] = updatedTotalCoins
-                    Log.d(TAG, "💰 Total coins updated: ${userProfile.totalCoins} -> $updatedTotalCoins")
+                    // Update both taskReward and totalCoins
+                    val taskRewardDiff = updatedTotalCoins - userProfile.totalCoins
+                    val newTaskReward = userProfile.taskReward + taskRewardDiff
+                    val newTotalCoins = newTaskReward + userProfile.miningReward + userProfile.referralReward
+                    
+                    updates["taskReward"] = newTaskReward
+                    updates["totalCoins"] = newTotalCoins
+                    Log.d(TAG, "💰 Total coins updated: ${userProfile.totalCoins} -> $newTotalCoins")
                 }
                 
                 if (updatedStreakBonusClaimed != userProfile.streakBonusClaimed) {
@@ -310,8 +314,12 @@ open class UserUseCase @Inject constructor(
                 val currentProfile = profileResult.getOrNull()!!
                 
                 // Prepare updates
+                val newTaskReward = newBalance
+                val newTotalCoins = newTaskReward + currentProfile.miningReward + currentProfile.referralReward
+                
                 val updates = mapOf<String, Any>(
-                    "taskReward" to newBalance,
+                    "taskReward" to newTaskReward,
+                    "totalCoins" to newTotalCoins,
                     "updatedAt" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).apply {
                         timeZone = TimeZone.getTimeZone("UTC")
                     }.format(Date())

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.LeaderboardViewModel
+import com.ekehi.network.presentation.ui.EkhLogo
 import com.ekehi.network.presentation.ui.components.LeaderboardScreenSkeleton
 
 // Data class for leaderboard entries
@@ -414,12 +415,7 @@ fun PodiumMember(
                 fontWeight = FontWeight.ExtraBold
             )
             Spacer(modifier = Modifier.width(2.dp))
-            Text(
-                text = "EKH",
-                color = Color.White.copy(alpha = 0.5f),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold
-            )
+            EkhLogo(size = 14.dp)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -540,11 +536,7 @@ fun LeaderboardEntryItem(entry: LeaderboardEntry) {
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = "EKH",
-                    color = Color(0xB3FFFFFF),
-                    fontSize = 12.sp
-                )
+                EkhLogo(size = 14.dp)
             }
         }
     }

@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.DashboardViewModel
+import com.ekehi.network.presentation.ui.EkhLogo
 
 @Composable
 fun DashboardScreen(
@@ -205,25 +206,40 @@ fun DashboardAdBonusButton() {
                     contentDescription = "Watch Ad",
                     tint = Color.White
                 )
-                Text(
-                    text = "Watch Ad for +2 EKH",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 8.dp)) {
+                    Text(
+                        text = "Watch Ad for +2",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    EkhLogo(size = 18.dp)
+                }
             }
         }
 
-        Text(
-            text = "Watch a short ad to earn bonus EKH tokens",
-            color = Color(0xB3FFFFFF), // 70% opacity white
-            fontSize = 12.sp,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Watch a short ad to earn bonus",
+                color = Color(0xB3FFFFFF), // 70% opacity white
+                fontSize = 12.sp
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            EkhLogo(size = 14.dp)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "tokens",
+                color = Color(0xB3FFFFFF), // 70% opacity white
+                fontSize = 12.sp
+            )
+        }
     }
 }
 

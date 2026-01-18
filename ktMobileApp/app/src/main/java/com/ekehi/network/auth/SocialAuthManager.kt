@@ -29,8 +29,35 @@ class SocialAuthManager @Inject constructor(
     private val facebookCallbackManager = CallbackManager.Factory.create()
     
     private val TAG = "SocialAuthManager"
-    
-    // ===== YOUTUBE OAUTH (FOR TASK VERIFICATION) =====
+
+    // ===== REGULAR GOOGLE AUTH (FOR LOGIN/SIGNUP) =====
+
+    /**
+     * Get regular Google sign-in client for authentication
+     */
+    fun getGoogleSignInClient(): GoogleSignInClient {
+        if (googleSignInClient == null) {
+            Log.d(TAG, "Creating regular Google Sign-In Client")
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(com.ekehi.network.BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                .build()
+            googleSignInClient = GoogleSignIn.getClient(context, gso)
+        }
+        return googleSignInClient!!
+    }
+
+    /**
+     * Helper to start Google Sign-In activity
+     */
+    fun signInWithGoogle(activity: android.app.Activity, requestCode: Int) {
+        val client = getGoogleSignInClient()
+        // Sign out first to ensure account picker shows up if needed
+        client.signOut().addOnCompleteListener {
+            val signInIntent = client.signInIntent
+            activity.startActivityForResult(signInIntent, requestCode)
+        }
+    }
     
     /**
      * Get YouTube-specific sign-in client with YouTube API scopes
@@ -79,8 +106,8 @@ class SocialAuthManager @Inject constructor(
         // If you don't have a separate YouTube client ID, you can use the same one as sign-in
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
-            .requestIdToken(com.ekehi.network.BuildConfig.YOUTUBE_CLIENT_ID)
-            .requestServerAuthCode(com.ekehi.network.BuildConfig.YOUTUBE_CLIENT_ID)
+            .requestIdToken(com.ekehi.network.BuildConfig.GOOGLE_WEB_CLIENT_ID)
+            .requestServerAuthCode(com.ekehi.network.BuildConfig.GOOGLE_WEB_CLIENT_ID)
             .requestScopes(
                 Scope("https://www.googleapis.com/auth/youtube.readonly"),
                 Scope("https://www.googleapis.com/auth/youtube.force-ssl")

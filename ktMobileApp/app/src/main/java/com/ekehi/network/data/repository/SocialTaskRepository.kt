@@ -109,31 +109,46 @@ open class SocialTaskRepository @Inject constructor(
                             Log.i("EKEHI_DEBUG", "  Record #$index: status=${ut.status}, completedAt=${ut.completedAt}, isRecent=$isRecent")
                         }
 
-                        val verifiedTasksInLast24h = userTasksForThisTask.filter { ut ->
-                            ut.status == "verified" && parseIsoDate(ut.completedAt) > oneDayAgo
+                        // Implement automatic 24h reset based on last completion time
+                        val sortedUserTasks = userTasksForThisTask.sortedByDescending { parseIsoDate(it.completedAt) }
+                        val oneDayMs = 24 * 60 * 60 * 1000L
+                        
+                        var completionCountToday = 0
+                        var lastReferenceTime = now
+                        var latestVerifiedTime = 0L
+                        
+                        // Count verified tasks in the current 24h active block
+                        for (ut in sortedUserTasks) {
+                            val compTime = parseIsoDate(ut.completedAt)
+                            
+                            // If gap since last task (or now) is > 24h, this starts a new reset cycle
+                            if (lastReferenceTime - compTime > oneDayMs) {
+                                break
+                            }
+                            
+                            if (ut.status == "verified") {
+                                completionCountToday++
+                                if (latestVerifiedTime == 0L) latestVerifiedTime = compTime
+                            }
+                            lastReferenceTime = compTime
                         }
                         
-                        val latestUserTask = userTasksForThisTask.maxByOrNull { 
-                            parseIsoDate(it.completedAt)
-                        }
-                        
-                        val completionCountToday = verifiedTasksInLast24h.size
-                        val latestVerifiedTask = verifiedTasksInLast24h.maxByOrNull {
-                            parseIsoDate(it.completedAt)
-                        }
-                        
-                        val lastVerifiedTime = parseIsoDate(latestVerifiedTask?.completedAt)
+                        val latestUserTask = sortedUserTasks.firstOrNull()
                         
                         val cooldownMs = task.cooldownMinutes * 60 * 1000L
-                        val nextAvailableTime = lastVerifiedTime + cooldownMs
-                        val isCooldownActive = lastVerifiedTime > 0 && now < nextAvailableTime
+                        val nextCooldownAvailableTime = latestVerifiedTime + cooldownMs
+                        val nextLimitAvailableTime = latestVerifiedTime + oneDayMs
+                        
+                        val isCooldownActive = latestVerifiedTime > 0 && now < nextCooldownAvailableTime
                         val isLimitReached = completionCountToday >= task.maxCompletionsPerDay
                         
-                        val nextAvailableAt = if (isCooldownActive) {
-                            java.time.Instant.ofEpochMilli(nextAvailableTime).toString()
-                        } else null
+                        val nextAvailableAt = when {
+                            isLimitReached -> java.time.Instant.ofEpochMilli(nextLimitAvailableTime).toString()
+                            isCooldownActive -> java.time.Instant.ofEpochMilli(nextCooldownAvailableTime).toString()
+                            else -> null
+                        }
                         
-                        Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, cooldown=$isCooldownActive")
+                        Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, isLimitReached=$isLimitReached, isCooldownActive=$isCooldownActive")
                         
                         task.copy(
                             isCompleted = isLimitReached || isCooldownActive,
@@ -212,28 +227,41 @@ open class SocialTaskRepository @Inject constructor(
                 
                 if (task.platform.lowercase() == "blog") {
                     Log.i("EKEHI_DEBUG", "Executing blog-specific logic")
-                    // Blog task: check 24h limit and cooldown
-                    val oneDayAgo = now - (24 * 60 * 60 * 1000L)
-                    val verifiedTasksInLast24h = userTasksForThisTask.filter { ut ->
-                        ut.status == "verified" && parseIsoDate(ut.completedAt) > oneDayAgo
+                    
+                    // Implement automatic 24h reset based on last completion time
+                    val sortedUserTasks = userTasksForThisTask.sortedByDescending { parseIsoDate(it.completedAt) }
+                    val oneDayMs = 24 * 60 * 60 * 1000L
+                    
+                    var completionCountToday = 0
+                    var lastReferenceTime = now
+                    var latestVerifiedTime = 0L
+                    
+                    for (ut in sortedUserTasks) {
+                        val compTime = parseIsoDate(ut.completedAt)
+                        if (lastReferenceTime - compTime > oneDayMs) break
+                        
+                        if (ut.status == "verified") {
+                            completionCountToday++
+                            if (latestVerifiedTime == 0L) latestVerifiedTime = compTime
+                        }
+                        lastReferenceTime = compTime
                     }
                     
-                    Log.i("EKEHI_DEBUG", "Blog completions in last 24h: ${verifiedTasksInLast24h.size}")
+                    Log.i("EKEHI_DEBUG", "Blog completions in current block: $completionCountToday")
                     
-                    if (verifiedTasksInLast24h.size >= task.maxCompletionsPerDay) {
-                        Log.w("EKEHI_DEBUG", "Blog limit reached: ${verifiedTasksInLast24h.size}/${task.maxCompletionsPerDay}")
-                        return@withContext Result.failure(Exception("Daily limit reached. Try again tomorrow."))
+                    if (completionCountToday >= task.maxCompletionsPerDay) {
+                        val nextResetTime = latestVerifiedTime + oneDayMs
+                        val remainingMs = nextResetTime - now
+                        val remainingHours = remainingMs / (60 * 60 * 1000)
+                        val remainingMinutes = (remainingMs / (60 * 1000)) % 60
+                        
+                        Log.w("EKEHI_DEBUG", "Blog limit reached. Next reset in $remainingHours h $remainingMinutes mins")
+                        return@withContext Result.failure(Exception("Daily limit reached. Try again in $remainingHours hours and $remainingMinutes minutes."))
                     }
-                    
-                    val latestVerifiedTask = verifiedTasksInLast24h.maxByOrNull {
-                        parseIsoDate(it.completedAt)
-                    }
-                    
-                    val lastVerifiedTime = parseIsoDate(latestVerifiedTask?.completedAt)
                     
                     val cooldownMs = task.cooldownMinutes * 60 * 1000L
-                    if (lastVerifiedTime > 0 && now < lastVerifiedTime + cooldownMs) {
-                        val remainingMs = (lastVerifiedTime + cooldownMs) - now
+                    if (latestVerifiedTime > 0 && now < latestVerifiedTime + cooldownMs) {
+                        val remainingMs = (latestVerifiedTime + cooldownMs) - now
                         val remainingMinutes = (remainingMs / (60 * 1000)) + 1
                         Log.w("EKEHI_DEBUG", "Blog cooldown active: $remainingMinutes mins left")
                         return@withContext Result.failure(Exception("Cooldown active. Available in $remainingMinutes minutes."))
@@ -573,7 +601,11 @@ open class SocialTaskRepository @Inject constructor(
                 @Suppress("UNCHECKED_CAST")
                 val profileData = profileDoc.data as Map<String, Any>
                 val currentTaskReward = (profileData["taskReward"] as? Number)?.toDouble() ?: 0.0
+                val currentMiningReward = (profileData["miningReward"] as? Number)?.toDouble() ?: 0.0
+                val currentReferralReward = (profileData["referralReward"] as? Number)?.toDouble() ?: 0.0
+                
                 val newTaskReward = currentTaskReward + amount
+                val newTotalCoins = newTaskReward + currentMiningReward + currentReferralReward
                 
                 Log.i("EKEHI_DEBUG", "Updating user profile $documentId: old=$currentTaskReward, new=$newTaskReward")
                 
@@ -583,6 +615,7 @@ open class SocialTaskRepository @Inject constructor(
                     documentId = documentId,
                     data = mapOf(
                         "taskReward" to newTaskReward,
+                        "totalCoins" to newTotalCoins,
                         "updatedAt" to java.time.Instant.now().toString()
                     )
                 )

@@ -17,6 +17,7 @@ import com.ekehi.network.presentation.ui.components.UpdateCheckWrapper
 import com.ekehi.network.presentation.viewmodel.LoginViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
+import com.ekehi.network.service.OAuthService
 import com.facebook.CallbackManager
 import com.startapp.sdk.adsbase.StartAppAd
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,6 +89,12 @@ class MainActivity : ComponentActivity() {
     
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        
+        // Handle Google Sign-In result
+        if (requestCode == OAuthService.GOOGLE_SIGN_IN_REQUEST_CODE) {
+            Log.d("MainActivity", "Received Google Sign-In result")
+            oAuthViewModel.handleGoogleSignInResult(this, data)
+        }
         
         // Handle Facebook login result
         callbackManager.onActivityResult(requestCode, resultCode, data)

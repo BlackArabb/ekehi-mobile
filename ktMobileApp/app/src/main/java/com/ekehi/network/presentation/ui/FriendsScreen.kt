@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.FriendsViewModel
+import com.ekehi.network.presentation.ui.EkhLogo
 import com.ekehi.network.data.model.Referral
 import com.ekehi.network.presentation.ui.components.FriendsScreenSkeleton
 
@@ -301,12 +302,16 @@ fun ReferralItem(referral: Referral) {
                             modifier = Modifier.size(16.dp)
                         )
                     }
-                    Text(
-                        text = "+2 EKH",
-                        color = Color(0xFF10b981),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "+2",
+                            color = Color(0xFF10b981),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        EkhLogo(size = 14.dp)
+                    }
                 } else {
                     Box(
                         modifier = Modifier

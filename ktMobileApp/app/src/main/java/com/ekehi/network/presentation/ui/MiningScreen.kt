@@ -68,6 +68,7 @@ import com.startapp.sdk.adsbase.Ad
 import com.ekehi.network.di.StartIoServiceEntryPoint
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
+import com.ekehi.network.presentation.ui.EkhLogo
 import com.ekehi.network.R
 import androidx.navigation.NavHostController
 
@@ -221,7 +222,7 @@ fun MiningScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Direct Share Card (separated from ReferralCard)
-                DirectShareCard()
+                DirectShareCard(userProfile)
                 
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -319,13 +320,17 @@ fun UserProfileCard(
                     fontSize = 10.sp, // Further reduced from 12.sp
                     maxLines = 1
                 )
-                Text(
-                    text = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
-                    color = Color(0xFFffa000), // Orange
-                    fontSize = 12.sp, // Further reduced from 12.sp
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "%.2f".format(userProfile?.totalCoins ?: 0.0),
+                        color = Color(0xFFffa000), // Orange
+                        fontSize = 12.sp, // Further reduced from 12.sp
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    EkhLogo(size = 14.dp)
+                }
             }
         }
         
@@ -447,13 +452,23 @@ fun MiningProgressBar(progress: Float, remainingTime: String, isMining: Boolean)
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-                Text(
-                    text = "2.0 EKH Reward",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                    Text(
+                        text = "2.0",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    EkhLogo(size = 18.dp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Reward",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
@@ -585,11 +600,21 @@ fun ReferralCard(navController: NavHostController? = null, userProfile: UserProf
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            Text(
-                text = "Earn 2 EKH for each friend who joins",
-                color = Color.Gray,
-                fontSize = 14.sp
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Earn 2",
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                EkhLogo(size = 14.dp)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "for each friend who joins",
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -628,9 +653,9 @@ fun ReferralCard(navController: NavHostController? = null, userProfile: UserProf
                         // Share referral link outside the app with user's actual referral code
                         val referralCode = userProfile?.referralCode ?: ""
                         val message = if (referralCode.isNotEmpty()) {
-                            "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: $referralCode"
+                            "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: $referralCode\n\nDownload here: https://loadly.io/v2hNdX15"
                         } else {
-                            "Join Ekehi Network and earn EKH tokens! Download the app and start mining EKH!"
+                            "Join Ekehi Network and earn EKH tokens! Download the app and start mining EKH!\n\nDownload here: https://loadly.io/v2hNdX15"
                         }
                         
                         val sendIntent = Intent().apply {
@@ -662,8 +687,10 @@ fun ReferralCard(navController: NavHostController? = null, userProfile: UserProf
 }
 
 @Composable
-fun DirectShareCard() {
+fun DirectShareCard(userProfile: UserProfile?) {
     val context = LocalContext.current
+    val referralCode = userProfile?.referralCode ?: "REF123456"
+    val shareMessage = "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: $referralCode\n\nDownload here: https://loadly.io/v2hNdX15"
     
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -693,7 +720,7 @@ fun DirectShareCard() {
                 // Facebook
                 IconButton(
                     onClick = { 
-                        shareToSocialMedia(context, "https://facebook.com/sharer/sharer.php?u=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        shareToSocialMedia(context, "https://facebook.com/sharer/sharer.php?u=", shareMessage)
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
@@ -727,7 +754,7 @@ fun DirectShareCard() {
                 // Telegram
                 IconButton(
                     onClick = { 
-                        shareToSocialMedia(context, "https://t.me/share/url?url=&text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        shareToSocialMedia(context, "https://t.me/share/url?url=&text=", shareMessage)
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
@@ -761,7 +788,7 @@ fun DirectShareCard() {
                 // WhatsApp
                 IconButton(
                     onClick = { 
-                        shareToSocialMedia(context, "https://api.whatsapp.com/send?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        shareToSocialMedia(context, "https://api.whatsapp.com/send?text=", shareMessage)
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
@@ -795,7 +822,7 @@ fun DirectShareCard() {
                 // Twitter
                 IconButton(
                     onClick = { 
-                        shareToSocialMedia(context, "https://twitter.com/intent/tweet?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        shareToSocialMedia(context, "https://twitter.com/intent/tweet?text=", shareMessage)
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
@@ -829,7 +856,7 @@ fun DirectShareCard() {
                 // Messenger
                 IconButton(
                     onClick = { 
-                        shareToSocialMedia(context, "https://www.facebook.com/dialog/send?app_id=&display=popup&href=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        shareToSocialMedia(context, "https://www.facebook.com/dialog/send?app_id=&display=popup&href=", shareMessage)
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
@@ -863,7 +890,7 @@ fun DirectShareCard() {
                 // Discord
                 IconButton(
                     onClick = { 
-                        shareToSocialMedia(context, "https://discord.com/channels/@me", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        shareToSocialMedia(context, "https://discord.com/channels/@me", shareMessage)
                     },
                     modifier = Modifier.size(50.dp)
                 ) {
@@ -897,7 +924,7 @@ fun DirectShareCard() {
                 // Line
                 IconButton(
                     onClick = { 
-                        shareToSocialMedia(context, "https://social-plugins.line.me/lineit/share?text=", "Join Ekehi Network and earn EKH tokens! Download the app and use my referral code: REF123456")
+                        shareToSocialMedia(context, "https://social-plugins.line.me/lineit/share?text=", shareMessage)
                     },
                     modifier = Modifier.size(50.dp)
                 ) {

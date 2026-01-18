@@ -9,6 +9,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,8 +33,10 @@ fun AppNavigation(
     isAuthenticated: Boolean = false,
     requiresAdditionalInfo: Boolean = false
 ) {
+    val context = LocalContext.current
+    val activity = context as ComponentActivity
     val navController = rememberNavController()
-    val oAuthViewModel: OAuthViewModel = hiltViewModel()
+    val oAuthViewModel: OAuthViewModel = hiltViewModel(activity)
     
     val authResolution by oAuthViewModel.authResolution.collectAsState()
     

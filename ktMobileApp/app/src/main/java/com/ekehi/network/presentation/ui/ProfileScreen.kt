@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.presentation.viewmodel.ProfileViewModel
+import com.ekehi.network.presentation.ui.EkhLogo
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
@@ -249,12 +250,16 @@ fun ProfileHeader(
                         letterSpacing = 1.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "%.2f EKH".format(userProfile?.totalCoins ?: 0.0),
-                        color = Color(0xFFffa000),
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "%.2f".format(userProfile?.totalCoins ?: 0.0),
+                            color = Color(0xFFffa000),
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        EkhLogo(size = 28.dp)
+                    }
                 }
             }
 
@@ -361,11 +366,12 @@ fun ProfileStatsSection(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatCard(
-                        value = "%.2f EKH".format(userProfile?.taskReward ?: 0.0),
+                        value = "%.2f".format(userProfile?.taskReward ?: 0.0),
                         label = "Task Reward",
                         icon = Icons.Default.TaskAlt,
                         iconColor = Color(0xFFffa000),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        showLogo = true
                     )
 
                     StatCard(
@@ -388,18 +394,42 @@ fun ProfileStatsSection(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatCard(
-                        value = "%.2f EKH".format(userProfile?.referralReward ?: 0.0),
+                        value = "%.2f".format(userProfile?.miningReward ?: 0.0),
+                        label = "Mining Reward",
+                        icon = Icons.Default.PrecisionManufacturing,
+                        iconColor = Color(0xFF3b82f6),
+                        modifier = Modifier.weight(1f),
+                        showLogo = true
+                    )
+
+                    StatCard(
+                        value = "%.2f".format(userProfile?.referralReward ?: 0.0),
                         label = "Referral Reward",
                         icon = Icons.Default.CardGiftcard,
                         iconColor = Color(0xFF8b5cf6),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        showLogo = true
                     )
+                }
 
+                // Third row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     StatCard(
                         value = (userProfile?.totalReferrals ?: 0).toString(),
                         label = "Referral Count",
                         icon = Icons.Default.People,
-                        iconColor = Color(0xFF8b5cf6),
+                        iconColor = Color(0xFFec4899),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    StatCard(
+                        value = (userProfile?.currentStreak ?: 0).toString(),
+                        label = "Current Streak",
+                        icon = Icons.Default.LocalFireDepartment,
+                        iconColor = Color(0xFFef4444),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -409,7 +439,7 @@ fun ProfileStatsSection(
 }
 
 @Composable
-fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, iconColor: Color, modifier: Modifier = Modifier) {
+fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, iconColor: Color, modifier: Modifier = Modifier, showLogo: Boolean = false) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -432,13 +462,21 @@ fun StatCard(value: String, label: String, icon: androidx.compose.ui.graphics.ve
                 tint = iconColor,
                 modifier = Modifier.size(24.dp)
             )
-            Text(
-                text = value,
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = 8.dp)
-            )
+            ) {
+                Text(
+                    text = value,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (showLogo) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    EkhLogo(size = 14.dp)
+                }
+            }
             Text(
                 text = label,
                 color = Color(0xB3FFFFFF), // 70% opacity white

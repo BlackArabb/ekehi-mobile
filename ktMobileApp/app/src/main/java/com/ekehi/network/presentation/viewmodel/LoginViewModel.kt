@@ -179,7 +179,8 @@ class LoginViewModel @Inject constructor(
      */
     private fun updateStreakAfterLogin() {
         Log.d("LoginViewModel", "=== UPDATING STREAK AFTER LOGIN ===")
-        viewModelScope.launch {
+        // Use fallbackScope to ensure streak update completes even if ViewModel is cleared during navigation
+        fallbackScope.launch {
             try {
                 // Get the current user to update their streak
                 authUseCase.getCurrentUserIfLoggedIn().collect { authResource ->
@@ -270,6 +271,9 @@ class LoginViewModel @Inject constructor(
                                                     is Resource.Success -> {
                                                         Log.d("LoginViewModel", "✅ User profile verified/created successfully")
                                                         _loginState.value = Resource.Success(Unit)
+                                                        
+                                                        // After auto-login, update the user's streak
+                                                        updateStreakAfterLogin()
                                                     }
                                                     is Resource.Error -> {
                                                         Log.e("LoginViewModel", "❌ Failed to create/verify user profile: ${profileResource.message}")

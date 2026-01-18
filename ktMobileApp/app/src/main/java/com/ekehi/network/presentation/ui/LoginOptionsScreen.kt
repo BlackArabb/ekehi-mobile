@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,7 +32,7 @@ import com.ekehi.network.R
 
 @Composable
 fun LoginOptionsScreen(
-    oAuthViewModel: OAuthViewModel = hiltViewModel(),
+    oAuthViewModel: OAuthViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
     onGoogleLogin: () -> Unit = {},
     onNavigateToGoogleSecondaryInfo: () -> Unit = {},  // Navigate to secondary info after Google OAuth
     onEmailLogin: () -> Unit,

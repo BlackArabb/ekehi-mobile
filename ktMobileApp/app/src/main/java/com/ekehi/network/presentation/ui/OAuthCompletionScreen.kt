@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -40,7 +42,7 @@ import com.ekehi.network.presentation.ui.components.CountryDropdownField
 @Composable
 fun OAuthCompletionScreen(
     secondaryInfoViewModel: SecondaryInfoViewModel = hiltViewModel(),
-    oAuthViewModel: OAuthViewModel = hiltViewModel(),
+    oAuthViewModel: OAuthViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
     onComplete: () -> Unit = {}
 ) {
     val phoneNumber by secondaryInfoViewModel.phoneNumber.collectAsState()

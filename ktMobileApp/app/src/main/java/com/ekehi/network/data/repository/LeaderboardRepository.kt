@@ -27,10 +27,25 @@ class LeaderboardRepository @Inject constructor(
 
                 // Convert documents to leaderboard entries
                 val leaderboardEntries = response.documents.mapIndexed { index, document ->
+                    val taskReward = (document.data["taskReward"] as? Number)?.toDouble() ?: 0.0
+                    val miningReward = (document.data["miningReward"] as? Number)?.toDouble() ?: 0.0
+                    val referralReward = (document.data["referralReward"] as? Number)?.toDouble() ?: 0.0
+                    
+                    // Use totalCoins from DB, calculate only if missing
+                    val totalCoins = (document.data["totalCoins"] as? Number)?.toDouble() 
+                        ?: (taskReward + miningReward + referralReward)
+
+                    val userIdValue = when (val uid = document.data["userId"]) {
+                        is List<*> -> uid.firstOrNull() as? String ?: document.id
+                        is String -> uid
+                        else -> document.id
+                    }
+
                     buildMap<String, Any> {
                         put("rank", index + 1)
+                        put("userId", userIdValue)
                         put("username", document.data["username"] as? String ?: "user_${document.id.take(8)}")
-                        put("totalCoins", (document.data["totalCoins"] as? Number)?.toDouble() ?: 0.0)
+                        put("totalCoins", totalCoins)
                         put("miningPower", 0.0)
                         put("currentStreak", (document.data["currentStreak"] as? Number)?.toInt() ?: 0)
                         put("totalReferrals", (document.data["totalReferrals"] as? Number)?.toInt() ?: 0)
@@ -78,6 +93,16 @@ class LeaderboardRepository @Inject constructor(
                 val rank = response.documents.size + 1
                 Result.success(rank)
             } catch (e: AppwriteException) {
+                Log.e("Leaderboard", "Error calculating rank with totalCoins, using fallback: ${e.message}")
+                // Fallback: If totalCoins index is missing, try to find user in top 100
+                val leaderboardResult = getVerifiedLeaderboard()
+                if (leaderboardResult.isSuccess) {
+                    val leaderboard = leaderboardResult.getOrNull()
+                    val userEntry = leaderboard?.find { it["userId"] == userId }
+                    if (userEntry != null) {
+                        return@withContext Result.success(userEntry["rank"] as Int)
+                    }
+                }
                 Result.failure(e)
             }
         }
@@ -105,12 +130,19 @@ class LeaderboardRepository @Inject constructor(
                     val miningReward = (document.data["miningReward"] as? Number)?.toDouble() ?: 0.0
                     val referralReward = (document.data["referralReward"] as? Number)?.toDouble() ?: 0.0
                     
-                    // Use totalCoins from DB if available, otherwise calculate it
+                    // Use totalCoins from DB, calculate only if missing
                     val totalCoins = (document.data["totalCoins"] as? Number)?.toDouble() 
                         ?: (taskReward + miningReward + referralReward)
 
+                    val userIdValue = when (val uid = document.data["userId"]) {
+                        is List<*> -> uid.firstOrNull() as? String ?: document.id
+                        is String -> uid
+                        else -> document.id
+                    }
+
                     buildMap<String, Any> {
                         put("rank", index + 1)
+                        put("userId", userIdValue)
                         put("username", document.data["username"] as? String ?: "user_${document.id.take(8)}")
                         put("totalCoins", totalCoins)
                         put("miningPower", (document.data["miningPower"] as? Number)?.toDouble() ?: 0.0)
@@ -134,19 +166,25 @@ class LeaderboardRepository @Inject constructor(
                             collectionId = AppwriteService.USER_PROFILES_COLLECTION,
                             queries = listOf(
                                 Query.orderDesc("taskReward"),
-                                Query.limit(50)
+                                Query.limit(100) // Fetch more to improve local sorting accuracy
                             )
                         )
                         
-                        val fallbackEntries = fallbackResponse.documents.mapIndexed { index, document ->
+                        val fallbackEntries = fallbackResponse.documents.map { document ->
                             val taskReward = (document.data["taskReward"] as? Number)?.toDouble() ?: 0.0
                             val miningReward = (document.data["miningReward"] as? Number)?.toDouble() ?: 0.0
                             val referralReward = (document.data["referralReward"] as? Number)?.toDouble() ?: 0.0
                             val totalCoins = (document.data["totalCoins"] as? Number)?.toDouble() 
                                 ?: (taskReward + miningReward + referralReward)
 
+                            val userIdValue = when (val uid = document.data["userId"]) {
+                                is List<*> -> uid.firstOrNull() as? String ?: document.id
+                                is String -> uid
+                                else -> document.id
+                            }
+
                             buildMap<String, Any> {
-                                put("rank", index + 1)
+                                put("userId", userIdValue)
                                 put("username", document.data["username"] as? String ?: "user_${document.id.take(8)}")
                                 put("totalCoins", totalCoins)
                                 put("miningPower", (document.data["miningPower"] as? Number)?.toDouble() ?: 0.0)
@@ -154,6 +192,11 @@ class LeaderboardRepository @Inject constructor(
                                 put("totalReferrals", (document.data["totalReferrals"] as? Number)?.toInt() ?: 0)
                             }
                         }
+                        .sortedByDescending { it["totalCoins"] as Double }
+                        .mapIndexed { index, entry ->
+                            entry.toMutableMap().apply { put("rank", index + 1) }
+                        }
+                        
                         return@withContext Result.success(fallbackEntries)
                     } catch (e2: Exception) {
                         Log.e("Leaderboard", "Fallback fetch also failed", e2)

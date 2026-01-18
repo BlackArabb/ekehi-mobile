@@ -1,11 +1,14 @@
 package com.ekehi.network.presentation.viewmodel
 
+import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.data.repository.AuthRepository
 import com.ekehi.network.util.DebugLogger
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 
 import com.ekehi.network.data.repository.UserRepository
 import com.ekehi.network.domain.model.Resource
@@ -31,6 +34,100 @@ class OAuthViewModel @Inject constructor(
 
     private val _oauthState = MutableStateFlow<Resource<Boolean>>(Resource.Idle)
     val oauthState: StateFlow<Resource<Boolean>> = _oauthState
+
+    fun handleGoogleSignInResult(activity: ComponentActivity, data: Intent?) {
+        DebugLogger.logStep("VM_HANDLE_GOOGLE_SIGN_IN_RESULT", "Processing Google sign-in result")
+        
+        if (data == null) {
+            DebugLogger.logError("VM_HANDLE_RESULT", "Intent data is null", Exception("Null intent data"))
+            _oauthState.value = Resource.Error("Authentication failed: No data received")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                _oauthState.value = Resource.Loading
+                
+                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+                
+                DebugLogger.logState("VM_GOOGLE_RESULT", "Parsed", mapOf(
+                    "account" to (account?.email ?: "null"),
+                    "hasIdToken" to (idToken != null)
+                ))
+                
+                if (idToken != null) {
+                    DebugLogger.logStep("VM_GOOGLE_ID_TOKEN_RECEIVED", "Received token, creating Appwrite session")
+                    val result = oAuthService.handleNativeGoogleLogin(idToken)
+                    
+                    if (result.isSuccess) {
+                        val resultMap = result.getOrThrow()
+                        val isProfileComplete = resultMap["isProfileComplete"] as? Boolean ?: false
+                        
+                        DebugLogger.logStep("VM_NATIVE_LOGIN_SUCCESS", "Session created successfully. Profile complete: $isProfileComplete")
+                        
+                        _requiresAdditionalInfo.value = !isProfileComplete
+                        _oauthState.value = Resource.Success(true)
+                        
+                        // Set resolution for navigation
+                        _authResolution.value = if (isProfileComplete) {
+                            AuthResolution.AuthenticatedComplete
+                        } else {
+                            AuthResolution.AuthenticatedIncomplete
+                        }
+                    } else {
+                        val error = result.exceptionOrNull()?.message ?: "Appwrite session creation failed"
+                        DebugLogger.logError("VM_NATIVE_LOGIN_FAILED", error, result.exceptionOrNull() as? Exception ?: Exception(error))
+                        
+                        // Fallback to browser-based OAuth if native login fails
+                        DebugLogger.logStep("VM_FALLBACK", "Native login failed, falling back to browser OAuth")
+                        initiateBrowserOAuth(activity)
+                    }
+                } else {
+                    DebugLogger.logError("VM_NATIVE_LOGIN_FAILED", "No ID token received from Google", Exception("No ID token"))
+                    // Fallback to browser-based OAuth
+                    initiateBrowserOAuth(activity)
+                }
+            } catch (e: ApiException) {
+                val statusCode = e.statusCode
+                DebugLogger.logError("VM_GOOGLE_SIGN_IN_API_ERROR", "Status Code: $statusCode", e)
+                
+                // 12501: SIGN_IN_CANCELLED
+                // 12502: SIGN_IN_CURRENTLY_IN_PROGRESS
+                // 7: NETWORK_ERROR
+                if (statusCode == 12501) { 
+                    DebugLogger.logStep("VM_GOOGLE_SIGN_IN_CANCELLED", "User cancelled sign-in")
+                    _oauthState.value = Resource.Idle
+                } else if (statusCode == 12502) {
+                    DebugLogger.logStep("VM_GOOGLE_SIGN_IN_PROGRESS", "Sign-in already in progress")
+                    // Don't change state, let it continue
+                } else {
+                    val error = "Google Sign-In failed (Code: $statusCode)"
+                    // For other errors, try fallback to browser
+                    DebugLogger.logStep("VM_FALLBACK", "Google API error, falling back to browser OAuth")
+                    initiateBrowserOAuth(activity)
+                }
+            } catch (e: Exception) {
+                DebugLogger.logError("VM_HANDLE_GOOGLE_SIGN_IN_RESULT", "Unexpected error: ${e.message}", e)
+                // Fallback to browser-based OAuth
+                initiateBrowserOAuth(activity)
+            }
+        }
+    }
+
+    private fun initiateBrowserOAuth(activity: ComponentActivity) {
+        viewModelScope.launch {
+            try {
+                _oauthState.value = Resource.Loading
+                // We'll call a dedicated method in OAuthService or just use createOAuth2Token directly
+                // For now, let's assume initiateGoogleOAuth has a way to force browser or we add a new method
+                oAuthService.initiateGoogleOAuth(activity, forceBrowser = true)
+            } catch (e: Exception) {
+                _oauthState.value = Resource.Error("OAuth initiation failed: ${e.message}")
+            }
+        }
+    }
 
     fun initiateGoogleOAuth(activity: ComponentActivity) {
         DebugLogger.logStep("VM_INITIATE_GOOGLE_OAUTH", "Initiating Google OAuth")

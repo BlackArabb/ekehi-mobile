@@ -44,7 +44,8 @@ fun UpdateCheckWrapper(
                 isDownloading = isDownloading,
                 downloadProgress = downloadProgress,
                 onUpdate = { viewModel.startDownload(status.config.downloadUrl) },
-                onDismiss = { if (!status.isMandatory) viewModel.dismissUpdate() }
+                onDismiss = { if (!status.isMandatory) viewModel.dismissUpdate() },
+                onManualDownload = { viewModel.openDownloadInBrowser(status.config.downloadUrl) }
             )
         }
         else -> {}
@@ -58,7 +59,8 @@ fun UpdateDialog(
     isDownloading: Boolean,
     downloadProgress: DownloadProgress?,
     onUpdate: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onManualDownload: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -146,12 +148,23 @@ fun UpdateDialog(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 if (downloadProgress is DownloadProgress.Failed) {
-                    Text(
-                        text = "Error: ${(downloadProgress as DownloadProgress.Failed).error}",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Error: ${(downloadProgress as DownloadProgress.Failed).error}",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        
+                        TextButton(
+                            onClick = onManualDownload,
+                            colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF4ECDC4))
+                        ) {
+                            Text("Try Manual Download", fontWeight = FontWeight.Bold)
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
 
                 if (isDownloading) {

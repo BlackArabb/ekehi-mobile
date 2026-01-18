@@ -28,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.viewmodel.ProfileViewModel
+import com.ekehi.network.presentation.ui.EkhLogo
 
 @Composable
 fun ReferralCodeScreen(
@@ -279,12 +280,20 @@ fun ReferralCodeScreen(
                             }
                         } else {
                             // Claim form UI
-                            Text(
-                                text = "Enter a referral code you received from a friend to get 2 EKH!",
-                                color = Color(0xB3FFFFFF),
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)) {
+                                Text(
+                                    text = "Enter a referral code you received from a friend to get 2",
+                                    color = Color(0xB3FFFFFF),
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                EkhLogo(size = 14.dp)
+                                Text(
+                                    text = "!",
+                                    color = Color(0xB3FFFFFF),
+                                    fontSize = 14.sp
+                                )
+                            }
                             
                             // Referral Code Input
                             OutlinedTextField(
@@ -340,11 +349,17 @@ fun ReferralCodeScreen(
                                             .padding(end = 8.dp)
                                     )
                                 }
-                                Text(
-                                    text = if (claimStatus is Resource.Loading) "Claiming..." else "Claim 2 EKH",
-                                    color = Color.White,
-                                    fontSize = 16.sp
-                                )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = if (claimStatus is Resource.Loading) "Claiming..." else "Claim 2",
+                                            color = Color.White,
+                                            fontSize = 16.sp
+                                        )
+                                        if (claimStatus !is Resource.Loading) {
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            EkhLogo(size = 16.dp)
+                                        }
+                                    }
                             }
                             
                             // Show success or error messages from claimStatus
@@ -397,7 +412,8 @@ fun ReferralCodeScreen(
                         BenefitItem(
                             icon = Icons.Default.CardGiftcard,
                             title = "For You",
-                            description = "Earn 2 EKH for each successful referral"
+                            description = "Earn 2 EKH for each successful referral",
+                            showLogoInDesc = true
                         )
                         
                         Spacer(modifier = Modifier.height(12.dp))
@@ -405,7 +421,8 @@ fun ReferralCodeScreen(
                         BenefitItem(
                             icon = Icons.Default.PersonAdd,
                             title = "For Your Friends",
-                            description = "Get a 50 EKH bonus when they sign up using your code"
+                            description = "Get a 50 EKH bonus when they sign up using your code",
+                            showLogoInDesc = true
                         )
                     }
                 }
@@ -416,7 +433,7 @@ fun ReferralCodeScreen(
                         // Share referral code
                         val referralCode = userProfile?.referralCode?.takeIf { it.isNotEmpty() }
                         if (referralCode != null) {
-                            val shareText = "Join Ekehi Network and start mining cryptocurrency! Use my referral code: $referralCode\n\nDownload the app now and earn rewards together!\n\n#EkehiNetwork #CryptoMining"
+                            val shareText = "Join Ekehi Network and start mining cryptocurrency! Use my referral code: $referralCode\n\nDownload the app now and earn rewards together: https://loadly.io/v2hNdX15\n\n#EkehiNetwork #CryptoMining"
                             
                             val sendIntent = Intent().apply {
                                 action = Intent.ACTION_SEND
@@ -463,7 +480,8 @@ fun ReferralCodeScreen(
 fun BenefitItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
-    description: String
+    description: String,
+    showLogoInDesc: Boolean = false
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -484,11 +502,36 @@ fun BenefitItem(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
-            Text(
-                text = description,
-                color = Color(0xB3FFFFFF),
-                fontSize = 14.sp
-            )
+            if (showLogoInDesc) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val parts = description.split("EKH")
+                    if (parts.size >= 2) {
+                        Text(
+                            text = parts[0],
+                            color = Color(0xB3FFFFFF),
+                            fontSize = 14.sp
+                        )
+                        EkhLogo(size = 14.dp)
+                        Text(
+                            text = parts[1],
+                            color = Color(0xB3FFFFFF),
+                            fontSize = 14.sp
+                        )
+                    } else {
+                        Text(
+                            text = description,
+                            color = Color(0xB3FFFFFF),
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = description,
+                    color = Color(0xB3FFFFFF),
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }
