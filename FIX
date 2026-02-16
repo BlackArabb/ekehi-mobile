@@ -1,0 +1,407 @@
+I'll create individual code fix artifacts for each file that needs to be updated to implement the blog task reward persistence system.Let me create comprehensive fix documents as artifacts that you can use to update your code:I apologize for the technical difficulties. Let me provide you with comprehensive fix documentation in a different format:
+
+## **Complete Blog Task Reward Persistence Fix**
+
+### **Fix 1: Update SocialTaskItem Data Class**
+
+**File:** `SocialTasksScreen.kt` (at the end of the file)
+
+**Current code:**
+```kotlin
+data class SocialTaskItem(
+    val id: String,
+    val title: String,
+    val description: String,
+    val platform: String,
+    val taskType: String,
+    val link: String,
+    val reward: Double,
+    val isCompleted: Boolean,
+    val isVerified: Boolean,
+    val verificationMethod: String,
+    val status: String = "available",
+    val maxCompletionsPerDay: Int = 1,
+    val cooldownMinutes: Int = 0,
+    val completionCountToday: Int = 0,
+    val nextAvailableAt: String? = null
+)
+```
+
+**Replace with:**
+```kotlin
+data class SocialTaskItem(
+    val id: String,
+    val title: String,
+    val description: String,
+    val platform: String,
+    val taskType: String,
+    val link: String,
+    val reward: Double,
+    val isCompleted: Boolean,
+    val isVerified: Boolean,
+    val verificationMethod: String,
+    val status: String = "available",
+    val maxCompletionsPerDay: Int = 1,
+    val cooldownMinutes: Int = 0,
+    val completionCountToday: Int = 0,
+    val nextAvailableAt: String? = null,
+    // NEW: Cumulative tracking (never reset during daily cycles)
+    val totalAccumulatedRewards: Double = 0.0,
+    val totalCompletions: Int = 0
+)
+```
+
+---
+
+### **Fix 2: Update Task Mapping in SocialTasksScreen**
+
+**File:** `SocialTasksScreen.kt`
+
+**Find this code block (around line 217):**
+```kotlin
+val taskItem = SocialTaskItem(
+    id = task.id,
+    title = task.title,
+    description = task.description,
+    platform = task.platform,
+    taskType = task.taskType,
+    link = task.actionUrl ?: "",
+    reward = task.rewardCoins,
+    isCompleted = task.isCompleted,
+    isVerified = task.isVerified,
+    verificationMethod = task.verificationMethod,
+    status = task.status ?: "available",
+    maxCompletionsPerDay = task.maxCompletionsPerDay,
+    cooldownMinutes = task.cooldownMinutes,
+    completionCountToday = task.completionCountToday,
+    nextAvailableAt = task.nextAvailableAt
+)
+```
+
+**Replace with:**
+```kotlin
+val taskItem = SocialTaskItem(
+    id = task.id,
+    title = task.title,
+    description = task.description,
+    platform = task.platform,
+    taskType = task.taskType,
+    link = task.actionUrl ?: "",
+    reward = task.rewardCoins,
+    isCompleted = task.isCompleted,
+    isVerified = task.isVerified,
+    verificationMethod = task.verificationMethod,
+    status = task.status ?: "available",
+    maxCompletionsPerDay = task.maxCompletionsPerDay,
+    cooldownMinutes = task.cooldownMinutes,
+    completionCountToday = task.completionCountToday,
+    nextAvailableAt = task.nextAvailableAt,
+    totalAccumulatedRewards = task.totalAccumulatedRewards,
+    totalCompletions = task.totalCompletions
+)
+```
+
+---
+
+### **Fix 3: Update SocialTask Data Model**
+
+**File:** `SocialTask.kt` (in `data/model` package)
+
+**Add these fields to the SocialTask data class:**
+```kotlin
+data class SocialTask(
+    // ... existing fields ...
+    val completionCountToday: Int = 0,
+    val nextAvailableAt: String? = null,
+    
+    // ADD THESE NEW FIELDS:
+    val totalAccumulatedRewards: Double = 0.0,
+    val totalCompletions: Int = 0
+)
+```
+
+---
+
+### **Fix 4: Update Repository - getSocialTasksWithUserStatus Method**
+
+**File:** `SocialTaskRepository.kt`
+
+**Find the blog task handling section (around line 89) and update it:**
+
+```kotlin
+if (task.platform.lowercase() == "blog") {
+    // ... existing logging and sorting code ...
+    
+    var completionCountToday = 0
+    var lastReferenceTime = now
+    var latestVerifiedTime = 0L
+    var totalCompletions = 0  // ADD THIS
+    var totalAccumulatedRewards = 0.0  // ADD THIS
+    
+    // Count verified tasks in the current 24h active block
+    for (ut in sortedUserTasks) {
+        val compTime = parseIsoDate(ut.completedAt)
+        
+        // If gap since last task (or now) is > 24h, this starts a new reset cycle
+        if (lastReferenceTime - compTime > oneDayMs) {
+            // Stop counting for today, but continue for totals
+            if (ut.status == "verified") {
+                totalCompletions++  // ADD THIS
+                totalAccumulatedRewards += task.rewardCoins  // ADD THIS
+            }
+        } else {
+            if (ut.status == "verified") {
+                completionCountToday++
+                totalCompletions++  // ADD THIS
+                totalAccumulatedRewards += task.rewardCoins  // ADD THIS
+                if (latestVerifiedTime == 0L) latestVerifiedTime = compTime
+            }
+        }
+        lastReferenceTime = compTime
+    }
+    
+    // Continue counting all verified tasks for total (outside current 24h window)
+    for (ut in sortedUserTasks) {
+        val compTime = parseIsoDate(ut.completedAt)
+        if (compTime < lastReferenceTime - oneDayMs && ut.status == "verified") {
+            totalCompletions++  // ADD THIS
+            totalAccumulatedRewards += task.rewardCoins  // ADD THIS
+        }
+    }
+    
+    // ... existing cooldown and limit logic ...
+    
+    task.copy(
+        isCompleted = isLimitReached || isCooldownActive,
+        isVerified = isLimitReached,
+        status = if (isLimitReached) "verified" else if (isCooldownActive) "pending" else null,
+        completionCountToday = completionCountToday,
+        nextAvailableAt = nextAvailableAt,
+        completedAt = latestUserTask?.completedAt,
+        verifiedAt = latestUserTask?.verifiedAt,
+        totalAccumulatedRewards = totalAccumulatedRewards,  // ADD THIS
+        totalCompletions = totalCompletions  // ADD THIS
+    )
+}
+```
+
+**SIMPLER ALTERNATIVE** - Calculate totals from ALL verified tasks:
+
+```kotlin
+if (task.platform.lowercase() == "blog") {
+    // Existing daily count logic...
+    var completionCountToday = 0
+    var lastReferenceTime = now
+    var latestVerifiedTime = 0L
+    
+    for (ut in sortedUserTasks) {
+        val compTime = parseIsoDate(ut.completedAt)
+        if (lastReferenceTime - compTime > oneDayMs) break
+        
+        if (ut.status == "verified") {
+            completionCountToday++
+            if (latestVerifiedTime == 0L) latestVerifiedTime = compTime
+        }
+        lastReferenceTime = compTime
+    }
+    
+    // NEW: Calculate totals from ALL verified tasks (not just today's)
+    val totalCompletions = userTasksForThisTask.count { it.status == "verified" }
+    val totalAccumulatedRewards = totalCompletions * task.rewardCoins
+    
+    // ... rest of the code ...
+    
+    task.copy(
+        isCompleted = isLimitReached || isCooldownActive,
+        isVerified = isLimitReached,
+        status = if (isLimitReached) "verified" else if (isCooldownActive) "pending" else null,
+        completionCountToday = completionCountToday,
+        nextAvailableAt = nextAvailableAt,
+        completedAt = latestUserTask?.completedAt,
+        verifiedAt = latestUserTask?.verifiedAt,
+        totalAccumulatedRewards = totalAccumulatedRewards,  // ADD THIS
+        totalCompletions = totalCompletions  // ADD THIS
+    )
+}
+```
+
+---
+
+### **Fix 5: Update Blog Task Card UI**
+
+**File:** `SocialTasksScreen.kt`
+
+**Find the blog progress badge section (around line 665) and replace:**
+
+```kotlin
+// Blog Progress Badge in Top Right
+if (task.platform.lowercase() == "blog") {
+    Surface(
+        modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(top = 16.dp, end = 16.dp),
+        color = BrandColors.Primary.copy(alpha = 0.9f),
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Daily progress
+            Text(
+                text = "Today: ${task.completionCountToday}/${task.maxCompletionsPerDay}",
+                color = BrandColors.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+            // ADD: Total completions and rewards
+            if (task.totalCompletions > 0) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Total: ${task.totalCompletions} (${String.format("%.1f", task.totalAccumulatedRewards)} EKH)",
+                    color = BrandColors.White.copy(alpha = 0.8f),
+                    fontSize = 10.sp
+                )
+            }
+        }
+    }
+}
+```
+
+---
+
+### **Fix 6: Critical - Ensure User Coin Balance is Never Reduced**
+
+**File:** `SocialTaskRepository.kt`
+
+**The `awardCoinsToUser` method looks correct - it only ADDS coins, never subtracts. Verify this:**
+
+```kotlin
+private suspend fun awardCoinsToUser(userId: String, amount: Double) {
+    try {
+        // ... get user profile ...
+        
+        val currentTaskReward = (profileData["taskReward"] as? Number)?.toDouble() ?: 0.0
+        val currentMiningReward = (profileData["miningReward"] as? Number)?.toDouble() ?: 0.0
+        val currentReferralReward = (profileData["referralReward"] as? Number)?.toDouble() ?: 0.0
+        
+        val newTaskReward = currentTaskReward + amount  // ✓ ADDITIVE ONLY
+        val newTotalCoins = newTaskReward + currentMiningReward + currentReferralReward
+        
+        appwriteService.databases.updateDocument(
+            // ... update with newTaskReward and newTotalCoins ...
+        )
+    } catch (e: Exception) {
+        Log.e("EKEHI_DEBUG", "Failed to award coins: ${e.message}", e)
+    }
+}
+```
+
+**This is correct - it never subtracts coins. The key is ensuring no other code reduces these values.**
+
+---
+
+### **Fix 7: Database Schema Update**
+
+You need to ensure your Appwrite `user_social_tasks` collection can store multiple documents for the same user+task combination for blog tasks.
+
+**Current behavior:** Blog tasks create NEW documents each time (line 268 in repository)
+```kotlin
+// Blog tasks ALWAYS create a NEW document to track history
+val userTask = createUserTask(userId, taskId, proofData, username).getOrThrow()
+```
+
+**This is CORRECT for tracking reward history!** Each completion is a separate document.
+
+**Important:** Make sure there's NO unique constraint on `(userId, taskId)` combination that would prevent multiple blog task completions.
+
+---
+
+### **Fix 8: Add Enhanced Stats Display**
+
+**File:** `SocialTasksScreen.kt`
+
+**Update the `EnhancedStatsSection` to show blog-specific rewards:**
+
+```kotlin
+@Composable
+fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
+    val socialTasksResource by viewModel.socialTasks.collectAsState()
+    
+    var completedTasks = 0
+    var totalTasks = 0
+    var totalRewards = 0.0
+    var blogRewards = 0.0  // ADD THIS
+    
+    if (socialTasksResource is Resource.Success) {
+        val tasks = (socialTasksResource as Resource.Success).data
+        totalTasks = tasks.size
+        completedTasks = tasks.count { it.isCompleted }
+        totalRewards = tasks.filter { it.isCompleted }.sumOf { it.rewardCoins }
+        
+        // ADD THIS: Calculate accumulated blog task rewards
+        blogRewards = tasks
+            .filter { it.platform.lowercase() == "blog" }
+            .sumOf { it.totalAccumulatedRewards }
+    }
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            // ... styling ...
+    ) {
+        EnhancedStatCard(
+            icon = Icons.Default.TaskAlt,
+            value = "$completedTasks/$totalTasks",
+            label = "Completed",
+            modifier = Modifier.weight(1f)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        EnhancedStatCard(
+            icon = Icons.Default.Toll,
+            value = String.format("%.1f", totalRewards),
+            label = "Earned",
+            modifier = Modifier.weight(1f),
+            isHighlight = true,
+            showLogoInLabel = true
+        )
+        
+        // ADD THIS: Show blog rewards if > 0
+        if (blogRewards > 0) {
+            Spacer(modifier = Modifier.width(16.dp))
+            EnhancedStatCard(
+                icon = Icons.Default.Repeat,
+                value = String.format("%.1f", blogRewards),
+                label = "Blog Rewards",
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+```
+
+---
+
+### **Summary of Changes**
+
+1. ✅ **SocialTaskItem** - Added `totalAccumulatedRewards` and `totalCompletions`
+2. ✅ **Task Mapping** - Map new fields from backend to UI
+3. ✅ **SocialTask Model** - Added cumulative tracking fields
+4. ✅ **Repository getSocialTasksWithUserStatus** - Calculate totals from ALL verified tasks
+5. ✅ **UI Display** - Show total completions and rewards on blog cards
+6. ✅ **Coin Awarding** - Already correct (additive only)
+7. ✅ **Database** - Ensure no unique constraint prevents multiple blog completions
+8. ✅ **Stats Section** - Display cumulative blog rewards
+
+### **Key Principle**
+
+The daily reset logic (calculating `completionCountToday`) is based on time windows, NOT database updates. This means:
+- `completionCountToday` is calculated fresh each time based on timestamps
+- `totalCompletions` and `totalAccumulatedRewards` are calculated from ALL verified task documents
+- User coin balance is NEVER reduced - it only increases via `awardCoinsToUser`
+- Each blog task completion creates a NEW document with its own reward tracking
+
+**No backend scheduled job is needed** because the reset is automatic based on the 24-hour time window calculation!

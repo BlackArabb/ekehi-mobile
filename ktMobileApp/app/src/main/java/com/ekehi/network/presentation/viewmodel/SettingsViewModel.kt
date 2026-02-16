@@ -27,7 +27,6 @@ class SettingsViewModel @Inject constructor(
         private const val MINING_NOTIFICATIONS_ENABLED = "mining_notifications_enabled"
         private const val SOCIAL_TASK_NOTIFICATIONS_ENABLED = "social_task_notifications_enabled"
         private const val REFERRAL_NOTIFICATIONS_ENABLED = "referral_notifications_enabled"
-        private const val STREAK_NOTIFICATIONS_ENABLED = "streak_notifications_enabled"
         private const val EMAIL_NOTIFICATIONS_ENABLED = "email_notifications_enabled"
         private const val IN_APP_NOTIFICATIONS_ENABLED = "in_app_notifications_enabled"
         private const val PUSH_NOTIFICATIONS_ENABLED = "push_notifications_enabled"
@@ -43,9 +42,6 @@ class SettingsViewModel @Inject constructor(
     )
     private val _referralNotificationsEnabled = MutableStateFlow(
         securePreferences.getBoolean(REFERRAL_NOTIFICATIONS_ENABLED, true)
-    )
-    private val _streakNotificationsEnabled = MutableStateFlow(
-        securePreferences.getBoolean(STREAK_NOTIFICATIONS_ENABLED, true)
     )
     private val _emailNotificationsEnabled = MutableStateFlow(
         securePreferences.getBoolean(EMAIL_NOTIFICATIONS_ENABLED, true)
@@ -69,7 +65,6 @@ class SettingsViewModel @Inject constructor(
     val miningNotificationsEnabled: StateFlow<Boolean> = _miningNotificationsEnabled
     val socialTaskNotificationsEnabled: StateFlow<Boolean> = _socialTaskNotificationsEnabled
     val referralNotificationsEnabled: StateFlow<Boolean> = _referralNotificationsEnabled
-    val streakNotificationsEnabled: StateFlow<Boolean> = _streakNotificationsEnabled
     val emailNotificationsEnabled: StateFlow<Boolean> = _emailNotificationsEnabled
     val inAppNotificationsEnabled: StateFlow<Boolean> = _inAppNotificationsEnabled
     val pushNotificationsEnabled: StateFlow<Boolean> = _pushNotificationsEnabled
@@ -104,15 +99,6 @@ class SettingsViewModel @Inject constructor(
             securePreferences.putBoolean(REFERRAL_NOTIFICATIONS_ENABLED, enabled)
             saveNotificationSettings()
             Log.d(TAG, "Referral notifications updated: $enabled")
-        }
-    }
-    
-    fun updateStreakNotifications(enabled: Boolean) {
-        viewModelScope.launch {
-            _streakNotificationsEnabled.value = enabled
-            securePreferences.putBoolean(STREAK_NOTIFICATIONS_ENABLED, enabled)
-            saveNotificationSettings()
-            Log.d(TAG, "Streak notifications updated: $enabled")
         }
     }
     
@@ -224,33 +210,21 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun changePassword(currentPassword: String, newPassword: String) {
+        // Password change not available for OAuth-only authentication
+        viewModelScope.launch {
+            _passwordChangeResult.value = Resource.Error("Password change is not available for Google sign-in users")
+        }
+    }
+
+    private fun unusedPasswordChangeMethod(currentPassword: String, newPassword: String) {
         viewModelScope.launch {
             try {
                 Log.d(TAG, "Initiating password change")
                 Log.d(TAG, "Current password length: ${currentPassword.length}")
                 Log.d(TAG, "New password length: ${newPassword.length}")
                 _passwordChangeResult.value = Resource.Loading
-                authUseCase.updatePassword(currentPassword, newPassword).collect { resource ->
-                    _passwordChangeResult.value = resource
-                    when (resource) {
-                        is Resource.Success -> {
-                            Log.d(TAG, "Password change successful")
-                        }
-                        is Resource.Error -> {
-                            Log.e(TAG, "Password change failed: ${resource.message}")
-                            // Also log the full exception if available
-                            if (resource.message?.contains("Exception") == true) {
-                                Log.e(TAG, "Full error details: ${resource.message}")
-                            }
-                        }
-                        is Resource.Loading -> {
-                            Log.d(TAG, "Password change in progress")
-                        }
-                        is Resource.Idle -> {
-                            // Do nothing for Idle state
-                        }
-                    }
-                }
+                // Password change not available - OAuth only
+                _passwordChangeResult.value = Resource.Error("Password change is not available")
             } catch (e: Exception) {
                 Log.e(TAG, "Password change exception: ${e.message}", e)
                 _passwordChangeResult.value = Resource.Error("Password change failed: ${e.message}")

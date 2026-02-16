@@ -15,11 +15,9 @@ fun NotificationSettings(
     miningNotificationsEnabled: Boolean,
     socialTaskNotificationsEnabled: Boolean,
     referralNotificationsEnabled: Boolean,
-    streakNotificationsEnabled: Boolean,
     onMiningNotificationsChanged: (Boolean) -> Unit,
     onSocialTaskNotificationsChanged: (Boolean) -> Unit,
-    onReferralNotificationsChanged: (Boolean) -> Unit,
-    onStreakNotificationsChanged: (Boolean) -> Unit
+    onReferralNotificationsChanged: (Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -54,13 +52,6 @@ fun NotificationSettings(
             description = "Get notified when you earn referral bonuses",
             checked = referralNotificationsEnabled,
             onCheckedChange = onReferralNotificationsChanged
-        )
-        
-        SettingToggle(
-            text = "Streak Bonuses",
-            description = "Get notified when you maintain mining streaks",
-            checked = streakNotificationsEnabled,
-            onCheckedChange = onStreakNotificationsChanged
         )
     }
 }

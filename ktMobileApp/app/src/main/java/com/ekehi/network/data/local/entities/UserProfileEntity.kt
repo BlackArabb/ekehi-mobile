@@ -18,9 +18,6 @@ data class UserProfileEntity(
     val totalCoins: Float = 0.0f,
     val autoMiningRate: Float = 0.0f,
     val miningPower: Float = 0.0f,
-    val currentStreak: Int = 0,
-    val longestStreak: Int = 0,
-    val lastLoginDate: String? = null,
     val referralCode: String? = null,
     val referredBy: String? = null,
     val totalReferrals: Int = 0,
@@ -29,7 +26,6 @@ data class UserProfileEntity(
     val maxDailyEarnings: Float = 0.0f,
     val todayEarnings: Float = 0.0f,
     val lastMiningDate: String? = null,
-    val streakBonusClaimed: Int = 0,
     val createdAt: String,
     val updatedAt: String
 )

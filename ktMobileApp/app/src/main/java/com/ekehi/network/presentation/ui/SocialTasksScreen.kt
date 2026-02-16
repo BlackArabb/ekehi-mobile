@@ -1201,6 +1201,19 @@ fun TaskActionDialog(
     onTaskCompleted: () -> Unit
 ) {
     val context = LocalContext.current
+
+    // 20-second cooldown state for blog tasks
+    var cooldownRemaining by remember { mutableStateOf(0L) }
+    var hasOpenedBlog by remember { mutableStateOf(false) }
+    val isBlogTask = task.platform.lowercase() == "blog"
+
+    // Start countdown timer when cooldown is active
+    LaunchedEffect(cooldownRemaining) {
+        if (cooldownRemaining > 0) {
+            kotlinx.coroutines.delay(1000)
+            cooldownRemaining = (cooldownRemaining - 1).coerceAtLeast(0)
+        }
+    }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -1344,9 +1357,15 @@ fun TaskActionDialog(
                                 } else {
                                     "https://${task.link}"
                                 }
-                                
+
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                                 context.startActivity(intent)
+
+                                // Start 20-second cooldown for blog tasks
+                                if (isBlogTask) {
+                                    hasOpenedBlog = true
+                                    cooldownRemaining = 20L
+                                }
                             } catch (e: Exception) {
                                 when (task.platform.lowercase()) {
                                     "telegram" -> {
@@ -1428,6 +1447,44 @@ fun TaskActionDialog(
                         fontWeight = FontWeight.Bold
                     )
                 }
+            } else if (isBlogTask && !hasOpenedBlog) {
+                // Blog task - user hasn't opened the blog yet
+                Button(
+                    onClick = {},
+                    enabled = false,
+                    colors = ButtonDefaults.buttonColors(
+                        disabledContainerColor = BrandColors.Gray.copy(alpha = 0.3f),
+                        disabledContentColor = BrandColors.Gray
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                ) {
+                    Icon(Icons.Default.Lock, "Locked")
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Visit Blog First",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            } else if (isBlogTask && cooldownRemaining > 0) {
+                // Show countdown button during 20-second cooldown
+                Button(
+                    onClick = {},
+                    enabled = false,
+                    colors = ButtonDefaults.buttonColors(
+                        disabledContainerColor = BrandColors.Primary.copy(alpha = 0.3f),
+                        disabledContentColor = BrandColors.White
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                ) {
+                    Icon(Icons.Default.Timer, "Cooldown")
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Wait ${cooldownRemaining}s",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             } else {
                 Button(
                     onClick = onTaskCompleted,
@@ -1437,7 +1494,7 @@ fun TaskActionDialog(
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-                   
+
                     Spacer(Modifier.width(8.dp))
                     Text(
                         "Task Completed",

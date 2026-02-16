@@ -12,69 +12,6 @@ import javax.inject.Inject
 class AuthUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    fun login(email: String, password: String): Flow<Resource<Unit>> = flow {
-        Log.d("AuthUseCase", "Starting login flow for email: $email")
-        emit(Resource.Loading)
-        Log.d("AuthUseCase", "Emitted Loading state")
-        
-        val result = authRepository.login(email, password)
-        Log.d("AuthUseCase", "Login result received: ${result.isSuccess}")
-        
-        if (result.isSuccess) {
-            Log.d("AuthUseCase", "Login successful for email: $email")
-            emit(Resource.Success(Unit))
-        } else {
-            val errorMessage = "Login failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
-            Log.e("AuthUseCase", errorMessage)
-            emit(Resource.Error(errorMessage))
-        }
-    }.catch { e ->
-        val errorMessage = "Login error: ${e.message ?: "Unknown error"}"
-        Log.e("AuthUseCase", errorMessage, e)
-        emit(Resource.Error(errorMessage))
-    }
-
-    fun register(email: String, password: String, name: String, referralCode: String = "", phoneNumber: String = "", country: String = ""): Flow<Resource<Unit>> = flow {
-        Log.d("AuthUseCase", "Starting registration flow for email: $email")
-        emit(Resource.Loading)
-        val result = authRepository.register(email, password, name, referralCode, phoneNumber, country)
-        if (result.isSuccess) {
-            Log.d("AuthUseCase", "Registration successful for email: $email")
-            // Profile is created automatically in AuthRepository.register()
-            emit(Resource.Success(Unit))
-        } else {
-            val errorMessage = "Registration failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
-            Log.e("AuthUseCase", errorMessage)
-            emit(Resource.Error(errorMessage))
-        }
-    }.catch { e ->
-        val errorMessage = "Registration error: ${e.message ?: "Unknown error"}"
-        Log.e("AuthUseCase", errorMessage, e)
-        emit(Resource.Error(errorMessage))
-    }
-
-    fun loginWithGoogle(idToken: String): Flow<Resource<Unit>> = flow {
-        Log.d("AuthUseCase", "Starting Google login flow")
-        emit(Resource.Loading)
-        Log.d("AuthUseCase", "Emitted Loading state for Google login")
-        
-        val result = authRepository.loginWithGoogle(idToken)
-        Log.d("AuthUseCase", "Google login result received: ${result.isSuccess}")
-        
-        if (result.isSuccess) {
-            Log.d("AuthUseCase", "Google login successful")
-            emit(Resource.Success(Unit))
-        } else {
-            val errorMessage = "Google login failed: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
-            Log.e("AuthUseCase", errorMessage)
-            emit(Resource.Error(errorMessage))
-        }
-    }.catch { e ->
-        val errorMessage = "Google login error: ${e.message ?: "Unknown error"}"
-        Log.e("AuthUseCase", errorMessage, e)
-        emit(Resource.Error(errorMessage))
-    }
-
     fun registerWithGoogle(idToken: String, name: String, email: String, phoneNumber: String = "", country: String = ""): Flow<Resource<Unit>> = flow {
         Log.d("AuthUseCase", "Starting Google registration flow for email: $email")
         emit(Resource.Loading)
@@ -207,30 +144,6 @@ class AuthUseCase @Inject constructor(
         }
     }.catch { e ->
         val errorMessage = "Error checking for current user: ${e.message ?: "Unknown error"}"
-        Log.e("AuthUseCase", errorMessage, e)
-        emit(Resource.Error(errorMessage))
-    }
-    
-    /**
-     * Update user password
-     * @param currentPassword The user's current password
-     * @param newPassword The new password to set
-     * @return Flow<Resource<Unit>> indicating success or failure
-     */
-    fun updatePassword(currentPassword: String, newPassword: String): Flow<Resource<Unit>> = flow {
-        Log.d("AuthUseCase", "Starting password update flow")
-        emit(Resource.Loading)
-        val result = authRepository.updatePassword(currentPassword, newPassword)
-        if (result.isSuccess) {
-            Log.d("AuthUseCase", "Password updated successfully")
-            emit(Resource.Success(Unit))
-        } else {
-            val errorMessage = "Failed to update password: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
-            Log.e("AuthUseCase", errorMessage)
-            emit(Resource.Error(errorMessage))
-        }
-    }.catch { e ->
-        val errorMessage = "Error updating password: ${e.message ?: "Unknown error"}"
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }

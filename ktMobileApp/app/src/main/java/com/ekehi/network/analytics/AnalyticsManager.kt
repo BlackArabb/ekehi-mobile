@@ -50,7 +50,7 @@ class AnalyticsManager @Inject constructor(
         analyticsService.setUserId(userId)
         analyticsService.setUserProperty("total_coins", userProfile.totalCoins.toString())
         analyticsService.setUserProperty("mining_power", "0.0")
-        analyticsService.setUserProperty("current_streak", userProfile.currentStreak.toString())
+        // Streak functionality removed
         analyticsService.setUserProperty("total_referrals", userProfile.totalReferrals.toString())
     }
     

@@ -442,9 +442,6 @@ open class UserRepository @Inject constructor(
             totalCoins = (data["totalCoins"] as? Number)?.toFloat() ?: 0.0f,
             autoMiningRate = (data["autoMiningRate"] as? Number)?.toFloat() ?: 0.0f,
             miningPower = 0.0f,
-            currentStreak = (data["currentStreak"] as? Number)?.toInt() ?: 0,
-            longestStreak = (data["longestStreak"] as? Number)?.toInt() ?: 0,
-            lastLoginDate = data["lastLoginDate"] as? String,
             referralCode = when (val referralCodeValue = data["referralCode"]) {
                 is List<*> -> referralCodeValue.firstOrNull() as? String
                 is String -> referralCodeValue
@@ -457,7 +454,6 @@ open class UserRepository @Inject constructor(
             maxDailyEarnings = (data["maxDailyEarnings"] as? Number)?.toFloat() ?: 10000.0f,
             todayEarnings = (data["todayEarnings"] as? Number)?.toFloat() ?: 0.0f,
             lastMiningDate = data["lastMiningDate"] as? String,
-            streakBonusClaimed = (data["streakBonusClaimed"] as? Number)?.toInt() ?: 0,
             createdAt = document.createdAt ?: "1970-01-01T00:00:00.000Z",
             updatedAt = document.updatedAt ?: "1970-01-01T00:00:00.000Z"
         )

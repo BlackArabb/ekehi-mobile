@@ -21,9 +21,8 @@ import com.ekehi.network.domain.usecase.SocialTaskUseCase
 import com.ekehi.network.domain.usecase.UserUseCase
 import com.ekehi.network.domain.verification.SocialVerificationService
 import com.ekehi.network.performance.PerformanceMonitor
-import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.ekehi.network.presentation.viewmodel.AuthViewModel
 import com.ekehi.network.presentation.viewmodel.SettingsViewModel
-import com.ekehi.network.presentation.viewmodel.StreakViewModel
 import com.ekehi.network.security.SecurePreferences
 import com.ekehi.network.service.*
 import com.ekehi.network.data.sync.SyncManager
@@ -386,16 +385,16 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideStreakViewModel(userUseCase: UserUseCase): StreakViewModel {
-        return StreakViewModel(userUseCase)
+    fun provideSettingsViewModel(authUseCase: AuthUseCase, securePreferences: SecurePreferences): SettingsViewModel {
+        return SettingsViewModel(authUseCase, securePreferences)
     }
 
     @Provides
     @Singleton
-    fun provideSettingsViewModel(authUseCase: AuthUseCase, securePreferences: SecurePreferences): SettingsViewModel {
-        return SettingsViewModel(authUseCase, securePreferences)
+    fun provideAuthViewModel(authUseCase: AuthUseCase): AuthViewModel {
+        return AuthViewModel(authUseCase)
     }
-    
+
     @Provides
     @Singleton
     fun provideVersionCheckService(
@@ -411,17 +410,6 @@ object AppModule {
         @ApplicationContext context: Context
     ): ApkDownloadManager {
         return ApkDownloadManager(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLoginViewModel(
-        authUseCase: AuthUseCase,
-        userUseCase: UserUseCase,
-        analyticsManager: AnalyticsManager,
-        performanceMonitor: PerformanceMonitor
-    ): LoginViewModel {
-        return LoginViewModel(authUseCase, userUseCase, analyticsManager, performanceMonitor)
     }
 
 }

@@ -17,7 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.presentation.navigation.AppNavigation
-import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.ekehi.network.presentation.viewmodel.AuthViewModel
 import com.ekehi.network.presentation.viewmodel.ProfileViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.startapp.sdk.adsbase.StartAppAd
@@ -30,7 +30,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class SplashActivity : ComponentActivity() {
     
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
     
     @Inject
@@ -77,8 +77,8 @@ class SplashActivity : ComponentActivity() {
         Log.d("SplashActivity", "=== CHECKING AUTHENTICATION ===")
         lifecycleScope.launch {
             try {
-                // Use the authentication check from LoginViewModel
-                loginViewModel.checkCurrentUser()
+                // Use the authentication check from AuthViewModel
+                authViewModel.checkCurrentUser()
             } catch (e: Exception) {
                 Log.e("SplashActivity", "Error checking authentication: ${e.message}", e)
                 isAuthenticated = false
@@ -90,7 +90,7 @@ class SplashActivity : ComponentActivity() {
     
     private fun observeAuthenticationState() {
         lifecycleScope.launch {
-            loginViewModel.loginState.collect { state ->
+            authViewModel.authState.collect { state ->
                 Log.d("SplashActivity", "Auth state received: ${state::class.simpleName}")
                 
                 // Skip processing if we've already timed out
@@ -169,8 +169,8 @@ class SplashActivity : ComponentActivity() {
         Log.d("SplashActivity", "=== NAVIGATING TO MAIN ACTIVITY ===")
         Log.d("SplashActivity", "Authenticated: $isAuthenticated, RequiresAdditionalInfo: $requiresAdditionalInfo")
         
-        // Reset the login state before navigating
-        loginViewModel.resetState()
+        // Reset the auth state before navigating
+        authViewModel.resetState()
         
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("IS_AUTHENTICATED", isAuthenticated)

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.ekehi.network.presentation.navigation.AppNavigation
 import com.ekehi.network.presentation.ui.components.UpdateCheckWrapper
-import com.ekehi.network.presentation.viewmodel.LoginViewModel
+import com.ekehi.network.presentation.viewmodel.AuthViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.service.OAuthService
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
     private val oAuthViewModel: OAuthViewModel by viewModels()
     private lateinit var callbackManager: CallbackManager
     
@@ -135,9 +135,9 @@ class MainActivity : ComponentActivity() {
                     // CRITICAL: Call onOAuthSuccess to set the authResolution which triggers navigation
                     oAuthViewModel.onOAuthSuccess()
                     
-                    // Refresh login state
+                    // Refresh auth state
                     lifecycleScope.launch {
-                        loginViewModel.checkCurrentUser()
+                        authViewModel.checkCurrentUser()
                     }
                 } else if (oauthError != null) {
                     Log.e("MainActivity", "❌ OAuth login failed: $oauthError")
@@ -149,11 +149,11 @@ class MainActivity : ComponentActivity() {
     
     private fun checkAuthenticationStatus() {
         Log.d("MainActivity", "Checking authentication status directly")
-        
+
         lifecycleScope.launch {
-            loginViewModel.checkCurrentUser()
-            
-            loginViewModel.loginState.collect { state ->
+            authViewModel.checkCurrentUser()
+
+            authViewModel.authState.collect { state ->
                 when (state) {
                     is com.ekehi.network.domain.model.Resource.Success -> {
                         Log.d("MainActivity", "✅ User is authenticated")

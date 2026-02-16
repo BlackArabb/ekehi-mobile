@@ -83,143 +83,9 @@ fun AppNavigation(
         composable("landing") {
             DebugLogger.logStep("NAV_LANDING", "Landing screen displayed")
             LandingScreen(
-                onNavigateToLogin = {
-                    try {
-                        DebugLogger.logNavigation("landing", "login", "User clicked login")
-                        navController.navigate("login")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_LANDING", "Navigation to login failed", e)
-                    }
-                },
-                onNavigateToRegister = {
-                    try {
-                        DebugLogger.logNavigation("landing", "register", "User clicked register")
-                        navController.navigate("register")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_LANDING", "Navigation to register failed", e)
-                    }
-                }
-            )
-        }
-        
-        composable("login") {
-            DebugLogger.logStep("NAV_LOGIN", "Login screen displayed")
-            LoginOptionsScreen(
-                onGoogleLogin = {
-                    DebugLogger.logStep("NAV_LOGIN", "Google login completed - navigating to main")
-                    try {
-                        navController.navigate("main") {
-                            popUpTo("landing") { inclusive = true }
-                        }
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
-                    }
-                },
-                onNavigateToGoogleSecondaryInfo = {
-                    DebugLogger.logStep("NAV_LOGIN", "Need secondary info - navigating")
-                    try {
-                        navController.navigate("secondary_info")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
-                    }
-                },
-                onEmailLogin = {
-                    DebugLogger.logNavigation("login", "login_email", "Email login clicked")
-                    try {
-                        navController.navigate("login_email")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
-                    }
-                },
-                onNavigateToSignup = {
-                    DebugLogger.logNavigation("login", "register", "Signup clicked")
-                    try {
-                        navController.navigate("register")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_LOGIN", "Navigation error", e)
-                    }
-                }
-            )
-        }
-        
-        composable("login_email") {
-            EmailLoginScreen(
-                onLoginSuccess = {
-                    try {
-                        navController.navigate("main") {
-                            popUpTo("landing") { inclusive = true }
-                        }
-                    } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
-                    }
-                },
-                onNavigateToRegistration = {
-                    try {
-                        navController.navigate("register")
-                    } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
-                    }
-                }
-            )
-        }
-        
-        composable("register") {
-            DebugLogger.logStep("NAV_REGISTER", "Register screen displayed")
-            SignupOptionsScreen(
-                onGoogleSignup = {
-                    DebugLogger.logStep("NAV_REGISTER", "Google signup completed - navigating to main")
-                    try {
-                        navController.navigate("main") {
-                            popUpTo("landing") { inclusive = true }
-                        }
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
-                    }
-                },
-                onNavigateToSecondaryInfo = {
-                    DebugLogger.logStep("NAV_REGISTER", "Need secondary info - navigating")
-                    try {
-                        navController.navigate("secondary_info")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
-                    }
-                },
-                onEmailSignup = {
-                    DebugLogger.logNavigation("register", "email_register", "Email signup clicked")
-                    try {
-                        navController.navigate("email_register")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
-                    }
-                },
-                onNavigateToLogin = {
-                    DebugLogger.logNavigation("register", "login", "Login clicked")
-                    try {
-                        navController.navigate("login")
-                    } catch (e: Exception) {
-                        DebugLogger.logError("NAV_REGISTER", "Navigation error", e)
-                    }
-                }
-            )
-        }
-        
-        composable("email_register") {
-            EmailSignupScreen(
-                onRegistrationSuccess = {
-                    try {
-                        navController.navigate("main") {
-                            popUpTo("landing") { inclusive = true }
-                        }
-                    } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
-                    }
-                },
-                onNavigateToLogin = {
-                    try {
-                        navController.navigate("login")
-                    } catch (e: Exception) {
-                        Log.e("AppNavigation", "Navigation error", e)
-                    }
+                onGoogleSignIn = {
+                    DebugLogger.logStep("NAV_LANDING", "Google sign-in clicked")
+                    oAuthViewModel.initiateGoogleOAuth(activity)
                 }
             )
         }
@@ -348,14 +214,6 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                 
                 composable("settings") {
                     SettingsScreen(
-                        onChangePassword = {
-                            try {
-                                Log.d("MainScreen", "Navigating to change password")
-                                navController.navigate("change_password")
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        },
                         onContactSupport = {
                             try {
                                 Log.d("MainScreen", "Navigating to contact support")
@@ -400,19 +258,6 @@ fun MainScreen(onLogout: () -> Unit = {}) {
                     )
                 }
 
-                composable("change_password") {
-                    ChangePasswordScreen(
-                        onNavigateBack = {
-                            Log.d("MainScreen", "Navigating back from change password")
-                            try {
-                                navController.popBackStack()
-                            } catch (e: Exception) {
-                                Log.e("MainScreen", "Navigation error", e)
-                            }
-                        }
-                    )
-                }
-                
                 composable("contact_support") {
                     ContactSupportScreen(
                         onNavigateBack = {

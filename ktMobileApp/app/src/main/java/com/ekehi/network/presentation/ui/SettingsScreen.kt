@@ -28,7 +28,6 @@ import com.ekehi.network.BuildConfig
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onChangePassword: () -> Unit,
     onContactSupport: () -> Unit,
     onTermsOfService: () -> Unit,
     onSignOut: () -> Unit,
@@ -40,7 +39,6 @@ fun SettingsScreen(
     val miningNotificationsEnabled by viewModel.miningNotificationsEnabled.collectAsState()
     val socialTaskNotificationsEnabled by viewModel.socialTaskNotificationsEnabled.collectAsState()
     val referralNotificationsEnabled by viewModel.referralNotificationsEnabled.collectAsState()
-    val streakNotificationsEnabled by viewModel.streakNotificationsEnabled.collectAsState()
     val emailNotificationsEnabled by viewModel.emailNotificationsEnabled.collectAsState()
     val inAppNotificationsEnabled by viewModel.inAppNotificationsEnabled.collectAsState()
     val pushNotificationsEnabled by viewModel.pushNotificationsEnabled.collectAsState()
@@ -86,7 +84,6 @@ fun SettingsScreen(
                     miningNotificationsEnabled = miningNotificationsEnabled,
                     socialTaskNotificationsEnabled = socialTaskNotificationsEnabled,
                     referralNotificationsEnabled = referralNotificationsEnabled,
-                    streakNotificationsEnabled = streakNotificationsEnabled,
                     onMiningNotificationsChanged = { enabled -> 
                         Log.d("SettingsScreen", "Mining notifications changed: $enabled")
                         viewModel.updateMiningNotifications(enabled)
@@ -98,10 +95,6 @@ fun SettingsScreen(
                     onReferralNotificationsChanged = { enabled -> 
                         Log.d("SettingsScreen", "Referral notifications changed: $enabled")
                         viewModel.updateReferralNotifications(enabled)
-                    },
-                    onStreakNotificationsChanged = { enabled -> 
-                        Log.d("SettingsScreen", "Streak notifications changed: $enabled")
-                        viewModel.updateStreakNotifications(enabled)
                     }
                 )
             }
@@ -143,16 +136,6 @@ fun SettingsScreen(
                 onDataManagementClick = {
                     Log.d("SettingsScreen", "Data management clicked")
                     onDataManagement()
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Security Settings
-            SecuritySettingsSection(
-                onChangePassword = {
-                    Log.d("SettingsScreen", "Change password clicked")
-                    onChangePassword()
                 }
             )
 
@@ -420,42 +403,6 @@ fun PrivacySettingsSection(
 }
 
 @Composable
-fun SecuritySettingsSection(
-    onChangePassword: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0x33FFFFFF)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Security",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SettingItem(
-                text = "Change Password",
-                icon = Icons.Default.Lock,
-                onClick = {
-                    Log.d("SecuritySettings", "🔐 Change Password clicked - triggering callback")
-                    onChangePassword()
-                }
-            )
-        }
-    }
-}
-
-@Composable
 fun AboutSection(
     onContactSupport: () -> Unit,
     onTermsOfServiceClick: () -> Unit = {}
@@ -512,7 +459,6 @@ fun AboutSection(
 fun SettingsScreenPreview() {
     EkehiMobileTheme {
         SettingsScreen(
-            onChangePassword = {},
             onContactSupport = {},
             onTermsOfService = {},
             onSignOut = {},

@@ -66,9 +66,6 @@ class OfflineUserRepository @Inject constructor(
                 totalCoins = 0.0f,
                 autoMiningRate = 0.0f,
                 miningPower = 0.0f,
-                currentStreak = 0,
-                longestStreak = 0,
-                lastLoginDate = null,
                 referralCode = null,
                 referredBy = null,
                 totalReferrals = 0,
@@ -77,7 +74,6 @@ class OfflineUserRepository @Inject constructor(
                 maxDailyEarnings = 100.0f,
                 todayEarnings = 0.0f,
                 lastMiningDate = null,
-                streakBonusClaimed = 0,
                 createdAt = "",
                 updatedAt = ""
             )
@@ -100,9 +96,6 @@ fun UserProfile.toEntity(): UserProfileEntity {
         totalCoins = this.totalCoins,
         autoMiningRate = this.autoMiningRate,
         miningPower = this.miningPower,
-        currentStreak = this.currentStreak,
-        longestStreak = this.longestStreak,
-        lastLoginDate = this.lastLoginDate,
         referralCode = this.referralCode,
         referredBy = this.referredBy,
         totalReferrals = this.totalReferrals,
@@ -111,7 +104,6 @@ fun UserProfile.toEntity(): UserProfileEntity {
         maxDailyEarnings = this.maxDailyEarnings,
         todayEarnings = this.todayEarnings,
         lastMiningDate = this.lastMiningDate,
-        streakBonusClaimed = this.streakBonusClaimed,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt
     )
@@ -129,9 +121,6 @@ fun UserProfileEntity.toUserProfile(): UserProfile {
         totalCoins = this.totalCoins,
         autoMiningRate = this.autoMiningRate,
         miningPower = this.miningPower,
-        currentStreak = this.currentStreak,
-        longestStreak = this.longestStreak,
-        lastLoginDate = this.lastLoginDate,
         referralCode = this.referralCode,
         referredBy = this.referredBy,
         totalReferrals = this.totalReferrals,
@@ -140,7 +129,6 @@ fun UserProfileEntity.toUserProfile(): UserProfile {
         maxDailyEarnings = this.maxDailyEarnings,
         todayEarnings = this.todayEarnings,
         lastMiningDate = this.lastMiningDate,
-        streakBonusClaimed = this.streakBonusClaimed,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt
     )

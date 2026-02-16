@@ -158,41 +158,14 @@ class ProfileViewModel @Inject constructor(
                     val profile = result.getOrNull()
                     if (profile != null) {
                         Log.d("ProfileViewModel", "✅ Profile loaded successfully: ${profile.username}, Task Reward: ${profile.taskReward}, Mining Reward: ${profile.miningReward}")
-                        
-                        // Update streak when profile is loaded
-                        Log.d("ProfileViewModel", "=== UPDATING STREAK ===")
-                        userUseCase.updateStreak(userId, profile).collect { streakResource ->
-                            when (streakResource) {
-                                is Resource.Success -> {
-                                    Log.d("ProfileViewModel", "✅ Streak updated: current=${streakResource.data.currentStreak}, longest=${streakResource.data.longestStreak}")
-                                    // Update the profile with the new streak data
-                                    _userProfile.value = Resource.Success(streakResource.data)
-                                    // Load user rank after profile is loaded
-                                    loadUserRank(userId)
-                                    // Load completed tasks count after profile is loaded
-                                    loadCompletedTasksCount(userId)
-                                }
-                                is Resource.Error -> {
-                                    Log.e("ProfileViewModel", "❌ Failed to update streak: ${streakResource.message}")
-                                    // Still show the original profile even if streak update fails
-                                    _userProfile.value = Resource.Success(profile)
-                                    // Load user rank after profile is loaded
-                                    loadUserRank(userId)
-                                    // Load completed tasks count after profile is loaded
-                                    loadCompletedTasksCount(userId)
-                                }
-                                else -> {
-                                    // For Loading or Idle states, show the original profile
-                                    Log.d("ProfileViewModel", "Streak update state: ${streakResource.javaClass.simpleName}")
-                                    _userProfile.value = Resource.Success(profile)
-                                    // Load user rank after profile is loaded
-                                    loadUserRank(userId)
-                                    // Load completed tasks count after profile is loaded
-                                    loadCompletedTasksCount(userId)
-                                }
-                            }
-                        }
-                        
+
+                        // Streak functionality removed - just show profile directly
+                        _userProfile.value = Resource.Success(profile)
+                        // Load user rank after profile is loaded
+                        loadUserRank(userId)
+                        // Load completed tasks count after profile is loaded
+                        loadCompletedTasksCount(userId)
+
                         if (userRepository is OfflineUserRepository) {
                             userRepository.cacheUserProfile(profile)
                         }
@@ -290,25 +263,8 @@ class ProfileViewModel @Inject constructor(
                             Log.d("ProfileViewModel", "   Phone: ${profile.phoneNumber}")
                             Log.d("ProfileViewModel", "   Country: ${profile.country}")
                             _userProfile.value = Resource.Success(profile)
-                            
-                            // Update streak for new profile
-                            Log.d("ProfileViewModel", "=== UPDATING STREAK FOR NEW PROFILE ===")
-                            userUseCase.updateStreak(userId, profile).collect { streakResource ->
-                                when (streakResource) {
-                                    is Resource.Success -> {
-                                        Log.d("ProfileViewModel", "✅ Streak updated for new profile: current=${streakResource.data.currentStreak}")
-                                        _userProfile.value = Resource.Success(streakResource.data)
-                                    }
-                                    is Resource.Error -> {
-                                        Log.e("ProfileViewModel", "❌ Failed to update streak for new profile: ${streakResource.message}")
-                                        _userProfile.value = Resource.Success(profile)
-                                    }
-                                    else -> {
-                                        Log.d("ProfileViewModel", "Streak update state for new profile: ${streakResource.javaClass.simpleName}")
-                                        _userProfile.value = Resource.Success(profile)
-                                    }
-                                }
-                            }
+
+                            // Streak functionality removed
                         } else {
                             Log.e("ProfileViewModel", "❌ Created profile is null")
                             _userProfile.value = Resource.Error("Failed to create user profile: profile is null")
@@ -410,17 +366,9 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun updatePassword(currentPassword: String, newPassword: String) {
+        // Password update not available for OAuth-only authentication
         viewModelScope.launch {
-            Log.d("ProfileViewModel", "Updating password")
-            val result = authRepository.updatePassword(currentPassword, newPassword)
-            if (result.isSuccess) {
-                Log.d("ProfileViewModel", "Password updated successfully")
-                // Password update was successful
-            } else {
-                val error = result.exceptionOrNull()
-                Log.e("ProfileViewModel", "Failed to update password: ${error?.message}")
-                // Handle error - in a real implementation, you might want to emit this to the UI
-            }
+            Log.d("ProfileViewModel", "Password update not available for Google sign-in users")
         }
     }
     

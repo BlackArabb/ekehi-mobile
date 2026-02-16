@@ -33,9 +33,6 @@ class DashboardViewModel @Inject constructor(
                     referralReward = 250.5f,
                     autoMiningRate = 0.0833f,
                     miningPower = 1.0f,
-                    currentStreak = 12,
-                    longestStreak = 15,
-                    lastLoginDate = "2023-12-01T00:00:00Z",
                     referralCode = "REF123",
                     referredBy = null,
                     totalReferrals = 5,
@@ -44,7 +41,6 @@ class DashboardViewModel @Inject constructor(
                     maxDailyEarnings = 100.0f,
                     todayEarnings = 12.5f,
                     lastMiningDate = "2023-12-01T00:00:00Z",
-                    streakBonusClaimed = 1,
                     createdAt = "2023-01-01T00:00:00Z",
                     updatedAt = "2023-12-01T00:00:00Z"
 

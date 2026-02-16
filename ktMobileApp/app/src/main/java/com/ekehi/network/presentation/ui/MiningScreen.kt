@@ -356,45 +356,28 @@ fun UserProfileCard(
                             modifier = Modifier.size(12.dp) // Further reduced size
                         )
                         Spacer(modifier = Modifier.width(2.dp)) // Reduced spacing
-                        Text(
-                            text = (userProfile?.currentStreak ?: 0).toString(),
-                            color = Color.White,
-                            fontSize = 12.sp, // Further reduced from 14.sp
-                            fontWeight = FontWeight.Bold
-                        )
+                        // Streak functionality removed
                     }
                     Text(
-                        text = "Streak",
+                        text = "",
                         color = Color(0xB3FFFFFF), // Light gray
                         fontSize = 8.sp, // Further reduced from 10.sp
                         maxLines = 1
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp)) // Further reduced spacing
-                
-                // Longest Streak
+
+                // Placeholder for removed streak section
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Longest Streak",
-                            tint = Color(0xFFfbbf24), // Yellow
-                            modifier = Modifier.size(12.dp) // Further reduced size
-                        )
-                        Spacer(modifier = Modifier.width(2.dp)) // Reduced spacing
-                        Text(
-                            text = (userProfile?.longestStreak ?: 0).toString(),
-                            color = Color.White,
-                            fontSize = 12.sp, // Further reduced from 14.sp
-                            fontWeight = FontWeight.Bold
-                        )
+                        // Streak functionality removed
                     }
                     Text(
-                        text = "Best",
+                        text = "",
                         color = Color(0xB3FFFFFF), // Light gray
                         fontSize = 8.sp, // Further reduced from 10.sp
                         maxLines = 1

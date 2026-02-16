@@ -425,13 +425,7 @@ fun ProfileStatsSection(
                         modifier = Modifier.weight(1f)
                     )
 
-                    StatCard(
-                        value = (userProfile?.currentStreak ?: 0).toString(),
-                        label = "Current Streak",
-                        icon = Icons.Default.LocalFireDepartment,
-                        iconColor = Color(0xFFef4444),
-                        modifier = Modifier.weight(1f)
-                    )
+                    // Streak functionality removed
                 }
             }
         }

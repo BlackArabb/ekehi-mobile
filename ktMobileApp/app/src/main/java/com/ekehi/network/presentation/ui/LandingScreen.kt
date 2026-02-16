@@ -22,8 +22,7 @@ import com.ekehi.network.R
 
 @Composable
 fun LandingScreen(
-    onNavigateToLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onGoogleSignIn: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -76,36 +75,30 @@ fun LandingScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Primary Get Started Button
+            // Google Sign In Button
             Button(
-                onClick = onNavigateToRegister,
+                onClick = onGoogleSignIn,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFffa000) // Orange color
+                    containerColor = Color(0xFF4285F4) // Google Blue
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
+                Image(
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = "Google Logo",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Get Started",
-                    color = Color.Black,
+                    text = "Continue with Google",
+                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Secondary Sign In Text Button
-            Text(
-                text = "I already have an account",
-                color = Color(0xB3FFFFFF),
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .clickable { onNavigateToLogin() }
-                    .padding(vertical = 8.dp)
-            )
         }
     }
 }
