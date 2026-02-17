@@ -75,28 +75,21 @@ fun LandingScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Google Sign In Button
-            Button(
-                onClick = onGoogleSignIn,
+            // Google Sign In Button - Image as primary element
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4285F4) // Google Blue
-                ),
-                shape = RoundedCornerShape(12.dp)
+                    .height(70.dp)
+                    .clickable { onGoogleSignIn() }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.google),
-                    contentDescription = "Google Logo",
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Continue with Google",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    contentDescription = "Continue with Google",
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(3.5f) // Maintain proper aspect ratio
                 )
             }
         }

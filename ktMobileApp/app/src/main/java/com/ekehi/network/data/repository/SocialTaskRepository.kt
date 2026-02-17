@@ -101,55 +101,56 @@ open class SocialTaskRepository @Inject constructor(
                     val userTasksForThisTask = userTasksByTaskId[task.id] ?: emptyList()
                     
                     if (task.platform.lowercase() == "blog") {
-                        // Detailed logging for blog tasks to find why count is 0
                         Log.i("EKEHI_DEBUG", "Filtering ${userTasksForThisTask.size} records for Blog Task: ${task.title}")
                         userTasksForThisTask.forEachIndexed { index, ut ->
                             val compTime = parseIsoDate(ut.completedAt)
                             val isRecent = compTime > oneDayAgo
                             Log.i("EKEHI_DEBUG", "  Record #$index: status=${ut.status}, completedAt=${ut.completedAt}, isRecent=$isRecent")
                         }
-
-                        // Implement automatic 24h reset based on last completion time
+                    
                         val sortedUserTasks = userTasksForThisTask.sortedByDescending { parseIsoDate(it.completedAt) }
                         val oneDayMs = 24 * 60 * 60 * 1000L
-                        
+                                                
                         var completionCountToday = 0
                         var lastReferenceTime = now
                         var latestVerifiedTime = 0L
-                        
+                                                
                         // Count verified tasks in the current 24h active block
                         for (ut in sortedUserTasks) {
                             val compTime = parseIsoDate(ut.completedAt)
-                            
-                            // If gap since last task (or now) is > 24h, this starts a new reset cycle
+                                                    
                             if (lastReferenceTime - compTime > oneDayMs) {
                                 break
                             }
-                            
+                                                    
                             if (ut.status == "verified") {
                                 completionCountToday++
                                 if (latestVerifiedTime == 0L) latestVerifiedTime = compTime
                             }
                             lastReferenceTime = compTime
                         }
-                        
+                                                
+                        // ADDED: Calculate totals from ALL verified tasks (not just today)
+                        val totalCompletions = userTasksForThisTask.count { it.status == "verified" }
+                        val totalAccumulatedRewards = totalCompletions * task.rewardCoins
+                                                
                         val latestUserTask = sortedUserTasks.firstOrNull()
-                        
+                                                
                         val cooldownMs = task.cooldownMinutes * 60 * 1000L
                         val nextCooldownAvailableTime = latestVerifiedTime + cooldownMs
                         val nextLimitAvailableTime = latestVerifiedTime + oneDayMs
-                        
+                                                
                         val isCooldownActive = latestVerifiedTime > 0 && now < nextCooldownAvailableTime
                         val isLimitReached = completionCountToday >= task.maxCompletionsPerDay
-                        
+                                                
                         val nextAvailableAt = when {
                             isLimitReached -> java.time.Instant.ofEpochMilli(nextLimitAvailableTime).toString()
                             isCooldownActive -> java.time.Instant.ofEpochMilli(nextCooldownAvailableTime).toString()
                             else -> null
                         }
-                        
-                        Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, isLimitReached=$isLimitReached, isCooldownActive=$isCooldownActive")
-                        
+                                                
+                        Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, total=$totalCompletions, totalRewards=$totalAccumulatedRewards")
+                                                
                         task.copy(
                             isCompleted = isLimitReached || isCooldownActive,
                             isVerified = isLimitReached,
@@ -157,7 +158,9 @@ open class SocialTaskRepository @Inject constructor(
                             completionCountToday = completionCountToday,
                             nextAvailableAt = nextAvailableAt,
                             completedAt = latestUserTask?.completedAt,
-                            verifiedAt = latestUserTask?.verifiedAt
+                            verifiedAt = latestUserTask?.verifiedAt,
+                            totalAccumulatedRewards = totalAccumulatedRewards,  // ADDED
+                            totalCompletions = totalCompletions                  // ADDED
                         )
                     } else {
                         val latestUserTask = userTasksForThisTask.maxByOrNull { 

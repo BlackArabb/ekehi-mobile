@@ -22,5 +22,9 @@ data class SocialTask(
     val completionCountToday: Int = 0,
     val nextAvailableAt: String? = null,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    
+    // ADDED: Cumulative tracking (never reset)
+    val totalAccumulatedRewards: Double = 0.0,
+    val totalCompletions: Int = 0
 )

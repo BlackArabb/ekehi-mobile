@@ -235,7 +235,9 @@ fun SocialTasksScreen(
                                 maxCompletionsPerDay = task.maxCompletionsPerDay,
                                 cooldownMinutes = task.cooldownMinutes,
                                 completionCountToday = task.completionCountToday,
-                                nextAvailableAt = task.nextAvailableAt
+                                nextAvailableAt = task.nextAvailableAt,
+                                totalAccumulatedRewards = task.totalAccumulatedRewards,  // ADDED
+                                totalCompletions = task.totalCompletions                  // ADDED
                             )
                             
                             EnhancedSocialTaskCard(
@@ -721,12 +723,18 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
     var completedTasks = 0
     var totalTasks = 0
     var totalRewards = 0.0
+    var blogRewards = 0.0  // ADDED
     
     if (socialTasksResource is Resource.Success) {
         val tasks = (socialTasksResource as Resource.Success).data
         totalTasks = tasks.size
         completedTasks = tasks.count { it.isCompleted }
         totalRewards = tasks.filter { it.isCompleted }.sumOf { it.rewardCoins }
+        
+        // ADDED: Calculate accumulated blog task rewards
+        blogRewards = tasks
+            .filter { it.platform.lowercase() == "blog" }
+            .sumOf { it.totalAccumulatedRewards }
     }
     
     Row(
@@ -772,6 +780,18 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
             isHighlight = true,
             showLogoInLabel = true
         )
+        
+        // ADDED: Show blog rewards if user has earned any
+        if (blogRewards > 0) {
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            EnhancedStatCard(
+                icon = Icons.Default.Repeat,
+                value = String.format("%.1f", blogRewards),
+                label = "Blog Total",
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
@@ -874,13 +894,27 @@ fun EnhancedSocialTaskCard(
                     shape = RoundedCornerShape(8.dp),
                     shadowElevation = 4.dp
                 ) {
-                    Text(
-                        text = "${task.completionCountToday}/${task.maxCompletionsPerDay}",
-                        color = BrandColors.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Daily progress
+                        Text(
+                            text = "Today: ${task.completionCountToday}/${task.maxCompletionsPerDay}",
+                            color = BrandColors.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        // ADDED: Show total completions and accumulated rewards
+                        if (task.totalCompletions > 0) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Total: ${task.totalCompletions} (${String.format("%.1f", task.totalAccumulatedRewards)} EKH)",
+                                color = BrandColors.White.copy(alpha = 0.8f),
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
                 }
             }
 
@@ -2501,7 +2535,9 @@ data class SocialTaskItem(
     val maxCompletionsPerDay: Int = 1,
     val cooldownMinutes: Int = 0,
     val completionCountToday: Int = 0,
-    val nextAvailableAt: String? = null
+    val nextAvailableAt: String? = null,
+    val totalAccumulatedRewards: Double = 0.0,  // ADDED: Never reset
+    val totalCompletions: Int = 0                // ADDED: Never reset
 )
 
 @EntryPoint
