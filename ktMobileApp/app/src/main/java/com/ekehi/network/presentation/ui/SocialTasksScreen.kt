@@ -1,4 +1,7 @@
-﻿package com.ekehi.network.presentation.ui
+﻿// COMPLETE SocialTasksScreen.kt - REPLACE ENTIRE FILE
+// This is the complete file with the fixed blog task card layout
+
+package com.ekehi.network.presentation.ui
 
 import android.content.Intent
 import android.net.Uri
@@ -40,6 +43,7 @@ import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
 import kotlinx.coroutines.delay
 import java.net.URL
+
 // Brand Colors
 object BrandColors {
     val Primary = Color(0xFFffa000)
@@ -55,7 +59,7 @@ object BrandColors {
     val Warning = Color(0xFFf59e0b)
     val CardBackground = Color(0xFF0d0d0d)
     val CardBorder = Color(0x4DFFA000) // 30% opacity orange
-    val Gray = Color(0xFF6b7280) // Adding gray color for disabled buttons
+    val Gray = Color(0xFF6b7280)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,12 +73,10 @@ fun SocialTasksScreen(
     val socialTasksResource by viewModel.socialTasks.collectAsState()
     val verificationState by viewModel.verificationState.collectAsState()
     
-    // Declare these variables early so they can be accessed by the launcher
     var selectedTask by remember { mutableStateOf<SocialTaskItem?>(null) }
     var showVerificationDialog by remember { mutableStateOf(false) }
     var taskActionCompleted by remember { mutableStateOf(false) }
     
-    // Get AuthRepository through DI
     val authRepository = remember {
         EntryPointAccessors.fromApplication(
             context.applicationContext,
@@ -82,18 +84,15 @@ fun SocialTasksScreen(
         ).authRepository()
     }
     
-    // Get current user ID when screen initializes
     LaunchedEffect(Unit) {
         Log.i("EKEHI_DEBUG", "SocialTasksScreen initialized, fetching user...")
         try {
-            // Get the current user from the auth repository
             val result = authRepository.getCurrentUserIfLoggedIn()
             if (result.isSuccess) {
                 val user = result.getOrNull()
                 if (user != null) {
                     userId = user.id
                     Log.i("EKEHI_DEBUG", "Found userId: $userId, loading tasks...")
-                    // Load user's social tasks (which handles status)
                     viewModel.loadUserSocialTasks(userId)
                 } else {
                     Log.w("EKEHI_DEBUG", "User is null despite successful auth check")
@@ -109,7 +108,6 @@ fun SocialTasksScreen(
         }
     }
 
-    // Handle verification state changes and refresh
     LaunchedEffect(verificationState) {
         if (verificationState is VerificationState.Success || verificationState is VerificationState.Error) {
             Log.i("EKEHI_DEBUG", "Verification state changed: $verificationState, refreshing...")
@@ -121,14 +119,13 @@ fun SocialTasksScreen(
         }
     }
 
-    // Auto-refresh list every minute if any task is in cooldown or limit reached
     LaunchedEffect(socialTasksResource) {
         val tasks = (socialTasksResource as? Resource.Success)?.data ?: emptyList()
         val hasAnyCooldown = tasks.any { it.nextAvailableAt != null }
         
         if (hasAnyCooldown) {
             while(true) {
-                delay(60000) // 1 minute
+                delay(60000)
                 Log.i("EKEHI_DEBUG", "Auto-refreshing social tasks list...")
                 if (userId.isNotEmpty()) {
                     viewModel.loadUserSocialTasks(userId)
@@ -154,7 +151,6 @@ fun SocialTasksScreen(
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)
         ) {
-            // Header with gradient accent and refresh button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -185,7 +181,6 @@ fun SocialTasksScreen(
                     )
                 }
                 
-                // Refresh button
                 IconButton(
                     onClick = {
                         viewModel.loadSocialTasks()
@@ -206,12 +201,10 @@ fun SocialTasksScreen(
                 }
             }
             
-            // Enhanced Stats Section
             EnhancedStatsSection(viewModel)
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Tasks List
             when (socialTasksResource) {
                 is Resource.Success -> {
                     val tasks = (socialTasksResource as Resource.Success).data
@@ -236,8 +229,8 @@ fun SocialTasksScreen(
                                 cooldownMinutes = task.cooldownMinutes,
                                 completionCountToday = task.completionCountToday,
                                 nextAvailableAt = task.nextAvailableAt,
-                                totalAccumulatedRewards = task.totalAccumulatedRewards,  // ADDED
-                                totalCompletions = task.totalCompletions                  // ADDED
+                                totalAccumulatedRewards = task.totalAccumulatedRewards,
+                                totalCompletions = task.totalCompletions
                             )
                             
                             EnhancedSocialTaskCard(
@@ -259,7 +252,6 @@ fun SocialTasksScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Skeleton for stats section
                         item {
                             Row(
                                 modifier = Modifier
@@ -287,7 +279,6 @@ fun SocialTasksScreen(
                                     .padding(20.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                // Completed tasks skeleton
                                 Column(
                                     modifier = Modifier.weight(1f),
                                     horizontalAlignment = Alignment.CenterHorizontally
@@ -324,7 +315,6 @@ fun SocialTasksScreen(
                                 
                                 Spacer(modifier = Modifier.width(16.dp))
                                 
-                                // EKH Earned skeleton
                                 Column(
                                     modifier = Modifier.weight(1f),
                                     horizontalAlignment = Alignment.CenterHorizontally
@@ -365,7 +355,6 @@ fun SocialTasksScreen(
                             Spacer(modifier = Modifier.height(24.dp))
                         }
                         
-                        // Skeleton for task cards
                         items(5) { index ->
                             Card(
                                 modifier = Modifier
@@ -377,7 +366,6 @@ fun SocialTasksScreen(
                                 shape = RoundedCornerShape(20.dp)
                             ) {
                                 Box {
-                                    // Gradient accent line at top
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -397,7 +385,6 @@ fun SocialTasksScreen(
                                             modifier = Modifier.fillMaxWidth(),
                                             verticalAlignment = Alignment.Top
                                         ) {
-                                            // Platform icon skeleton
                                             Box(
                                                 modifier = Modifier
                                                     .size(56.dp)
@@ -411,7 +398,6 @@ fun SocialTasksScreen(
                                             Spacer(Modifier.width(16.dp))
                                             
                                             Column(modifier = Modifier.weight(1f)) {
-                                                // Title skeleton
                                                 Box(
                                                     modifier = Modifier
                                                         .width(120.dp)
@@ -424,7 +410,6 @@ fun SocialTasksScreen(
                                                 
                                                 Spacer(Modifier.height(8.dp))
                                                 
-                                                // Description skeleton
                                                 repeat(2) {
                                                     Box(
                                                         modifier = Modifier
@@ -440,7 +425,6 @@ fun SocialTasksScreen(
                                                 
                                                 Spacer(Modifier.height(8.dp))
                                                 
-                                                // Domain skeleton
                                                 Box(
                                                     modifier = Modifier
                                                         .width(80.dp)
@@ -453,7 +437,6 @@ fun SocialTasksScreen(
                                                 
                                                 Spacer(Modifier.height(12.dp))
                                                 
-                                                // Verification badge skeleton
                                                 Box(
                                                     modifier = Modifier
                                                         .width(90.dp)
@@ -480,7 +463,6 @@ fun SocialTasksScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            // Reward badge skeleton
                                             Box(
                                                 modifier = Modifier
                                                     .background(
@@ -521,7 +503,6 @@ fun SocialTasksScreen(
                                                 }
                                             }
                                             
-                                            // Button skeleton
                                             Box(
                                                 modifier = Modifier
                                                     .width(80.dp)
@@ -572,14 +553,11 @@ fun SocialTasksScreen(
             }
         }
         
-        // Task Action Dialog
         if (selectedTask != null && !showVerificationDialog) {
-            // Show pending task dialog if task is in review
             if (selectedTask!!.status == "pending") {
                 PendingTaskDialog(
                     task = selectedTask!!,
                     onDeleteTask = { 
-                        // TODO: Implement delete task functionality
                         viewModel.deletePendingTask(userId, selectedTask!!.id)
                         selectedTask = null
                     },
@@ -602,7 +580,6 @@ fun SocialTasksScreen(
             }
         }
         
-        // Verification Dialog
         if (selectedTask != null && showVerificationDialog) {
             TaskVerificationDialog(
                 task = selectedTask!!,
@@ -622,7 +599,6 @@ fun SocialTasksScreen(
             )
         }
         
-        // Verification State Snackbar with explicit close buttons
         when (verificationState) {
             is VerificationState.Success -> {
                 Snackbar(
@@ -723,7 +699,7 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
     var completedTasks = 0
     var totalTasks = 0
     var totalRewards = 0.0
-    var blogRewards = 0.0  // ADDED
+    var blogRewards = 0.0
     
     if (socialTasksResource is Resource.Success) {
         val tasks = (socialTasksResource as Resource.Success).data
@@ -731,7 +707,6 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
         completedTasks = tasks.count { it.isCompleted }
         totalRewards = tasks.filter { it.isCompleted }.sumOf { it.rewardCoins }
         
-        // ADDED: Calculate accumulated blog task rewards
         blogRewards = tasks
             .filter { it.platform.lowercase() == "blog" }
             .sumOf { it.totalAccumulatedRewards }
@@ -781,7 +756,6 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
             showLogoInLabel = true
         )
         
-        // ADDED: Show blog rewards if user has earned any
         if (blogRewards > 0) {
             Spacer(modifier = Modifier.width(16.dp))
             
@@ -838,6 +812,7 @@ fun EnhancedStatCard(
     }
 }
 
+// FIXED VERSION OF EnhancedSocialTaskCard
 @Composable
 fun EnhancedSocialTaskCard(
     task: SocialTaskItem,
@@ -850,13 +825,13 @@ fun EnhancedSocialTaskCard(
             .shadow(6.dp, RoundedCornerShape(20.dp))
             .then(
                 if (task.platform.lowercase() == "blog" && task.nextAvailableAt != null) {
-                    Modifier // Disable clicking during blog cooldown
+                    Modifier
                 } else if (task.platform.lowercase() == "blog" && task.completionCountToday >= task.maxCompletionsPerDay) {
-                    Modifier // Disable clicking when blog limit reached
+                    Modifier
                 } else if (!task.isVerified && task.status != "pending") {
                     Modifier.clickable(onClick = onClick)
                 } else if (task.status == "pending") {
-                    Modifier.clickable(onClick = onClick) // Still clickable but will show dialog
+                    Modifier.clickable(onClick = onClick)
                 } else {
                     Modifier
                 }
@@ -867,7 +842,6 @@ fun EnhancedSocialTaskCard(
         shape = RoundedCornerShape(20.dp)
     ) {
         Box {
-            // Gradient accent line at top
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -882,9 +856,7 @@ fun EnhancedSocialTaskCard(
                     )
             )
             
-            
-
-            // Blog Progress Badge in Top Right
+            // FIXED: Simplified badge showing only today's count
             if (task.platform.lowercase() == "blog") {
                 Surface(
                     modifier = Modifier
@@ -894,27 +866,13 @@ fun EnhancedSocialTaskCard(
                     shape = RoundedCornerShape(8.dp),
                     shadowElevation = 4.dp
                 ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Daily progress
-                        Text(
-                            text = "Today: ${task.completionCountToday}/${task.maxCompletionsPerDay}",
-                            color = BrandColors.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        // ADDED: Show total completions and accumulated rewards
-                        if (task.totalCompletions > 0) {
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "Total: ${task.totalCompletions} (${String.format("%.1f", task.totalAccumulatedRewards)} EKH)",
-                                color = BrandColors.White.copy(alpha = 0.8f),
-                                fontSize = 10.sp
-                            )
-                        }
-                    }
+                    Text(
+                        text = "${task.completionCountToday}/${task.maxCompletionsPerDay}",
+                        color = BrandColors.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
             }
 
@@ -923,7 +881,6 @@ fun EnhancedSocialTaskCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
                 ) {
-                    // Platform icon with gradient background or favicon
                     Box(
                         modifier = Modifier
                             .size(56.dp)
@@ -980,7 +937,6 @@ fun EnhancedSocialTaskCard(
                             lineHeight = 20.sp
                         )
                         
-                        // Display domain if link is available
                         if (task.link.isNotEmpty()) {
                             Text(
                                 text = extractDomain(task.link),
@@ -993,7 +949,7 @@ fun EnhancedSocialTaskCard(
                         
                         Spacer(Modifier.height(8.dp))
                         
-                        // Verification badge
+                        // FIXED: Badge with total rewards integrated
                         Row(
                             modifier = Modifier
                                 .background(
@@ -1035,22 +991,40 @@ fun EnhancedSocialTaskCard(
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = if (task.platform.lowercase() == "blog")
-                                    "Daily Limit: ${task.maxCompletionsPerDay}"
-                                else if (task.verificationMethod == "api") 
-                                    "Auto-verification" 
-                                else 
-                                    "Manual review",
-                                color = if (task.platform.lowercase() == "blog")
-                                    BrandColors.Primary
-                                else if (task.verificationMethod == "api") 
-                                    BrandColors.Success 
-                                else 
-                                    BrandColors.Warning,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            )
+                            
+                            // FIXED: Show daily limit AND total for blog
+                            if (task.platform.lowercase() == "blog") {
+                                Column {
+                                    Text(
+                                        text = "Daily Limit: ${task.maxCompletionsPerDay}",
+                                        color = BrandColors.Primary,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    if (task.totalCompletions > 0) {
+                                        Text(
+                                            text = "Earned ${task.totalCompletions}× (${String.format("%.1f", task.totalAccumulatedRewards)} EKH total)",
+                                            color = BrandColors.Primary.copy(alpha = 0.8f),
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            modifier = Modifier.padding(top = 2.dp)
+                                        )
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = if (task.verificationMethod == "api") 
+                                        "Auto-verification" 
+                                    else 
+                                        "Manual review",
+                                    color = if (task.verificationMethod == "api") 
+                                        BrandColors.Success 
+                                    else 
+                                        BrandColors.Warning,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
                 }
@@ -1069,7 +1043,6 @@ fun EnhancedSocialTaskCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Reward badge
                     Row(
                         modifier = Modifier
                             .background(
@@ -1107,7 +1080,6 @@ fun EnhancedSocialTaskCard(
                     }
                     
                     if (task.platform.lowercase() == "blog" && task.nextAvailableAt != null) {
-                        // Cooldown state for blog - Styled as a disabled button to maintain layout
                         Button(
                             onClick = {},
                             enabled = false,
@@ -1228,6 +1200,10 @@ fun EnhancedSocialTaskCard(
     }
 }
 
+
+
+// PART 2 OF SocialTasksScreen.kt - APPEND THIS TO PART 1
+
 @Composable
 fun TaskActionDialog(
     task: SocialTaskItem,
@@ -1235,13 +1211,10 @@ fun TaskActionDialog(
     onTaskCompleted: () -> Unit
 ) {
     val context = LocalContext.current
-
-    // 20-second cooldown state for blog tasks
     var cooldownRemaining by remember { mutableStateOf(0L) }
     var hasOpenedBlog by remember { mutableStateOf(false) }
     val isBlogTask = task.platform.lowercase() == "blog"
 
-    // Start countdown timer when cooldown is active
     LaunchedEffect(cooldownRemaining) {
         if (cooldownRemaining > 0) {
             kotlinx.coroutines.delay(1000)
@@ -1295,7 +1268,6 @@ fun TaskActionDialog(
                 
                 Divider(color = BrandColors.LightGray.copy(alpha = 0.3f))
                 
-                // Task Instructions
                 Column(
                     modifier = Modifier
                         .background(
@@ -1336,7 +1308,6 @@ fun TaskActionDialog(
                 
                 Divider(color = BrandColors.LightGray.copy(alpha = 0.3f))
                 
-                // Reward info
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1381,7 +1352,6 @@ fun TaskActionDialog(
                     }
                 }
                 
-                // Open Platform Button
                 if (task.link.isNotEmpty()) {
                     Button(
                         onClick = {
@@ -1395,7 +1365,6 @@ fun TaskActionDialog(
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                                 context.startActivity(intent)
 
-                                // Start 20-second cooldown for blog tasks
                                 if (isBlogTask) {
                                     hasOpenedBlog = true
                                     cooldownRemaining = 20L
@@ -1464,9 +1433,8 @@ fun TaskActionDialog(
         },
         confirmButton = {
             if (task.status == "pending") {
-                // Disable the button and show different text for pending tasks
                 Button(
-                    onClick = {}, // Disabled - no action
+                    onClick = {},
                     enabled = false,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = BrandColors.Gray
@@ -1482,7 +1450,6 @@ fun TaskActionDialog(
                     )
                 }
             } else if (isBlogTask && !hasOpenedBlog) {
-                // Blog task - user hasn't opened the blog yet
                 Button(
                     onClick = {},
                     enabled = false,
@@ -1501,7 +1468,6 @@ fun TaskActionDialog(
                     )
                 }
             } else if (isBlogTask && cooldownRemaining > 0) {
-                // Show countdown button during 20-second cooldown
                 Button(
                     onClick = {},
                     enabled = false,
@@ -1528,7 +1494,6 @@ fun TaskActionDialog(
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-
                     Spacer(Modifier.width(8.dp))
                     Text(
                         "Task Completed",
@@ -1598,11 +1563,10 @@ fun TaskVerificationDialog(
             }
         },
         text = {
-            // Wrap content in a LazyColumn to make it scrollable
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 500.dp), // Set max height for scrolling
+                    .heightIn(max = 500.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
@@ -1675,7 +1639,6 @@ fun TaskVerificationDialog(
         },
         confirmButton = {
             if (isLoading) {
-                // Show loading state with message
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1838,21 +1801,17 @@ fun TelegramVerificationUI(
             )
         }
         
-        // Button to open verification bot
         Button(
             onClick = {
                 try {
-                    // Open the ekehi_task_bot specifically
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/ekehi_task_bot"))
                     context.startActivity(intent)
                 } catch (e: Exception) {
-                    // Fallback to opening Telegram app
                     try {
                         val intent = context.packageManager.getLaunchIntentForPackage("org.telegram.messenger")
                         if (intent != null) {
                             context.startActivity(intent)
                         } else {
-                            // Open web version
                             val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org"))
                             context.startActivity(webIntent)
                         }
@@ -1918,7 +1877,6 @@ fun TelegramVerificationUI(
             )
         )
         
-        // Help text
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1946,272 +1904,6 @@ fun TelegramVerificationUI(
                 style = MaterialTheme.typography.bodySmall,
                 color = BrandColors.White.copy(alpha = 0.9f),
                 fontSize = 12.sp
-            )
-        }
-    }
-}
-
-@Composable
-fun YouTubeVerificationUI(
-    taskType: String,
-    actionUrl: String,
-    isAlreadySignedIn: Boolean = false,
-    onConnectYouTube: () -> Unit
-) {
-    var isConnecting by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    
-    // Reset connecting state after a timeout
-    LaunchedEffect(isConnecting) {
-        if (isConnecting) {
-            kotlinx.coroutines.delay(10000) // 10 seconds timeout
-            isConnecting = false
-            android.util.Log.w("YouTubeVerificationUI", "Connection timeout - resetting state")
-        }
-    }
-    
-    Column(
-        modifier = Modifier
-            .background(BrandColors.CardBackground, RoundedCornerShape(12.dp))
-            .border(1.dp, Color(0xFFFF0000).copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        if (isAlreadySignedIn) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        BrandColors.Success.copy(alpha = 0.1f),
-                        RoundedCornerShape(8.dp)
-                    )
-                    .border(
-                        1.dp,
-                        BrandColors.Success.copy(alpha = 0.3f),
-                        RoundedCornerShape(8.dp)
-                    )
-                    .padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = BrandColors.Success,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "Already connected with Google account",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = BrandColors.Success,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-        
-        Text(
-            text = if (isAlreadySignedIn) 
-                "We'll verify using your connected account" 
-            else 
-                "Connect your YouTube account to verify automatically",
-            style = MaterialTheme.typography.bodyMedium,
-            color = BrandColors.White,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Text(
-            text = "We'll check if you've completed the task on YouTube.",
-            style = MaterialTheme.typography.bodySmall,
-            color = BrandColors.White.copy(alpha = 0.7f)
-        )
-        
-        if (!isAlreadySignedIn) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Color(0xFFFF0000).copy(alpha = 0.1f),
-                        RoundedCornerShape(8.dp)
-                    )
-                    .padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.Info,
-                    contentDescription = null,
-                    tint = Color(0xFFFF0000),
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "Make sure you've completed the task before connecting",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = BrandColors.White.copy(alpha = 0.9f),
-                    fontSize = 12.sp
-                )
-            }
-            
-            Button(
-                onClick = {
-                    android.util.Log.d("YouTubeVerificationUI", "Connect button clicked")
-                    isConnecting = true
-                    try {
-                        onConnectYouTube()
-                    } catch (e: Exception) {
-                        android.util.Log.e("YouTubeVerificationUI", "Error calling onConnectYouTube: ${e.message}", e)
-                        isConnecting = false
-                        android.widget.Toast.makeText(
-                            context,
-                            "Error: ${e.message}",
-                            android.widget.Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF0000)
-                ),
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(vertical = 12.dp),
-                enabled = !isConnecting
-            ) {
-                if (isConnecting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = BrandColors.White
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Connecting...", fontWeight = FontWeight.Bold)
-                } else {
-                    Icon(Icons.Default.AccountCircle, "Connect")
-                    Spacer(Modifier.width(8.dp))
-                    Text("Connect YouTube Account", fontWeight = FontWeight.Bold)
-                }
-            }
-            
-            if (isConnecting) {
-                Text(
-                    text = "Check your browser/app for the sign-in page",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = BrandColors.Warning,
-                    fontSize = 11.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FacebookVerificationUI(
-    actionUrl: String,
-    onConnectFacebook: () -> Unit
-) {
-    val context = LocalContext.current
-    var isConnecting by remember { mutableStateOf(false) }
-    
-    // Reset connecting state after timeout
-    LaunchedEffect(isConnecting) {
-        if (isConnecting) {
-            kotlinx.coroutines.delay(10000) // 10 seconds timeout
-            isConnecting = false
-            android.util.Log.w("FacebookVerificationUI", "Connection timeout - resetting state")
-        }
-    }
-    
-    Column(
-        modifier = Modifier
-            .background(BrandColors.CardBackground, RoundedCornerShape(12.dp))
-            .border(1.dp, Color(0xFF4267B2).copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Connect your Facebook account to verify automatically",
-            style = MaterialTheme.typography.bodyMedium,
-            color = BrandColors.White,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Text(
-            text = "We'll check if you've liked the page on Facebook.",
-            style = MaterialTheme.typography.bodySmall,
-            color = BrandColors.White.copy(alpha = 0.7f)
-        )
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Color(0xFF4267B2).copy(alpha = 0.1f),
-                    RoundedCornerShape(8.dp)
-                )
-                .padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Info,
-                contentDescription = null,
-                tint = Color(0xFF4267B2),
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = "Make sure you've liked the page before connecting",
-                style = MaterialTheme.typography.bodySmall,
-                color = BrandColors.White.copy(alpha = 0.9f),
-                fontSize = 12.sp
-            )
-        }
-        
-        Button(
-            onClick = {
-                android.util.Log.d("FacebookVerificationUI", "Connect button clicked")
-                isConnecting = true
-                try {
-                    onConnectFacebook()
-                } catch (e: Exception) {
-                    android.util.Log.e("FacebookVerificationUI", "Error calling onConnectFacebook: ${e.message}", e)
-                    isConnecting = false
-                    android.widget.Toast.makeText(
-                        context,
-                        "Facebook connection failed: ${e.message}",
-                        android.widget.Toast.LENGTH_LONG
-                    ).show()
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4267B2)
-            ),
-            shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(vertical = 12.dp),
-            enabled = !isConnecting
-        ) {
-            if (isConnecting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = BrandColors.White
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Connecting...", fontWeight = FontWeight.Bold)
-            } else {
-                Icon(Icons.Default.AccountCircle, "Connect")
-                Spacer(Modifier.width(8.dp))
-                Text("Connect Facebook Account", fontWeight = FontWeight.Bold)
-            }
-        }
-        
-        if (isConnecting) {
-            Text(
-                text = "Check your browser/app for the Facebook login page",
-                style = MaterialTheme.typography.bodySmall,
-                color = BrandColors.Warning,
-                fontSize = 11.sp,
-                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
@@ -2285,108 +1977,6 @@ fun ManualVerificationUI(
     }
 }
 
-fun getTaskInstructions(platform: String, taskType: String): String {
-    return when (platform.lowercase()) {
-        "telegram" -> "1. Click the button below to open the Telegram channel/group\n2. Join the channel/group\n3. Come back here and click 'I've Completed This'"
-        "youtube" -> when (taskType.lowercase()) {
-            "subscribe", "channel_subscribe" -> "1. Click the button below to open YouTube\n2. Subscribe to the channel\n3. Come back here and click 'I've Completed This'"
-            "like", "video_like" -> "1. Click the button below to open YouTube\n2. Watch and like the video\n3. Come back here and click 'I've Completed This'"
-            else -> "1. Click the button below to open YouTube\n2. Complete the required action\n3. Come back here and click 'I've Completed This'"
-        }
-        "facebook" -> "1. Click the button below to open Facebook\n2. Like the page\n3. Come back here and click 'I've Completed This'"
-        "twitter", "x" -> "1. Click the button below to open Twitter/X\n2. Complete the action (follow, like, or retweet)\n3. Come back here and click 'I've Completed This'"
-        "instagram" -> "1. Click the button below to open Instagram\n2. Follow the account or like the post\n3. Come back here and click 'I've Completed This'"
-        else -> "1. Click the button below to open ${platform.capitalize()}\n2. Complete the required task\n3. Come back here and click 'I've Completed This'"
-    }
-}
-
-fun isReadyToSubmit(platform: String, telegramUserId: String, username: String, proofUrl: String, taskType: String = ""): Boolean {
-    if (platform.lowercase() == "blog") return true
-    return when (platform.lowercase()) {
-        "telegram" -> telegramUserId.isNotEmpty() && telegramUserId.all { it.isDigit() } && telegramUserId.length >= 8
-        else -> username.isNotEmpty() || proofUrl.isNotEmpty()
-    }
-}
-
-fun calculateRemainingCooldown(nextAvailableAt: String?): String {
-    if (nextAvailableAt == null) return ""
-    return try {
-        val nextTime = parseIsoDate(nextAvailableAt)
-        val now = System.currentTimeMillis()
-        val diffMs = nextTime - now
-        if (diffMs <= 0) return ""
-        
-        val minutes = (diffMs / (60 * 1000)) % 60
-        val hours = (diffMs / (60 * 60 * 1000))
-        
-        if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
-    } catch (e: Exception) {
-        ""
-    }
-}
-
-fun parseIsoDate(dateStr: String?): Long {
-    if (dateStr.isNullOrEmpty()) return 0L
-    // Normalize: Instant.parse only likes 'Z', but Appwrite sometimes returns +00:00
-    val normalizedDate = dateStr.replace("+00:00", "Z")
-    return try {
-        java.time.Instant.parse(normalizedDate).toEpochMilli()
-    } catch (e: Exception) {
-        try {
-            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).apply {
-                timeZone = java.util.TimeZone.getTimeZone("UTC")
-            }
-            format.parse(normalizedDate)?.time ?: 0L
-        } catch (e2: Exception) {
-            0L
-        }
-    }
-}
-
-fun isValidTelegramUserId(userId: String): Boolean {
-    return userId.isNotEmpty() && 
-           userId.all { it.isDigit() } && 
-           userId.length >= 8 && 
-           userId.length <= 12 &&
-           userId.toLongOrNull() != null
-}
-
-fun getTelegramUserIdErrorMessage(userId: String): String {
-    return when {
-        userId.isEmpty() -> ""
-        !userId.all { it.isDigit() } -> "User ID should contain only numbers"
-        userId.length < 8 -> "User ID should be at least 8 digits"
-        userId.length > 12 -> "User ID should not exceed 12 digits"
-        else -> ""
-    }
-}
-
-fun buildProofData(platform: String, telegramUserId: String, username: String, proofUrl: String): Map<String, Any> {
-    return buildMap {
-        // Always include platform and timestamp
-        put("platform", platform)
-        put("submitted_at", System.currentTimeMillis())
-        
-        when (platform.lowercase()) {
-            "telegram" -> {
-                telegramUserId.toLongOrNull()?.let { userId ->
-                    put("telegram_user_id", userId)
-                    put("user_id", userId) // Alternative key some backends expect
-                }
-            }
-            else -> {
-                if (username.isNotEmpty()) put("username", username)
-                if (proofUrl.isNotEmpty()) put("proof_url", proofUrl)
-            }
-        }
-        
-        // Always include all available data for debugging
-        if (username.isNotEmpty()) put("submitted_username", username)
-        if (proofUrl.isNotEmpty()) put("submitted_proof_url", proofUrl)
-        if (telegramUserId.isNotEmpty()) put("submitted_telegram_id", telegramUserId)
-    }
-}
-
 @Composable
 fun PendingTaskDialog(
     task: SocialTaskItem,
@@ -2450,7 +2040,6 @@ fun PendingTaskDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    // Wait for review - just close the dialog
                     onDismiss()
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -2465,7 +2054,6 @@ fun PendingTaskDialog(
         dismissButton = {
             TextButton(
                 onClick = {
-                    // Show confirmation dialog before deleting
                     onDeleteTask()
                 },
                 colors = ButtonDefaults.textButtonColors(
@@ -2476,6 +2064,106 @@ fun PendingTaskDialog(
             }
         }
     )
+}
+
+// Helper functions
+fun getTaskInstructions(platform: String, taskType: String): String {
+    return when (platform.lowercase()) {
+        "telegram" -> "1. Click the button below to open the Telegram channel/group\n2. Join the channel/group\n3. Come back here and click 'I've Completed This'"
+        "youtube" -> when (taskType.lowercase()) {
+            "subscribe", "channel_subscribe" -> "1. Click the button below to open YouTube\n2. Subscribe to the channel\n3. Come back here and click 'I've Completed This'"
+            "like", "video_like" -> "1. Click the button below to open YouTube\n2. Watch and like the video\n3. Come back here and click 'I've Completed This'"
+            else -> "1. Click the button below to open YouTube\n2. Complete the required action\n3. Come back here and click 'I've Completed This'"
+        }
+        "facebook" -> "1. Click the button below to open Facebook\n2. Like the page\n3. Come back here and click 'I've Completed This'"
+        "twitter", "x" -> "1. Click the button below to open Twitter/X\n2. Complete the action (follow, like, or retweet)\n3. Come back here and click 'I've Completed This'"
+        "instagram" -> "1. Click the button below to open Instagram\n2. Follow the account or like the post\n3. Come back here and click 'I've Completed This'"
+        else -> "1. Click the button below to open ${platform.capitalize()}\n2. Complete the required task\n3. Come back here and click 'I've Completed This'"
+    }
+}
+
+fun isReadyToSubmit(platform: String, telegramUserId: String, username: String, proofUrl: String, taskType: String = ""): Boolean {
+    if (platform.lowercase() == "blog") return true
+    return when (platform.lowercase()) {
+        "telegram" -> telegramUserId.isNotEmpty() && telegramUserId.all { it.isDigit() } && telegramUserId.length >= 8
+        else -> username.isNotEmpty() || proofUrl.isNotEmpty()
+    }
+}
+
+fun calculateRemainingCooldown(nextAvailableAt: String?): String {
+    if (nextAvailableAt == null) return ""
+    return try {
+        val nextTime = parseIsoDate(nextAvailableAt)
+        val now = System.currentTimeMillis()
+        val diffMs = nextTime - now
+        if (diffMs <= 0) return ""
+        
+        val minutes = (diffMs / (60 * 1000)) % 60
+        val hours = (diffMs / (60 * 60 * 1000))
+        
+        if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+fun parseIsoDate(dateStr: String?): Long {
+    if (dateStr.isNullOrEmpty()) return 0L
+    val normalizedDate = dateStr.replace("+00:00", "Z")
+    return try {
+        java.time.Instant.parse(normalizedDate).toEpochMilli()
+    } catch (e: Exception) {
+        try {
+            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).apply {
+                timeZone = java.util.TimeZone.getTimeZone("UTC")
+            }
+            format.parse(normalizedDate)?.time ?: 0L
+        } catch (e2: Exception) {
+            0L
+        }
+    }
+}
+
+fun isValidTelegramUserId(userId: String): Boolean {
+    return userId.isNotEmpty() && 
+           userId.all { it.isDigit() } && 
+           userId.length >= 8 && 
+           userId.length <= 12 &&
+           userId.toLongOrNull() != null
+}
+
+fun getTelegramUserIdErrorMessage(userId: String): String {
+    return when {
+        userId.isEmpty() -> ""
+        !userId.all { it.isDigit() } -> "User ID should contain only numbers"
+        userId.length < 8 -> "User ID should be at least 8 digits"
+        userId.length > 12 -> "User ID should not exceed 12 digits"
+        else -> ""
+    }
+}
+
+fun buildProofData(platform: String, telegramUserId: String, username: String, proofUrl: String): Map<String, Any> {
+    return buildMap {
+        put("platform", platform)
+        put("submitted_at", System.currentTimeMillis())
+        
+        when (platform.lowercase()) {
+            "telegram" -> {
+                telegramUserId.toLongOrNull()?.let { userId ->
+                    put("telegram_user_id", userId)
+                    put("user_id", userId)
+                }
+            }
+            else -> {
+                if (username.isNotEmpty()) put("username", username)
+                if (proofUrl.isNotEmpty()) put("proof_url", proofUrl)
+            }
+        }
+        
+        if (username.isNotEmpty()) put("submitted_username", username)
+        if (proofUrl.isNotEmpty()) put("submitted_proof_url", proofUrl)
+        if (telegramUserId.isNotEmpty()) put("submitted_telegram_id", telegramUserId)
+    }
 }
 
 fun getPlatformColor(platform: String): Color {
@@ -2500,7 +2188,6 @@ fun getPlatformIcon(platform: String): androidx.compose.ui.graphics.vector.Image
     }
 }
 
-// Function to extract domain from URL
 fun extractDomain(url: String): String {
     return try {
         val domain = URL(url).host
@@ -2510,7 +2197,6 @@ fun extractDomain(url: String): String {
     }
 }
 
-// Function to generate favicon URL
 fun getFaviconUrl(url: String): String {
     return try {
         val domain = URL(url).host
@@ -2531,13 +2217,13 @@ data class SocialTaskItem(
     val isCompleted: Boolean,
     val isVerified: Boolean,
     val verificationMethod: String,
-    val status: String = "available", // "available", "pending_review", "verified", "rejected"
+    val status: String = "available",
     val maxCompletionsPerDay: Int = 1,
     val cooldownMinutes: Int = 0,
     val completionCountToday: Int = 0,
     val nextAvailableAt: String? = null,
-    val totalAccumulatedRewards: Double = 0.0,  // ADDED: Never reset
-    val totalCompletions: Int = 0                // ADDED: Never reset
+    val totalAccumulatedRewards: Double = 0.0,
+    val totalCompletions: Int = 0
 )
 
 @EntryPoint
