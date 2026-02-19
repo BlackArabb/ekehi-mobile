@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,6 +85,9 @@ fun SocialTasksScreen(
         ).authRepository()
     }
     
+    // Preserve scroll position and content state
+    val scrollState = rememberScrollState()
+    
     LaunchedEffect(Unit) {
         Log.i("EKEHI_DEBUG", "SocialTasksScreen initialized, fetching user...")
         try {
@@ -93,29 +97,51 @@ fun SocialTasksScreen(
                 if (user != null) {
                     userId = user.id
                     Log.i("EKEHI_DEBUG", "Found userId: $userId, loading tasks...")
+                    // Check if we have cached data first
+                    val cachedData = viewModel.getCachedTasks()
+                    if (cachedData is Resource.Success) {
+                        // Use cached data temporarily while fresh data loads
+                        viewModel.restoreFromCache()
+                    }
                     viewModel.loadUserSocialTasks(userId)
                 } else {
                     Log.w("EKEHI_DEBUG", "User is null despite successful auth check")
+                    // Check if we have cached data first
+                    val cachedData = viewModel.getCachedTasks()
+                    if (cachedData is Resource.Success) {
+                        // Use cached data temporarily while fresh data loads
+                        viewModel.restoreFromCache()
+                    }
                     viewModel.loadSocialTasks()
                 }
             } else {
                 Log.w("EKEHI_DEBUG", "Auth check failed, loading tasks without user status")
+                // Check if we have cached data first
+                val cachedData = viewModel.getCachedTasks()
+                if (cachedData is Resource.Success) {
+                    // Use cached data temporarily while fresh data loads
+                    viewModel.restoreFromCache()
+                }
                 viewModel.loadSocialTasks()
             }
         } catch (e: Exception) {
             Log.e("EKEHI_DEBUG", "Failed to get current user ID", e)
+            // Check if we have cached data first
+            val cachedData = viewModel.getCachedTasks()
+            if (cachedData is Resource.Success) {
+                // Use cached data temporarily while fresh data loads
+                viewModel.restoreFromCache()
+            }
             viewModel.loadSocialTasks()
         }
     }
 
     LaunchedEffect(verificationState) {
         if (verificationState is VerificationState.Success || verificationState is VerificationState.Error) {
-            Log.i("EKEHI_DEBUG", "Verification state changed: $verificationState, refreshing...")
-            if (userId.isNotEmpty()) {
-                viewModel.loadUserSocialTasks(userId)
-            } else {
-                viewModel.loadSocialTasks()
-            }
+            Log.i("EKEHI_DEBUG", "Verification state changed: $verificationState")
+            // Don't refresh the entire list, just clear verification state
+            // The task status will be updated locally
+            viewModel.clearVerificationState()
         }
     }
 
@@ -126,8 +152,10 @@ fun SocialTasksScreen(
         if (hasAnyCooldown) {
             while(true) {
                 delay(60000)
-                Log.i("EKEHI_DEBUG", "Auto-refreshing social tasks list...")
+                Log.i("EKEHI_DEBUG", "Checking for task cooldown updates...")
+                // Only refresh if we need to update cooldown status
                 if (userId.isNotEmpty()) {
+                    // Check if any task status might have changed due to cooldowns expiring
                     viewModel.loadUserSocialTasks(userId)
                 }
             }
@@ -183,8 +211,16 @@ fun SocialTasksScreen(
                 
                 IconButton(
                     onClick = {
+                        // Use cached data temporarily while fresh data loads
+                        val cachedData = viewModel.getCachedTasks()
+                        if (cachedData is Resource.Success) {
+                            viewModel.restoreFromCache()
+                        }
+                        // Load fresh data
                         viewModel.loadSocialTasks()
-                        viewModel.loadUserSocialTasks(userId)
+                        if (userId.isNotEmpty()) {
+                            viewModel.loadUserSocialTasks(userId)
+                        }
                     },
                     modifier = Modifier
                         .background(
@@ -213,24 +249,28 @@ fun SocialTasksScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(tasks) { task ->
+                            // Check for local state updates for this specific task
+                            val localTaskState = viewModel.getLocalTaskState(task.id)
+                            val currentTask = localTaskState ?: task
+                            
                             val taskItem = SocialTaskItem(
-                                id = task.id,
-                                title = task.title,
-                                description = task.description,
-                                platform = task.platform,
-                                taskType = task.taskType,
-                                link = task.actionUrl ?: "",
-                                reward = task.rewardCoins,
-                                isCompleted = task.isCompleted,
-                                isVerified = task.isVerified,
-                                verificationMethod = task.verificationMethod,
-                                status = task.status ?: "available",
-                                maxCompletionsPerDay = task.maxCompletionsPerDay,
-                                cooldownMinutes = task.cooldownMinutes,
-                                completionCountToday = task.completionCountToday,
-                                nextAvailableAt = task.nextAvailableAt,
-                                totalAccumulatedRewards = task.totalAccumulatedRewards,
-                                totalCompletions = task.totalCompletions
+                                id = currentTask.id,
+                                title = currentTask.title,
+                                description = currentTask.description,
+                                platform = currentTask.platform,
+                                taskType = currentTask.taskType,
+                                link = currentTask.actionUrl ?: "",
+                                reward = currentTask.rewardCoins,
+                                isCompleted = currentTask.isCompleted,
+                                isVerified = currentTask.isVerified,
+                                verificationMethod = currentTask.verificationMethod,
+                                status = currentTask.status ?: "available",
+                                maxCompletionsPerDay = currentTask.maxCompletionsPerDay,
+                                cooldownMinutes = currentTask.cooldownMinutes,
+                                completionCountToday = currentTask.completionCountToday,
+                                nextAvailableAt = currentTask.nextAvailableAt,
+                                totalAccumulatedRewards = currentTask.totalAccumulatedRewards,
+                                totalCompletions = currentTask.totalCompletions
                             )
                             
                             EnhancedSocialTaskCard(

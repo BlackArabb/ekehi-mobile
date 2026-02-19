@@ -28,6 +28,14 @@ class SocialTasksViewModel @Inject constructor(
     private val _verificationState = MutableStateFlow<VerificationState>(VerificationState.Idle)
     val verificationState: StateFlow<VerificationState> = _verificationState
 
+    // Caching and local state management
+    private val _cachedSocialTasks = MutableStateFlow<Resource<List<SocialTask>>>(Resource.Loading)
+    val cachedSocialTasks: StateFlow<Resource<List<SocialTask>>> = _cachedSocialTasks
+    
+    // Track local task states to avoid full refreshes
+    private val _localTaskStates = MutableStateFlow<Map<String, SocialTask>>(emptyMap())
+    val localTaskStates: StateFlow<Map<String, SocialTask>> = _localTaskStates
+
     private var currentUserId: String? = null
     private var youtubeAccessToken: String? = null
 
@@ -46,11 +54,76 @@ class SocialTasksViewModel @Inject constructor(
             }
         }
     }
+    
+    // Caching methods
+    fun cacheSocialTasks(tasks: List<SocialTask>) {
+        _cachedSocialTasks.value = Resource.Success(tasks)
+    }
+    
+    fun getCachedTasks(): Resource<List<SocialTask>> {
+        return _cachedSocialTasks.value
+    }
+    
+    // Local state management for individual tasks
+    fun updateLocalTaskState(taskId: String, updatedTask: SocialTask) {
+        val currentStates = _localTaskStates.value.toMutableMap()
+        currentStates[taskId] = updatedTask
+        _localTaskStates.value = currentStates
+    }
+    
+    fun getLocalTaskState(taskId: String): SocialTask? {
+        return _localTaskStates.value[taskId]
+    }
+    
+    fun clearLocalTaskState() {
+        _localTaskStates.value = emptyMap()
+    }
+    
+    fun updateTaskStatusLocally(userId: String, taskId: String, newStatus: String, isCompleted: Boolean = false, isVerified: Boolean = false) {
+        // Get the current tasks
+        val currentTasks = when (val currentState = _socialTasks.value) {
+            is Resource.Success -> currentState.data
+            else -> emptyList()
+        }
+        
+        // Update the specific task
+        val updatedTasks = currentTasks.map { task ->
+            if (task.id == taskId) {
+                task.copy(
+                    status = newStatus,
+                    isCompleted = isCompleted,
+                    isVerified = isVerified
+                )
+            } else {
+                task
+            }
+        }
+        
+        // Update the state with the modified list
+        _socialTasks.value = Resource.Success(updatedTasks)
+        
+        // Also update the local task state cache
+        val updatedTask = updatedTasks.find { it.id == taskId }
+        if (updatedTask != null) {
+            updateLocalTaskState(taskId, updatedTask)
+        }
+    }
+    
+    // Method to restore from cache if needed
+    fun restoreFromCache() {
+        if (_cachedSocialTasks.value is Resource.Success) {
+            _socialTasks.value = _cachedSocialTasks.value
+        }
+    }
 
     fun loadSocialTasks() {
         viewModelScope.launch {
             socialTasksUseCase.getSocialTasks().collect { resource ->
                 _socialTasks.value = resource
+                // Also cache the tasks
+                if (resource is Resource.Success) {
+                    _cachedSocialTasks.value = resource
+                }
             }
         }
     }
@@ -60,6 +133,10 @@ class SocialTasksViewModel @Inject constructor(
         viewModelScope.launch {
             socialTasksUseCase.getUserSocialTasks(userId).collect { resource ->
                 _socialTasks.value = resource
+                // Also cache the tasks
+                if (resource is Resource.Success) {
+                    _cachedSocialTasks.value = resource
+                }
             }
         }
     }
@@ -86,6 +163,22 @@ class SocialTasksViewModel @Inject constructor(
                 if (result.isSuccess) {
                     val (userTask, verificationResult) = result.getOrNull()!!
                     
+                    // Update local task state based on verification result
+                    when (verificationResult) {
+                        is VerificationResult.Success -> {
+                            // Update local task state instead of refreshing entire list
+                            updateTaskStatusLocally(userId, taskId, "completed", isCompleted = true, isVerified = true)
+                        }
+                        is VerificationResult.Pending -> {
+                            // Update local task state for pending status
+                            updateTaskStatusLocally(userId, taskId, "pending_review", isCompleted = true, isVerified = false)
+                        }
+                        is VerificationResult.Failure -> {
+                            // Update local task state for failed status
+                            updateTaskStatusLocally(userId, taskId, "failed", isCompleted = false, isVerified = false)
+                        }
+                    }
+                    
                     // Update verification state based on result
                     _verificationState.value = when (verificationResult) {
                         is VerificationResult.Success -> {
@@ -102,21 +195,11 @@ class SocialTasksViewModel @Inject constructor(
                         }
                     }
                     
-                    // Send event to refresh social tasks only if verification succeeded or is pending
-                    if (verificationResult is VerificationResult.Success || verificationResult is VerificationResult.Pending) {
-                        viewModelScope.launch {
-                            EventBus.sendEvent(Event.RefreshSocialTasks(userId))
-                            // Only refresh leaderboard and profile if coins were awarded (success only)
-                            if (verificationResult is VerificationResult.Success) {
-                                EventBus.sendEvent(Event.RefreshUserProfile)
-                                EventBus.sendEvent(Event.RefreshLeaderboard)
-                            }
-                        }
-                    } else {
-                        // On failure, still refresh to show the rejected status
-                        viewModelScope.launch {
-                            EventBus.sendEvent(Event.RefreshSocialTasks(userId))
-                        }
+                    // Send events for related updates without forcing social tasks refresh
+                    if (verificationResult is VerificationResult.Success) {
+                        // Only refresh leaderboard and profile since coins were awarded
+                        EventBus.sendEvent(Event.RefreshUserProfile)
+                        EventBus.sendEvent(Event.RefreshLeaderboard)
                     }
                 } else {
                     _verificationState.value = VerificationState.Error(result.exceptionOrNull()?.message ?: "Failed to complete task")
