@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.ekehi.network.presentation.ui.components.ShimmerEffect
 
 @Composable
 fun SkeletonLoader() {
@@ -58,10 +59,9 @@ fun SkeletonLoader() {
 
 @Composable
 fun CardSkeleton(modifier: Modifier = Modifier) {
-    Box(
+    ShimmerEffect(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0x1AFFFFFF))
     )
 }
 
@@ -74,33 +74,30 @@ fun ProfileHeaderSkeleton() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Avatar Skeleton
-        Box(
+        ShimmerEffect(
             modifier = Modifier
                 .size(90.dp)
                 .clip(CircleShape)
-                .background(Color(0x33FFFFFF))
         )
         
         Spacer(modifier = Modifier.height(20.dp))
         
         // Username Skeleton
-        Box(
+        ShimmerEffect(
             modifier = Modifier
                 .width(150.dp)
                 .height(26.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(Color(0x33FFFFFF))
         )
         
         Spacer(modifier = Modifier.height(12.dp))
         
         // Join Date Skeleton
-        Box(
+        ShimmerEffect(
             modifier = Modifier
                 .width(120.dp)
                 .height(14.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(Color(0x33FFFFFF))
         )
         
         Spacer(modifier = Modifier.height(12.dp))
@@ -109,31 +106,28 @@ fun ProfileHeaderSkeleton() {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            ShimmerEffect(
                 modifier = Modifier
                     .size(18.dp)
                     .clip(CircleShape)
-                    .background(Color(0x33FFFFFF))
             )
             Spacer(modifier = Modifier.width(6.dp))
-            Box(
+            ShimmerEffect(
                 modifier = Modifier
                     .width(100.dp)
                     .height(15.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0x33FFFFFF))
             )
         }
         
         Spacer(modifier = Modifier.height(20.dp))
         
         // Edit Profile Button Skeleton
-        Box(
+        ShimmerEffect(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0x33FFFFFF))
         )
     }
 }

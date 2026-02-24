@@ -36,6 +36,7 @@ import com.ekehi.network.presentation.viewmodel.SocialTasksViewModel
 import com.ekehi.network.presentation.ui.EkhLogo
 import com.ekehi.network.presentation.viewmodel.VerificationState
 import com.ekehi.network.domain.model.Resource
+import com.ekehi.network.presentation.ui.components.SocialTasksScreenSkeleton
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -288,7 +289,8 @@ fun SocialTasksScreen(
                     }
                 }
                 is Resource.Loading -> {
-                    LazyColumn(
+                    SocialTasksScreenSkeleton()
+                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
