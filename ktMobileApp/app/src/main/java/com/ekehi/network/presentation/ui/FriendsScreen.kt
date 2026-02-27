@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,9 +34,15 @@ fun FriendsScreen(
 ) {
     val referralsResource by viewModel.referrals.collectAsState()
     
-    // Load referrals when screen appears
+    // Track if screen has been loaded - persists across navigation
+    var hasLoaded by rememberSaveable { mutableStateOf(false) }
+    
+    // Load referrals only once on initial interaction
     LaunchedEffect(Unit) {
-        viewModel.loadReferrals()
+        if (!hasLoaded) {
+            viewModel.loadReferrals()
+            hasLoaded = true
+        }
     }
     
     Box(

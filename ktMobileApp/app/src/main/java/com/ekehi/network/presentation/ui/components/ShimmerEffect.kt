@@ -11,6 +11,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+// Brand colors for shimmer effect - matching app theme
+private val ShimmerBaseColor = Color(0x33FFA000) // 20% opacity gold
+private val ShimmerHighlightColor = Color(0x66FFA000) // 40% opacity gold
+private val ShimmerDarkColor = Color(0x1AFFA000) // 10% opacity gold
+
 @Composable
 fun ShimmerEffect(
     modifier: Modifier = Modifier,
@@ -32,12 +37,14 @@ fun ShimmerEffect(
 
     val shimmerBrush = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFB8B5B5),
-            Color(0xFF8F8B8B),
-            Color(0xFFB8B5B5)
+            ShimmerDarkColor,
+            ShimmerBaseColor,
+            ShimmerHighlightColor,
+            ShimmerBaseColor,
+            ShimmerDarkColor
         ),
         start = Offset(0f, 0f),
-        end = Offset(offsetX, 0f)
+        end = Offset(offsetX, offsetX / 2)
     )
 
     Box(

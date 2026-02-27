@@ -75,11 +75,28 @@ class SocialTasksViewModel @Inject constructor(
         return _localTaskStates.value[taskId]
     }
     
+    /**
+     * Get all tasks with local state overrides applied
+     */
+    fun getCombinedTasks(): List<SocialTask> {
+        val currentTasks = when (val currentState = _socialTasks.value) {
+            is Resource.Success -> currentState.data
+            else -> emptyList()
+        }
+        
+        val localStates = _localTaskStates.value
+        
+        // Apply local states to tasks
+        return currentTasks.map { task ->
+            localStates[task.id] ?: task
+        }
+    }
+    
     fun clearLocalTaskState() {
         _localTaskStates.value = emptyMap()
     }
     
-    fun updateTaskStatusLocally(userId: String, taskId: String, newStatus: String, isCompleted: Boolean = false, isVerified: Boolean = false) {
+    fun updateTaskStatusLocally(userId: String, taskId: String, newStatus: String, isCompleted: Boolean = false, isVerified: Boolean = false, incrementCompletionCount: Boolean = false) {
         // Get the current tasks
         val currentTasks = when (val currentState = _socialTasks.value) {
             is Resource.Success -> currentState.data
@@ -89,10 +106,22 @@ class SocialTasksViewModel @Inject constructor(
         // Update the specific task
         val updatedTasks = currentTasks.map { task ->
             if (task.id == taskId) {
+                val newCompletionCount = if (incrementCompletionCount) {
+                    task.completionCountToday + 1
+                } else {
+                    task.completionCountToday
+                }
+                val newTotalAccumulatedRewards = if (incrementCompletionCount) {
+                    task.totalAccumulatedRewards + task.rewardCoins
+                } else {
+                    task.totalAccumulatedRewards
+                }
                 task.copy(
                     status = newStatus,
                     isCompleted = isCompleted,
-                    isVerified = isVerified
+                    isVerified = isVerified,
+                    completionCountToday = newCompletionCount,
+                    totalAccumulatedRewards = newTotalAccumulatedRewards
                 )
             } else {
                 task
@@ -163,15 +192,24 @@ class SocialTasksViewModel @Inject constructor(
                 if (result.isSuccess) {
                     val (userTask, verificationResult) = result.getOrNull()!!
                     
+                    // Get the task to check if it's a blog task
+                    val currentTasks = when (val currentState = _socialTasks.value) {
+                        is Resource.Success -> currentState.data
+                        else -> emptyList()
+                    }
+                    val task = currentTasks.find { it.id == taskId }
+                    val isBlogTask = task?.platform?.lowercase() == "blog"
+                    
                     // Update local task state based on verification result
                     when (verificationResult) {
                         is VerificationResult.Success -> {
                             // Update local task state instead of refreshing entire list
-                            updateTaskStatusLocally(userId, taskId, "completed", isCompleted = true, isVerified = true)
+                            // For blog tasks, increment completion count
+                            updateTaskStatusLocally(userId, taskId, "completed", isCompleted = true, isVerified = true, incrementCompletionCount = isBlogTask)
                         }
                         is VerificationResult.Pending -> {
                             // Update local task state for pending status
-                            updateTaskStatusLocally(userId, taskId, "pending_review", isCompleted = true, isVerified = false)
+                            updateTaskStatusLocally(userId, taskId, "pending_review", isCompleted = true, isVerified = false, incrementCompletionCount = isBlogTask)
                         }
                         is VerificationResult.Failure -> {
                             // Update local task state for failed status

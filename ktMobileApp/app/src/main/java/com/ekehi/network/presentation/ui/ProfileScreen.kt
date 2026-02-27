@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +35,9 @@ import androidx.compose.ui.platform.LocalContext
 import android.app.Activity
 import com.ekehi.network.service.StartIoService
 import com.ekehi.network.presentation.ui.components.ProfileHeaderSkeleton
+import com.ekehi.network.presentation.ui.components.ProfileStatsSectionSkeleton
+import com.ekehi.network.presentation.ui.components.ProfileContentSectionSkeleton
+import com.ekehi.network.presentation.ui.components.ProfileActionsSectionSkeleton
 import com.ekehi.network.presentation.viewmodel.SettingsViewModel
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
@@ -57,6 +61,9 @@ fun ProfileScreen(
     val completedTasksResource by viewModel.completedTasksCount.collectAsState()
     val scrollState = rememberScrollState()
     
+    // Track if screen has been loaded - persists across navigation
+    var hasLoaded by rememberSaveable { mutableStateOf(false) }
+    
     // Get StartIoService through DI
     val context = LocalContext.current
     val startIoService = remember {
@@ -66,9 +73,12 @@ fun ProfileScreen(
         ).startIoService()
     }
     
-    // Initialize StartIoService
+    // Initialize StartIoService - only once on first load
     LaunchedEffect(Unit) {
-        startIoService.initialize()
+        if (!hasLoaded) {
+            startIoService.initialize()
+            hasLoaded = true
+        }
     }
     
     Box(
@@ -97,59 +107,17 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Stats Section Skeleton
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0x1AFFFFFF)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0x1AFFFFFF))
-                    )
-                }
+                ProfileStatsSectionSkeleton()
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Content Section Skeleton
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0x1AFFFFFF)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0x1AFFFFFF))
-                    )
-                }
+                ProfileContentSectionSkeleton()
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Actions Section Skeleton
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0x1AFFFFFF)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0x1AFFFFFF))
-                    )
-                }
+                ProfileActionsSectionSkeleton()
             }
         } else {
             // Show actual content when data is loaded

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -89,51 +90,54 @@ fun SocialTasksScreen(
     // Preserve scroll position and content state
     val scrollState = rememberScrollState()
     
+    // Track if screen has been loaded - persists across navigation
+    var hasLoaded by rememberSaveable { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    
+    // Load data only once on initial interaction
     LaunchedEffect(Unit) {
-        Log.i("EKEHI_DEBUG", "SocialTasksScreen initialized, fetching user...")
-        try {
-            val result = authRepository.getCurrentUserIfLoggedIn()
-            if (result.isSuccess) {
-                val user = result.getOrNull()
-                if (user != null) {
-                    userId = user.id
-                    Log.i("EKEHI_DEBUG", "Found userId: $userId, loading tasks...")
-                    // Check if we have cached data first
-                    val cachedData = viewModel.getCachedTasks()
-                    if (cachedData is Resource.Success) {
-                        // Use cached data temporarily while fresh data loads
-                        viewModel.restoreFromCache()
+        if (!hasLoaded) {
+            Log.i("EKEHI_DEBUG", "SocialTasksScreen initial load...")
+            try {
+                val result = authRepository.getCurrentUserIfLoggedIn()
+                if (result.isSuccess) {
+                    val user = result.getOrNull()
+                    if (user != null) {
+                        userId = user.id
+                        Log.i("EKEHI_DEBUG", "Found userId: $userId, loading tasks...")
+                        // Check if we have cached data first
+                        val cachedData = viewModel.getCachedTasks()
+                        if (cachedData is Resource.Success) {
+                            viewModel.restoreFromCache()
+                        }
+                        viewModel.loadUserSocialTasks(userId)
+                    } else {
+                        Log.w("EKEHI_DEBUG", "User is null despite successful auth check")
+                        val cachedData = viewModel.getCachedTasks()
+                        if (cachedData is Resource.Success) {
+                            viewModel.restoreFromCache()
+                        }
+                        viewModel.loadSocialTasks()
                     }
-                    viewModel.loadUserSocialTasks(userId)
                 } else {
-                    Log.w("EKEHI_DEBUG", "User is null despite successful auth check")
-                    // Check if we have cached data first
+                    Log.w("EKEHI_DEBUG", "Auth check failed, loading tasks without user status")
                     val cachedData = viewModel.getCachedTasks()
                     if (cachedData is Resource.Success) {
-                        // Use cached data temporarily while fresh data loads
                         viewModel.restoreFromCache()
                     }
                     viewModel.loadSocialTasks()
                 }
-            } else {
-                Log.w("EKEHI_DEBUG", "Auth check failed, loading tasks without user status")
-                // Check if we have cached data first
+            } catch (e: Exception) {
+                Log.e("EKEHI_DEBUG", "Failed to get current user ID", e)
                 val cachedData = viewModel.getCachedTasks()
                 if (cachedData is Resource.Success) {
-                    // Use cached data temporarily while fresh data loads
                     viewModel.restoreFromCache()
                 }
                 viewModel.loadSocialTasks()
             }
-        } catch (e: Exception) {
-            Log.e("EKEHI_DEBUG", "Failed to get current user ID", e)
-            // Check if we have cached data first
-            val cachedData = viewModel.getCachedTasks()
-            if (cachedData is Resource.Success) {
-                // Use cached data temporarily while fresh data loads
-                viewModel.restoreFromCache()
-            }
-            viewModel.loadSocialTasks()
+            hasLoaded = true
+        } else {
+            Log.i("EKEHI_DEBUG", "Screen already loaded, using cached data")
         }
     }
 
@@ -212,12 +216,8 @@ fun SocialTasksScreen(
                 
                 IconButton(
                     onClick = {
-                        // Use cached data temporarily while fresh data loads
-                        val cachedData = viewModel.getCachedTasks()
-                        if (cachedData is Resource.Success) {
-                            viewModel.restoreFromCache()
-                        }
-                        // Load fresh data
+                        // Only refresh tasks via ViewModel - no need to reload entire screen
+                        Log.i("EKEHI_DEBUG", "Refreshing social tasks only...")
                         viewModel.loadSocialTasks()
                         if (userId.isNotEmpty()) {
                             viewModel.loadUserSocialTasks(userId)
@@ -737,14 +737,28 @@ fun SocialTasksScreen(
 @Composable
 fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
     val socialTasksResource by viewModel.socialTasks.collectAsState()
+    val localTaskStates by viewModel.localTaskStates.collectAsState()
     
     var completedTasks = 0
     var totalTasks = 0
     var totalRewards = 0.0
     var blogRewards = 0.0
     
-    if (socialTasksResource is Resource.Success) {
-        val tasks = (socialTasksResource as Resource.Success).data
+    // Use combined tasks (original + local overrides) for accurate stats
+    val tasks = if (localTaskStates.isNotEmpty()) {
+        val baseTasks = when (socialTasksResource) {
+            is Resource.Success -> (socialTasksResource as Resource.Success).data
+            else -> emptyList()
+        }
+        baseTasks.map { task -> localTaskStates[task.id] ?: task }
+    } else {
+        when (socialTasksResource) {
+            is Resource.Success -> (socialTasksResource as Resource.Success).data
+            else -> emptyList()
+        }
+    }
+    
+    if (tasks.isNotEmpty()) {
         totalTasks = tasks.size
         completedTasks = tasks.count { it.isCompleted }
         totalRewards = tasks.filter { it.isCompleted }.sumOf { it.rewardCoins }
@@ -805,7 +819,8 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
                 icon = Icons.Default.Repeat,
                 value = String.format("%.1f", blogRewards),
                 label = "Blog Total",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                showLogoInLabel = true
             )
         }
     }
