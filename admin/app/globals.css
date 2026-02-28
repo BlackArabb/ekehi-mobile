@@ -13,6 +13,12 @@
   --accent-green: 34, 197, 94;
 }
 
+/* Mobile-first responsive base styles */
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -25,6 +31,52 @@ body {
   );
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior-y: contain;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 767px) {
+  html {
+    font-size: 14px;
+  }
+  
+  body {
+    /* Prevent scroll bounce on iOS */
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Larger touch targets for mobile */
+  button, 
+  a, 
+  input, 
+  select, 
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve touch scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .hover\:bg-gray-700\/50:hover {
+    background-color: transparent;
+  }
+}
+
+/* Safe area insets for notched phones */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
 }
 
 body::before {

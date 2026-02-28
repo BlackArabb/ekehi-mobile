@@ -264,10 +264,10 @@ export default function UsersPage() {
   if (loading && users.length === 0) {
     return (
       <div className="py-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Users Management</h1>
+        <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
+          <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Users Management</h1>
         </div>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
           <div className="mt-8 flex justify-center items-center h-64 glass-effect rounded-2xl border border-purple-500/20">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500"></div>
           </div>
@@ -281,9 +281,9 @@ export default function UsersPage() {
       {/* Floating particles effect */}
       <div className="particles"></div>
       
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+      <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
             Users Management
           </h1>
           <Button 
@@ -295,12 +295,12 @@ export default function UsersPage() {
         </div>
         
         {/* Stats */}
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 md:mt-8 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 lg:grid-cols-4">
           {loading && Object.values(stats).every(value => value === 0) ? (
             // Show skeleton loaders when stats are loading
             Array.from({ length: 4 }).map((_, index) => (
-              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
                       <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
@@ -316,8 +316,8 @@ export default function UsersPage() {
           ) : (
             // Show actual stats
             <>
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
                       <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -337,8 +337,8 @@ export default function UsersPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-green-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-green-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-green-500 to-green-600 p-3 shadow-lg">
                       <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -358,8 +358,8 @@ export default function UsersPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-red-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-red-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-red-500 to-red-600 p-3 shadow-lg">
                       <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -379,8 +379,8 @@ export default function UsersPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
                       <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -404,7 +404,7 @@ export default function UsersPage() {
         </div>
       </div>
       
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+      <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
         {/* Error message */}
         {error && (
           <div className="mt-4">
@@ -663,7 +663,7 @@ export default function UsersPage() {
         onClose={() => setShowAddModal(false)}
         title="Add New User"
       >
-        <div className="space-y-4 glass-effect border border-purple-500/20 rounded-2xl p-6">
+        <div className="space-y-4 glass-effect border border-purple-500/20 rounded-2xl p-3 md:p-4">
           <div>
             <label className="block text-sm font-medium text-gray-300">Full Name</label>
             <input
@@ -736,7 +736,7 @@ export default function UsersPage() {
         title="Edit User"
       >
         {selectedUser && (
-          <div className="space-y-4 glass-effect border border-purple-500/20 rounded-2xl p-6">
+          <div className="space-y-4 glass-effect border border-purple-500/20 rounded-2xl p-3 md:p-4">
             <div>
               <label className="block text-sm font-medium text-gray-300">Full Name</label>
               <input

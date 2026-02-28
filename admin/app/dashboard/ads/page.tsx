@@ -276,9 +276,9 @@ export default function AdsPage() {
       <div className="py-6 relative">
         <div className="particles"></div>
         
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
               Ad Campaigns Management
             </h1>
             <div className="text-sm text-gray-400">
@@ -287,12 +287,12 @@ export default function AdsPage() {
           </div>
         </div>
         
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
           {/* Stats Skeletons */}
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-4">
+          <div className="mt-4 md:mt-8 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
                       <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
@@ -308,7 +308,7 @@ export default function AdsPage() {
           </div>
 
           {/* Search Filter Skeleton */}
-          <div className="mt-8 glass-effect rounded-2xl border border-purple-500/20 p-6 shadow-xl">
+          <div className="mt-8 glass-effect rounded-2xl border border-purple-500/20 p-3 md:p-4 shadow-xl">
             <div className="h-40 bg-gray-700/50 rounded animate-pulse"></div>
           </div>
 
@@ -410,9 +410,9 @@ export default function AdsPage() {
 
   return (
     <div className="py-6 overflow-x-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+      <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Ad Campaigns Management</h1>
+          <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Ad Campaigns Management</h1>
           <Button 
             onClick={() => setShowAddModal(true)}
             className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
@@ -422,7 +422,7 @@ export default function AdsPage() {
         </div>
       </div>
       
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+      <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
         {/* Error message */}
         {error && (
           <div className="mt-6">
@@ -472,12 +472,12 @@ export default function AdsPage() {
         </div>
         
         {/* Ad Campaigns Stats */}
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-4">
+        <div className="mt-4 md:mt-8 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 sm:grid-cols-4">
           {loading && stats.totalCampaigns === 0 ? (
             // Show skeleton loaders when stats are loading
             Array.from({ length: 4 }).map((_, index) => (
-              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
                       <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
@@ -493,8 +493,8 @@ export default function AdsPage() {
           ) : (
             // Show actual stats
             <>
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
                       <span className="text-white text-lg">📺</span>
@@ -511,8 +511,8 @@ export default function AdsPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-cyan-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-3 shadow-lg">
                       <span className="text-white text-lg">👁️</span>
@@ -531,8 +531,8 @@ export default function AdsPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-green-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-green-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-green-500 to-green-600 p-3 shadow-lg">
                       <span className="text-white text-lg">👆</span>
@@ -551,8 +551,8 @@ export default function AdsPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-pink-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg">
                       <span className="text-white text-lg">📈</span>

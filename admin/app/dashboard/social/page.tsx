@@ -309,9 +309,9 @@ export default function SocialPage() {
       <div className="py-6 relative">
         <div className="particles"></div>
         
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+        <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
               Social Tasks Management
             </h1>
             <div className="text-sm text-gray-400">
@@ -320,12 +320,12 @@ export default function SocialPage() {
           </div>
         </div>
         
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
           {/* Stats Skeletons */}
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="mt-4 md:mt-8 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 sm:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
                       <div className="h-6 w-6 bg-gray-600/50 rounded-full animate-pulse"></div>
@@ -341,7 +341,7 @@ export default function SocialPage() {
           </div>
 
           {/* Search Filter Skeleton */}
-          <div className="mt-8 glass-effect rounded-2xl border border-purple-500/20 p-6 shadow-xl">
+          <div className="mt-8 glass-effect rounded-2xl border border-purple-500/20 p-3 md:p-4 shadow-xl">
             <div className="h-40 bg-gray-700/50 rounded animate-pulse"></div>
           </div>
 
@@ -381,25 +381,25 @@ export default function SocialPage() {
   }
 
   return (
-    <div className="py-6">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-white">Social Tasks Management</h1>
-          <div className="flex space-x-2">
-            <Button onClick={() => window.location.href = '/dashboard/social/validation'}>
+    <div className="py-4 md:py-6">
+      <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-xl md:text-2xl font-semibold text-white">Social Tasks Management</h1>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => window.location.href = '/dashboard/social/validation'} size="sm">
               Validate Submissions
             </Button>
-            <Button onClick={() => setShowAddModal(true)}>Add New Task</Button>
+            <Button onClick={() => setShowAddModal(true)} size="sm">Add New Task</Button>
           </div>
         </div>
         
         {/* Stats */}
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="mt-4 md:mt-8 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 sm:grid-cols-3">
           {loading && stats.totalTasks === 0 ? (
             // Show skeleton loaders when stats are loading
             Array.from({ length: 3 }).map((_, index) => (
-              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
                       <div className="h-6 w-6 bg-gray-600/50 rounded-full animate-pulse"></div>
@@ -415,8 +415,8 @@ export default function SocialPage() {
           ) : (
             // Show actual stats
             <>
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
                       <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -435,8 +435,8 @@ export default function SocialPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-green-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-green-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-green-500 to-green-600 p-3 shadow-lg">
                       <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -455,8 +455,8 @@ export default function SocialPage() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-pink-500/20">
+                <div className="p-3 md:p-4 animated-gradient-slow">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg">
                       <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -530,7 +530,7 @@ export default function SocialPage() {
         </div>
         
         {/* Social Tasks List */}
-        <div className="mt-6 glass-effect rounded-2xl shadow-2xl border border-purple-500/20 overflow-hidden">
+        <div className="mt-6 glass-effect rounded-lg shadow-md border border-purple-500/20 overflow-hidden">
           <div className="px-4 py-5 sm:px-6 border-b border-gray-700/50">
             <h3 className="text-lg font-medium leading-6 text-white">Social Tasks</h3>
           </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { 
   HomeIcon, 
   UsersIcon, 
@@ -36,10 +36,28 @@ export default function Sidebar({
 }) {
   const [expanded, setExpanded] = useState(false)
   const pathname = usePathname()
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Check for mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Function to toggle sidebar expansion
   const toggleExpansion = () => {
     setExpanded(!expanded)
+  }
+
+  // Handle navigation - close sidebar on mobile
+  const handleNavClick = () => {
+    if (isMobile) {
+      setSidebarOpen(false)
+    }
   }
 
   return (
@@ -105,11 +123,12 @@ export default function Sidebar({
                       <a
                         key={item.name}
                         href={item.href}
+                        onClick={handleNavClick}
                         className={classNames(
                           isActive
                             ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-white border-l-4 border-purple-500'
                             : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
-                          'group flex items-center px-2 py-3 text-base font-medium rounded-lg transition-all duration-200'
+                          'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200'
                         )}
                       >
                         <item.icon
@@ -117,7 +136,7 @@ export default function Sidebar({
                             isActive
                               ? 'text-purple-400'
                               : 'text-gray-400 group-hover:text-cyan-400',
-                            'mr-4 h-6 w-6 flex-shrink-0'
+                            'mr-3 h-6 w-6 flex-shrink-0'
                           )}
                           aria-hidden="true"
                         />
@@ -134,7 +153,7 @@ export default function Sidebar({
       </Transition.Root>
 
       {/* Static sidebar for desktop - collapsed by default */}
-      <div className={`hidden md:fixed md:inset-y-0 md:left-0 md:flex md:flex-col transition-all duration-300 ease-in-out ${expanded ? 'md:w-64' : 'md:w-20'} z-30`} style={{ zIndex: 30 }}>
+      <div className={`hidden md:flex md:flex-col transition-all duration-300 ease-in-out ${expanded ? 'w-64' : 'w-20'} z-30`} style={{ zIndex: 30 }}>
         {/* Sidebar component */}
         <div className="flex min-h-0 flex-1 flex-col glass-effect border-r border-purple-500/20" style={{ zIndex: 30 }}>
           <div className="flex flex-shrink-0 items-center p-4 justify-center">
@@ -147,7 +166,7 @@ export default function Sidebar({
           <div className="flex justify-center py-2">
             <button
               onClick={toggleExpansion}
-              className="p-1 rounded-lg bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-200"
+              className="p-2 rounded-lg bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-200"
               aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
             >
               <ChevronRightIcon 
@@ -157,7 +176,7 @@ export default function Sidebar({
             </button>
           </div>
           
-          <nav className="mt-5 flex-1 px-2 space-y-1">
+          <nav className="mt-2 flex-1 px-2 space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/dashboard')
               return (
@@ -168,8 +187,8 @@ export default function Sidebar({
                     isActive
                       ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-white'
                       : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
-                    'group flex items-center rounded-lg transition-all duration-200 py-3',
-                    expanded ? 'px-3' : 'justify-center px-3'
+                      'group flex items-center rounded-lg transition-all duration-200 py-3',
+                      expanded ? 'px-3' : 'justify-center px-2'
                   )}
                 >
                   <item.icon

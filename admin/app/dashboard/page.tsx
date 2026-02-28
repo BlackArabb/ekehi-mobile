@@ -170,12 +170,12 @@ export default function Dashboard() {
   // If we have admin and data is still loading, show skeleton loaders
   if (loading && admin) {
     return (
-      <div className="py-6 relative">
+      <div className="py-4 md:py-6 relative">
         <div className="particles"></div>
         
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="mx-auto w-full px-1 md:px-4 sm:px-2">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 bg-clip-text text-transparent">
               Dashboard
             </h1>
             <div className="text-sm text-gray-400">
@@ -186,17 +186,17 @@ export default function Dashboard() {
         
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           {/* Stats Skeletons */}
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 md:mt-6 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-2 md:p-3">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
-                      <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
+                    <div className="flex-shrink-0 rounded-lg md:rounded-xl bg-gray-700/50 p-2 md:p-3 shadow-lg">
+                      <div className="h-5 w-5 md:h-7 md:w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <div className="h-4 bg-gray-700/50 rounded w-24 mb-3 animate-pulse"></div>
-                      <div className="h-8 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                    <div className="ml-2 md:ml-5 w-0 flex-1">
+                      <div className="h-3 md:h-4 bg-gray-700/50 rounded w-16 md:w-24 mb-2 md:mb-3 animate-pulse"></div>
+                      <div className="h-6 md:h-8 bg-gray-700/50 rounded w-10 md:w-16 animate-pulse"></div>
                     </div>
                   </div>
                 </div>
@@ -205,17 +205,17 @@ export default function Dashboard() {
           </div>
 
           {/* Additional Stats Skeleton Row */}
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 md:mt-6 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 lg:grid-cols-4">
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={`additional-stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`additional-stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-2 md:p-3">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
-                      <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
+                    <div className="flex-shrink-0 rounded-lg md:rounded-xl bg-gray-700/50 p-2 md:p-3 shadow-lg">
+                      <div className="h-5 w-5 md:h-7 md:w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <div className="h-4 bg-gray-700/50 rounded w-24 mb-3 animate-pulse"></div>
-                      <div className="h-8 bg-gray-700/50 rounded w-16 animate-pulse"></div>
+                    <div className="ml-2 md:ml-5 w-0 flex-1">
+                      <div className="h-3 md:h-4 bg-gray-700/50 rounded w-16 md:w-24 mb-2 md:mb-3 animate-pulse"></div>
+                      <div className="h-6 md:h-8 bg-gray-700/50 rounded w-10 md:w-16 animate-pulse"></div>
                     </div>
                   </div>
                 </div>
@@ -224,34 +224,34 @@ export default function Dashboard() {
           </div>
 
           {/* Charts Skeletons */}
-          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
-                <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
+          <div className="mt-4 md:mt-8 grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+              <div className="px-3 md:px-6 py-3 md:py-5 border-b border-gray-700/50">
+                <div className="h-5 md:h-6 bg-gray-700/50 rounded w-24 md:w-32 animate-pulse"></div>
               </div>
-              <div className="p-5">
-                <div className="h-80 bg-gray-700/50 rounded animate-pulse"></div>
+              <div className="p-3 md:p-5">
+                <div className="h-48 md:h-80 bg-gray-700/50 rounded animate-pulse"></div>
               </div>
             </div>
 
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
-              <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
-                <div className="h-6 bg-gray-700/50 rounded w-40 animate-pulse"></div>
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-cyan-500/20">
+              <div className="px-3 md:px-6 py-3 md:py-5 border-b border-gray-700/50">
+                <div className="h-5 md:h-6 bg-gray-700/50 rounded w-28 md:w-40 animate-pulse"></div>
               </div>
-              <div className="p-5">
-                <div className="h-80 bg-gray-700/50 rounded animate-pulse"></div>
+              <div className="p-3 md:p-5">
+                <div className="h-48 md:h-80 bg-gray-700/50 rounded animate-pulse"></div>
               </div>
             </div>
           </div>
 
           <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
             {/* Recent Activity Skeleton */}
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-pink-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
                 <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
               </div>
               <div className="border-t border-gray-700/30">
-                <div className="p-6 space-y-4">
+                <div className="p-2 md:p-3 space-y-4">
                   {Array.from({ length: 3 }).map((_, index) => (
                     <div key={`activity-skeleton-${index}`} className="flex items-center justify-between animate-pulse">
                       <div className="flex items-center">
@@ -272,14 +272,14 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Actions Skeleton */}
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-orange-500/20">
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-orange-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
                 <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
               </div>
-              <div className="p-6">
+              <div className="p-2 md:p-3">
                 <div className="grid grid-cols-2 gap-5">
                   {Array.from({ length: 4 }).map((_, index) => (
-                    <div key={`action-skeleton-${index}`} className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-6 animate-pulse">
+                    <div key={`action-skeleton-${index}`} className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-2 md:p-3 animate-pulse">
                       <div className="h-14 w-14 rounded-full bg-gray-700/50 mb-3"></div>
                       <div className="h-4 bg-gray-700/50 rounded w-16"></div>
                     </div>
@@ -298,7 +298,7 @@ export default function Dashboard() {
     return (
       <div className="py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <div className="rounded-lg bg-red-500/10 border border-red-500/50 p-6">
+          <div className="rounded-lg bg-red-500/10 border border-red-500/50 p-2 md:p-3">
             <h3 className="text-lg font-semibold text-red-400 mb-2">Error Loading Dashboard</h3>
             <p className="text-sm text-red-300">{error}</p>
             <button
@@ -329,14 +329,14 @@ export default function Dashboard() {
         </div>
       </div>
       
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+      <div className="mx-auto w-full px-1">
         {/* Stats */}
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-2 grid grid-cols-2 gap-1.5 sm:gap-2 md:gap-4 lg:grid-cols-4">
           {loading ? (
             // Show skeleton loaders when stats are loading
             Array.from({ length: 4 }).map((_, index) => (
-              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-2 md:p-3">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
                       <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
@@ -352,17 +352,17 @@ export default function Dashboard() {
           ) : (
             // Show actual stats
             <>
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-2 md:p-3 animated-gradient-slow">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg">
-                      <UsersIcon className="h-7 w-7 text-white" />
+                    <div className="flex-shrink-0 rounded-md bg-gradient-to-br from-purple-500 to-purple-600 p-1.5 md:p-2 shadow">
+                      <UsersIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-2 md:ml-3 w-0 flex-1">
                       <dl>
-                        <dt className="truncate text-sm font-medium text-gray-300">Total Users</dt>
+                        <dt className="truncate text-[10px] md:text-xs font-medium text-gray-300">Total Users</dt>
                         <dd className="flex items-baseline">
-                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.totalUsers.toLocaleString()}</div>
+                          <div className="text-lg md:text-xl font-bold text-white drop-shadow">{stats.totalUsers.toLocaleString()}</div>
                         </dd>
                       </dl>
                     </div>
@@ -370,17 +370,17 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-cyan-500/20">
+                <div className="p-2 md:p-3 animated-gradient-slow">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-3 shadow-lg">
-                      <MegaphoneIcon className="h-7 w-7 text-white" />
+                    <div className="flex-shrink-0 rounded-lg md:rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 p-2 md:p-3 shadow-lg">
+                      <MegaphoneIcon className="h-5 w-5 md:h-7 md:w-7 text-white" />
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-2 md:ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="truncate text-sm font-medium text-gray-300">Completed Tasks</dt>
+                        <dt className="truncate text-xs md:text-sm font-medium text-gray-300">Completed Tasks</dt>
                         <dd className="flex items-baseline">
-                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.completedTasks}</div>
+                          <div className="text-xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.completedTasks}</div>
                         </dd>
                       </dl>
                     </div>
@@ -388,17 +388,17 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-pink-500/20">
+                <div className="p-2 md:p-3 animated-gradient-slow">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg">
-                      <ChartBarIcon className="h-7 w-7 text-white" />
+                    <div className="flex-shrink-0 rounded-lg md:rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 p-2 md:p-3 shadow-lg">
+                      <ChartBarIcon className="h-5 w-5 md:h-7 md:w-7 text-white" />
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-2 md:ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="truncate text-sm font-medium text-gray-300">Pending Tasks</dt>
+                        <dt className="truncate text-xs md:text-sm font-medium text-gray-300">Pending Tasks</dt>
                         <dd className="flex items-baseline">
-                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.pendingSubmissions}</div>
+                          <div className="text-xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.pendingSubmissions}</div>
                         </dd>
                       </dl>
                     </div>
@@ -406,17 +406,17 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-orange-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-orange-500/20">
+                <div className="p-2 md:p-3 animated-gradient-slow">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 p-3 shadow-lg">
-                      <CurrencyDollarIcon className="h-7 w-7 text-white" />
+                    <div className="flex-shrink-0 rounded-lg md:rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 p-2 md:p-3 shadow-lg">
+                      <CurrencyDollarIcon className="h-5 w-5 md:h-7 md:w-7 text-white" />
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-2 md:ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="truncate text-sm font-medium text-gray-300">Verified Tasks</dt>
+                        <dt className="truncate text-xs md:text-sm font-medium text-gray-300">Verified Tasks</dt>
                         <dd className="flex items-baseline">
-                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.verifiedSubmissions}</div>
+                          <div className="text-xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.verifiedSubmissions}</div>
                         </dd>
                       </dl>
                     </div>
@@ -428,12 +428,12 @@ export default function Dashboard() {
         </div>
 
         {/* Additional Stats Row */}
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-3 md:mt-6 grid grid-cols-2 gap-2 md:gap-4 sm:gap-3 lg:grid-cols-4">
           {loading ? (
             // Show skeleton loaders when stats are loading
             Array.from({ length: 2 }).map((_, index) => (
-              <div key={`additional-stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6">
+              <div key={`additional-stat-skeleton-${index}`} className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-2 md:p-3">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 rounded-xl bg-gray-700/50 p-3 shadow-lg">
                       <div className="h-7 w-7 bg-gray-600/50 rounded-full animate-pulse"></div>
@@ -449,17 +449,17 @@ export default function Dashboard() {
           ) : (
             // Show actual additional stats
             <>
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-purple-500/20">
+                <div className="p-2 md:p-3 animated-gradient-slow">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-red-500 to-red-600 p-3 shadow-lg">
-                      <ChartBarIcon className="h-7 w-7 text-white" />
+                    <div className="flex-shrink-0 rounded-lg md:rounded-xl bg-gradient-to-br from-red-500 to-red-600 p-2 md:p-3 shadow-lg">
+                      <ChartBarIcon className="h-5 w-5 md:h-7 md:w-7 text-white" />
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-2 md:ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="truncate text-sm font-medium text-gray-300">Rejected Tasks</dt>
+                        <dt className="truncate text-xs md:text-sm font-medium text-gray-300">Rejected Tasks</dt>
                         <dd className="flex items-baseline">
-                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.rejectedSubmissions}</div>
+                          <div className="text-xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.rejectedSubmissions}</div>
                         </dd>
                       </dl>
                     </div>
@@ -467,17 +467,17 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
-                <div className="p-6 animated-gradient-slow">
+              <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-cyan-500/20">
+                <div className="p-2 md:p-3 animated-gradient-slow">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-3 shadow-lg">
-                      <GiftIcon className="h-7 w-7 text-white" />
+                    <div className="flex-shrink-0 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-2 md:p-3 shadow-lg">
+                      <GiftIcon className="h-5 w-5 md:h-7 md:w-7 text-white" />
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-2 md:ml-5 w-0 flex-1">
                       <dl>
-                        <dt className="truncate text-sm font-medium text-gray-300">Total Submissions</dt>
+                        <dt className="truncate text-xs md:text-sm font-medium text-gray-300">Total Submissions</dt>
                         <dd className="flex items-baseline">
-                          <div className="text-3xl font-bold text-white drop-shadow-lg">{stats.totalSubmissions}</div>
+                          <div className="text-xl md:text-3xl font-bold text-white drop-shadow-lg">{stats.totalSubmissions}</div>
                         </dd>
                       </dl>
                     </div>
@@ -489,11 +489,11 @@ export default function Dashboard() {
         </div>
 
         {/* Charts */}
-        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="mt-4 md:mt-8 grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
           {/* User Growth Chart */}
           {loading ? (
             // Show skeleton loader when chart is loading
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-purple-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
                 <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
               </div>
@@ -503,7 +503,7 @@ export default function Dashboard() {
             </div>
           ) : (
             // Show actual chart
-            <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-purple-500/20">
+            <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-purple-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
                 <h3 className="text-lg font-bold leading-6 text-white">User Growth</h3>
               </div>
@@ -523,7 +523,7 @@ export default function Dashboard() {
           {/* Revenue Sources */}
           {loading ? (
             // Show skeleton loader when chart is loading
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-cyan-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
                 <div className="h-6 bg-gray-700/50 rounded w-40 animate-pulse"></div>
               </div>
@@ -533,7 +533,7 @@ export default function Dashboard() {
             </div>
           ) : (
             // Show actual chart
-            <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-cyan-500/20">
+            <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-cyan-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
                 <h3 className="text-lg font-bold leading-6 text-white">Submission Status</h3>
               </div>
@@ -559,12 +559,12 @@ export default function Dashboard() {
           {/* Recent Activity */}
           {loading ? (
             // Show skeleton loader when recent activity is loading
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-pink-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
                 <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
               </div>
               <div className="border-t border-gray-700/30">
-                <div className="p-6 space-y-4">
+                <div className="p-2 md:p-3 space-y-4">
                   {Array.from({ length: 3 }).map((_, index) => (
                     <div key={`activity-skeleton-${index}`} className="flex items-center justify-between animate-pulse">
                       <div className="flex items-center">
@@ -585,7 +585,7 @@ export default function Dashboard() {
             </div>
           ) : (
             // Show actual recent activity
-            <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-pink-500/20">
+            <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-pink-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
                 <h3 className="text-lg font-bold leading-6 text-white">Recent Activity</h3>
               </div>
@@ -636,14 +636,14 @@ export default function Dashboard() {
           {/* Quick Actions */}
           {loading ? (
             // Show skeleton loader when quick actions are loading
-            <div className="glass-effect overflow-hidden rounded-2xl shadow-2xl border border-orange-500/20">
+            <div className="glass-effect overflow-hidden rounded-lg shadow-md border border-orange-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50">
                 <div className="h-6 bg-gray-700/50 rounded w-32 animate-pulse"></div>
               </div>
-              <div className="p-6">
+              <div className="p-2 md:p-3">
                 <div className="grid grid-cols-2 gap-5">
                   {Array.from({ length: 4 }).map((_, index) => (
-                    <div key={`action-skeleton-${index}`} className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-6 animate-pulse">
+                    <div key={`action-skeleton-${index}`} className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-2 md:p-3 animate-pulse">
                       <div className="h-14 w-14 rounded-full bg-gray-700/50 mb-3"></div>
                       <div className="h-4 bg-gray-700/50 rounded w-16"></div>
                     </div>
@@ -653,15 +653,15 @@ export default function Dashboard() {
             </div>
           ) : (
             // Show actual quick actions
-            <div className="glass-effect hover-glow overflow-hidden rounded-2xl shadow-2xl border border-orange-500/20">
+            <div className="glass-effect hover-glow overflow-hidden rounded-lg shadow-md border border-orange-500/20">
               <div className="px-6 py-5 sm:px-7 border-b border-gray-700/50 animated-gradient">
                 <h3 className="text-lg font-bold leading-6 text-white">Quick Actions</h3>
               </div>
-              <div className="p-6">
+              <div className="p-2 md:p-3">
                 <div className="grid grid-cols-2 gap-5">
                   <button 
                     onClick={() => router.push('/dashboard/users')}
-                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-6 hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-cyan-500/10 transition-all duration-300 transform hover:-translate-y-1"
+                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-2 md:p-3 hover:bg-gradient-to-br hover:from-purple-500/10 hover:to-cyan-500/10 transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg mb-3">
                       <UsersIcon className="h-7 w-7 text-white" />
@@ -670,7 +670,7 @@ export default function Dashboard() {
                   </button>
                   <button 
                     onClick={() => router.push('/dashboard/social')}
-                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-6 hover:bg-gradient-to-br hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300 transform hover:-translate-y-1"
+                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-2 md:p-3 hover:bg-gradient-to-br hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-lg mb-3">
                       <MegaphoneIcon className="h-7 w-7 text-white" />
@@ -679,7 +679,7 @@ export default function Dashboard() {
                   </button>
                   <button 
                     onClick={() => router.push('/dashboard/wallet')}
-                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-6 hover:bg-gradient-to-br hover:from-pink-500/10 hover:to-purple-500/10 transition-all duration-300 transform hover:-translate-y-1"
+                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-2 md:p-3 hover:bg-gradient-to-br hover:from-pink-500/10 hover:to-purple-500/10 transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-pink-600 shadow-lg mb-3">
                       <WalletIcon className="h-7 w-7 text-white" />
@@ -688,7 +688,7 @@ export default function Dashboard() {
                   </button>
                   <button 
                     onClick={() => router.push('/dashboard/ads')}
-                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-6 hover:bg-gradient-to-br hover:from-orange-500/10 hover:to-red-500/10 transition-all duration-300 transform hover:-translate-y-1"
+                    className="flex flex-col items-center justify-center rounded-xl border border-gray-700/50 p-2 md:p-3 hover:bg-gradient-to-br hover:from-orange-500/10 hover:to-red-500/10 transition-all duration-300 transform hover:-translate-y-1"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg mb-3">
                       <GiftIcon className="h-7 w-7 text-white" />
