@@ -6,12 +6,6 @@
       "use": "@vercel/next"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ],
   "headers": [
     {
       "source": "/sw.js",
