@@ -6,9 +6,9 @@ import { API_CONFIG } from '@/src/config/api';
 
 
 // PATCH /api/social/submissions/[id] - Update submission status
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     if (!id) {
       return NextResponse.json({ success: false, error: 'Submission ID is required' }, { status: 400 });

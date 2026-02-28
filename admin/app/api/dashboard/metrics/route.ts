@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     // Define collection IDs
     const userProfilesCollection = API_CONFIG.COLLECTIONS.USER_PROFILES;
     const userSocialTasksCollection = API_CONFIG.COLLECTIONS.USER_SOCIAL_TASKS;
+    const socialTasksCollection = API_CONFIG.COLLECTIONS.SOCIAL_TASKS;
 
     // Get total number of registered users
     const totalUsersResponse = await databases.listDocuments(
@@ -24,6 +25,14 @@ export async function GET(request: Request) {
       []
     );
     const totalUsers = totalUsersResponse.total;
+
+    // Get total active social tasks
+    const activeTasksResponse = await databases.listDocuments(
+      API_CONFIG.DATABASE_ID,
+      socialTasksCollection,
+      [Query.equal('isActive', [true])]
+    );
+    const activeTasks = activeTasksResponse.total;
 
     // Get total number of social task submissions
     const allSubmissionsResponse = await databases.listDocuments(
@@ -86,6 +95,7 @@ export async function GET(request: Request) {
     // Prepare the response data
     const dashboardData = {
       totalUsers,
+      activeTasks,
       totalSubmissions,
       completedTasks,
       pendingSubmissions,

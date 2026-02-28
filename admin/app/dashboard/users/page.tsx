@@ -26,6 +26,11 @@ export default function UsersPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalUsers, setTotalUsers] = useState(0)
+  const usersPerPage = 10
+  
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
@@ -48,17 +53,18 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers()
-  }, [])
+  }, [currentPage, usersPerPage])
 
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/users')
+      const response = await fetch(`/api/users?page=${currentPage}&limit=${usersPerPage}`)
       const data = await response.json()
       
       if (data.success) {
         setUsers(data.data.users)
         setStats(data.data.stats)
+        setTotalUsers(data.data.total || 0)
       } else {
         setError(data.error || 'Failed to fetch users')
       }
@@ -610,6 +616,44 @@ export default function UsersPage() {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination Controls */}
+          {totalUsers > usersPerPage && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-700/50">
+              <div className="text-sm text-gray-400">
+                Showing {((currentPage - 1) * usersPerPage) + 1} to {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers} users
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded-lg bg-gray-700/50 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600/50 transition-colors"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: Math.ceil(totalUsers / usersPerPage) }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+                      currentPage === page 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(Math.ceil(totalUsers / usersPerPage), prev + 1))}
+                  disabled={currentPage >= Math.ceil(totalUsers / usersPerPage)}
+                  className="px-3 py-1 rounded-lg bg-gray-700/50 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600/50 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       

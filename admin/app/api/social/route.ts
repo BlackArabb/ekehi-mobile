@@ -36,6 +36,8 @@ export async function GET() {
       verificationData: task.verificationData || null,
       isActive: task.isActive || false,
       sortOrder: task.sortOrder || 0,
+      maxCompletionsPerDay: task.maxCompletionsPerDay || 1,
+      cooldownMinutes: task.cooldownMinutes || 0,
       createdAt: task.$createdAt || new Date().toISOString(),
       updatedAt: task.$updatedAt || new Date().toISOString()
     }));
@@ -78,7 +80,9 @@ export async function POST(request: Request) {
       verificationMethod: taskData.verificationMethod || 'manual',
       verificationData: taskData.verificationData || null,
       isActive: taskData.isActive !== undefined ? taskData.isActive : true,
-      sortOrder: taskData.sortOrder || 0
+      sortOrder: taskData.sortOrder || 0,
+      maxCompletionsPerDay: taskData.maxCompletionsPerDay || 1,
+      cooldownMinutes: taskData.cooldownMinutes || 0
     };
     
     let result;
@@ -114,6 +118,8 @@ export async function POST(request: Request) {
       verificationData: (result as any).verificationData || null,
       isActive: result.isActive || false,
       sortOrder: result.sortOrder || 0,
+      maxCompletionsPerDay: (result as any).maxCompletionsPerDay || 1,
+      cooldownMinutes: (result as any).cooldownMinutes || 0,
       createdAt: result.$createdAt || new Date().toISOString(),
       updatedAt: result.$updatedAt || new Date().toISOString()
     };

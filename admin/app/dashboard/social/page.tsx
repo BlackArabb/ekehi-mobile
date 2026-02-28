@@ -18,6 +18,8 @@ interface SocialTask {
   verificationData?: Record<string, string> | null
   isActive: boolean
   sortOrder: number
+  maxCompletionsPerDay: number
+  cooldownMinutes: number
   createdAt: string
   updatedAt: string
 }
@@ -41,7 +43,9 @@ export default function SocialPage() {
     verificationMethod: 'manual',
     verificationData: {},
     isActive: true,
-    sortOrder: 0
+    sortOrder: 0,
+    maxCompletionsPerDay: 1,
+    cooldownMinutes: 0
   })
 
   const [stats, setStats] = useState({
@@ -195,7 +199,9 @@ export default function SocialPage() {
           verificationMethod: 'manual',
           verificationData: {},
           isActive: true,
-          sortOrder: 0
+          sortOrder: 0,
+          maxCompletionsPerDay: 1,
+          cooldownMinutes: 0
         })
         setShowAddModal(false)
         // Update stats
@@ -548,6 +554,12 @@ export default function SocialPage() {
                     Verification
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Max/Day
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Cooldown
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -579,6 +591,12 @@ export default function SocialPage() {
                       <span className={`px-2 py-1 rounded text-xs ${task.verificationMethod === 'auto' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
                         {task.verificationMethod}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      {task.maxCompletionsPerDay || 1}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                      {task.cooldownMinutes || 0} min
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -715,6 +733,32 @@ export default function SocialPage() {
             />
           </div>
           
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300">Max Daily Completions</label>
+              <input
+                type="number"
+                min="1"
+                value={newTask.maxCompletionsPerDay}
+                onChange={(e) => setNewTask({...newTask, maxCompletionsPerDay: parseInt(e.target.value) || 1})}
+                className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+                placeholder="e.g., 3"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300">Cooldown (minutes)</label>
+              <input
+                type="number"
+                min="0"
+                value={newTask.cooldownMinutes}
+                onChange={(e) => setNewTask({...newTask, cooldownMinutes: parseInt(e.target.value) || 0})}
+                className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+                placeholder="e.g., 60"
+              />
+            </div>
+          </div>
+          
           <div className="flex items-center">
             <input
               id="active"
@@ -828,6 +872,32 @@ export default function SocialPage() {
                 className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
                 placeholder="Enter reward amount"
               />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300">Max Daily Completions</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={selectedTask?.maxCompletionsPerDay || 1}
+                  onChange={(e) => selectedTask && setSelectedTask({...selectedTask, maxCompletionsPerDay: parseInt(e.target.value) || 1})}
+                  className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+                  placeholder="e.g., 3"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300">Cooldown (minutes)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={selectedTask?.cooldownMinutes || 0}
+                  onChange={(e) => selectedTask && setSelectedTask({...selectedTask, cooldownMinutes: parseInt(e.target.value) || 0})}
+                  className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 focus:ring-1 focus:ring-opacity-50 sm:text-sm px-3 py-2 transition-colors duration-200"
+                  placeholder="e.g., 60"
+                />
+              </div>
             </div>
             
             <div className="flex items-center">

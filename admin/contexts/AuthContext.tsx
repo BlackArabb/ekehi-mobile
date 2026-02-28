@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { account } from '@/lib/appwriteClient'
 
 interface Admin {
   id: string
@@ -24,23 +23,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
-    // Check if user is already logged in using Appwrite
+    // Check if user is already logged in using server API
     const checkSession = async () => {
       if (typeof window === 'undefined') return;
       
       try {
-        // Try to get the current user session
-        const currentUser = await account.get();
-        if (currentUser) {
+        const response = await fetch('/api/auth/session');
+        const result = await response.json();
+        
+        if (result.success) {
           const adminData: Admin = {
-            id: currentUser.$id,
-            email: currentUser.email,
-            name: currentUser.name || currentUser.email
+            id: result.data.userId,
+            email: result.data.email,
+            name: result.data.name
           };
           setAdmin(adminData);
+        } else {
+          setAdmin(null);
         }
       } catch (error) {
-        // If no session exists, user is not logged in
         console.log('No active session found');
         setAdmin(null);
       } finally {
@@ -56,67 +57,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
-      // First, check if there's an existing session and delete it
-      try {
-        const currentSession = await account.get();
-        if (currentSession) {
-          console.log('Existing session found, deleting...');
-          await account.deleteSession('current');
-        }
-      } catch (error) {
-        // No existing session, continue with login
-        console.log('No existing session to delete');
-      }
-
-      // Create new session with email/password
-      await account.createEmailPasswordSession(email, password);
+      // Use server-side API to avoid CORS issues
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
       
-      // Get the current user after successful login
-      const currentUser = await account.get();
+      const result = await response.json();
       
-      if (currentUser) {
+      if (result.success) {
         const adminData: Admin = {
-          id: currentUser.$id,
-          email: currentUser.email,
-          name: currentUser.name || currentUser.email
+          id: result.data.userId,
+          email: result.data.email,
+          name: result.data.name
         };
         
         setAdmin(adminData);
         return { success: true };
       } else {
-        return { success: false, error: 'Could not retrieve user data after login' };
+        // Show more detailed error for debugging
+        const detailedError = result.details || result.error;
+        console.log('Login failed - Details:', result);
+        return { success: false, error: detailedError || 'Login failed' };
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      let errorMessage = 'Authentication failed. Please try again.';
-      
-      if (error?.message) {
-        errorMessage = error.message;
-      } else if (error?.type) {
-        // Appwrite specific error types
-        switch (error.type) {
-          case 'user_invalid_credentials':
-          case 'USER_INVALID':
-            errorMessage = 'Invalid email or password';
-            break;
-          case 'user_not_found':
-          case 'USER_NOT_FOUND':
-            errorMessage = 'User not found';
-            break;
-          case 'user_invalid_token':
-          case 'USER_PASSWORD_WRONG':
-            errorMessage = 'Incorrect password';
-            break;
-          case 'rate_limit_exceeded':
-          case 'RATE_LIMIT_EXCEEDED':
-            errorMessage = 'Too many login attempts. Please try again later.';
-            break;
-          default:
-            errorMessage = error.type;
-        }
-      }
-      
-      return { success: false, error: errorMessage };
+      return { success: false, error: error.message || 'Authentication failed' };
     } finally {
       setIsLoading(false);
     }
@@ -125,12 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     setIsLoading(true);
     try {
-      // Use Appwrite's logout function
-      await account.deleteSession('current');
+      await fetch('/api/auth/logout', { method: 'DELETE' });
       setAdmin(null);
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if logout fails, clear local state
       setAdmin(null);
     } finally {
       setIsLoading(false);

@@ -79,7 +79,10 @@ export async function GET(request: Request) {
             description: task.description,
             platform: task.platform,
             rewardCoins: task.rewardCoins,
-            taskType: task.taskType || 'generic'
+            taskType: task.taskType || 'generic',
+            maxCompletionsPerDay: task.maxCompletionsPerDay || 1,
+            cooldownMinutes: task.cooldownMinutes || 0,
+            verificationMethod: task.verificationMethod || 'manual'
           };
         });
       }
