@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  outputFileTracingRoot: __dirname,
   images: {
     domains: ['images.unsplash.com', 'www.google.com'],
   },
@@ -56,12 +55,6 @@ const nextConfig = {
     }
     
     return config;
-  },
-  // Configure runtime chunk behavior
-  experimental: {
-    appDir: true,
-    // Increase chunk timeout
-    serverComponentsExternalPackages: [],
   },
 }
 

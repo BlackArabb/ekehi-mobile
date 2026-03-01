@@ -48,14 +48,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           API_CONFIG.DATABASE_ID,
           collections.userSocialTasks,
           id
-        );
+        ) as any;
         
         // Get the task to get reward amount
         const task = await databases.getDocument(
           API_CONFIG.DATABASE_ID,
           collections.socialTasks,
           submission.taskId
-        );
+        ) as any;
         
         // Award coins to user
         if (task.rewardCoins > 0) {
@@ -71,17 +71,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     // Transform result to match data model
     const transformedResult = {
       id: result.$id,
-      userId: result.userId,
-      taskId: result.taskId,
-      status: result.status,
-      completedAt: result.completedAt || result.$createdAt,
-      verifiedAt: result.verifiedAt || null,
-      proofUrl: result.proofUrl || null,
-      proofEmail: result.proofEmail || null,
-      proofData: result.proofData || null,
-      verificationAttempts: result.verificationAttempts || 0,
-      rejectionReason: result.rejectionReason || null,
-      username: result.username || null,
+      userId: (result as any).userId,
+      taskId: (result as any).taskId,
+      status: (result as any).status,
+      completedAt: (result as any).completedAt || result.$createdAt,
+      verifiedAt: (result as any).verifiedAt || null,
+      proofUrl: (result as any).proofUrl || null,
+      proofEmail: (result as any).proofEmail || null,
+      proofData: (result as any).proofData || null,
+      verificationAttempts: (result as any).verificationAttempts || 0,
+      rejectionReason: (result as any).rejectionReason || null,
+      username: (result as any).username || null,
       createdAt: result.$createdAt,
       updatedAt: result.$updatedAt
     };
