@@ -8,9 +8,10 @@ client
   .setEndpoint(API_CONFIG.APPWRITE_ENDPOINT)
   .setProject(API_CONFIG.APPWRITE_PROJECT_ID);
 
-// Set API key if available
+// Set API key if available - node-appwrite v8 uses setKey
 if (API_CONFIG.APPWRITE_API_KEY) {
-  client.setKey(API_CONFIG.APPWRITE_API_KEY);
+  // For node-appwrite v8, we need to use the correct method
+  (client as any).setKey(API_CONFIG.APPWRITE_API_KEY);
 }
 
 // Initialize services
