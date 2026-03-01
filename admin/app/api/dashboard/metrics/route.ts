@@ -75,16 +75,16 @@ export async function GET(request: Request) {
     
     const recentActivity = recentActivityResponse.documents.map(doc => ({
       id: doc.$id,
-      userId: doc.userId,
-      taskId: doc.taskId,
-      status: doc.status,
-      completedAt: doc.completedAt,
-      verifiedAt: doc.verifiedAt || null,
-      proofUrl: doc.proofUrl || null,
-      proofEmail: doc.proofEmail || null,
-      proofData: doc.proofData || null,
-      rejectionReason: doc.rejectionReason || null,
-      username: doc.username || null,
+      userId: (doc as any).userId,
+      taskId: (doc as any).taskId,
+      status: (doc as any).status,
+      completedAt: (doc as any).completedAt,
+      verifiedAt: (doc as any).verifiedAt || null,
+      proofUrl: (doc as any).proofUrl || null,
+      proofEmail: (doc as any).proofEmail || null,
+      proofData: (doc as any).proofData || null,
+      rejectionReason: (doc as any).rejectionReason || null,
+      username: (doc as any).username || null,
       createdAt: doc.$createdAt,
       updatedAt: doc.$updatedAt
     }));
