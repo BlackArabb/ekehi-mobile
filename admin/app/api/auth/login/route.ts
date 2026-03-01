@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { Client, Account } from 'node-appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
 export async function POST(request: Request) {
@@ -13,18 +12,49 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create client without API key - let user authenticate directly
-    const client = new Client()
-      .setEndpoint(API_CONFIG.APPWRITE_ENDPOINT)
-      .setProject(API_CONFIG.APPWRITE_PROJECT_ID);
+    // Use Appwrite REST API directly for authentication
+    const response = await fetch(
+      `${API_CONFIG.APPWRITE_ENDPOINT}/account/sessions/email`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': API_CONFIG.APPWRITE_PROJECT_ID,
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      }
+    );
 
-    const account = new Account(client);
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Appwrite auth error:', errorData);
+      
+      let errorMessage = 'Login failed';
+      
+      if (response.status === 401 || errorData?.type === 'user_invalid_credentials') {
+        errorMessage = 'Invalid email or password';
+      } else if (errorData?.message) {
+        errorMessage = errorData.message;
+      }
 
-    // Create session - Appwrite v13 authentication
-    const session = await (account as any).createEmailPasswordSession(email, password);
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: errorMessage,
+          details: errorData?.message,
+          type: errorData?.type,
+          code: response.status
+        },
+        { status: 401 }
+      );
+    }
 
-    // Get current user (without using account scopes that cause role issues)
-    // We'll return basic session info instead
+    const session = await response.json();
+    
+    // Return session info to client
     return NextResponse.json({
       success: true,
       data: {
@@ -36,24 +66,10 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Login error:', error);
     console.error('Error message:', error?.message);
-    console.error('Error code:', error?.code);
-    console.error('Error type:', error?.type);
-    console.error('Full error:', JSON.stringify(error));
     
     let errorMessage = 'Login failed';
     
-    // Check for various error patterns
-    if (error?.type === 'user_invalid_credentials' || 
-        error?.type === 'USER_INVALID_CREDENTIALS' ||
-        error?.message?.toLowerCase().includes('invalid credentials') ||
-        error?.message?.toLowerCase().includes('wrong password') ||
-        error?.code === 401) {
-      errorMessage = 'Invalid email or password';
-    } else if (error?.type === 'user_not_found' || 
-               error?.type === 'USER_NOT_FOUND' ||
-               error?.message?.toLowerCase().includes('user not found')) {
-      errorMessage = 'User not found';
-    } else if (error?.message) {
+    if (error?.message) {
       errorMessage = error.message;
     }
 
@@ -61,9 +77,7 @@ export async function POST(request: Request) {
       { 
         success: false, 
         error: errorMessage, 
-        details: error?.message,
-        type: error?.type,
-        code: error?.code
+        details: error?.message
       },
       { status: 401 }
     );
