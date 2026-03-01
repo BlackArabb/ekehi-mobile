@@ -1,18 +1,22 @@
 import { Client, Databases, Account } from 'node-appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
-// Appwrite configuration
-const client = new Client();
-
-client
+// Appwrite server configuration
+const client = new Client()
   .setEndpoint(API_CONFIG.APPWRITE_ENDPOINT)
   .setProject(API_CONFIG.APPWRITE_PROJECT_ID);
 
-// Set API key if available - node-appwrite v8 uses setKey
+// Set API key if available
 if (API_CONFIG.APPWRITE_API_KEY) {
-  // For node-appwrite v8, we need to use the correct method
-  (client as any).setKey(API_CONFIG.APPWRITE_API_KEY);
+  client.setKey(API_CONFIG.APPWRITE_API_KEY);
 }
+
+console.log('[Appwrite] Client configured with:', {
+  endpoint: API_CONFIG.APPWRITE_ENDPOINT,
+  project: API_CONFIG.APPWRITE_PROJECT_ID,
+  hasApiKey: !!API_CONFIG.APPWRITE_API_KEY,
+  databaseId: API_CONFIG.DATABASE_ID
+});
 
 // Initialize services
 export const account = new Account(client);
