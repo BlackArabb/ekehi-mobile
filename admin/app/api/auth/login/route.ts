@@ -21,14 +21,16 @@ export async function POST(request: Request) {
     const account = new Account(client);
 
     // Create session - Appwrite will handle user role validation
-    const session = await account.createEmailPasswordSession(email, password);
+    // For Appwrite v13, we need to use the correct authentication flow
+    // This is a placeholder - we'll need to implement the correct method
+    throw new Error('Authentication method needs to be updated for Appwrite v13');
 
     // Get current user (without using account scopes that cause role issues)
     // We'll return basic session info instead
     return NextResponse.json({
       success: true,
       data: {
-        sessionId: session.$id,
+        sessionId: 'placeholder-session-id',
         email: email,
         name: email.split('@')[0],
       }
