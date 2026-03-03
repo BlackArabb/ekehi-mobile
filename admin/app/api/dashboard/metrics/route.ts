@@ -4,12 +4,21 @@ import { API_CONFIG } from '@/src/config/api';
 export async function GET(request: Request) {
   try {
     console.log('[Metrics] Starting metrics fetch via REST API');
+    console.log('[Metrics] Config:', {
+      endpoint: API_CONFIG.APPWRITE_ENDPOINT,
+      projectId: API_CONFIG.APPWRITE_PROJECT_ID,
+      databaseId: API_CONFIG.DATABASE_ID,
+      hasApiKey: !!API_CONFIG.APPWRITE_API_KEY,
+      apiKeyLength: API_CONFIG.APPWRITE_API_KEY?.length || 0
+    });
     
     // Verify API key is configured
     if (!API_CONFIG.APPWRITE_API_KEY) {
+      console.error('[Metrics] ERROR: APPWRITE_API_KEY is not configured');
       return NextResponse.json({ 
         success: false, 
-        error: 'Appwrite API key not configured' 
+        error: 'Appwrite API key not configured - check environment variables',
+        code: 'MISSING_API_KEY'
       }, { status: 500 });
     }
 
@@ -22,10 +31,15 @@ export async function GET(request: Request) {
 
     // Fetch user profiles count
     const usersUrl = `${API_CONFIG.APPWRITE_ENDPOINT}/databases/${API_CONFIG.DATABASE_ID}/collections/${API_CONFIG.COLLECTIONS.USER_PROFILES}/documents`;
+    console.log('[Metrics] Fetching from:', usersUrl);
     const usersResponse = await fetch(usersUrl, {
       method: 'GET',
       headers,
     });
+    if (!usersResponse.ok) {
+      const errorText = await usersResponse.text();
+      throw new Error(`Users fetch failed: ${usersResponse.status} - ${errorText}`);
+    }
     const usersData = await usersResponse.json() as any;
     const totalUsers = usersData.total || 0;
     console.log('[Metrics] Total users:', totalUsers);
@@ -36,6 +50,10 @@ export async function GET(request: Request) {
       method: 'GET',
       headers,
     });
+    if (!tasksResponse.ok) {
+      const errorText = await tasksResponse.text();
+      throw new Error(`Tasks fetch failed: ${tasksResponse.status} - ${errorText}`);
+    }
     const tasksData = await tasksResponse.json() as any;
     const activeTasks = tasksData.total || 0;
     console.log('[Metrics] Active tasks:', activeTasks);
@@ -46,6 +64,10 @@ export async function GET(request: Request) {
       method: 'GET',
       headers,
     });
+    if (!submissionsResponse.ok) {
+      const errorText = await submissionsResponse.text();
+      throw new Error(`Submissions fetch failed: ${submissionsResponse.status} - ${errorText}`);
+    }
     const submissionsData = await submissionsResponse.json() as any;
     const totalSubmissions = submissionsData.total || 0;
     const submissionDocuments = submissionsData.documents || [];
@@ -93,13 +115,17 @@ export async function GET(request: Request) {
       message: error?.message,
       code: error?.code,
       status: error?.status,
-      body: error?.body
+      body: error?.body,
+      stack: error?.stack?.split('\n').slice(0, 3).join('\n')
     });
     
+    // Return detailed error for debugging
     return NextResponse.json({ 
       success: false, 
       error: error?.message || 'Failed to fetch dashboard metrics',
-      details: error?.toString()
+      errorCode: error?.code,
+      errorType: error?.constructor?.name,
+      details: error?.response || error?.body || error?.toString()
     }, { status: 500 });
   }
 }
