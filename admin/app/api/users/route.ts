@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { Client, Databases, Query, Users } from 'node-appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
+export const dynamic = 'force-dynamic';
+
 // Create a new client with admin permissions for server-side operations
 const adminClient = new Client();
 adminClient

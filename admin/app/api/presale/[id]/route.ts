@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { databases, collections } from '@/lib/appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
+export const dynamic = 'force-dynamic';
+
 // DELETE /api/presale/[id] - Delete presale purchase from Appwrite
 export async function DELETE(
   request: Request, 

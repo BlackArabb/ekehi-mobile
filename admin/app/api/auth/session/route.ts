@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Client, Account } from 'appwrite';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const client = new Client()

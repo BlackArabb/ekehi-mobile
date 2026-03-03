@@ -3,6 +3,8 @@ import { databases, collections } from '@/lib/appwrite';
 import { Query } from 'appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
+export const dynamic = 'force-dynamic';
+
 
 
 // PATCH /api/social/submissions/[id] - Update submission status
