@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { API_CONFIG } from '@/src/config/api';
 
+// Force dynamic rendering - don't cache at build time
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     console.log('[Metrics] Starting metrics fetch via REST API');

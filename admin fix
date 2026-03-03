@@ -1,0 +1,188 @@
+19:27:58.487 Running build in Washington, D.C., USA (East) – iad1
+19:27:58.488 Build machine configuration: 2 cores, 8 GB
+19:27:58.498 Cloning github.com/BlackArabb/ekehi-mobile (Branch: main, Commit: b73055d)
+19:27:58.499 Skipping build cache, deployment was triggered without cache.
+19:28:01.595 Cloning completed: 3.096s
+19:28:01.988 Running "vercel build"
+19:28:02.740 WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+19:28:02.900 Installing dependencies...
+19:28:39.157 npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+19:28:39.639 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+19:28:39.964 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+19:28:49.588 
+19:28:49.589 added 682 packages in 46s
+19:28:49.589 
+19:28:49.590 72 packages are looking for funding
+19:28:49.590   run `npm fund` for details
+19:28:49.671 Detected Next.js version: 14.2.35
+19:28:49.678 Running "npm run build"
+19:28:49.771 
+19:28:49.772 > ekehi-admin-dashboard@1.0.0 build
+19:28:49.772 > next build
+19:28:49.772 
+19:28:50.324 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+19:28:50.325 This information is used to shape Next.js' roadmap and prioritize features.
+19:28:50.325 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+19:28:50.325 https://nextjs.org/telemetry
+19:28:50.326 
+19:28:50.374   ▲ Next.js 14.2.35
+19:28:50.375 
+19:28:50.393    Creating an optimized production build ...
+19:29:06.041  ✓ Compiled successfully
+19:29:06.042    Linting and checking validity of types ...
+19:29:13.659    Collecting page data ...
+19:29:14.009 [Appwrite] Client configured with: {
+19:29:14.009   endpoint: 'https://fra.cloud.appwrite.io/v1',
+19:29:14.009   project: '68c2dd6e002112935ed2',
+19:29:14.009   hasApiKey: true,
+19:29:14.009   databaseId: '68c336e7000f87296feb'
+19:29:14.009 }
+19:29:15.005    Generating static pages (0/25) ...
+19:29:15.478    Generating static pages (6/25) 
+19:29:15.492 [Metrics] Starting metrics fetch via REST API
+19:29:15.655 [Metrics] Total users: 0
+19:29:15.889 [Metrics] Active tasks: 0
+19:29:15.891 [Metrics] Total submissions: 0
+19:29:15.891 [Metrics] Success: {
+19:29:15.891   totalUsers: 0,
+19:29:15.891   activeTasks: 0,
+19:29:15.891   totalSubmissions: 0,
+19:29:15.892   completedTasks: 0,
+19:29:15.892   pendingSubmissions: 0,
+19:29:15.892   verifiedSubmissions: 0,
+19:29:15.892   rejectedSubmissions: 0,
+19:29:15.893   recentActivity: [],
+19:29:15.893   timestamp: '2026-03-03T18:29:15.874Z'
+19:29:15.893 }
+19:29:16.025 Testing Appwrite connection...
+19:29:16.025 Endpoint: https://fra.cloud.appwrite.io/v1
+19:29:16.025 Project ID: 68c2dd6e002112935ed2
+19:29:16.026 Database ID: 68c336e7000f87296feb
+19:29:16.026 Users Collection ID: users
+19:29:16.026 API Key provided: true
+19:29:16.102 Error connecting to Appwrite: t [Error]: request cannot have request body
+19:29:16.104     at a.call (/vercel/path0/admin/.next/server/chunks/vendors-_rsc_node_modules_node-appwrite_index_js.js:1:23684)
+19:29:16.107     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+19:29:16.108     at async a.listDocuments (/vercel/path0/admin/.next/server/chunks/vendors-_rsc_node_modules_node-appwrite_index_js.js:1:44098)
+19:29:16.108     at async c (/vercel/path0/admin/.next/server/app/api/test-appwrite/route.js:1:1563)
+19:29:16.108     at async /vercel/path0/admin/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
+19:29:16.108     at async e_.execute (/vercel/path0/admin/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
+19:29:16.109     at async e_.handle (/vercel/path0/admin/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
+19:29:16.109     at async exportAppRoute (/vercel/path0/admin/node_modules/next/dist/export/routes/app-route.js:77:26)
+19:29:16.109     at async exportPageImpl (/vercel/path0/admin/node_modules/next/dist/export/worker.js:175:20)
+19:29:16.109     at async Span.traceAsyncFn (/vercel/path0/admin/node_modules/next/dist/trace/trace.js:154:20) {
+19:29:16.109   code: 400,
+19:29:16.110   type: '',
+19:29:16.110   response: 'request cannot have request body'
+19:29:16.110 }
+19:29:16.130 Error fetching social task submissions: B [Error]: Dynamic server usage: Route /api/social/submissions couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+19:29:16.130     at V (/vercel/path0/admin/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:21778)
+19:29:16.131     at Object.get (/vercel/path0/admin/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:29465)
+19:29:16.131     at p (/vercel/path0/admin/.next/server/app/api/social/submissions/route.js:1:1240)
+19:29:16.131     at /vercel/path0/admin/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+19:29:16.132     at /vercel/path0/admin/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+19:29:16.132     at NoopContextManager.with (/vercel/path0/admin/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+19:29:16.132     at ContextAPI.with (/vercel/path0/admin/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+19:29:16.132     at NoopTracer.startActiveSpan (/vercel/path0/admin/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+19:29:16.136     at ProxyTracer.startActiveSpan (/vercel/path0/admin/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+19:29:16.137     at /vercel/path0/admin/node_modules/next/dist/server/lib/trace/tracer.js:122:103 {
+19:29:16.137   description: "Route /api/social/submissions couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+19:29:16.137   digest: 'DYNAMIC_SERVER_USAGE'
+19:29:16.138 }
+19:29:16.138    Generating static pages (12/25) 
+19:29:16.185  ⚠ Unsupported metadata themeColor is configured in metadata export in /_not-found. Please move it to viewport export instead.
+19:29:16.185 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.191  ⚠ Unsupported metadata themeColor is configured in metadata export in /_not-found. Please move it to viewport export instead.
+19:29:16.191 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.271  ⚠ Unsupported metadata themeColor is configured in metadata export in /auth/login. Please move it to viewport export instead.
+19:29:16.271 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.271  ⚠ Unsupported metadata themeColor is configured in metadata export in /auth/login. Please move it to viewport export instead.
+19:29:16.271 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.290  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/ads. Please move it to viewport export instead.
+19:29:16.290 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.307  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/ads. Please move it to viewport export instead.
+19:29:16.307 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.338  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard. Please move it to viewport export instead.
+19:29:16.339 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.386  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard. Please move it to viewport export instead.
+19:29:16.387 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.425  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/presale. Please move it to viewport export instead.
+19:29:16.426 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.426  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/presale. Please move it to viewport export instead.
+19:29:16.426 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.436    Generating static pages (18/25) 
+19:29:16.450  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/settings. Please move it to viewport export instead.
+19:29:16.450 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.450  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/settings. Please move it to viewport export instead.
+19:29:16.451 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.494  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/social. Please move it to viewport export instead.
+19:29:16.495 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.495  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/social. Please move it to viewport export instead.
+19:29:16.495 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.527  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/social/validation. Please move it to viewport export instead.
+19:29:16.527 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.527  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/social/validation. Please move it to viewport export instead.
+19:29:16.528 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.544  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/users. Please move it to viewport export instead.
+19:29:16.544 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.544  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/users. Please move it to viewport export instead.
+19:29:16.544 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.576  ⚠ Unsupported metadata themeColor is configured in metadata export in /. Please move it to viewport export instead.
+19:29:16.576 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.576  ⚠ Unsupported metadata themeColor is configured in metadata export in /. Please move it to viewport export instead.
+19:29:16.576 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.598  ⚠ Unsupported metadata themeColor is configured in metadata export in /test. Please move it to viewport export instead.
+19:29:16.598 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.598  ⚠ Unsupported metadata themeColor is configured in metadata export in /test. Please move it to viewport export instead.
+19:29:16.598 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.640  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/wallet. Please move it to viewport export instead.
+19:29:16.640 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.640  ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard/wallet. Please move it to viewport export instead.
+19:29:16.640 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+19:29:16.644  ✓ Generating static pages (25/25)
+19:29:16.916    Finalizing page optimization ...
+19:29:16.918    Collecting build traces ...
+19:29:20.492 
+19:29:20.500 Route (app)                                                                                                                          Size     First Load JS
+19:29:20.500 ┌ ○ /                                                                                                                                683 B          88.4 kB
+19:29:20.501 ├ ○ /_not-found                                                                                                                      933 B          88.6 kB
+19:29:20.501 ├ ƒ /api/ads                                                                                                                         0 B                0 B
+19:29:20.501 ├ ƒ /api/auth/login                                                                                                                  0 B                0 B
+19:29:20.501 ├ ƒ /api/auth/logout                                                                                                                 0 B                0 B
+19:29:20.501 ├ ƒ /api/auth/session                                                                                                                0 B                0 B
+19:29:20.501 ├ ○ /api/dashboard/metrics                                                                                                           0 B                0 B
+19:29:20.501 ├ ƒ /api/presale                                                                                                                     0 B                0 B
+19:29:20.501 ├ ƒ /api/presale/[id]                                                                                                                0 B                0 B
+19:29:20.501 ├ ƒ /api/social                                                                                                                      0 B                0 B
+19:29:20.501 ├ ƒ /api/social/submissions                                                                                                          0 B                0 B
+19:29:20.501 ├ ƒ /api/social/submissions/[id]                                                                                                     0 B                0 B
+19:29:20.501 ├ ƒ /api/test-appwrite                                                                                                               0 B                0 B
+19:29:20.501 ├ ƒ /api/users                                                                                                                       0 B                0 B
+19:29:20.501 ├ ƒ /api/users/[id]                                                                                                                  0 B                0 B
+19:29:20.501 ├ ƒ /api/wallet                                                                                                                      0 B                0 B
+19:29:20.501 ├ ○ /auth/login                                                                                                                      3.05 kB        90.7 kB
+19:29:20.501 ├ ○ /dashboard                                                                                                                       6.17 kB         202 kB
+19:29:20.501 ├ ○ /dashboard/ads                                                                                                                   4.39 kB         109 kB
+19:29:20.501 ├ ○ /dashboard/presale                                                                                                               5.82 kB         219 kB
+19:29:20.501 ├ ○ /dashboard/settings                                                                                                              2.39 kB        90.1 kB
+19:29:20.501 ├ ○ /dashboard/social                                                                                                                4.58 kB         109 kB
+19:29:20.502 ├ ○ /dashboard/social/validation                                                                                                     4.45 kB         109 kB
+19:29:20.502 ├ ○ /dashboard/users                                                                                                                 4.77 kB         110 kB
+19:29:20.502 ├ ○ /dashboard/wallet                                                                                                                5.11 kB         218 kB
+19:29:20.502 └ ○ /test                                                                                                                            216 B          87.9 kB
+19:29:20.502 + First Load JS shared by all                                                                                                        87.7 kB
+19:29:20.502   ├ chunks/fd9d1056-5b36c733c43bfbb8.js                                                                                              53.6 kB
+19:29:20.502   └ chunks/vendors-_app-pages-browser_node_modules_next_dist_client_app-next_js-_app-pages-browser_node_-76fc4f-c67ef2e4a7101f86.js  31.9 kB
+19:29:20.502   └ other shared chunks (total)                                                                                                      2.1 kB
+19:29:20.502 
+19:29:20.502 
+19:29:20.502 ƒ Middleware                                                                                                                         26.7 kB
+19:29:20.502 
+19:29:20.502 ○  (Static)   prerendered as static content
+19:29:20.502 ƒ  (Dynamic)  server-rendered on demand
+19:29:20.502 
+19:29:20.648 Traced Next.js server files in: 30.692ms
+19:29:20.770 Created all serverless functions in: 121.511ms
+19:29:20.833 Collected static files (public/, static/, .next/static): 6.269ms
+19:29:20.942 Build Completed in /vercel/output [1m]
+19:29:21.089 Deploying outputs...
