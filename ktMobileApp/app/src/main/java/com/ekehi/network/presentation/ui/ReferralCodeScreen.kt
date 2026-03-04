@@ -421,7 +421,7 @@ fun ReferralCodeScreen(
                         BenefitItem(
                             icon = Icons.Default.PersonAdd,
                             title = "For Your Friends",
-                            description = "Get a 50 EKH bonus when they sign up using your code",
+                            description = "Get a 2 EKH bonus when they sign up using your code",
                             showLogoInDesc = true
                         )
                     }
