@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const headers = {
       'Content-Type': 'application/json',
       'X-Appwrite-Key': API_CONFIG.APPWRITE_API_KEY || '',
+      'X-Appwrite-Project': API_CONFIG.APPWRITE_PROJECT_ID || '',
     };
 
     // Build URL with query params

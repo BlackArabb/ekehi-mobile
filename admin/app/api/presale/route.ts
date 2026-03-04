@@ -11,6 +11,7 @@ export async function GET() {
     const headers = {
       'Content-Type': 'application/json',
       'X-Appwrite-Key': API_CONFIG.APPWRITE_API_KEY || '',
+      'X-Appwrite-Project': API_CONFIG.APPWRITE_PROJECT_ID || '',
     };
 
     const url = `${API_CONFIG.APPWRITE_ENDPOINT}/databases/${API_CONFIG.DATABASE_ID}/collections/${API_CONFIG.COLLECTIONS.PRESALE_PURCHASES}/documents`;
