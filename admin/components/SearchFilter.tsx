@@ -53,10 +53,10 @@ export default function SearchFilter({
   }
 
   return (
-    <div className="mb-6 glass-effect rounded-2xl border border-purple-500/20 p-6 shadow-xl">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="mb-4 sm:mb-6 glass-effect rounded-xl sm:rounded-2xl border border-purple-500/20 p-3 sm:p-6 shadow-xl">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-4 sm:gap-4">
         {/* Search Input */}
-        <div className="md:col-span-2">
+        <div className="sm:col-span-2">
           <label htmlFor="search" className="block text-sm font-medium text-gray-300 mb-1">
             Search
           </label>
@@ -64,13 +64,13 @@ export default function SearchFilter({
             <input
               type="text"
               id="search"
-              className="block w-full py-3 px-4 bg-gray-800/50 border border-gray-700/50 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+              className="block w-full py-2 sm:py-3 px-3 sm:px-4 bg-gray-800/50 border border-gray-700/50 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-lg text-sm"
               placeholder="Search users..."
               value={searchQuery}
               onChange={handleSearchChange}
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <div className="absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center pointer-events-none">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
               </svg>
             </div>
@@ -85,7 +85,7 @@ export default function SearchFilter({
             </label>
             <select
               id={filter.name}
-              className="block w-full py-3 px-3 bg-gray-800/50 border border-gray-700/50 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+              className="block w-full py-2 sm:py-3 px-2 sm:px-3 bg-gray-800/50 border border-gray-700/50 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg text-sm"
               value={filters[filter.name] || ''}
               onChange={(e) => handleFilterChange(filter.name, e.target.value)}
             >
@@ -107,7 +107,7 @@ export default function SearchFilter({
             </label>
             <select
               id="sort"
-              className="block w-full py-3 px-3 bg-gray-800/50 border border-gray-700/50 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+              className="block w-full py-2 sm:py-3 px-2 sm:px-3 bg-gray-800/50 border border-gray-700/50 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg text-sm"
               value={`${sortBy}:${sortOrder}`}
               onChange={handleSortChange}
             >
@@ -123,10 +123,10 @@ export default function SearchFilter({
       </div>
 
       {/* Clear Filters Button */}
-      <div className="mt-4 flex justify-end">
+      <div className="mt-3 sm:mt-4 flex justify-center sm:justify-end">
         <button
           type="button"
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 rounded-lg transition-colors duration-200"
+          className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 rounded-lg transition-colors duration-200"
           onClick={clearFilters}
         >
           Clear Filters

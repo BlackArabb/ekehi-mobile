@@ -21,16 +21,16 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-20 py-3 md:py-4 glass-effect border-b border-gray-700/50 shadow-lg">
-      <div className="flex items-center justify-between h-full px-3 md:px-6 gap-2">
+    <header className="sticky top-0 z-20 py-2 md:py-4 glass-effect border-b border-gray-700/50 shadow-lg">
+      <div className="flex items-center justify-between h-full px-2 md:px-6 gap-1 md:gap-2">
         {/* Mobile hamburger */}
         <button
-          className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0"
+          className="p-1.5 md:p-2 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0"
           onClick={() => setSidebarOpen(true)}
           aria-label="Menu"
           style={{ zIndex: 25 }}
         >
-          <Bars3Icon className="w-5 h-5 md:w-6 md:h-6" aria-hidden="true" />
+          <Bars3Icon className="w-4 h-4 md:w-6 md:h-6" aria-hidden="true" />
         </button>
         
         {/* Search input - hidden on small mobile */}
@@ -50,7 +50,7 @@ export default function Header({
           </div>
         </div>
         
-        <ul className="flex items-center flex-shrink-0 gap-2 md:space-x-4">
+        <ul className="flex items-center flex-shrink-0 gap-1 md:space-x-4">
           {/* Theme toggler - hidden on mobile */}
           <li className="hidden md:flex">
             <button
@@ -66,12 +66,12 @@ export default function Header({
           {/* Notifications menu */}
           <li className="relative">
             <button
-              className="p-2 rounded-lg bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-200"
+              className="p-1.5 md:p-2 rounded-lg bg-gray-800/50 text-gray-300 hover:text-white hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-200"
               aria-label="Notifications"
               aria-haspopup="true"
             >
-              <BellIcon className="w-5 h-5" aria-hidden="true" />
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/3 -translate-y-1/3 bg-pink-500 rounded-full">3</span>
+              <BellIcon className="w-4 h-4 md:w-5 md:h-5" aria-hidden="true" />
+              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-pink-500 rounded-full">3</span>
             </button>
           </li>
           
@@ -81,8 +81,8 @@ export default function Header({
               <div>
                 <Menu.Button className="flex text-sm bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                   <span className="sr-only">Open user menu</span>
-                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-cyan-500 shadow-lg">
-                    <span className="text-white font-bold text-sm md:text-lg">A</span>
+                  <div className="h-7 w-7 md:h-10 md:w-10 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-cyan-500 shadow-lg">
+                    <span className="text-white font-bold text-xs md:text-lg">A</span>
                   </div>
                 </Menu.Button>
               </div>

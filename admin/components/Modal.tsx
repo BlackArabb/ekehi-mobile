@@ -15,10 +15,10 @@ export default function Modal({ open, onClose, title, children, actions, size = 
   const cancelButtonRef = useRef(null);
 
   const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl'
+    sm: 'sm:max-w-sm',
+    md: 'sm:max-w-md',
+    lg: 'sm:max-w-lg',
+    xl: 'sm:max-w-xl'
   };
 
   return (
@@ -37,7 +37,7 @@ export default function Modal({ open, onClose, title, children, actions, size = 
         </Transition.Child>
 
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-end justify-center p-2 sm:p-4 text-center sm:items-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -47,20 +47,20 @@ export default function Modal({ open, onClose, title, children, actions, size = 
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className={`relative transform rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-${sizeClasses[size]} sm:p-6 dark:bg-gray-800`}>
-                <div className="absolute top-0 right-0 pt-4 pr-4">
+              <Dialog.Panel className={`relative transform rounded-lg bg-white px-3 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full ${sizeClasses[size]} sm:p-4 dark:bg-gray-800`}>
+                <div className="absolute top-0 right-0 pt-3 pr-3 sm:pt-4 sm:pr-4">
                   <button
                     type="button"
                     className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                   </button>
                 </div>
                 <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                  <div className="mt-2 sm:mt-0 sm:text-left w-full text-center sm:text-left">
+                    <Dialog.Title as="h3" className="text-base sm:text-lg font-medium leading-6 text-gray-900 dark:text-white">
                       {title}
                     </Dialog.Title>
                     <div className="mt-2">
@@ -69,7 +69,7 @@ export default function Modal({ open, onClose, title, children, actions, size = 
                   </div>
                 </div>
                 {actions && (
-                  <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <div className="mt-4 sm:mt-5 sm:flex sm:flex-row-reverse sm:gap-2">
                     {actions}
                   </div>
                 )}

@@ -49,21 +49,21 @@ export default function Alert({ title, message, type, onClose, className = '' }:
 
   return (
     <div 
-      className={`rounded-md border p-4 ${typeClasses[type]} ${className}`}
+      className={`rounded-md border p-3 sm:p-4 ${typeClasses[type]} ${className}`}
       role="alert"
     >
-      <div className="flex">
-        <div className={`flex-shrink-0 ${iconClasses[type]}`}>
+      <div className="flex flex-col sm:flex-row">
+        <div className={`flex-shrink-0 ${iconClasses[type]} self-start sm:self-auto`}>
           {iconType[type]}
         </div>
-        <div className="ml-3">
+        <div className="ml-0 sm:ml-3 mt-2 sm:mt-0 text-center sm:text-left">
           <h3 className="text-sm font-medium">{title}</h3>
-          <div className="mt-2 text-sm">
+          <div className="mt-1 sm:mt-2 text-xs sm:text-sm">
             <p>{message}</p>
           </div>
         </div>
         {onClose && (
-          <div className="ml-auto pl-3">
+          <div className="ml-auto pl-0 sm:pl-3 mt-2 sm:mt-0 flex justify-end">
             <div className="-mx-1.5 -my-1.5">
               <button
                 type="button"
@@ -71,7 +71,7 @@ export default function Alert({ title, message, type, onClose, className = '' }:
                 onClick={onClose}
               >
                 <span className="sr-only">Dismiss</span>
-                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                <XMarkIcon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
               </button>
             </div>
           </div>

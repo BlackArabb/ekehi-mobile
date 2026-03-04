@@ -24,7 +24,7 @@ export default function Table({ columns, data, loading = false, onRowClick, clas
   }
 
   return (
-    <div className={`overflow-x-auto ${className}`}>
+    <div className={`overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 ${className}`}>
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
@@ -32,7 +32,7 @@ export default function Table({ columns, data, loading = false, onRowClick, clas
               <th
                 key={column.key}
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300"
+                className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300"
               >
                 {column.title}
               </th>
@@ -47,7 +47,7 @@ export default function Table({ columns, data, loading = false, onRowClick, clas
               onClick={() => onRowClick && onRowClick(row)}
             >
               {columns.map((column) => (
-                <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td key={column.key} className="px-3 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   {column.render ? column.render(row[column.key], row) : row[column.key]}
                 </td>
               ))}

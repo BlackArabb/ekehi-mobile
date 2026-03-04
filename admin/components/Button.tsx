@@ -29,8 +29,8 @@ export default function Button({
   
   const sizeClasses = {
     sm: 'px-2.5 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base'
+    md: 'px-3 py-2 text-sm md:px-4',
+    lg: 'px-4 py-3 text-base md:px-6'
   };
   
   const widthClass = fullWidth ? 'w-full justify-center' : '';

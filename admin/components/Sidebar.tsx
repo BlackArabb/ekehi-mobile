@@ -116,7 +116,7 @@ export default function Sidebar({
                       <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Ekehi Admin</h1>
                     </div>
                   </div>
-                  <nav className="mt-5 space-y-1 px-2">
+                  <nav className="mt-5 px-2 space-y-1">
                     {navigation.map((item) => {
                     const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/dashboard')
                     return (
@@ -128,7 +128,7 @@ export default function Sidebar({
                           isActive
                             ? 'bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-white border-l-4 border-purple-500'
                             : 'text-gray-300 hover:bg-gray-700/50 hover:text-white',
-                          'group flex items-center px-3 py-3 text-base font-medium rounded-lg transition-all duration-200'
+                          'group flex items-center px-3 py-3 sm:py-2.5 text-sm sm:text-base font-medium rounded-lg transition-all duration-200'
                         )}
                       >
                         <item.icon
@@ -136,7 +136,7 @@ export default function Sidebar({
                             isActive
                               ? 'text-purple-400'
                               : 'text-gray-400 group-hover:text-cyan-400',
-                            'mr-3 h-6 w-6 flex-shrink-0'
+                            'mr-3 h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0'
                           )}
                           aria-hidden="true"
                         />
