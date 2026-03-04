@@ -1,22 +1,32 @@
 import { NextResponse } from 'next/server';
-import { databases, collections } from '@/lib/appwrite';
-import { Query } from 'appwrite';
 import { API_CONFIG } from '@/src/config/api';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/presale - Fetch presale purchases from Appwrite
+// GET /api/presale - Fetch presale purchases using REST API
 export async function GET() {
   try {
-    // Fetch presale purchases from Appwrite
-    const response = await databases.listDocuments(
-      API_CONFIG.DATABASE_ID,
-      collections.presalePurchases,
-      [Query.orderDesc('$createdAt')]
-    );
-    
+    console.log('[Presale API] Fetching presale purchases...');
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Key': API_CONFIG.APPWRITE_API_KEY || '',
+    };
+
+    const url = `${API_CONFIG.APPWRITE_ENDPOINT}/databases/${API_CONFIG.DATABASE_ID}/collections/${API_CONFIG.COLLECTIONS.PRESALE_PURCHASES}/documents`;
+
+    const response = await fetch(url, { method: 'GET', headers });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Presale fetch failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json() as any;
+    const presales = data.documents || [];
+
     // Calculate statistics
-    const completedPresales = response.documents.filter((p: any) => p.status === 'completed');
+    const completedPresales = presales.filter((p: any) => p.status === 'completed');
     
     const totalRaised = completedPresales.reduce((sum: number, p: any) => sum + (p.amountUsd || 0), 0);
     const tokensSold = completedPresales.reduce((sum: number, p: any) => sum + (p.tokensAmount || 0), 0);
@@ -30,48 +40,22 @@ export async function GET() {
       tokensSold,
       participants
     };
-    
+
+    console.log('[Presale API] Success:', { count: presales.length });
+
     return NextResponse.json({ 
       success: true, 
       data: {
-        presales: response.documents,
+        presales,
         stats
       }
     });
-  } catch (error: any) {
-    console.error('Error fetching presale data:', error);
-    return NextResponse.json({ success: false, error: error.message || 'Failed to fetch presale data' }, { status: 500 });
-  }
-}
 
-// POST /api/presale - Create or update presale purchase in Appwrite
-export async function POST(request: Request) {
-  try {
-    const presaleData = await request.json();
-    
-    let result;
-    
-    if (presaleData.$id) {
-      // Update existing presale purchase
-      result = await databases.updateDocument(
-        API_CONFIG.DATABASE_ID,
-        collections.presalePurchases,
-        presaleData.$id,
-        presaleData
-      );
-    } else {
-      // Create new presale purchase
-      result = await databases.createDocument(
-        API_CONFIG.DATABASE_ID,
-        collections.presalePurchases,
-        'unique()',
-        presaleData
-      );
-    }
-    
-    return NextResponse.json({ success: true, message: 'Presale purchase saved successfully', data: result });
   } catch (error: any) {
-    console.error('Error saving presale purchase:', error);
-    return NextResponse.json({ success: false, error: error.message || 'Failed to save presale purchase' }, { status: 500 });
+    console.error('[Presale API] Error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to fetch presales' },
+      { status: 500 }
+    );
   }
 }
