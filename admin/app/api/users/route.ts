@@ -39,15 +39,15 @@ export async function GET(request: Request) {
     const users = data.documents || [];
     const total = data.total || 0;
 
-    // Format users data
+    // Format users data - map to frontend expected fields
     const formattedUsers = users.map((user: any) => ({
-      $id: user.$id,
-      userId: user.userId,
-      username: user.username,
-      email: user.email || `${user.username}@placeholder.com`,
+      id: user.$id,
+      name: user.username || user.name || 'Unknown',
+      email: user.email || `${user.username || 'user'}@placeholder.com`,
+      status: user.isActive !== false ? 'active' : 'inactive',
+      role: user.role || 'user',
       totalCoins: user.totalCoins || 0,
       walletBalance: user.walletBalance || 0,
-      isActive: user.isActive ?? true,
       createdAt: user.$createdAt,
       updatedAt: user.$updatedAt,
     }));
