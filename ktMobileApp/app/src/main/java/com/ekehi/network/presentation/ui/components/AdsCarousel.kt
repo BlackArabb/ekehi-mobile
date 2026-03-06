@@ -18,10 +18,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.ekehi.network.data.model.AdContent
 import com.ekehi.network.data.model.AdType
 import com.ekehi.network.domain.model.Resource
+import coil.request.ImageRequest
 
 @Composable
 fun AdsCarousel(
@@ -116,8 +116,8 @@ private fun AdsCarouselContent(
     onAdIndexChanged: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        // Ad content
+    Box(modifier = modifier) {
+        // Ad content with dots overlay at bottom
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -134,85 +134,31 @@ private fun AdsCarouselContent(
                         }
                 )
             }
-        }
-
-        // Dots indicator
-        if (ads.size > 1) {
-            Spacer(modifier = Modifier.height(12.dp))
             
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                repeat(ads.size) { index ->
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(
-                                if (index == currentAdIndex) Color(0xFFffa000) else Color(0x80FFFFFF)
-                            )
-                            .padding(2.dp)
-                    )
-                    
-                    if (index < ads.size - 1) {
-                        Spacer(modifier = Modifier.width(8.dp))
+            // Dot indicators overlay at bottom of image
+            if (ads.size > 1) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(ads.size) { index ->
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(
+                                    if (index == currentAdIndex) Color(0xFFffa000) else Color(0x80FFFFFF)
+                                )
+                                .padding(2.dp)
+                        )
+                        
+                        if (index < ads.size - 1) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
                     }
-                }
-            }
-            
-            // Previous/Next buttons
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Button(
-                    onClick = {
-                        val prevIndex = if (currentAdIndex == 0) ads.size - 1 else currentAdIndex - 1
-                        onAdIndexChanged(prevIndex)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8b5cf6)
-                    ),
-                    modifier = Modifier
-                        .size(40.dp)
-                        .aspectRatio(1f)
-                ) {
-                    Text(
-                        text = "<",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                
-                Text(
-                    text = "${currentAdIndex + 1} / ${ads.size}",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-                
-                Button(
-                    onClick = {
-                        val nextIndex = (currentAdIndex + 1) % ads.size
-                        onAdIndexChanged(nextIndex)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8b5cf6)
-                    ),
-                    modifier = Modifier
-                        .size(40.dp)
-                        .aspectRatio(1f)
-                ) {
-                    Text(
-                        text = ">",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
                 }
             }
         }

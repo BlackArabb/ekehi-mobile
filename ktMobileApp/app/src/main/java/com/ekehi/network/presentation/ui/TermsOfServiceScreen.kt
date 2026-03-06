@@ -92,43 +92,43 @@ fun TermsOfServiceScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        SectionHeader("1. Acceptance of Terms")
-                        SectionText(
+                        SharedSectionHeader("1. Acceptance of Terms")
+                        SharedSectionText(
                             "By accessing or using the Ekehi Network mobile application, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this app."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("2. Use License")
-                        SectionText(
+                        SharedSectionHeader("2. Use License")
+                        SharedSectionText(
                             "Permission is granted to temporarily download one copy of the materials (information or software) on Ekehi Network's mobile application for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("3. Disclaimer")
-                        SectionText(
+                        SharedSectionHeader("3. Disclaimer")
+                        SharedSectionText(
                             "The materials on Ekehi Network's mobile application are provided on an 'as is' basis. Ekehi Network makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("4. Limitations")
-                        SectionText(
+                        SharedSectionHeader("4. Limitations")
+                        SharedSectionText(
                             "In no event shall Ekehi Network or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Ekehi Network's mobile application."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("5. Revisions and Errata")
-                        SectionText(
+                        SharedSectionHeader("5. Revisions and Errata")
+                        SharedSectionText(
                             "The materials appearing on Ekehi Network's mobile application could include technical, typographical, or photographic errors. Ekehi Network does not warrant that any of the materials on its mobile application are accurate, complete or current."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("6. Governing Law")
-                        SectionText(
+                        SharedSectionHeader("6. Governing Law")
+                        SharedSectionText(
                             "These terms and conditions are governed by and construed in accordance with the laws of the jurisdiction in which Ekehi Network operates and you irrevocably submit to the exclusive jurisdiction of the courts in that location."
                         )
                     }

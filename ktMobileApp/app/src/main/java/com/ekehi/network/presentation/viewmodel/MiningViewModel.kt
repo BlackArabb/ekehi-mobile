@@ -11,6 +11,7 @@ import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.data.model.UserProfile
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
+import com.ekehi.network.service.PushNotificationService
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -25,7 +26,8 @@ class MiningViewModel @Inject constructor(
         private val miningRepository: MiningRepository,
         private val authRepository: AuthRepository,
         private val userRepository: UserRepository,
-        private val analyticsManager: AnalyticsManager
+        private val analyticsManager: AnalyticsManager,
+        private val pushNotificationService: PushNotificationService
 ) : ViewModel() {
 
     private val _is24HourMiningActive = MutableStateFlow(false)
@@ -78,11 +80,20 @@ class MiningViewModel @Inject constructor(
             }
         }
         
-        // Listen for logout events
+        // Listen for logout and account deletion events
         viewModelScope.launch {
             EventBus.events.collect { event ->
-                if (event is Event.UserLoggedOut) {
-                    handleLogout()
+                when (event) {
+                    is Event.UserLoggedOut -> {
+                        handleLogout()
+                    }
+                    is Event.AccountDeleted -> {
+                        Log.d("MiningViewModel", "Received AccountDeleted event")
+                        handleLogout() // Same cleanup as logout
+                    }
+                    else -> {
+                        // Ignore other events
+                    }
                 }
             }
         }
@@ -253,6 +264,9 @@ class MiningViewModel @Inject constructor(
                 // Track analytics
                 analyticsManager.trackMiningSessionStart(userId, "24hour_session")
 
+                // Reset mining reminder timer
+                pushNotificationService.resetMiningReminderTimer()
+
                 // Start UI update loop
                 startUIUpdateLoop()
 
@@ -302,6 +316,9 @@ class MiningViewModel @Inject constructor(
                     EventBus.sendEvent(Event.RefreshUserProfile)
                     EventBus.sendEvent(Event.RefreshLeaderboard)
                 }
+                
+                // Show success notification for reward claim
+                showMiningRewardClaimedNotification(_sessionReward.value)
 
                 // Reset UI state after a short delay
                 viewModelScope.launch {
@@ -341,6 +358,10 @@ class MiningViewModel @Inject constructor(
                             _remainingTime.value = 0
                             _progressPercentage.value = 100.0
                             _sessionEarnings.value = status.reward // Set to full reward when complete
+                            
+                            // Send mining completion notification
+                            sendMiningCompletionNotification(status.reward)
+                            
                             updateJob?.cancel()
                         }
                     }
@@ -363,6 +384,72 @@ class MiningViewModel @Inject constructor(
         _sessionEarnings.value = 0.0 // Reset earnings
         _finalRewardClaimed.value = false
         sessionStartTime = 0
+    }
+
+    /**
+     * Sends notification when mining session completes
+     */
+    private fun sendMiningCompletionNotification(reward: Double) {
+        viewModelScope.launch {
+            try {
+                Log.d("MiningViewModel", "Sending mining completion notification for reward: $reward")
+                
+                // Use PushNotificationService to show notification
+                pushNotificationService.showMiningUpdateNotification(reward, "mining_session_complete")
+                
+                Log.d("MiningViewModel", "✅ Mining completion notification sent")
+            } catch (e: Exception) {
+                Log.e("MiningViewModel", "Failed to send mining completion notification: ${e.message}", e)
+            }
+        }
+    }
+
+    /**
+     * Sends notification when mining reward is successfully claimed
+     */
+    private fun showMiningRewardClaimedNotification(reward: Double) {
+        viewModelScope.launch {
+            try {
+                Log.d("MiningViewModel", "Sending reward claimed notification for: $reward EKH")
+                
+                // Show success notification
+                pushNotificationService.showNotification(
+                    "Mining Reward Claimed! 🎉",
+                    "You've successfully claimed $reward EKH tokens from your mining session"
+                )
+                
+                Log.d("MiningViewModel", "✅ Reward claimed notification sent")
+            } catch (e: Exception) {
+                Log.e("MiningViewModel", "Failed to send reward claimed notification: ${e.message}", e)
+            }
+        }
+    }
+
+    /**
+     * Sends a reminder notification to start mining
+     */
+    fun sendMiningReminder() {
+        viewModelScope.launch {
+            try {
+                // Check if user already has active mining
+                if (_is24HourMiningActive.value && _remainingTime.value > 0) {
+                    Log.d("MiningViewModel", "Mining already active - skipping reminder")
+                    return@launch
+                }
+                
+                Log.d("MiningViewModel", "Sending mining reminder notification")
+                
+                // Send reminder notification
+                pushNotificationService.showNotification(
+                    "Time to Mine! ⛏️",
+                    "Start your daily mining session and earn 2 EKH tokens. Tap to begin!"
+                )
+                
+                Log.d("MiningViewModel", "✅ Mining reminder sent")
+            } catch (e: Exception) {
+                Log.e("MiningViewModel", "Failed to send mining reminder: ${e.message}", e)
+            }
+        }
     }
 
     /**

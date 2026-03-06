@@ -32,6 +32,10 @@ class SocialTasksViewModel @Inject constructor(
     private val _cachedSocialTasks = MutableStateFlow<Resource<List<SocialTask>>>(Resource.Loading)
     val cachedSocialTasks: StateFlow<Resource<List<SocialTask>>> = _cachedSocialTasks
     
+    // User-specific social tasks
+    private val _userSocialTasks = MutableStateFlow<List<SocialTask>>(emptyList())
+    val userSocialTasks: StateFlow<List<SocialTask>> = _userSocialTasks
+    
     // Track local task states to avoid full refreshes
     private val _localTaskStates = MutableStateFlow<Map<String, SocialTask>>(emptyMap())
     val localTaskStates: StateFlow<Map<String, SocialTask>> = _localTaskStates
@@ -40,12 +44,17 @@ class SocialTasksViewModel @Inject constructor(
     private var youtubeAccessToken: String? = null
 
     init {
-        // Listen for refresh events
+        // Listen for refresh and account events
         viewModelScope.launch {
             EventBus.events.collect { event ->
                 when (event) {
                     is Event.RefreshSocialTasks -> {
                         loadUserSocialTasks(event.userId)
+                    }
+                    is Event.UserLoggedOut, is Event.AccountDeleted -> {
+                        Log.d("SocialTasksViewModel", "Received ${event::class.simpleName} event - clearing data")
+                        _userSocialTasks.value = emptyList()
+                        _cachedSocialTasks.value = com.ekehi.network.domain.model.Resource.Error("User logged out")
                     }
                     else -> {
                         // Handle other events if needed

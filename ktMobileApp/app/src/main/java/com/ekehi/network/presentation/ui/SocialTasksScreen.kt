@@ -270,6 +270,7 @@ fun SocialTasksScreen(
                                 cooldownMinutes = currentTask.cooldownMinutes,
                                 completionCountToday = currentTask.completionCountToday,
                                 nextAvailableAt = currentTask.nextAvailableAt,
+                                nextResetTime = currentTask.nextResetTime,
                                 totalAccumulatedRewards = currentTask.totalAccumulatedRewards,
                                 totalCompletions = currentTask.totalCompletions
                             )
@@ -1163,6 +1164,75 @@ fun EnhancedSocialTaskCard(
                             }
                             Text(
                                 text = if (remainingTime.isNotEmpty()) remainingTime else "Cooldown",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                        }
+                    } else if (task.platform.lowercase() == "blog" && task.completionCountToday >= task.maxCompletionsPerDay) {
+                        // Blog daily limit reached - show reset timer
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    BrandColors.Primary.copy(alpha = 0.15f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .border(
+                                    1.5.dp,
+                                    BrandColors.Primary.copy(alpha = 0.3f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Repeat,
+                                "Daily Limit",
+                                tint = BrandColors.Primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Column {
+                                Text(
+                                    "${task.completionCountToday}/${task.maxCompletionsPerDay} Today",
+                                    color = BrandColors.Primary,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                if (task.nextResetTime != null) {
+                                    val timeUntilReset = remember(task.nextResetTime) {
+                                        calculateTimeUntilReset(task.nextResetTime)
+                                    }
+                                    Text(
+                                        text = "Resets in $timeUntilReset",
+                                        color = BrandColors.Primary.copy(alpha = 0.8f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                    } else if (task.platform.lowercase() == "blog" && task.completionCountToday > 0 && task.completionCountToday < task.maxCompletionsPerDay) {
+                        // Blog has partial completions but can still do more - show available with count
+                        Button(
+                            onClick = onClick,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BrandColors.Primary
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 4.dp,
+                                pressedElevation = 2.dp
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "Do Another (${task.maxCompletionsPerDay - task.completionCountToday} left)",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp
                             )
@@ -2164,6 +2234,23 @@ fun calculateRemainingCooldown(nextAvailableAt: String?): String {
     }
 }
 
+fun calculateTimeUntilReset(nextResetTime: String?): String {
+    if (nextResetTime == null) return "24h"
+    return try {
+        val resetTime = parseIsoDate(nextResetTime)
+        val now = System.currentTimeMillis()
+        val diffMs = resetTime - now
+        if (diffMs <= 0) return "Now"
+        
+        val minutes = (diffMs / (60 * 1000)) % 60
+        val hours = (diffMs / (60 * 60 * 1000))
+        
+        if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+    } catch (e: Exception) {
+        "24h"
+    }
+}
+
 fun parseIsoDate(dateStr: String?): Long {
     if (dateStr.isNullOrEmpty()) return 0L
     val normalizedDate = dateStr.replace("+00:00", "Z")
@@ -2279,6 +2366,7 @@ data class SocialTaskItem(
     val cooldownMinutes: Int = 0,
     val completionCountToday: Int = 0,
     val nextAvailableAt: String? = null,
+    val nextResetTime: String? = null,
     val totalAccumulatedRewards: Double = 0.0,
     val totalCompletions: Int = 0
 )

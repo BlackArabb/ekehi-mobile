@@ -18,10 +18,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.ekehi.network.domain.model.Resource
 import coil.request.ImageRequest
 import com.ekehi.network.data.model.AdContent
 import com.ekehi.network.data.model.AdType
-import com.ekehi.network.domain.model.Resource
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -42,10 +42,28 @@ fun ImageAdsCarousel(
     imageAdsResource: Resource<List<AdContent>>,
     modifier: Modifier = Modifier
 ) {
+    var currentAdIndex by remember { mutableStateOf(0) }
+    
+    LaunchedEffect(imageAdsResource) {
+        if (imageAdsResource is com.ekehi.network.domain.model.Resource.Success && imageAdsResource.data.isNotEmpty()) {
+            currentAdIndex = 0
+        }
+    }
+    
+    // Auto-rotate ads every 5 seconds
+    LaunchedEffect(imageAdsResource) {
+        if (imageAdsResource is com.ekehi.network.domain.model.Resource.Success && imageAdsResource.data.size > 1) {
+            while (true) {
+                kotlinx.coroutines.delay(5000) // 5 seconds
+                currentAdIndex = (currentAdIndex + 1) % imageAdsResource.data.size
+            }
+        }
+    }
+    
     AdsCarousel(
         adsResource = imageAdsResource,
-        title = "Image Ads",
-        adTypeFilter = listOf(AdType.IMAGE, AdType.ANIMATED_IMAGE),
+        currentAdIndex = currentAdIndex,
+        onAdIndexChanged = { currentAdIndex = it },
         modifier = modifier
     )
 }
@@ -420,7 +438,7 @@ private fun AdItem(
                 // Ads indicator
                 Box(
                     modifier = Modifier
-                        .align(Alignment.TopStart)
+                        .align(Alignment.TopEnd)
                         .background(Color(0xFF8b5cf6))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {

@@ -92,50 +92,50 @@ fun PrivacyPolicyScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        SectionHeader("1. Information We Collect")
-                        SectionText(
+                        SharedSectionHeader("1. Information We Collect")
+                        SharedSectionText(
                             "We collect information you provide directly to us, such as when you create an account, participate in mining activities, or contact support. This may include your email address, username, and device information."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("2. How We Use Your Information")
-                        SectionText(
+                        SharedSectionHeader("2. How We Use Your Information")
+                        SharedSectionText(
                             "We use the information we collect to provide, maintain, and improve our services. This includes enabling you to participate in mining activities, communicating with you about your account, and personalizing your experience."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("3. Information Sharing and Disclosure")
-                        SectionText(
+                        SharedSectionHeader("3. Information Sharing and Disclosure")
+                        SharedSectionText(
                             "We do not share your personal information with third parties except as necessary to provide our services, comply with legal obligations, or protect our rights and property. We may share anonymous, aggregated data for analytical purposes."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("4. Data Security")
-                        SectionText(
+                        SharedSectionHeader("4. Data Security")
+                        SharedSectionText(
                             "We implement industry-standard security measures to protect your information. However, no method of transmission over the internet or electronic storage is 100% secure, so we cannot guarantee absolute security."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("5. Your Rights")
-                        SectionText(
+                        SharedSectionHeader("5. Your Rights")
+                        SharedSectionText(
                             "You have the right to access, update, or delete your personal information. You may also opt out of certain data collection activities through your device settings or by contacting our support team."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("6. Children's Privacy")
-                        SectionText(
+                        SharedSectionHeader("6. Children's Privacy")
+                        SharedSectionText(
                             "Our services are not intended for children under 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected such information, we will take steps to delete it."
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        SectionHeader("7. Changes to This Policy")
-                        SectionText(
+                        SharedSectionHeader("7. Changes to This Policy")
+                        SharedSectionText(
                             "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the 'Last Updated' date."
                         )
                     }

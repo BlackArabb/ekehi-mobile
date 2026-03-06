@@ -21,6 +21,7 @@ data class SocialTask(
     val cooldownMinutes: Int = 0,
     val completionCountToday: Int = 0,
     val nextAvailableAt: String? = null,
+    val nextResetTime: String? = null, // When the daily limit resets (24h from first completion)
     val createdAt: String,
     val updatedAt: String,
     

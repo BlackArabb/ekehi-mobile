@@ -143,20 +143,36 @@ open class SocialTaskRepository @Inject constructor(
                         val isCooldownActive = latestVerifiedTime > 0 && now < nextCooldownAvailableTime
                         val isLimitReached = completionCountToday >= task.maxCompletionsPerDay
                                                 
+                        // For blog tasks: show cooldown (4h) until next attempt, or daily reset (24h) if limit reached
                         val nextAvailableAt = when {
+                            // If daily limit reached, show when daily limit resets (24h)
                             isLimitReached -> java.time.Instant.ofEpochMilli(nextLimitAvailableTime).toString()
+                            // If within daily limit but in cooldown period (4h between attempts)
                             isCooldownActive -> java.time.Instant.ofEpochMilli(nextCooldownAvailableTime).toString()
+                            // If user has completed some today but no cooldown active, show next available time as 4h from last
+                            completionCountToday > 0 && latestVerifiedTime > 0 -> java.time.Instant.ofEpochMilli(latestVerifiedTime + cooldownMs).toString()
                             else -> null
                         }
                                                 
-                        Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, total=$totalCompletions, totalRewards=$totalAccumulatedRewards")
+                        // Calculate nextResetTime (24h from the first completion in the current block)
+                        val nextResetTime = if (completionCountToday > 0 && latestVerifiedTime > 0) {
+                            java.time.Instant.ofEpochMilli(latestVerifiedTime + oneDayMs).toString()
+                        } else null
+                                                
+                        // For blog tasks, don't mark as "completed" unless daily limit is reached
+                        // A blog task should show available with countdown when within daily limit
+                        val isBlogTaskAvailable = completionCountToday > 0 && completionCountToday < task.maxCompletionsPerDay
+                                                
+                        Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, total=$totalCompletions, totalRewards=$totalAccumulatedRewards, isBlogAvailable=$isBlogTaskAvailable")
                                                 
                         task.copy(
                             isCompleted = isLimitReached || isCooldownActive,
+                            // Only mark as verified if daily limit is reached (not for partial completions)
                             isVerified = isLimitReached,
-                            status = if (isLimitReached) "verified" else if (isCooldownActive) "pending" else null,
+                            status = if (isLimitReached) "verified" else if (isCooldownActive || isBlogTaskAvailable) "pending" else null,
                             completionCountToday = completionCountToday,
                             nextAvailableAt = nextAvailableAt,
+                            nextResetTime = nextResetTime,
                             completedAt = latestUserTask?.completedAt,
                             verifiedAt = latestUserTask?.verifiedAt,
                             totalAccumulatedRewards = totalAccumulatedRewards,  // ADDED
@@ -801,6 +817,42 @@ open class SocialTaskRepository @Inject constructor(
                     Result.failure(Exception("Pending task not found"))
                 }
             } catch (e: AppwriteException) {
+                Result.failure(e)
+            }
+        }
+    }
+    
+    /**
+     * Get available social tasks for a user (tasks they haven't completed yet)
+     */
+    suspend fun getAvailableSocialTasks(userId: String): Result<List<SocialTask>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Get all social tasks
+                val allTasksResult = getAllSocialTasks()
+                if (allTasksResult.isFailure) {
+                    return@withContext Result.failure(allTasksResult.exceptionOrNull() ?: Exception("Failed to get social tasks"))
+                }
+                
+                val allTasks = allTasksResult.getOrNull() ?: emptyList()
+                
+                // Get user's completed tasks
+                val userTasksResult = getUserSocialTasks(userId)
+                if (userTasksResult.isFailure) {
+                    // If we can't get user tasks, return all tasks as available
+                    return@withContext Result.success(allTasks.filter { it.isActive })
+                }
+                
+                val userTasks = userTasksResult.getOrNull() ?: emptyList()
+                val completedTaskIds = userTasks.filter { it.status == "verified" }.map { it.taskId }.toSet()
+                
+                // Filter out completed tasks
+                val availableTasks = allTasks.filter { 
+                    it.isActive && !completedTaskIds.contains(it.id) 
+                }
+                
+                Result.success(availableTasks)
+            } catch (e: Exception) {
                 Result.failure(e)
             }
         }

@@ -1,5 +1,6 @@
 package com.ekehi.network.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ekehi.network.domain.usecase.LeaderboardUseCase
@@ -26,7 +27,7 @@ class LeaderboardViewModel @Inject constructor(
     private var currentUserId: String? = null
 
     init {
-        // Listen for refresh events
+        // Listen for refresh and account events
         viewModelScope.launch {
             EventBus.events.collect { event ->
                 when (event) {
@@ -39,6 +40,12 @@ class LeaderboardViewModel @Inject constructor(
                         currentUserId?.let { userId ->
                             loadUserRank(userId)
                         }
+                    }
+                    is Event.UserLoggedOut, is Event.AccountDeleted -> {
+                        Log.d("LeaderboardViewModel", "Received ${event::class.simpleName} event - clearing data")
+                        _leaderboard.value = com.ekehi.network.domain.model.Resource.Error("User logged out")
+                        _userRank.value = com.ekehi.network.domain.model.Resource.Error("User logged out")
+                        currentUserId = null
                     }
                     else -> {
                         // Handle other events if needed

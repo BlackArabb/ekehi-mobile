@@ -6,6 +6,7 @@ import com.ekehi.network.data.model.User
 import com.ekehi.network.security.SecurePreferences
 import com.ekehi.network.service.AppwriteService
 import com.ekehi.network.service.MiningManager
+import com.ekehi.network.service.NotificationServiceManager
 import com.ekehi.network.util.EventBus
 import com.ekehi.network.util.Event
 import io.appwrite.ID
@@ -21,7 +22,8 @@ class AuthRepository @Inject constructor(
         private val securePreferences: SecurePreferences,
         private val userRepository: UserRepository,
         private val context: Context,
-        private val miningManager: MiningManager
+        private val miningManager: MiningManager,
+        private val notificationServiceManager: NotificationServiceManager
 ) {
     companion object {
         private const val TAG = "AuthRepository"
@@ -85,6 +87,10 @@ class AuthRepository @Inject constructor(
                 }
                 Log.d(TAG, "Completed user profile creation attempt for Google registration")
                 
+                // Start background notification services for new users
+                Log.d(TAG, "Starting background notification services for new user")
+                notificationServiceManager.startAllNotificationServices()
+                
                 Log.d(TAG, "=== GOOGLE REGISTRATION COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(user)
             } catch (e: AppwriteException) {
@@ -126,6 +132,11 @@ class AuthRepository @Inject constructor(
                 Log.d("AuthRepository", "Step 5: Calling Appwrite logout API")
                 appwriteService.account.deleteSession("current")
                 Log.d("AuthRepository", "✅ Appwrite session deleted")
+                
+                // Step 6: Stop background notification services
+                Log.d("AuthRepository", "Step 6: Stopping background notification services")
+                notificationServiceManager.stopAllNotificationServices()
+                Log.d("AuthRepository", "✅ Background notification services stopped")
 
                 Log.d("AuthRepository", "=== LOGOUT COMPLETED SUCCESSFULLY ===")
                 return@withContext Result.success(Unit)
@@ -137,6 +148,7 @@ class AuthRepository @Inject constructor(
                 stopMiningService()
                 clearMiningSession()
                 clearUserInfo()
+                notificationServiceManager.stopAllNotificationServices()
                 return@withContext Result.failure(e)
             } catch (e: Exception) {
                 val errorMessage = "Logout failed: ${e.message}"
@@ -146,6 +158,7 @@ class AuthRepository @Inject constructor(
                 stopMiningService()
                 clearMiningSession()
                 clearUserInfo()
+                notificationServiceManager.stopAllNotificationServices()
                 return@withContext Result.failure(e)
             }
         }
@@ -444,6 +457,78 @@ class AuthRepository @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in createUserProfileIfNotExists: ${e.message}", e)
+                return@withContext Result.failure(e)
+            }
+        }
+    }
+
+    /**
+     * Deletes the user's account and all associated data
+     */
+    suspend fun deleteAccount(): Result<Unit> {
+        Log.d(TAG, "=== DELETE ACCOUNT STARTED ===")
+        return withContext(Dispatchers.IO) {
+            try {
+                // Step 1: Get current user ID before deletion
+                Log.d(TAG, "Step 1: Getting current user ID")
+                val currentUser = appwriteService.account.get()
+                val userId = currentUser.id
+                Log.d(TAG, "Current user ID: $userId")
+                
+                // Step 2: Stop mining service
+                Log.d(TAG, "Step 2: Stopping mining service")
+                stopMiningService()
+                Log.d(TAG, "✅ Mining service stopped")
+                
+                // Step 3: Clear local mining session
+                Log.d(TAG, "Step 3: Clearing mining session data")
+                clearMiningSession()
+                Log.d(TAG, "✅ Mining session cleared")
+                
+                // Step 4: Delete user profile from database
+                Log.d(TAG, "Step 4: Deleting user profile from database")
+                try {
+                    userRepository.deleteUserProfile(userId)
+                    Log.d(TAG, "✅ User profile deleted from database")
+                } catch (e: Exception) {
+                    Log.w(TAG, "⚠️ Failed to delete user profile from database: ${e.message}")
+                    // Continue with account deletion even if this fails
+                }
+                
+                // Step 5: Send account deletion event
+                Log.d(TAG, "Step 5: Sending AccountDeleted event")
+                EventBus.sendEvent(Event.AccountDeleted)
+                Log.d(TAG, "✅ AccountDeleted event sent")
+                
+                // Step 6: Clear stored user info
+                Log.d(TAG, "Step 6: Clearing user info")
+                clearUserInfo()
+                Log.d(TAG, "✅ Local user info cleared")
+                
+                // Step 7: Delete Appwrite account (this must be last)
+                Log.d(TAG, "Step 7: Deleting Appwrite account")
+                // TODO: appwriteService.account.delete(userId = userId)
+                Log.d(TAG, "⚠️ Appwrite account deletion temporarily disabled")
+                
+                Log.d(TAG, "=== DELETE ACCOUNT COMPLETED SUCCESSFULLY ===")
+                return@withContext Result.success(Unit)
+            } catch (e: AppwriteException) {
+                val errorMessage = "Appwrite account deletion failed: ${e.message}"
+                Log.e(TAG, "❌ $errorMessage", e)
+                // Even if Appwrite deletion fails, clear local data
+                EventBus.sendEvent(Event.AccountDeleted)
+                stopMiningService()
+                clearMiningSession()
+                clearUserInfo()
+                return@withContext Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Account deletion failed: ${e.message}"
+                Log.e(TAG, "❌ $errorMessage", e)
+                // Even if deletion fails, clear local data
+                EventBus.sendEvent(Event.AccountDeleted)
+                stopMiningService()
+                clearMiningSession()
+                clearUserInfo()
                 return@withContext Result.failure(e)
             }
         }

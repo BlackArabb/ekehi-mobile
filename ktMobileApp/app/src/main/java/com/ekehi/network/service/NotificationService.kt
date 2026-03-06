@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.ekehi.network.R
 import com.ekehi.network.security.SecurePreferences
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,7 +48,7 @@ class NotificationService @Inject constructor(
 
     fun showNotification(title: String, message: String) {
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // Using a system icon for now
+            .setSmallIcon(R.mipmap.ic_launcher) // Use app icon
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

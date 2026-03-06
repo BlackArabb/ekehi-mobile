@@ -27,7 +27,7 @@ fun EkhLogo(
 }
 
 @Composable
-fun SectionHeader(text: String) {
+fun SharedSectionHeader(text: String) {
     Text(
         text = text,
         color = Color.White,
@@ -38,7 +38,7 @@ fun SectionHeader(text: String) {
 }
 
 @Composable
-fun SectionText(text: String) {
+fun SharedSectionText(text: String) {
     Text(
         text = text,
         color = Color(0xB3FFFFFF),

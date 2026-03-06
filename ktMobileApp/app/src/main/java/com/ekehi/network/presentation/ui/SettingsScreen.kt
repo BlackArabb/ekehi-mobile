@@ -141,6 +141,35 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // TEST BUTTON - Hidden notification test
+            if (BuildConfig.DEBUG) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFffa000)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .clickable {
+                                Log.d("SettingsScreen", "🧪 TESTING ALL NOTIFICATIONS")
+                                viewModel.testAllNotifications()
+                            }
+                    ) {
+                        Text(
+                            text = "TEST NOTIFICATIONS",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             // About Section
             AboutSection(
                 onContactSupport = {

@@ -120,3 +120,7 @@ LineNumberTable, *Annotation*, EnclosingMethod
 
 # Keep DI classes
 -keep class com.ekehi.network.di.** { *; }
+
+# SLF4J - Keep to prevent missing class errors
+-keep class org.slf4j.** { *; }
+-dontwarn org.slf4j.**

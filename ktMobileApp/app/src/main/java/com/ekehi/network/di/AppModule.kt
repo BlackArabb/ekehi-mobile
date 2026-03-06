@@ -225,13 +225,14 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        appwriteService: AppwriteService, 
-        securePreferences: SecurePreferences, 
+        appwriteService: AppwriteService,
+        securePreferences: SecurePreferences,
         userRepository: UserRepository,
         @ApplicationContext context: Context,
-        miningManager: MiningManager
+        miningManager: MiningManager,
+        notificationServiceManager: NotificationServiceManager
     ): AuthRepository {
-        return AuthRepository(appwriteService, securePreferences, userRepository, context, miningManager)
+        return AuthRepository(appwriteService, securePreferences, userRepository, context, miningManager, notificationServiceManager)
     }
 
     @Provides
@@ -385,8 +386,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSettingsViewModel(authUseCase: AuthUseCase, securePreferences: SecurePreferences): SettingsViewModel {
-        return SettingsViewModel(authUseCase, securePreferences)
+    fun provideSettingsViewModel(
+        authUseCase: AuthUseCase,
+        securePreferences: SecurePreferences,
+        pushNotificationService: PushNotificationService,
+        miningReminderManager: MiningReminderManager
+    ): SettingsViewModel {
+        return SettingsViewModel(authUseCase, securePreferences, pushNotificationService, miningReminderManager)
     }
 
     @Provides

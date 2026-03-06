@@ -7,6 +7,8 @@ import com.ekehi.network.data.model.User
 import com.ekehi.network.domain.usecase.AuthUseCase
 import com.ekehi.network.domain.model.Resource
 import com.ekehi.network.security.SecurePreferences
+import com.ekehi.network.service.MiningReminderManager
+import com.ekehi.network.service.PushNotificationService
 import kotlinx.coroutines.flow.first
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val authUseCase: AuthUseCase,
-    private val securePreferences: SecurePreferences
+    private val securePreferences: SecurePreferences,
+    private val pushNotificationService: PushNotificationService,
+    private val miningReminderManager: MiningReminderManager
 ) : ViewModel() {
     
     companion object {
@@ -60,6 +64,7 @@ class SettingsViewModel @Inject constructor(
     private val _passwordChangeResult = MutableStateFlow<Resource<Unit>?>(null)
     private val _notificationSettingsResult = MutableStateFlow<Resource<Unit>?>(null)
     private val _privacySettingsResult = MutableStateFlow<Resource<Unit>?>(null)
+    private val _accountDeletionResult = MutableStateFlow<Resource<Unit>?>(null)
     
     // Public state flows
     val miningNotificationsEnabled: StateFlow<Boolean> = _miningNotificationsEnabled
@@ -73,6 +78,7 @@ class SettingsViewModel @Inject constructor(
     val passwordChangeResult: StateFlow<Resource<Unit>?> = _passwordChangeResult
     val notificationSettingsResult: StateFlow<Resource<Unit>?> = _notificationSettingsResult
     val privacySettingsResult: StateFlow<Resource<Unit>?> = _privacySettingsResult
+    val accountDeletionResult: StateFlow<Resource<Unit>?> = _accountDeletionResult
 
     // Notification settings functions
     fun updateMiningNotifications(enabled: Boolean) {
@@ -259,6 +265,38 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Initiating account deletion")
+                _accountDeletionResult.value = Resource.Loading
+                
+                authUseCase.deleteAccount().collect { resource ->
+                    when (resource) {
+                        is com.ekehi.network.domain.model.Resource.Success -> {
+                            Log.d(TAG, "Account deletion successful")
+                            _accountDeletionResult.value = Resource.Success(Unit)
+                        }
+                        is com.ekehi.network.domain.model.Resource.Error -> {
+                            Log.e(TAG, "Account deletion failed: ${resource.message}")
+                            _accountDeletionResult.value = Resource.Error("Account deletion failed: ${resource.message}")
+                        }
+                        is com.ekehi.network.domain.model.Resource.Loading -> {
+                            Log.d(TAG, "Account deletion in progress")
+                            _accountDeletionResult.value = Resource.Loading
+                        }
+                        is com.ekehi.network.domain.model.Resource.Idle -> {
+                            // Do nothing for Idle state
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Account deletion exception: ${e.message}", e)
+                _accountDeletionResult.value = Resource.Error("Account deletion failed: ${e.message}")
+            }
+        }
+    }
     
     /**
      * Gets the current user
@@ -276,5 +314,53 @@ class SettingsViewModel @Inject constructor(
             Log.e(TAG, "Error getting current user: ${e.message}", e)
             null
         }
+    }
+    
+    /**
+     * Test all notifications - only for debugging
+     */
+    fun testAllNotifications() {
+        Log.d(TAG, "🧪 TESTING ALL NOTIFICATIONS")
+        
+        // Test push notification
+        pushNotificationService.showNotification(
+            title = "Test Notification",
+            message = "This is a test notification from KtMobileApp!",
+            notificationId = "test_push".hashCode()
+        )
+        
+        // Test mining notification
+        pushNotificationService.showMiningUpdateNotification(
+            coinsEarned = 2.0,
+            sessionId = "test_session"
+        )
+        
+        // Test social task notification
+        pushNotificationService.showSocialTaskCompletedNotification(
+            taskTitle = "Follow on Twitter"
+        )
+        
+        // Test referral notification
+        pushNotificationService.showReferralBonusNotification(
+            bonusAmount = 10.0
+        )
+        
+        // Test streak notification
+        pushNotificationService.showStreakBonusNotification(
+            streakDays = 7,
+            bonusAmount = 5.0
+        )
+        
+        // Test mining reminder (FORCE all sequences)
+        miningReminderManager.setMiningReminderEnabled(true)
+        
+        // Simulate mining stopped 25 hours ago to trigger all reminders
+        val stopTime = System.currentTimeMillis() - (25L * 60 * 60 * 1000) // 25 hours ago
+        securePreferences.putLong("last_mining_stop_time", stopTime)
+        securePreferences.putInt("reminder_sequence", 0) // Reset to first reminder
+        
+        miningReminderManager.sendReminderIfAppropriate()
+        
+        Log.d(TAG, "✅ All notification tests sent!")
     }
 }

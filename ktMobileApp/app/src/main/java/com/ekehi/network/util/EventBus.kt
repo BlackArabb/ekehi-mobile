@@ -16,5 +16,7 @@ sealed class Event {
     object RefreshUserProfile : Event()
     object RefreshLeaderboard : Event()
     object UserLoggedOut : Event()
+    object AccountDeleted : Event()
     data class RefreshSocialTasks(val userId: String) : Event()
+    data class UserDataExported(val email: String) : Event()
 }

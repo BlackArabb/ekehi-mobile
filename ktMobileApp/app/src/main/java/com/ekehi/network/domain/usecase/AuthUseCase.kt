@@ -169,4 +169,26 @@ class AuthUseCase @Inject constructor(
         Log.e("AuthUseCase", errorMessage, e)
         emit(Resource.Error(errorMessage))
     }
+
+    /**
+     * Deletes the user's account and all associated data
+     */
+    fun deleteAccount(): Flow<Resource<Unit>> = flow {
+        Log.d("AuthUseCase", "Starting delete account flow")
+        emit(Resource.Loading)
+        
+        val result = authRepository.deleteAccount()
+        if (result.isSuccess) {
+            Log.d("AuthUseCase", "Account deleted successfully")
+            emit(Resource.Success(Unit))
+        } else {
+            val errorMessage = "Failed to delete account: ${result.exceptionOrNull()?.message ?: "Unknown error"}"
+            Log.e("AuthUseCase", errorMessage)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Error deleting account: ${e.message ?: "Unknown error"}"
+        Log.e("AuthUseCase", errorMessage, e)
+        emit(Resource.Error(errorMessage))
+    }
 }

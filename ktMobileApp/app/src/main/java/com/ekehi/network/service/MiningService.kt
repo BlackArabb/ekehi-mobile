@@ -11,9 +11,16 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ekehi.network.R
+import com.ekehi.network.service.MiningReminderManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MiningService : Service() {
+    @Inject
+    lateinit var miningReminderManager: MiningReminderManager
+    
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var isMining = false
     private var miningJob: Job? = null
@@ -44,6 +51,10 @@ class MiningService : Service() {
         if (isMining) return
         
         isMining = true
+        
+        // Clear mining reminder when user starts mining
+        miningReminderManager.resetAllReminders()
+        
         startForeground(NOTIFICATION_ID, createNotification())
         
         // Start mining coroutine
@@ -62,6 +73,10 @@ class MiningService : Service() {
     private fun stopMining() {
         isMining = false
         miningJob?.cancel()
+        
+        // Record mining stop time for reminders
+        miningReminderManager.recordMiningStop()
+        
         stopForeground(true)
         stopSelf()
     }

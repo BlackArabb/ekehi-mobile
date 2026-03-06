@@ -1,16 +1,21 @@
-package com.ekehi.network
+﻿package com.ekehi.network
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.ekehi.network.presentation.navigation.AppNavigation
 import com.ekehi.network.presentation.ui.components.UpdateCheckWrapper
@@ -18,10 +23,13 @@ import com.ekehi.network.presentation.viewmodel.AuthViewModel
 import com.ekehi.network.presentation.viewmodel.OAuthViewModel
 import com.ekehi.network.ui.theme.EkehiMobileTheme
 import com.ekehi.network.service.OAuthService
+import com.ekehi.network.service.MiningReminderManager
+import com.ekehi.network.service.NotificationServiceManager
 import com.facebook.CallbackManager
 import com.startapp.sdk.adsbase.StartAppAd
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -30,10 +38,26 @@ class MainActivity : ComponentActivity() {
     private val oAuthViewModel: OAuthViewModel by viewModels()
     private lateinit var callbackManager: CallbackManager
     
+    @Inject
+    lateinit var miningReminderManager: MiningReminderManager
+    
+    @Inject
+    lateinit var notificationServiceManager: NotificationServiceManager
+    
     private var isAuthenticated by mutableStateOf(false)
     private var isAuthChecked by mutableStateOf(false)
     private var requiresAdditionalInfo by mutableStateOf(false)
     private var oauthError by mutableStateOf<String?>(null)
+    
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d("MainActivity", "✅ Notification permission granted")
+        } else {
+            Log.w("MainActivity", "⚠️ Notification permission denied")
+        }
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +66,28 @@ class MainActivity : ComponentActivity() {
         callbackManager = CallbackManager.Factory.create()
         
         Log.d("MainActivity", "=== MAIN ACTIVITY CREATED ===")
+        
+        // Request notification permission on first launch (Android 13+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    Log.d("MainActivity", "✅ Notification permission already granted")
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    Log.d("MainActivity", "📢 Showing permission rationale - requesting anyway")
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                else -> {
+                    Log.d("MainActivity", "🔔 Requesting notification permission for first time")
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            Log.d("MainActivity", "ℹ️ Android version < 13 - notification permission not required")
+        }
         
         // Determine where we came from
         val fromSplash = intent.getBooleanExtra("FROM_SPLASH", false)
@@ -65,6 +111,14 @@ class MainActivity : ComponentActivity() {
                 // Direct launch (shouldn't happen normally, but handle it)
                 Log.w("MainActivity", "⚠️ Direct launch detected - checking authentication")
                 checkAuthenticationStatus()
+            }
+        }
+        
+        // Start background notification services if user is authenticated
+        if (isAuthenticated) {
+            lifecycleScope.launch {
+                kotlinx.coroutines.delay(3000) // Wait 3 seconds after app launch
+                startBackgroundNotificationServices()
             }
         }
         
@@ -176,8 +230,41 @@ class MainActivity : ComponentActivity() {
         }
     }
     
-    override fun onBackPressed() {
-        StartAppAd.onBackPressed(this)
-        super.onBackPressed()
+    /**
+     * Send mining reminder if user hasn't mined recently
+     */
+    private fun sendMiningReminderIfAppropriate() {
+        try {
+            Log.d("MainActivity", "Checking if mining reminder should be sent")
+            
+            // Only send reminders for authenticated users
+            if (!isAuthenticated) {
+                Log.d("MainActivity", "User not authenticated - skipping reminder")
+                return
+            }
+            
+            miningReminderManager.sendReminderIfAppropriate()
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Failed to send mining reminder: ${e.message}", e)
+        }
+    }
+    
+    /**
+     * Start all background notification services
+     */
+    private fun startBackgroundNotificationServices() {
+        try {
+            Log.d("MainActivity", "Starting background notification services")
+            
+            if (!isAuthenticated) {
+                Log.d("MainActivity", "User not authenticated - skipping notification services")
+                return
+            }
+            
+            notificationServiceManager.startAllNotificationServices()
+            Log.d("MainActivity", "✅ Background notification services started")
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Failed to start notification services: ${e.message}", e)
+        }
     }
 }

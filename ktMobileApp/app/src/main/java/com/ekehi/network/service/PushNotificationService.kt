@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ekehi.network.MainActivity
@@ -28,6 +29,7 @@ class PushNotificationService @Inject constructor(
         private const val SOCIAL_TASK_NOTIFICATIONS_ENABLED = "social_task_notifications_enabled"
         private const val REFERRAL_NOTIFICATIONS_ENABLED = "referral_notifications_enabled"
         private const val STREAK_NOTIFICATIONS_ENABLED = "streak_notifications_enabled"
+        private const val TAG = "PushNotificationService"
     }
     
     init {
@@ -127,5 +129,13 @@ class PushNotificationService @Inject constructor(
             "Congratulations! You've maintained a $streakDays-day streak and earned $bonusAmount EKEHI coins!",
             "streak_bonus".hashCode()
         )
+    }
+    
+    /**
+     * Reset mining reminder timer (called when user starts mining)
+     */
+    fun resetMiningReminderTimer() {
+        securePreferences.putLong("last_reminder_time", System.currentTimeMillis())
+        Log.d(TAG, "Mining reminder timer reset")
     }
 }

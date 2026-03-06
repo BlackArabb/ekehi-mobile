@@ -458,4 +458,51 @@ open class UserRepository @Inject constructor(
             updatedAt = document.updatedAt ?: "1970-01-01T00:00:00.000Z"
         )
     }
+    
+    /**
+     * Deletes a user profile from the database
+     */
+    suspend fun deleteUserProfile(userId: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("UserRepository", "Attempting to delete profile for userId: $userId")
+                
+                // First, find the user profile document by userId field
+                val response = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    queries = listOf(
+                        io.appwrite.Query.equal("userId", listOf(userId))
+                    )
+                )
+                
+                if (response.documents.isNotEmpty()) {
+                    val documentId = response.documents[0].id
+                    Log.d("UserRepository", "Found document with ID: $documentId")
+                    
+                    // Delete the document
+                    appwriteService.databases.deleteDocument(
+                        databaseId = AppwriteService.DATABASE_ID,
+                        collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                        documentId = documentId
+                    )
+                    
+                    Log.d("UserRepository", "Successfully deleted profile for user: $userId")
+                    Result.success(Unit)
+                } else {
+                    val errorMessage = "User profile not found for userId: $userId"
+                    Log.e("UserRepository", errorMessage)
+                    Result.failure(Exception(errorMessage))
+                }
+            } catch (e: AppwriteException) {
+                val errorMessage = "Appwrite exception while deleting profile: ${e.message}"
+                Log.e("UserRepository", errorMessage, e)
+                Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Unexpected error while deleting profile: ${e.message}"
+                Log.e("UserRepository", errorMessage, e)
+                Result.failure(e)
+            }
+        }
+    }
 }

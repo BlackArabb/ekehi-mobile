@@ -68,13 +68,18 @@ class ProfileViewModel @Inject constructor(
             }
         }
 
-        // Listen for refresh events
+        // Listen for refresh and account events
         viewModelScope.launch {
             EventBus.events.collect { event ->
                 when (event) {
                     is Event.RefreshUserProfile -> {
                         Log.d("ProfileViewModel", "Received RefreshUserProfile event")
                         refreshUserProfile()
+                    }
+                    is Event.UserLoggedOut, is Event.AccountDeleted -> {
+                        Log.d("ProfileViewModel", "Received ${event::class.simpleName} event - clearing profile")
+                        _userProfile.value = Resource.Error("User logged out")
+                        currentUserId = null
                     }
                     else -> {}
                 }
