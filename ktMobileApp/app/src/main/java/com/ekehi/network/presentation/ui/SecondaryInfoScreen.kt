@@ -169,7 +169,7 @@ fun SecondaryInfoScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Important: Your phone number is the only way to recover your password. Please ensure it is active and reachable.",
+                                text = "Important: Your phone number is the only way to recover your account. Please ensure it is active and reachable.",
                                 color = Color.White,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium

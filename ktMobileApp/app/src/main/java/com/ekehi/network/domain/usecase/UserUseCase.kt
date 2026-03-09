@@ -141,4 +141,40 @@ open class UserUseCase @Inject constructor(
         Log.e(TAG, "❌ PROFILE UPDATE EXCEPTION", e)
         emit(Resource.Error(errorMessage))
     }
+
+    /**
+     * Check if a phone number already exists in the system
+     * @param phoneNumber The phone number to check
+     * @param currentUserId The current user's ID (to exclude from check)
+     * @return Flow<Resource<Boolean>> - true if phone exists, false otherwise
+     */
+    fun checkPhoneNumberExists(phoneNumber: String, currentUserId: String? = null): Flow<Resource<Boolean>> = flow {
+        Log.d(TAG, "=== CHECKING PHONE NUMBER EXISTS ===")
+        Log.d(TAG, "Phone: $phoneNumber, CurrentUserId: $currentUserId")
+        
+        emit(Resource.Loading)
+        
+        try {
+            val result = userRepository.checkPhoneNumberExists(phoneNumber, currentUserId)
+            
+            if (result.isSuccess) {
+                val exists = result.getOrNull() ?: false
+                Log.d(TAG, "Phone number check result: exists=$exists")
+                emit(Resource.Success(exists))
+            } else {
+                val error = result.exceptionOrNull()
+                val errorMessage = "Failed to check phone number: ${error?.message ?: "Unknown error"}"
+                Log.e(TAG, "❌ $errorMessage", error)
+                emit(Resource.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            val errorMessage = "Error checking phone number: ${e.message ?: "Unknown error"}"
+            Log.e(TAG, "❌ PHONE CHECK EXCEPTION", e)
+            emit(Resource.Error(errorMessage))
+        }
+    }.catch { e ->
+        val errorMessage = "Phone check error: ${e.message ?: "Unknown error"}"
+        Log.e(TAG, "❌ PHONE CHECK EXCEPTION", e)
+        emit(Resource.Error(errorMessage))
+    }
 }

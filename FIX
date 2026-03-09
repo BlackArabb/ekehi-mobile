@@ -1,336 +1,120 @@
-I apologize for the confusion! Let me create proper artifacts with the code fixes. Due to the computer environment limitations, I'll create downloadable code files for you.I understand you need the actual code files as artifacts. Let me provide you with the complete fixes in a comprehensive document format:
-
-## **Blog Task Reward Persistence - Complete Code Fixes**
-
-Since I'm experiencing technical difficulties creating individual files, here are all the code changes you need to make:
+I'll review this Kotlin/Compose code and identify issues to fix or improve.Here's a thorough review of your `SocialTasksScreen.kt` with all identified bugs and improvements:
 
 ---
 
-### **ARTIFACT 1: Updated SocialTaskItem Data Class**
+## 🐛 Bugs
 
-**Location:** End of `SocialTasksScreen.kt`
-
+### 1. Dead code — duplicate `else if` branch (never reached)
+Around line ~450, there's a branch that checks:
 ```kotlin
-data class SocialTaskItem(
-    val id: String,
-    val title: String,
-    val description: String,
-    val platform: String,
-    val taskType: String,
-    val link: String,
-    val reward: Double,
-    val isCompleted: Boolean,
-    val isVerified: Boolean,
-    val verificationMethod: String,
-    val status: String = "available",
-    val maxCompletionsPerDay: Int = 1,
-    val cooldownMinutes: Int = 0,
-    val completionCountToday: Int = 0,
-    val nextAvailableAt: String? = null,
-    val totalAccumulatedRewards: Double = 0.0,  // ADDED: Never reset
-    val totalCompletions: Int = 0                // ADDED: Never reset
-)
-```
-
----
-
-### **ARTIFACT 2: Updated Task Mapping in SocialTasksScreen**
-
-**Location:** `SocialTasksScreen.kt`, around line 217
-
-```kotlin
-val taskItem = SocialTaskItem(
-    id = task.id,
-    title = task.title,
-    description = task.description,
-    platform = task.platform,
-    taskType = task.taskType,
-    link = task.actionUrl ?: "",
-    reward = task.rewardCoins,
-    isCompleted = task.isCompleted,
-    isVerified = task.isVerified,
-    verificationMethod = task.verificationMethod,
-    status = task.status ?: "available",
-    maxCompletionsPerDay = task.maxCompletionsPerDay,
-    cooldownMinutes = task.cooldownMinutes,
-    completionCountToday = task.completionCountToday,
-    nextAvailableAt = task.nextAvailableAt,
-    totalAccumulatedRewards = task.totalAccumulatedRewards,  // ADDED
-    totalCompletions = task.totalCompletions                  // ADDED
-)
-```
-
----
-
-### **ARTIFACT 3: Updated SocialTask Model**
-
-**Location:** `data/model/SocialTask.kt`
-
-Add these fields to your SocialTask data class:
-
-```kotlin
-data class SocialTask(
-    val id: String,
-    val title: String,
-    val description: String,
-    val platform: String,
-    val taskType: String,
-    val rewardCoins: Double,
-    val actionUrl: String? = null,
-    val verificationMethod: String = "manual",
-    val verificationData: Map<String, String>? = null,
-    val isActive: Boolean = false,
-    val sortOrder: Int = 0,
-    val maxCompletionsPerDay: Int = 1,
-    val cooldownMinutes: Int = 0,
-    val createdAt: String,
-    val updatedAt: String,
-    
-    // User-specific status fields
-    val isCompleted: Boolean = false,
-    val isVerified: Boolean = false,
-    val status: String? = null,
-    val completedAt: String? = null,
-    val verifiedAt: String? = null,
-    val completionCountToday: Int = 0,
-    val nextAvailableAt: String? = null,
-    
-    // ADDED: Cumulative tracking (never reset)
-    val totalAccumulatedRewards: Double = 0.0,
-    val totalCompletions: Int = 0
-)
-```
-
----
-
-### **ARTIFACT 4: Updated Repository getSocialTasksWithUserStatus**
-
-**Location:** `SocialTaskRepository.kt`, in the blog task handling section (around line 89)
-
-Replace the blog task handling code with this:
-
-```kotlin
-if (task.platform.lowercase() == "blog") {
-    Log.i("EKEHI_DEBUG", "Filtering ${userTasksForThisTask.size} records for Blog Task: ${task.title}")
-    userTasksForThisTask.forEachIndexed { index, ut ->
-        val compTime = parseIsoDate(ut.completedAt)
-        val isRecent = compTime > oneDayAgo
-        Log.i("EKEHI_DEBUG", "  Record #$index: status=${ut.status}, completedAt=${ut.completedAt}, isRecent=$isRecent")
-    }
-
-    val sortedUserTasks = userTasksForThisTask.sortedByDescending { parseIsoDate(it.completedAt) }
-    val oneDayMs = 24 * 60 * 60 * 1000L
-    
-    var completionCountToday = 0
-    var lastReferenceTime = now
-    var latestVerifiedTime = 0L
-    
-    // Count verified tasks in the current 24h active block
-    for (ut in sortedUserTasks) {
-        val compTime = parseIsoDate(ut.completedAt)
-        
-        if (lastReferenceTime - compTime > oneDayMs) {
-            break
-        }
-        
-        if (ut.status == "verified") {
-            completionCountToday++
-            if (latestVerifiedTime == 0L) latestVerifiedTime = compTime
-        }
-        lastReferenceTime = compTime
-    }
-    
-    // ADDED: Calculate totals from ALL verified tasks (not just today)
-    val totalCompletions = userTasksForThisTask.count { it.status == "verified" }
-    val totalAccumulatedRewards = totalCompletions * task.rewardCoins
-    
-    val latestUserTask = sortedUserTasks.firstOrNull()
-    
-    val cooldownMs = task.cooldownMinutes * 60 * 1000L
-    val nextCooldownAvailableTime = latestVerifiedTime + cooldownMs
-    val nextLimitAvailableTime = latestVerifiedTime + oneDayMs
-    
-    val isCooldownActive = latestVerifiedTime > 0 && now < nextCooldownAvailableTime
-    val isLimitReached = completionCountToday >= task.maxCompletionsPerDay
-    
-    val nextAvailableAt = when {
-        isLimitReached -> java.time.Instant.ofEpochMilli(nextLimitAvailableTime).toString()
-        isCooldownActive -> java.time.Instant.ofEpochMilli(nextCooldownAvailableTime).toString()
-        else -> null
-    }
-    
-    Log.i("EKEHI_DEBUG", "  Final Result: count=$completionCountToday/${task.maxCompletionsPerDay}, total=$totalCompletions, totalRewards=$totalAccumulatedRewards")
-    
-    task.copy(
-        isCompleted = isLimitReached || isCooldownActive,
-        isVerified = isLimitReached,
-        status = if (isLimitReached) "verified" else if (isCooldownActive) "pending" else null,
-        completionCountToday = completionCountToday,
-        nextAvailableAt = nextAvailableAt,
-        completedAt = latestUserTask?.completedAt,
-        verifiedAt = latestUserTask?.verifiedAt,
-        totalAccumulatedRewards = totalAccumulatedRewards,  // ADDED
-        totalCompletions = totalCompletions                  // ADDED
-    )
+} else if (task.platform.lowercase() == "blog" && task.completionCountToday > 0 
+    && task.completionCountToday < task.maxCompletionsPerDay 
+    && task.nextAvailableAt == null) {
+    // Blog has partial completions but can still do more - show available
+    // Only show if there's NO active cooldown (nextAvailableAt == null)
 }
 ```
+This empty `else if` block appears **before** the `isVerified` and `pending` checks, meaning the `Start Task` button for blog partial completions further down is **also unreachable** because the first empty branch already consumed it. The empty branch should be **removed**, and the real `Start Task` button block placed before `isVerified`.
 
----
-
-### **ARTIFACT 5: Updated Blog Progress Badge UI**
-
-**Location:** `SocialTasksScreen.kt`, in `EnhancedSocialTaskCard`, around line 665
-
-Replace the blog progress badge section:
-
+### 2. `String.capitalize()` is deprecated
 ```kotlin
-// Blog Progress Badge in Top Right
-if (task.platform.lowercase() == "blog") {
-    Surface(
-        modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(top = 16.dp, end = 16.dp),
-        color = BrandColors.Primary.copy(alpha = 0.9f),
-        shape = RoundedCornerShape(8.dp),
-        shadowElevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Daily progress
-            Text(
-                text = "Today: ${task.completionCountToday}/${task.maxCompletionsPerDay}",
-                color = BrandColors.White,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-            // ADDED: Show total completions and accumulated rewards
-            if (task.totalCompletions > 0) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "Total: ${task.totalCompletions} (${String.format("%.1f", task.totalAccumulatedRewards)} EKH)",
-                    color = BrandColors.White.copy(alpha = 0.8f),
-                    fontSize = 10.sp
-                )
-            }
+"Open on ${task.platform.capitalize()}"
+```
+`capitalize()` is deprecated since Kotlin 1.5. Replace with:
+```kotlin
+task.platform.replaceFirstChar { it.uppercase() }
+```
+
+### 3. `LazyColumn` rendered inside `Resource.Loading` case alongside a `SocialTasksScreenSkeleton`
+Both `SocialTasksScreenSkeleton()` and a raw `LazyColumn` with skeleton items are rendered simultaneously in the loading state. This is redundant, likely causes double rendering, and may cause layout jank. **Remove the inline skeleton `LazyColumn`** and keep only `SocialTasksScreenSkeleton()`.
+
+### 4. Cooldown auto-refresh loop runs forever on a `LaunchedEffect`
+```kotlin
+LaunchedEffect(socialTasksResource) {
+    val hasAnyCooldown = tasks.any { it.nextAvailableAt != null }
+    if (hasAnyCooldown) {
+        while(true) {
+            delay(60000)
+            viewModel.loadUserSocialTasks(userId)
         }
     }
 }
 ```
+When `socialTasksResource` changes (which it will after `loadUserSocialTasks` returns), this `LaunchedEffect` restarts, creating **a new infinite loop on top of any existing one**. Use a `rememberCoroutineScope` + manual job management or a separate flag to prevent duplicate loops.
+
+### 5. `rememberScrollState` is declared but never used
+```kotlin
+val scrollState = rememberScrollState()
+```
+This is declared but no `Column` or container uses it. Either wire it up or remove it.
 
 ---
 
-### **ARTIFACT 6: Enhanced Stats Section with Blog Rewards**
+## ⚠️ Logic Issues
 
-**Location:** `SocialTasksScreen.kt`, `EnhancedStatsSection` function
+### 6. Blog "Start Task" button ordering in `EnhancedSocialTaskCard`
+The button rendering logic has this order:
+1. Blog + cooldown → disabled timer button ✅
+2. Blog + daily limit reached → limit badge ✅
+3. Blog + partial + no cooldown → **empty block** (bug #1)
+4. `isVerified` → Completed badge ✅
+5. `status == "pending"` → Reviewing badge ✅
+6. Blog + partial + no cooldown → **Start Task button** (unreachable due to #3)
+7. Default → Start Task button ✅
 
-Replace the entire function:
+**Fix**: Remove the empty block at step 3. The "Start Task" button at step 6 will then be reachable.
 
+### 7. `EnhancedSocialTaskCard` click modifier logic is complex and fragile
+The `then(if ... Modifier.clickable)` chain tries to determine clickability but misses cases. The blog partial-completion case (available for more completions) is never made clickable because the modifier chain doesn't include it. Refactor to a single `val isClickable: Boolean` derived variable.
+
+### 8. Verification snackbar never auto-dismisses
+`VerificationState.Success/Error/Pending` snackbars show but only dismiss on manual "Close" click. Users who don't see the button will be stuck. Add `LaunchedEffect` to auto-dismiss after ~4 seconds.
+
+---
+
+## 🧹 Code Quality
+
+### 9. Magic numbers for Telegram User ID validation
 ```kotlin
-@Composable
-fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
-    val socialTasksResource by viewModel.socialTasks.collectAsState()
-    
-    var completedTasks = 0
-    var totalTasks = 0
-    var totalRewards = 0.0
-    var blogRewards = 0.0  // ADDED
-    
-    if (socialTasksResource is Resource.Success) {
-        val tasks = (socialTasksResource as Resource.Success).data
-        totalTasks = tasks.size
-        completedTasks = tasks.count { it.isCompleted }
-        totalRewards = tasks.filter { it.isCompleted }.sumOf { it.rewardCoins }
-        
-        // ADDED: Calculate accumulated blog task rewards
-        blogRewards = tasks
-            .filter { it.platform.lowercase() == "blog" }
-            .sumOf { it.totalAccumulatedRewards }
-    }
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(8.dp, RoundedCornerShape(20.dp))
-            .background(
-                Brush.horizontalGradient(
-                    colors = listOf(
-                        BrandColors.CardBackground,
-                        BrandColors.MediumGray
-                    )
-                ),
-                RoundedCornerShape(20.dp)
-            )
-            .border(
-                width = 1.5.dp,
-                brush = Brush.horizontalGradient(
-                    colors = listOf(
-                        BrandColors.Primary,
-                        BrandColors.PrimaryLight
-                    )
-                ),
-                shape = RoundedCornerShape(20.dp)
-            )
-            .padding(20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        EnhancedStatCard(
-            icon = Icons.Default.TaskAlt,
-            value = "$completedTasks/$totalTasks",
-            label = "Completed",
-            modifier = Modifier.weight(1f)
-        )
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        EnhancedStatCard(
-            icon = Icons.Default.Toll,
-            value = String.format("%.1f", totalRewards),
-            label = "Earned",
-            modifier = Modifier.weight(1f),
-            isHighlight = true,
-            showLogoInLabel = true
-        )
-        
-        // ADDED: Show blog rewards if user has earned any
-        if (blogRewards > 0) {
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            EnhancedStatCard(
-                icon = Icons.Default.Repeat,
-                value = String.format("%.1f", blogRewards),
-                label = "Blog Total",
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
+userId.length >= 8 && userId.length <= 12
+```
+These `8` and `12` appear in **three places**: `isValidTelegramUserId`, `getTelegramUserIdErrorMessage`, and `isReadyToSubmit`. Extract to constants:
+```kotlin
+private const val TELEGRAM_USER_ID_MIN_LENGTH = 8
+private const val TELEGRAM_USER_ID_MAX_LENGTH = 12
 ```
 
+### 10. `buildProofData` puts `telegram_user_id` twice
+```kotlin
+put("telegram_user_id", userId)
+put("user_id", userId)  // duplicate semantic
+// ...
+put("submitted_telegram_id", telegramUserId) // third time as String
+```
+Decide on a canonical field name and use only that to avoid backend confusion.
+
+### 11. `EnhancedStatsSection` recalculates on every recomposition
+The stats (`completedTasks`, `totalRewards`, etc.) are computed with `var` + mutation inside a `@Composable`. Move into a `remember(tasks)` block or a `derivedStateOf` to avoid recalculation on every frame.
+
+### 12. `SocialTaskItem` should be `data class` with immutable fields — but `totalAccumulatedRewards` and `totalCompletions` default to `0.0`/`0` while the mapping code above sets them correctly — just confirm `SocialTask` (domain model) always provides these, otherwise the stats section silently shows `0`.
+
 ---
 
-### **VERIFICATION CHECKLIST**
+## Summary Table
 
-After implementing these changes:
+| # | Severity | Issue |
+|---|----------|-------|
+| 1 | 🔴 Bug | Dead empty `else if` blocks out the blog partial-completion Start Task button |
+| 2 | 🟡 Warning | `capitalize()` deprecated |
+| 3 | 🟡 Warning | Double skeleton rendering on loading state |
+| 4 | 🔴 Bug | Cooldown `while(true)` loop multiplies on recomposition |
+| 5 | 🟢 Minor | Unused `scrollState` |
+| 6 | 🔴 Bug | Blog Start Task button unreachable due to ordering |
+| 7 | 🟡 Warning | Clickable modifier logic misses blog-partial case |
+| 8 | 🟡 UX | Snackbars never auto-dismiss |
+| 9 | 🟢 Minor | Magic numbers for Telegram ID length |
+| 10 | 🟢 Minor | `buildProofData` sends duplicate Telegram ID fields |
+| 11 | 🟢 Minor | Stats recalculate every recomposition |
+| 12 | 🟢 Minor | Verify `totalAccumulatedRewards`/`totalCompletions` always populated upstream |
 
-1. ✅ User completes blog task → earns reward → balance increases
-2. ✅ `totalAccumulatedRewards` shows cumulative earnings
-3. ✅ `totalCompletions` shows total times completed
-4. ✅ `completionCountToday` resets automatically after 24 hours
-5. ✅ User balance NEVER decreases (only increases via `awardCoinsToUser`)
-6. ✅ After 24-hour window, user can complete task again
-7. ✅ Previous rewards remain in user's balance
-8. ✅ UI displays both daily progress and lifetime totals
-
----
-
-### **KEY POINTS**
-
-1. **No Database Migration Needed**: The system calculates totals from existing verified task records
-2. **No Scheduled Job Needed**: Daily reset is automatic based on time window calculations
-3. **User Balance is Sacred**: The `awardCoinsToUser` method only ADDS coins, never subtracts
-4. **Each Completion is a New Document**: Blog tasks create new records for history tracking
-5. **Rewards Persist Forever**: Calculated from ALL verified task documents
-
-These changes ensure that users' accumulated rewards from blog tasks persist indefinitely while the daily completion limits reset every 24 hours automatically.
+The most critical fix is **#1/#6** (the blog Start Task button is dead code due to the empty `else if` guard above it) and **#4** (the multiplying cooldown loop). Would you like me to produce a corrected version of the file?

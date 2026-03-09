@@ -15,9 +15,11 @@ fun NotificationSettings(
     miningNotificationsEnabled: Boolean,
     socialTaskNotificationsEnabled: Boolean,
     referralNotificationsEnabled: Boolean,
+    bannerAdNotificationsEnabled: Boolean,
     onMiningNotificationsChanged: (Boolean) -> Unit,
     onSocialTaskNotificationsChanged: (Boolean) -> Unit,
-    onReferralNotificationsChanged: (Boolean) -> Unit
+    onReferralNotificationsChanged: (Boolean) -> Unit,
+    onBannerAdNotificationsChanged: (Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -52,6 +54,13 @@ fun NotificationSettings(
             description = "Get notified when you earn referral bonuses",
             checked = referralNotificationsEnabled,
             onCheckedChange = onReferralNotificationsChanged
+        )
+        
+        SettingToggle(
+            text = "New Banner Ads",
+            description = "Get notified when new picture ads are uploaded",
+            checked = bannerAdNotificationsEnabled,
+            onCheckedChange = onBannerAdNotificationsChanged
         )
     }
 }

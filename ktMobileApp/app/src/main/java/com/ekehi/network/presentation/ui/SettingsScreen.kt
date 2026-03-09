@@ -43,6 +43,7 @@ fun SettingsScreen(
     val inAppNotificationsEnabled by viewModel.inAppNotificationsEnabled.collectAsState()
     val pushNotificationsEnabled by viewModel.pushNotificationsEnabled.collectAsState()
     val analyticsEnabled by viewModel.analyticsEnabled.collectAsState()
+    val bannerAdNotificationsEnabled by viewModel.bannerAdNotificationsEnabled.collectAsState()
     
     Box(
         modifier = Modifier
@@ -84,6 +85,7 @@ fun SettingsScreen(
                     miningNotificationsEnabled = miningNotificationsEnabled,
                     socialTaskNotificationsEnabled = socialTaskNotificationsEnabled,
                     referralNotificationsEnabled = referralNotificationsEnabled,
+                    bannerAdNotificationsEnabled = bannerAdNotificationsEnabled,
                     onMiningNotificationsChanged = { enabled -> 
                         Log.d("SettingsScreen", "Mining notifications changed: $enabled")
                         viewModel.updateMiningNotifications(enabled)
@@ -95,6 +97,10 @@ fun SettingsScreen(
                     onReferralNotificationsChanged = { enabled -> 
                         Log.d("SettingsScreen", "Referral notifications changed: $enabled")
                         viewModel.updateReferralNotifications(enabled)
+                    },
+                    onBannerAdNotificationsChanged = { enabled ->
+                        Log.d("SettingsScreen", "Banner ad notifications changed: $enabled")
+                        viewModel.updateBannerAdNotifications(enabled)
                     }
                 )
             }
@@ -139,36 +145,7 @@ fun SettingsScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
 
-            // TEST BUTTON - Hidden notification test
-            if (BuildConfig.DEBUG) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFffa000)
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .clickable {
-                                Log.d("SettingsScreen", "🧪 TESTING ALL NOTIFICATIONS")
-                                viewModel.testAllNotifications()
-                            }
-                    ) {
-                        Text(
-                            text = "TEST NOTIFICATIONS",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
             // About Section
             AboutSection(

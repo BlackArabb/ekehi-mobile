@@ -1,6 +1,7 @@
 package com.ekehi.network.service
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Worker for checking and sending notifications about new banner ads
+ * Notifies users when NEW ads are uploaded to Appwrite storage bucket
  */
 @HiltWorker
 class BannerAdNotificationWorker @AssistedInject constructor(
@@ -32,7 +34,15 @@ class BannerAdNotificationWorker @AssistedInject constructor(
     companion object {
         private const val TAG = "BannerAdNotificationWorker"
         private const val WORK_NAME = "banner_ad_notification_check"
-        private const val CHECK_INTERVAL_HOURS = 12L // Check every 12 hours
+        private const val CHECK_INTERVAL_MINUTES = 30L // Check every 30 minutes
+        
+        // Notification IDs - using fixed IDs to avoid stacking
+        private const val NOTIFICATION_ID_NEW_ADS = 1001
+        private const val NOTIFICATION_ID_REMINDER = 1002
+        
+        // Keys for tracking last known ads - stored in SecurePreferences for consistency
+        private const val LAST_AD_IDS = "last_ad_ids" // Comma-separated list of ad IDs
+        private const val LAST_AD_CHECK_TIME = "last_ad_check_time" // Timestamp of last reminder
 
         /**
          * Schedule periodic banner ad notification checks
@@ -41,7 +51,7 @@ class BannerAdNotificationWorker @AssistedInject constructor(
             Log.d(TAG, "Scheduling periodic banner ad notification check")
             
             val workRequest = PeriodicWorkRequestBuilder<BannerAdNotificationWorker>(
-                CHECK_INTERVAL_HOURS, TimeUnit.HOURS
+                CHECK_INTERVAL_MINUTES, TimeUnit.MINUTES
             )
                 .setBackoffCriteria(
                     androidx.work.BackoffPolicy.EXPONENTIAL,
@@ -51,11 +61,11 @@ class BannerAdNotificationWorker @AssistedInject constructor(
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 WORK_NAME,
-                ExistingPeriodicWorkPolicy.REPLACE,
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
                 workRequest
             )
             
-            Log.d(TAG, "Banner ad notification check scheduled - interval: ${CHECK_INTERVAL_HOURS}h")
+            Log.d(TAG, "Banner ad notification check scheduled - interval: ${CHECK_INTERVAL_MINUTES}min")
         }
 
         /**
@@ -65,15 +75,32 @@ class BannerAdNotificationWorker @AssistedInject constructor(
             Log.d(TAG, "Canceling scheduled banner ad notification check")
             WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
         }
+        
+        /**
+         * Reset tracking - call this when user views the ads carousel
+         * This marks current ads as "seen" so future new ads will trigger notification
+         * Uses SecurePreferences for consistency with doWork()
+         */
+        fun markAdsAsSeen(securePreferences: SecurePreferences, adIds: List<String>) {
+            securePreferences.putString(LAST_AD_IDS, adIds.joinToString(","))
+            securePreferences.putLong(LAST_AD_CHECK_TIME, System.currentTimeMillis())
+            Log.d(TAG, "Marked ${adIds.size} ads as seen")
+        }
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "Starting banner ad notification check")
 
-            // Check if push notifications are enabled (banner ads use push notifications)
+            // Check if push notifications are enabled
             if (!securePreferences.getBoolean("push_notifications_enabled", true)) {
                 Log.d(TAG, "Push notifications disabled - skipping")
+                return@withContext Result.success()
+            }
+
+            // Check if banner ad notifications are enabled
+            if (!securePreferences.getBoolean("banner_ad_notifications_enabled", true)) {
+                Log.d(TAG, "Banner ad notifications disabled - skipping")
                 return@withContext Result.success()
             }
 
@@ -84,21 +111,69 @@ class BannerAdNotificationWorker @AssistedInject constructor(
                 return@withContext Result.success()
             }
 
-            // Check for new/active banner ads
+            // Get active ads from repository
             try {
-                val ads = adsRepository.getActiveAds()
-                if (ads.isNotEmpty()) {
-                    Log.d(TAG, "Found ${ads.size} active banner ads - sending notification")
-                    
-                    // Send notification for new banner ads
-                    pushNotificationService.showNotification(
-                        "New Advertising Opportunities! 📢",
-                        "${ads.size} new banner ads available. Check them out in the app!",
-                        "new_banner_ads".hashCode()
-                    )
-                } else {
-                    Log.d(TAG, "No new banner ads found")
+                val currentAds = adsRepository.getActiveAds()
+                
+                if (currentAds.isEmpty()) {
+                    Log.d(TAG, "No banner ads found")
+                    return@withContext Result.success()
                 }
+
+                // Get current ad IDs
+                val currentAdIds = currentAds.map { it.id }.toSet()
+                
+                // Get last known ad IDs from storage
+                val lastAdIdsString = securePreferences.getString(LAST_AD_IDS, "")
+                val lastAdIds = if (lastAdIdsString.isNullOrEmpty()) {
+                    emptySet()
+                } else {
+                    lastAdIdsString.split(",").toSet()
+                }
+                
+                // Find NEW ads (ads in current but not in last known)
+                val newAdIds = currentAdIds - lastAdIds
+                
+                if (newAdIds.isNotEmpty()) {
+                    // Get the new ads details
+                    val newAds = currentAds.filter { it.id in newAdIds }
+                    
+                    Log.d(TAG, "🎉 Found ${newAdIds.size} NEW banner ads: $newAdIds")
+                    
+                    // Send notification about new ads - use fixed ID to avoid stacking
+                    pushNotificationService.showNotification(
+                        if (newAdIds.size == 1) "New Ad Available! 🖼️" else "New Ads Available! 🖼️",
+                        if (newAdIds.size == 1) "Check out the new advertising content on the mining page!" else "${newAdIds.size} new ads available! Check them out on the mining page.",
+                        NOTIFICATION_ID_NEW_ADS
+                    )
+                    
+                    // Update last known ads to current (mark them as seen)
+                    securePreferences.putString(LAST_AD_IDS, currentAdIds.joinToString(","))
+                    Log.d(TAG, "Updated tracked ad IDs")
+                } else {
+                    // No new ads, but remind about existing ads periodically
+                    val lastReminderTime = securePreferences.getLong(LAST_AD_CHECK_TIME, 0)
+                    val currentTime = System.currentTimeMillis()
+                    val hoursSinceLastReminder = (currentTime - lastReminderTime) / (1000 * 60 * 60)
+                    
+                    // Only remind every 6 hours about existing ads
+                    if (hoursSinceLastReminder >= 6) {
+                        Log.d(TAG, "Reminding about existing ${currentAds.size} banner ads")
+                        
+                        // Use fixed ID to avoid stacking reminders
+                        pushNotificationService.showNotification(
+                            "View Ads & Earn! 🖼️",
+                            "You have ${currentAds.size} ads waiting to be viewed on the mining page.",
+                            NOTIFICATION_ID_REMINDER
+                        )
+                        
+                        // Update last reminder time
+                        securePreferences.putLong(LAST_AD_CHECK_TIME, currentTime)
+                    } else {
+                        Log.d(TAG, "Skipping reminder - only been ${hoursSinceLastReminder}h since last reminder")
+                    }
+                }
+                
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get banner ads: ${e.message}", e)
             }

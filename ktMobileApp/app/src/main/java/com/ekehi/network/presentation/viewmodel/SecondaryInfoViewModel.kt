@@ -88,8 +88,53 @@ class SecondaryInfoViewModel @Inject constructor(
                     return@launch
                 }
 
-                Log.d("SecondaryInfoViewModel", "✅ All validations passed, proceeding with secondary info submission")
-                
+                // Check if phone number already exists in the system
+                Log.d("SecondaryInfoViewModel", "Checking if phone number already exists...")
+                userUseCase.checkPhoneNumberExists(phoneNumber).collect { checkResource ->
+                    when (checkResource) {
+                        is Resource.Success -> {
+                            if (checkResource.data == true) {
+                                // Phone number already exists for another user
+                                val errorMessage = "This phone number is already registered to another account. Please provide a different phone number."
+                                Log.e("SecondaryInfoViewModel", errorMessage)
+                                _secondaryInfoState.value = Resource.Error(errorMessage)
+                                return@collect
+                            }
+                            
+                            // Phone number is available, proceed with submission
+                            Log.d("SecondaryInfoViewModel", "✅ Phone number is available, proceeding with secondary info submission")
+                            proceedWithSubmission(phoneNumber, country)
+                        }
+                        is Resource.Error -> {
+                            Log.e("SecondaryInfoViewModel", "Failed to check phone number: ${checkResource.message}")
+                            // Proceed anyway if check fails - let the actual submission handle errors
+                            Log.d("SecondaryInfoViewModel", "Proceeding with submission despite phone check failure")
+                            proceedWithSubmission(phoneNumber, country)
+                        }
+                        is Resource.Loading -> {
+                            Log.d("SecondaryInfoViewModel", "Checking phone number...")
+                        }
+                        is Resource.Idle -> {
+                            // Ignore idle
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val errorMessage = "Secondary info submission failed: ${e.message}"
+                Log.e("SecondaryInfoViewModel", "❌ $errorMessage", e)
+                _secondaryInfoState.value = Resource.Error(errorMessage)
+            }
+        }
+    }
+    
+    /**
+     * Proceed with the actual submission after phone number validation passes
+     */
+    private fun proceedWithSubmission(phoneNumber: String, country: String) {
+        Log.d("SecondaryInfoViewModel", "=== PROCEEDING WITH SUBMISSION ===")
+        
+        viewModelScope.launch {
+            try {
                 // Get current user to get their userId
                 authUseCase.getCurrentUserIfLoggedIn().collect { resource ->
                     when (resource) {

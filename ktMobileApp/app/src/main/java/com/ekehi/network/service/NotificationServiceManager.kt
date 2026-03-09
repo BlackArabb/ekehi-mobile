@@ -23,50 +23,45 @@ class NotificationServiceManager @Inject constructor(
     /**
      * Start all background notification services
      * Call this when user logs in or enables notifications
+     * 
+     * NOTE: Banner Ads runs on schedule (every 30 min)
+     * Social Tasks and Mining Completion are EVENT-BASED (called from ViewModels)
+     * Mining Reminder runs on schedule (hourly check)
      */
     fun startAllNotificationServices() {
         Log.d(TAG, "Starting all notification services")
         
-        // Schedule social task notifications (every 6 hours)
-        SocialTaskNotificationWorker.schedulePeriodicCheck(context)
-        
-        // Schedule mining completion notifications (every 30 minutes)
-        MiningCompletionNotificationWorker.schedulePeriodicCheck(context)
-        
-        // Schedule banner ad notifications (every 12 hours)
+        // Schedule Banner Ads notification worker (every 30 min - works in background)
         BannerAdNotificationWorker.schedulePeriodicCheck(context)
         
-        // Schedule mining reminders (every 24 hours)
+        // Schedule mining reminders (hourly check for tiered reminders)
         miningReminderManager.scheduleReminder()
         
-        Log.d(TAG, "✅ All notification services started")
+        Log.d(TAG, "✅ Notification services started")
     }
     
     /**
      * Stop all background notification services
-     * Call this when user logs out or disables notifications
+     * Call this when user logs out or disables all notifications
      */
     fun stopAllNotificationServices() {
         Log.d(TAG, "Stopping all notification services")
         
-        // Cancel social task notifications
-        SocialTaskNotificationWorker.cancelScheduledCheck(context)
-        
-        // Cancel mining completion notifications
-        MiningCompletionNotificationWorker.cancelScheduledCheck(context)
-        
-        // Cancel banner ad notifications
+        // Cancel banner ads worker
         BannerAdNotificationWorker.cancelScheduledCheck(context)
         
         // Cancel mining reminders
         miningReminderManager.cancelReminder()
         
-        Log.d(TAG, "✅ All notification services stopped")
+        Log.d(TAG, "✅ Notification services stopped")
     }
     
     /**
      * Update notification services based on user preferences
      * Call this when user changes notification settings
+     * 
+     * NOTE: Banner Ads, Social Tasks, Mining Completion are EVENT-BASED
+     * Only mining reminders are controlled here
      */
     fun updateNotificationServices(
         miningEnabled: Boolean,
@@ -83,41 +78,31 @@ class NotificationServiceManager @Inject constructor(
             return
         }
         
-        // Restart services based on individual preferences
-        if (socialTasksEnabled) {
-            SocialTaskNotificationWorker.schedulePeriodicCheck(context)
-        } else {
-            SocialTaskNotificationWorker.cancelScheduledCheck(context)
-        }
+        // Banner Ads, Social Tasks, Mining Completion are EVENT-BASED
+        // No periodic workers to schedule/cancel
         
-        if (miningEnabled) {
-            MiningCompletionNotificationWorker.schedulePeriodicCheck(context)
-        } else {
-            MiningCompletionNotificationWorker.cancelScheduledCheck(context)
-        }
-        
-        // Banner ads always run if push notifications enabled
-        BannerAdNotificationWorker.schedulePeriodicCheck(context)
-        
-        // Mining reminders
+        // Mining reminders - enable/disable
         if (miningRemindersEnabled) {
             miningReminderManager.setMiningReminderEnabled(true)
+            miningReminderManager.scheduleReminder()
         } else {
             miningReminderManager.setMiningReminderEnabled(false)
+            miningReminderManager.cancelReminder()
         }
         
-        Log.d(TAG, "✅ Notification services updated")
+        Log.d(TAG, "✅ Notification services updated (event-based notifications always active)")
     }
     
     /**
      * Check status of all notification services
+     * NOTE: Banner Ads, Social Tasks, Mining Completion are EVENT-BASED (always ready)
      */
     fun getServicesStatus(): Map<String, Boolean> {
         return mapOf(
-            "social_task_notifications" to true, // WorkManager handles persistence
-            "mining_completion_notifications" to true,
-            "banner_ad_notifications" to true,
-            "mining_reminders" to miningReminderManager.isMiningReminderEnabled()
+            "social_task_notifications" to true, // Event-based
+            "mining_completion_notifications" to true, // Event-based
+            "banner_ad_notifications" to true, // Event-based
+            "mining_reminders" to miningReminderManager.isMiningReminderEnabled() // Scheduled
         )
     }
 }

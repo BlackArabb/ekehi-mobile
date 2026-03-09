@@ -1203,7 +1203,7 @@ fun EnhancedSocialTaskCard(
                                         calculateTimeUntilReset(task.nextResetTime)
                                     }
                                     Text(
-                                        text = "Resets in $timeUntilReset",
+                                        text = " $timeUntilReset",
                                         color = BrandColors.Primary.copy(alpha = 0.8f),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium
@@ -1211,32 +1211,9 @@ fun EnhancedSocialTaskCard(
                                 }
                             }
                         }
-                    } else if (task.platform.lowercase() == "blog" && task.completionCountToday > 0 && task.completionCountToday < task.maxCompletionsPerDay) {
-                        // Blog has partial completions but can still do more - show available with count
-                        Button(
-                            onClick = onClick,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = BrandColors.Primary
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-                            elevation = ButtonDefaults.buttonElevation(
-                                defaultElevation = 4.dp,
-                                pressedElevation = 2.dp
-                            )
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Do Another (${task.maxCompletionsPerDay - task.completionCountToday} left)",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp
-                            )
-                        }
+                    } else if (task.platform.lowercase() == "blog" && task.completionCountToday > 0 && task.completionCountToday < task.maxCompletionsPerDay && task.nextAvailableAt == null) {
+                        // Blog has partial completions but can still do more - show available
+                        // Only show if there's NO active cooldown (nextAvailableAt == null)
                     } else if (task.isVerified) {
                         Row(
                             modifier = Modifier
@@ -1293,6 +1270,28 @@ fun EnhancedSocialTaskCard(
                                 color = BrandColors.Warning,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else if (task.platform.lowercase() == "blog" && task.completionCountToday > 0 && task.completionCountToday < task.maxCompletionsPerDay && task.nextAvailableAt == null) {
+                        // Blog has partial completions but can still do more - show available
+                        Button(
+                            onClick = onClick,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BrandColors.Primary
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
+                        ) {
+                            Text(
+                                text = "Start Task",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Icon(
+                                Icons.Default.OpenInNew,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     } else {

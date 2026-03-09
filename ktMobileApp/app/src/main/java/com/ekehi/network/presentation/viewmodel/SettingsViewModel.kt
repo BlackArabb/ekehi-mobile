@@ -35,6 +35,7 @@ class SettingsViewModel @Inject constructor(
         private const val IN_APP_NOTIFICATIONS_ENABLED = "in_app_notifications_enabled"
         private const val PUSH_NOTIFICATIONS_ENABLED = "push_notifications_enabled"
         private const val ANALYTICS_ENABLED = "analytics_enabled"
+        private const val BANNER_AD_NOTIFICATIONS_ENABLED = "banner_ad_notifications_enabled"
     }
     
     // State flows for notification settings
@@ -59,6 +60,9 @@ class SettingsViewModel @Inject constructor(
     private val _analyticsEnabled = MutableStateFlow(
         securePreferences.getBoolean(ANALYTICS_ENABLED, true)
     )
+    private val _bannerAdNotificationsEnabled = MutableStateFlow(
+        securePreferences.getBoolean(BANNER_AD_NOTIFICATIONS_ENABLED, true)
+    )
     
     // Results
     private val _passwordChangeResult = MutableStateFlow<Resource<Unit>?>(null)
@@ -74,6 +78,7 @@ class SettingsViewModel @Inject constructor(
     val inAppNotificationsEnabled: StateFlow<Boolean> = _inAppNotificationsEnabled
     val pushNotificationsEnabled: StateFlow<Boolean> = _pushNotificationsEnabled
     val analyticsEnabled: StateFlow<Boolean> = _analyticsEnabled
+    val bannerAdNotificationsEnabled: StateFlow<Boolean> = _bannerAdNotificationsEnabled
     
     val passwordChangeResult: StateFlow<Resource<Unit>?> = _passwordChangeResult
     val notificationSettingsResult: StateFlow<Resource<Unit>?> = _notificationSettingsResult
@@ -142,6 +147,15 @@ class SettingsViewModel @Inject constructor(
             securePreferences.putBoolean(ANALYTICS_ENABLED, enabled)
             savePrivacySettings()
             Log.d(TAG, "Analytics updated: $enabled")
+        }
+    }
+    
+    fun updateBannerAdNotifications(enabled: Boolean) {
+        viewModelScope.launch {
+            _bannerAdNotificationsEnabled.value = enabled
+            securePreferences.putBoolean(BANNER_AD_NOTIFICATIONS_ENABLED, enabled)
+            saveNotificationSettings()
+            Log.d(TAG, "Banner ad notifications updated: $enabled")
         }
     }
     
@@ -314,53 +328,5 @@ class SettingsViewModel @Inject constructor(
             Log.e(TAG, "Error getting current user: ${e.message}", e)
             null
         }
-    }
-    
-    /**
-     * Test all notifications - only for debugging
-     */
-    fun testAllNotifications() {
-        Log.d(TAG, "🧪 TESTING ALL NOTIFICATIONS")
-        
-        // Test push notification
-        pushNotificationService.showNotification(
-            title = "Test Notification",
-            message = "This is a test notification from KtMobileApp!",
-            notificationId = "test_push".hashCode()
-        )
-        
-        // Test mining notification
-        pushNotificationService.showMiningUpdateNotification(
-            coinsEarned = 2.0,
-            sessionId = "test_session"
-        )
-        
-        // Test social task notification
-        pushNotificationService.showSocialTaskCompletedNotification(
-            taskTitle = "Follow on Twitter"
-        )
-        
-        // Test referral notification
-        pushNotificationService.showReferralBonusNotification(
-            bonusAmount = 10.0
-        )
-        
-        // Test streak notification
-        pushNotificationService.showStreakBonusNotification(
-            streakDays = 7,
-            bonusAmount = 5.0
-        )
-        
-        // Test mining reminder (FORCE all sequences)
-        miningReminderManager.setMiningReminderEnabled(true)
-        
-        // Simulate mining stopped 25 hours ago to trigger all reminders
-        val stopTime = System.currentTimeMillis() - (25L * 60 * 60 * 1000) // 25 hours ago
-        securePreferences.putLong("last_mining_stop_time", stopTime)
-        securePreferences.putInt("reminder_sequence", 0) // Reset to first reminder
-        
-        miningReminderManager.sendReminderIfAppropriate()
-        
-        Log.d(TAG, "✅ All notification tests sent!")
     }
 }

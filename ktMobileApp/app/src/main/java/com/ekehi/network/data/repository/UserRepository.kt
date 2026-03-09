@@ -213,6 +213,59 @@ open class UserRepository @Inject constructor(
         }
     }
 
+    /**
+     * Check if a phone number already exists in the system (used by another user)
+     * @param phoneNumber The phone number to check
+     * @param currentUserId The current user's ID (to exclude from check if updating own number)
+     * @return Result.success(true) if phone exists, Result.success(false) if not found, Result.failure on error
+     */
+    suspend fun checkPhoneNumberExists(phoneNumber: String, currentUserId: String? = null): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d("UserRepository", "Checking if phone number exists: $phoneNumber")
+                
+                // Build queries list
+                val queries = mutableListOf(
+                    io.appwrite.Query.equal("phoneNumber", listOf(phoneNumber))
+                )
+                
+                val response = appwriteService.databases.listDocuments(
+                    databaseId = AppwriteService.DATABASE_ID,
+                    collectionId = AppwriteService.USER_PROFILES_COLLECTION,
+                    queries = queries
+                )
+                
+                if (response.documents.isNotEmpty()) {
+                    // Check if the found profile belongs to the current user
+                    for (doc in response.documents) {
+                        val userIdList = doc.data["userId"]
+                        if (userIdList is List<*> && userIdList.isNotEmpty()) {
+                            val userId = userIdList[0] as? String
+                            if (userId != currentUserId) {
+                                Log.d("UserRepository", "Phone number $phoneNumber exists for another user")
+                                return@withContext Result.success(true)
+                            }
+                        }
+                    }
+                    // Phone number belongs to current user
+                    Log.d("UserRepository", "Phone number belongs to current user")
+                    Result.success(false)
+                } else {
+                    Log.d("UserRepository", "Phone number $phoneNumber not found in system")
+                    Result.success(false)
+                }
+            } catch (e: AppwriteException) {
+                val errorMessage = "Appwrite exception while checking phone number: ${e.message}"
+                Log.e("UserRepository", errorMessage, e)
+                Result.failure(e)
+            } catch (e: Exception) {
+                val errorMessage = "Unexpected error while checking phone number: ${e.message}"
+                Log.e("UserRepository", errorMessage, e)
+                Result.failure(e)
+            }
+        }
+    }
+
     suspend fun getReferralsByReferrerId(referrerId: String): List<Referral> {
         return withContext(Dispatchers.IO) {
             try {

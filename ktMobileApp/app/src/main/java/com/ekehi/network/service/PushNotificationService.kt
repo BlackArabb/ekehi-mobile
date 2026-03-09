@@ -132,6 +132,56 @@ class PushNotificationService @Inject constructor(
     }
     
     /**
+     * Show notification when new social tasks are available (event-based)
+     */
+    fun showNewSocialTasksNotification(taskCount: Int) {
+        // Check if social task notifications are enabled
+        if (!securePreferences.getBoolean(SOCIAL_TASK_NOTIFICATIONS_ENABLED, true)) {
+            return
+        }
+        
+        showNotification(
+            "New Tasks Available!",
+            "$taskCount new social tasks waiting for you. Complete them to earn rewards!",
+            "new_social_tasks".hashCode()
+        )
+    }
+    
+    /**
+     * Show mining completion notification (event-based)
+     * Called when mining session completes
+     */
+    fun showMiningCompletedNotification(reward: Double, sessionId: String) {
+        // Check if mining notifications are enabled
+        if (!securePreferences.getBoolean(MINING_NOTIFICATIONS_ENABLED, true)) {
+            return
+        }
+        
+        showNotification(
+            "Mining Complete! 🎉",
+            "Your mining session is complete! You've earned $reward EKEHI coins.",
+            "mining_complete_$sessionId".hashCode()
+        )
+    }
+    
+    /**
+     * Show new ads available notification (event-based)
+     * Called when new ads are uploaded
+     */
+    fun showNewAdsNotification(adCount: Int) {
+        // Check if push notifications are enabled
+        if (!securePreferences.getBoolean(PUSH_NOTIFICATIONS_ENABLED, true)) {
+            return
+        }
+        
+        showNotification(
+            "New Ads Available! 🖼️",
+            "$adCount new ads are available. Check them out on the mining page!",
+            "new_ads".hashCode()
+        )
+    }
+    
+    /**
      * Reset mining reminder timer (called when user starts mining)
      */
     fun resetMiningReminderTimer() {
