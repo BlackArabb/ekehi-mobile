@@ -34,6 +34,9 @@ class NotificationServiceManager @Inject constructor(
         // Schedule Banner Ads notification worker (every 30 min - works in background)
         BannerAdNotificationWorker.schedulePeriodicCheck(context)
         
+        // Schedule Social Tasks notification worker (every 6 hours)
+        SocialTaskNotificationWorker.schedulePeriodicCheck(context)
+        
         // Schedule mining reminders (hourly check for tiered reminders)
         miningReminderManager.scheduleReminder()
         

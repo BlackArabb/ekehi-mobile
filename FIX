@@ -1,120 +1,56 @@
-I'll review this Kotlin/Compose code and identify issues to fix or improve.Here's a thorough review of your `SocialTasksScreen.kt` with all identified bugs and improvements:
+The worker looks correct structurally, but here are the most likely reasons reminders aren't firing:
 
----
+## Debug Checklist
 
-## 🐛 Bugs
+**1. Is `recordMiningStop()` actually being called?**
 
-### 1. Dead code — duplicate `else if` branch (never reached)
-Around line ~450, there's a branch that checks:
+The worker exits early if `last_mining_stop_time == 0L`. Add a log immediately in your ViewModel/repository where mining stops:
+
 ```kotlin
-} else if (task.platform.lowercase() == "blog" && task.completionCountToday > 0 
-    && task.completionCountToday < task.maxCompletionsPerDay 
-    && task.nextAvailableAt == null) {
-    // Blog has partial completions but can still do more - show available
-    // Only show if there's NO active cooldown (nextAvailableAt == null)
-}
-```
-This empty `else if` block appears **before** the `isVerified` and `pending` checks, meaning the `Start Task` button for blog partial completions further down is **also unreachable** because the first empty branch already consumed it. The empty branch should be **removed**, and the real `Start Task` button block placed before `isVerified`.
-
-### 2. `String.capitalize()` is deprecated
-```kotlin
-"Open on ${task.platform.capitalize()}"
-```
-`capitalize()` is deprecated since Kotlin 1.5. Replace with:
-```kotlin
-task.platform.replaceFirstChar { it.uppercase() }
+miningReminderManager.recordMiningStop()
+Log.d("DEBUG", "recordMiningStop called at ${System.currentTimeMillis()}")
 ```
 
-### 3. `LazyColumn` rendered inside `Resource.Loading` case alongside a `SocialTasksScreenSkeleton`
-Both `SocialTasksScreenSkeleton()` and a raw `LazyColumn` with skeleton items are rendered simultaneously in the loading state. This is redundant, likely causes double rendering, and may cause layout jank. **Remove the inline skeleton `LazyColumn`** and keep only `SocialTasksScreenSkeleton()`.
+Verify this key is actually being written by checking SecurePreferences after stopping mining.
 
-### 4. Cooldown auto-refresh loop runs forever on a `LaunchedEffect`
-```kotlin
-LaunchedEffect(socialTasksResource) {
-    val hasAnyCooldown = tasks.any { it.nextAvailableAt != null }
-    if (hasAnyCooldown) {
-        while(true) {
-            delay(60000)
-            viewModel.loadUserSocialTasks(userId)
-        }
-    }
-}
-```
-When `socialTasksResource` changes (which it will after `loadUserSocialTasks` returns), this `LaunchedEffect` restarts, creating **a new infinite loop on top of any existing one**. Use a `rememberCoroutineScope` + manual job management or a separate flag to prevent duplicate loops.
+**2. Is the worker actually running?**
 
-### 5. `rememberScrollState` is declared but never used
-```kotlin
-val scrollState = rememberScrollState()
-```
-This is declared but no `Column` or container uses it. Either wire it up or remove it.
+WorkManager won't run periodic workers immediately — there's a minimum 15-minute flex window, and on first enqueue it may delay up to the full interval (1 hour). To verify the worker is being scheduled at all:
 
----
-
-## ⚠️ Logic Issues
-
-### 6. Blog "Start Task" button ordering in `EnhancedSocialTaskCard`
-The button rendering logic has this order:
-1. Blog + cooldown → disabled timer button ✅
-2. Blog + daily limit reached → limit badge ✅
-3. Blog + partial + no cooldown → **empty block** (bug #1)
-4. `isVerified` → Completed badge ✅
-5. `status == "pending"` → Reviewing badge ✅
-6. Blog + partial + no cooldown → **Start Task button** (unreachable due to #3)
-7. Default → Start Task button ✅
-
-**Fix**: Remove the empty block at step 3. The "Start Task" button at step 6 will then be reachable.
-
-### 7. `EnhancedSocialTaskCard` click modifier logic is complex and fragile
-The `then(if ... Modifier.clickable)` chain tries to determine clickability but misses cases. The blog partial-completion case (available for more completions) is never made clickable because the modifier chain doesn't include it. Refactor to a single `val isClickable: Boolean` derived variable.
-
-### 8. Verification snackbar never auto-dismisses
-`VerificationState.Success/Error/Pending` snackbars show but only dismiss on manual "Close" click. Users who don't see the button will be stuck. Add `LaunchedEffect` to auto-dismiss after ~4 seconds.
-
----
-
-## 🧹 Code Quality
-
-### 9. Magic numbers for Telegram User ID validation
-```kotlin
-userId.length >= 8 && userId.length <= 12
-```
-These `8` and `12` appear in **three places**: `isValidTelegramUserId`, `getTelegramUserIdErrorMessage`, and `isReadyToSubmit`. Extract to constants:
-```kotlin
-private const val TELEGRAM_USER_ID_MIN_LENGTH = 8
-private const val TELEGRAM_USER_ID_MAX_LENGTH = 12
+```bash
+adb shell dumpsys jobscheduler | grep mining_reminder
 ```
 
-### 10. `buildProofData` puts `telegram_user_id` twice
+Or in the worker, add a log at the very top *before* any early returns:
+
 ```kotlin
-put("telegram_user_id", userId)
-put("user_id", userId)  // duplicate semantic
-// ...
-put("submitted_telegram_id", telegramUserId) // third time as String
+Log.d(TAG, "=== MiningReminderWorker EXECUTING ===")
 ```
-Decide on a canonical field name and use only that to avoid backend confusion.
 
-### 11. `EnhancedStatsSection` recalculates on every recomposition
-The stats (`completedTasks`, `totalRewards`, etc.) are computed with `var` + mutation inside a `@Composable`. Move into a `remember(tasks)` block or a `derivedStateOf` to avoid recalculation on every frame.
+If you never see this log, the worker isn't running at all.
 
-### 12. `SocialTaskItem` should be `data class` with immutable fields — but `totalAccumulatedRewards` and `totalCompletions` default to `0.0`/`0` while the mapping code above sets them correctly — just confirm `SocialTask` (domain model) always provides these, otherwise the stats section silently shows `0`.
+**3. Is `scheduleReminder()` being called?**
 
----
+Add a log in `NotificationServiceManager.startAllNotificationServices()` and verify it's being called after login. Also check that `miningReminderManager.isMiningReminderEnabled()` returns `true`.
 
-## Summary Table
+**4. Battery optimization is likely killing it**
 
-| # | Severity | Issue |
-|---|----------|-------|
-| 1 | 🔴 Bug | Dead empty `else if` blocks out the blog partial-completion Start Task button |
-| 2 | 🟡 Warning | `capitalize()` deprecated |
-| 3 | 🟡 Warning | Double skeleton rendering on loading state |
-| 4 | 🔴 Bug | Cooldown `while(true)` loop multiplies on recomposition |
-| 5 | 🟢 Minor | Unused `scrollState` |
-| 6 | 🔴 Bug | Blog Start Task button unreachable due to ordering |
-| 7 | 🟡 Warning | Clickable modifier logic misses blog-partial case |
-| 8 | 🟡 UX | Snackbars never auto-dismiss |
-| 9 | 🟢 Minor | Magic numbers for Telegram ID length |
-| 10 | 🟢 Minor | `buildProofData` sends duplicate Telegram ID fields |
-| 11 | 🟢 Minor | Stats recalculate every recomposition |
-| 12 | 🟢 Minor | Verify `totalAccumulatedRewards`/`totalCompletions` always populated upstream |
+On most Android devices, background work gets heavily restricted. Test with:
 
-The most critical fix is **#1/#6** (the blog Start Task button is dead code due to the empty `else if` guard above it) and **#4** (the multiplying cooldown loop). Would you like me to produce a corrected version of the file?
+```bash
+adb shell dumpsys deviceidle whitelist +com.ekehi.network
+```
+
+Or in code during development:
+```kotlin
+// Temporarily force-run the worker for testing
+WorkManager.getInstance(context).enqueue(
+    OneTimeWorkRequestBuilder<MiningReminderWorker>().build()
+)
+```
+
+Use a `OneTimeWorkRequest` to test the logic in isolation — if that fires and still doesn't send a notification, the bug is inside `sendReminderIfAppropriate()`, not the scheduling.
+
+**5. Fastest way to isolate the bug**
+
+Call `sendReminderIfAppropriate()` directly from a button in your UI during testing, bypassing WorkManager entirely. If the notification shows up, WorkManager scheduling is the problem. If it doesn't, the reminder logic itself is broken.

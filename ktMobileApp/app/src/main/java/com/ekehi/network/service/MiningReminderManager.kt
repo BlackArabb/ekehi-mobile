@@ -94,11 +94,12 @@ class MiningReminderManager @Inject constructor(
      * Record when user stops mining (start reminder sequence)
      */
     fun recordMiningStop() {
-        securePreferences.putLong(LAST_MINING_STOP_TIME, System.currentTimeMillis())
+        val timestamp = System.currentTimeMillis()
+        securePreferences.putLong(LAST_MINING_STOP_TIME, timestamp)
         securePreferences.putInt(REMINDER_SEQUENCE, 0) // Reset sequence
         securePreferences.remove(FIRST_REMINDER_TIME)
         securePreferences.remove(SECOND_REMINDER_TIME)
-        Log.d(TAG, "Mining stop recorded - reminder sequence reset")
+        Log.d(TAG, "📍 recordMiningStop() called at timestamp: $timestamp (${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(timestamp))})")
     }
     
     /**
@@ -212,5 +213,37 @@ class MiningReminderManager @Inject constructor(
                 }
             }
         }
+    }
+    
+    /**
+     * Test method - forces a reminder notification to be sent
+     * Use this to verify notifications are working
+     */
+    fun testReminder() {
+        Log.d(TAG, "🧪 TEST: Forcing reminder notification")
+        pushNotificationService.showNotification(
+            "🧪 TEST: Mining Reminder",
+            "This is a test notification to verify reminders are working!",
+            "mining_reminder_test".hashCode()
+        )
+    }
+    
+    /**
+     * Debug method - logs current state of reminder system
+     */
+    fun logDebugState() {
+        val stopTime = securePreferences.getLong(LAST_MINING_STOP_TIME, 0)
+        val sequence = securePreferences.getInt(REMINDER_SEQUENCE, -1)
+        val firstTime = securePreferences.getLong(FIRST_REMINDER_TIME, 0)
+        val secondTime = securePreferences.getLong(SECOND_REMINDER_TIME, 0)
+        val enabled = isMiningReminderEnabled()
+        
+        Log.d(TAG, "=== DEBUG STATE ===")
+        Log.d(TAG, "Mining reminders enabled: $enabled")
+        Log.d(TAG, "Last mining stop time: $stopTime (${if (stopTime > 0) "${getHoursSinceMiningStopped()}h ago" else "NOT SET"})")
+        Log.d(TAG, "Reminder sequence: $sequence")
+        Log.d(TAG, "First reminder time: $firstTime")
+        Log.d(TAG, "Second reminder time: $secondTime")
+        Log.d(TAG, "===================")
     }
 }

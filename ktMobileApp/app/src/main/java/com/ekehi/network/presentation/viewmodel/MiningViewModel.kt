@@ -319,6 +319,12 @@ class MiningViewModel @Inject constructor(
                 
                 // Show success notification for reward claim
                 showMiningRewardClaimedNotification(_sessionReward.value)
+                
+                // Show mining completion push notification (event-based)
+                pushNotificationService.showMiningCompletedNotification(
+                    _sessionReward.value,
+                    userId
+                )
 
                 // Reset UI state after a short delay
                 viewModelScope.launch {

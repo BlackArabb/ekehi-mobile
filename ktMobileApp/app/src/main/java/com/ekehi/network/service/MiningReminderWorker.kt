@@ -2,36 +2,56 @@ package com.ekehi.network.service
 
 import android.content.Context
 import android.util.Log
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ekehi.network.security.SecurePreferences
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
  * Worker for sending mining reminder notifications
- * Delegates to MiningReminderManager for all reminder logic
+ * Uses manual DI to avoid HiltWorker instantiation issues
  */
-@HiltWorker
-class MiningReminderWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters,
-    private val securePreferences: SecurePreferences,
-    private val miningReminderManager: MiningReminderManager
+class MiningReminderWorker(
+    context: Context,
+    workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
         private const val TAG = "MiningReminderWorker"
         private const val MINING_REMINDER_ENABLED = "mining_reminder_enabled"
         private const val LAST_REMINDER_TIME = "last_reminder_time"
+        
+        @EntryPoint
+        @InstallIn(SingletonComponent::class)
+        interface WorkerEntryPoint {
+            fun securePreferences(): SecurePreferences
+            fun miningReminderManager(): MiningReminderManager
+        }
+    }
+
+    private val securePreferences: SecurePreferences by lazy {
+        EntryPointAccessors.fromApplication(
+            applicationContext,
+            WorkerEntryPoint::class.java
+        ).securePreferences()
+    }
+    
+    private val miningReminderManager: MiningReminderManager by lazy {
+        EntryPointAccessors.fromApplication(
+            applicationContext,
+            WorkerEntryPoint::class.java
+        ).miningReminderManager()
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Starting mining reminder check")
+            Log.d(TAG, "🔔=== MiningReminderWorker EXECUTING ===")
+            Log.d(TAG, "Current time: ${System.currentTimeMillis()}")
 
             // Check if mining reminders are enabled
             if (!securePreferences.getBoolean(MINING_REMINDER_ENABLED, true)) {

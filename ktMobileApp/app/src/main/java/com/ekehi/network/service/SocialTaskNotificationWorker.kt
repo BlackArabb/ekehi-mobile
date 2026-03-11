@@ -2,38 +2,42 @@ package com.ekehi.network.service
 
 import android.content.Context
 import android.util.Log
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.ekehi.network.data.model.SocialTask
 import com.ekehi.network.data.repository.SocialTaskRepository
-import com.ekehi.network.data.repository.MiningRepository
 import com.ekehi.network.security.SecurePreferences
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 /**
  * Worker for checking and sending notifications about new social tasks
+ * Uses manual DI to avoid HiltWorker instantiation issues
  */
-@HiltWorker
-class SocialTaskNotificationWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters,
-    private val socialTaskRepository: SocialTaskRepository,
-    private val pushNotificationService: PushNotificationService,
-    private val securePreferences: SecurePreferences
+class SocialTaskNotificationWorker(
+    context: Context,
+    workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
         private const val TAG = "SocialTaskNotificationWorker"
         private const val WORK_NAME = "social_task_notification_check"
         private const val CHECK_INTERVAL_HOURS = 6L // Check every 6 hours
+        
+        @EntryPoint
+        @InstallIn(SingletonComponent::class)
+        interface WorkerEntryPoint {
+            fun socialTaskRepository(): SocialTaskRepository
+            fun pushNotificationService(): PushNotificationService
+            fun securePreferences(): SecurePreferences
+        }
 
         /**
          * Schedule periodic social task notification checks
@@ -70,7 +74,16 @@ class SocialTaskNotificationWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Starting social task notification check")
+            Log.d(TAG, "🔔=== SocialTaskNotificationWorker EXECUTING ===")
+            
+            // Manual DI via EntryPoint
+            val entryPoint = EntryPointAccessors.fromApplication(
+                applicationContext,
+                WorkerEntryPoint::class.java
+            )
+            val securePreferences = entryPoint.securePreferences()
+            val socialTaskRepository = entryPoint.socialTaskRepository()
+            val pushNotificationService = entryPoint.pushNotificationService()
 
             // Check if social task notifications are enabled
             if (!securePreferences.getBoolean("social_task_notifications_enabled", true)) {

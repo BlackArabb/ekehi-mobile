@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,12 +88,8 @@ fun SocialTasksScreen(
         ).authRepository()
     }
     
-    // Preserve scroll position and content state
-    val scrollState = rememberScrollState()
-    
     // Track if screen has been loaded - persists across navigation
     var hasLoaded by rememberSaveable { mutableStateOf(false) }
-    var isRefreshing by remember { mutableStateOf(false) }
     
     // Load data only once on initial interaction
     LaunchedEffect(Unit) {
@@ -141,28 +138,17 @@ fun SocialTasksScreen(
         }
     }
 
-    LaunchedEffect(verificationState) {
-        if (verificationState is VerificationState.Success || verificationState is VerificationState.Error) {
-            Log.i("EKEHI_DEBUG", "Verification state changed: $verificationState")
-            // Don't refresh the entire list, just clear verification state
-            // The task status will be updated locally
-            viewModel.clearVerificationState()
-        }
-    }
-
+    // Cooldown auto-refresh - runs only once per resource change
     LaunchedEffect(socialTasksResource) {
         val tasks = (socialTasksResource as? Resource.Success)?.data ?: emptyList()
         val hasAnyCooldown = tasks.any { it.nextAvailableAt != null }
         
         if (hasAnyCooldown) {
-            while(true) {
-                delay(60000)
-                Log.i("EKEHI_DEBUG", "Checking for task cooldown updates...")
-                // Only refresh if we need to update cooldown status
-                if (userId.isNotEmpty()) {
-                    // Check if any task status might have changed due to cooldowns expiring
-                    viewModel.loadUserSocialTasks(userId)
-                }
+            // Wait for cooldown period then refresh once
+            delay(60000)
+            Log.i("EKEHI_DEBUG", "Checking for task cooldown updates...")
+            if (userId.isNotEmpty()) {
+                viewModel.loadUserSocialTasks(userId)
             }
         }
     }
@@ -291,280 +277,6 @@ fun SocialTasksScreen(
                 }
                 is Resource.Loading -> {
                     SocialTasksScreenSkeleton()
-                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .shadow(8.dp, RoundedCornerShape(20.dp))
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            colors = listOf(
-                                                BrandColors.CardBackground,
-                                                BrandColors.MediumGray
-                                            )
-                                        ),
-                                        RoundedCornerShape(20.dp)
-                                    )
-                                    .border(
-                                        width = 1.5.dp,
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                BrandColors.Primary,
-                                                BrandColors.PrimaryLight
-                                            )
-                                        ),
-                                        shape = RoundedCornerShape(20.dp)
-                                    )
-                                    .padding(20.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(28.dp)
-                                            .background(
-                                                BrandColors.LightGray,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .width(60.dp)
-                                            .height(26.dp)
-                                            .background(
-                                                BrandColors.LightGray,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .width(50.dp)
-                                            .height(13.dp)
-                                            .background(
-                                                BrandColors.LightGray,
-                                                RoundedCornerShape(4.dp)
-                                            )
-                                    )
-                                }
-                                
-                                Spacer(modifier = Modifier.width(16.dp))
-                                
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(28.dp)
-                                            .background(
-                                                BrandColors.LightGray,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .width(60.dp)
-                                            .height(26.dp)
-                                            .background(
-                                                BrandColors.LightGray,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .width(50.dp)
-                                            .height(13.dp)
-                                            .background(
-                                                BrandColors.LightGray,
-                                                RoundedCornerShape(4.dp)
-                                            )
-                                    )
-                                }
-                            }
-                        }
-                        
-                        item {
-                            Spacer(modifier = Modifier.height(24.dp))
-                        }
-                        
-                        items(5) { index ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .shadow(6.dp, RoundedCornerShape(20.dp)),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = BrandColors.CardBackground
-                                ),
-                                shape = RoundedCornerShape(20.dp)
-                            ) {
-                                Box {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(4.dp)
-                                            .background(
-                                                Brush.horizontalGradient(
-                                                    colors = listOf(
-                                                        BrandColors.Primary,
-                                                        BrandColors.PrimaryLight
-                                                    )
-                                                )
-                                            )
-                                    )
-                                    
-                                    Column(modifier = Modifier.padding(20.dp)) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalAlignment = Alignment.Top
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(56.dp)
-                                                    .shadow(4.dp, RoundedCornerShape(16.dp))
-                                                    .background(
-                                                        BrandColors.LightGray,
-                                                        RoundedCornerShape(16.dp)
-                                                    )
-                                            )
-                                            
-                                            Spacer(Modifier.width(16.dp))
-                                            
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .width(120.dp)
-                                                        .height(20.dp)
-                                                        .background(
-                                                            BrandColors.LightGray,
-                                                            RoundedCornerShape(4.dp)
-                                                        )
-                                                )
-                                                
-                                                Spacer(Modifier.height(8.dp))
-                                                
-                                                repeat(2) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .height(14.dp)
-                                                            .background(
-                                                                BrandColors.LightGray,
-                                                                RoundedCornerShape(4.dp)
-                                                            )
-                                                            .padding(top = 2.dp)
-                                                    )
-                                                }
-                                                
-                                                Spacer(Modifier.height(8.dp))
-                                                
-                                                Box(
-                                                    modifier = Modifier
-                                                        .width(80.dp)
-                                                        .height(12.dp)
-                                                        .background(
-                                                            BrandColors.LightGray,
-                                                            RoundedCornerShape(4.dp)
-                                                        )
-                                                )
-                                                
-                                                Spacer(Modifier.height(12.dp))
-                                                
-                                                Box(
-                                                    modifier = Modifier
-                                                        .width(90.dp)
-                                                        .height(24.dp)
-                                                        .background(
-                                                            BrandColors.LightGray,
-                                                            RoundedCornerShape(8.dp)
-                                                        )
-                                                )
-                                            }
-                                        }
-                                        
-                                        Spacer(Modifier.height(16.dp))
-                                        
-                                        Divider(
-                                            color = BrandColors.LightGray.copy(alpha = 0.3f),
-                                            thickness = 1.dp
-                                        )
-                                        
-                                        Spacer(Modifier.height(16.dp))
-                                        
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .background(
-                                                        Brush.horizontalGradient(
-                                                            colors = listOf(
-                                                                BrandColors.Primary.copy(alpha = 0.2f),
-                                                                BrandColors.PrimaryLight.copy(alpha = 0.1f)
-                                                            )
-                                                        ),
-                                                        RoundedCornerShape(12.dp)
-                                                    )
-                                                    .border(
-                                                        1.5.dp,
-                                                        BrandColors.Primary.copy(alpha = 0.5f),
-                                                        RoundedCornerShape(12.dp)
-                                                    )
-                                                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                                            ) {
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(20.dp)
-                                                            .background(
-                                                                BrandColors.LightGray,
-                                                                RoundedCornerShape(4.dp)
-                                                            )
-                                                    )
-                                                    Spacer(Modifier.width(6.dp))
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .width(40.dp)
-                                                            .height(18.dp)
-                                                            .background(
-                                                                BrandColors.LightGray,
-                                                                RoundedCornerShape(4.dp)
-                                                            )
-                                                    )
-                                                }
-                                            }
-                                            
-                                            Box(
-                                                modifier = Modifier
-                                                    .width(80.dp)
-                                                    .height(40.dp)
-                                                    .background(
-                                                        BrandColors.LightGray,
-                                                        RoundedCornerShape(12.dp)
-                                                    )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        item {
-                            Spacer(modifier = Modifier.height(20.dp))
-                        }
-                    }
                 }
                 is Resource.Error -> {
                     Card(
@@ -642,6 +354,16 @@ fun SocialTasksScreen(
             )
         }
         
+        // Auto-dismiss verification snackbars after 4 seconds
+        LaunchedEffect(verificationState) {
+            if (verificationState is VerificationState.Success || 
+                verificationState is VerificationState.Error || 
+                verificationState is VerificationState.Pending) {
+                delay(4000)
+                viewModel.clearVerificationState()
+            }
+        }
+                
         when (verificationState) {
             is VerificationState.Success -> {
                 Snackbar(
@@ -740,34 +462,28 @@ fun EnhancedStatsSection(viewModel: SocialTasksViewModel) {
     val socialTasksResource by viewModel.socialTasks.collectAsState()
     val localTaskStates by viewModel.localTaskStates.collectAsState()
     
-    var completedTasks = 0
-    var totalTasks = 0
-    var totalRewards = 0.0
-    var blogRewards = 0.0
-    
-    // Use combined tasks (original + local overrides) for accurate stats
-    val tasks = if (localTaskStates.isNotEmpty()) {
-        val baseTasks = when (socialTasksResource) {
-            is Resource.Success -> (socialTasksResource as Resource.Success).data
-            else -> emptyList()
-        }
-        baseTasks.map { task -> localTaskStates[task.id] ?: task }
-    } else {
-        when (socialTasksResource) {
-            is Resource.Success -> (socialTasksResource as Resource.Success).data
-            else -> emptyList()
+    // Use derived states to avoid recalculation on every recomposition
+    val tasks = remember(socialTasksResource, localTaskStates) {
+        if (localTaskStates.isNotEmpty()) {
+            val baseTasks = when (socialTasksResource) {
+                is Resource.Success -> (socialTasksResource as Resource.Success).data
+                else -> emptyList()
+            }
+            baseTasks.map { task -> localTaskStates[task.id] ?: task }
+        } else {
+            when (socialTasksResource) {
+                is Resource.Success -> (socialTasksResource as Resource.Success).data
+                else -> emptyList()
+            }
         }
     }
     
-    if (tasks.isNotEmpty()) {
-        totalTasks = tasks.size
-        completedTasks = tasks.count { it.isCompleted }
-        totalRewards = tasks.filter { it.isCompleted }.sumOf { it.rewardCoins }
-        
-        blogRewards = tasks
-            .filter { it.platform.lowercase() == "blog" }
-            .sumOf { it.totalAccumulatedRewards }
+    val completedTasks = remember(tasks) { tasks.count { it.isCompleted } }
+    val totalRewards = remember(tasks) { tasks.filter { it.isCompleted }.sumOf { it.rewardCoins } }
+    val blogRewards = remember(tasks) { 
+        tasks.filter { it.platform.lowercase() == "blog" }.sumOf { it.totalAccumulatedRewards } 
     }
+    val totalTasks = remember(tasks) { tasks.size }
     
     Row(
         modifier = Modifier
@@ -1211,9 +927,6 @@ fun EnhancedSocialTaskCard(
                                 }
                             }
                         }
-                    } else if (task.platform.lowercase() == "blog" && task.completionCountToday > 0 && task.completionCountToday < task.maxCompletionsPerDay && task.nextAvailableAt == null) {
-                        // Blog has partial completions but can still do more - show available
-                        // Only show if there's NO active cooldown (nextAvailableAt == null)
                     } else if (task.isVerified) {
                         Row(
                             modifier = Modifier
@@ -1524,7 +1237,7 @@ fun TaskActionDialog(
                         Icon(Icons.Default.OpenInNew, "Open")
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "Open on ${task.platform.capitalize()}",
+                            "Open on ${task.platform.replaceFirstChar { it.uppercase() }}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         )
@@ -2204,7 +1917,7 @@ fun getTaskInstructions(platform: String, taskType: String): String {
         "facebook" -> "1. Click the button below to open Facebook\n2. Like the page\n3. Come back here and click 'I've Completed This'"
         "twitter", "x" -> "1. Click the button below to open Twitter/X\n2. Complete the action (follow, like, or retweet)\n3. Come back here and click 'I've Completed This'"
         "instagram" -> "1. Click the button below to open Instagram\n2. Follow the account or like the post\n3. Come back here and click 'I've Completed This'"
-        else -> "1. Click the button below to open ${platform.capitalize()}\n2. Complete the required task\n3. Come back here and click 'I've Completed This'"
+        else -> "1. Click the button below to open ${platform.replaceFirstChar { it.uppercase() }}\n2. Complete the required task\n3. Come back here and click 'I've Completed This'"
     }
 }
 
@@ -2267,11 +1980,14 @@ fun parseIsoDate(dateStr: String?): Long {
     }
 }
 
+private const val TELEGRAM_USER_ID_MIN_LENGTH = 8
+private const val TELEGRAM_USER_ID_MAX_LENGTH = 12
+
 fun isValidTelegramUserId(userId: String): Boolean {
     return userId.isNotEmpty() && 
            userId.all { it.isDigit() } && 
-           userId.length >= 8 && 
-           userId.length <= 12 &&
+           userId.length >= TELEGRAM_USER_ID_MIN_LENGTH && 
+           userId.length <= TELEGRAM_USER_ID_MAX_LENGTH &&
            userId.toLongOrNull() != null
 }
 
@@ -2279,8 +1995,8 @@ fun getTelegramUserIdErrorMessage(userId: String): String {
     return when {
         userId.isEmpty() -> ""
         !userId.all { it.isDigit() } -> "User ID should contain only numbers"
-        userId.length < 8 -> "User ID should be at least 8 digits"
-        userId.length > 12 -> "User ID should not exceed 12 digits"
+        userId.length < TELEGRAM_USER_ID_MIN_LENGTH -> "User ID should be at least $TELEGRAM_USER_ID_MIN_LENGTH digits"
+        userId.length > TELEGRAM_USER_ID_MAX_LENGTH -> "User ID should not exceed $TELEGRAM_USER_ID_MAX_LENGTH digits"
         else -> ""
     }
 }
@@ -2294,7 +2010,6 @@ fun buildProofData(platform: String, telegramUserId: String, username: String, p
             "telegram" -> {
                 telegramUserId.toLongOrNull()?.let { userId ->
                     put("telegram_user_id", userId)
-                    put("user_id", userId)
                 }
             }
             else -> {
@@ -2305,7 +2020,6 @@ fun buildProofData(platform: String, telegramUserId: String, username: String, p
         
         if (username.isNotEmpty()) put("submitted_username", username)
         if (proofUrl.isNotEmpty()) put("submitted_proof_url", proofUrl)
-        if (telegramUserId.isNotEmpty()) put("submitted_telegram_id", telegramUserId)
     }
 }
 

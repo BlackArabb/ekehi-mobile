@@ -190,9 +190,11 @@
     
         <!-- Enable splash ads (enabled by default) -->
         <!-- <meta-data android:name="com.startapp.sdk.SPLASH_ENABLED" android:value="true" /> -->
+        <meta-data android:name="com.startapp.sdk.SPLASH_ENABLED" android:value="false" />
         
         <!-- Enable return ads (enabled by default) -->
         <!-- <meta-data android:name="com.startapp.sdk.RETURN_ADS_ENABLED" android:value="true" /> -->
+        <meta-data android:name="com.startapp.sdk.RETURN_ADS_ENABLED" android:value="true" />
     </application>
 
 </manifest>
