@@ -43,10 +43,16 @@ misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
 
-# Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
-#*.jks
-#*.keystore
+# Keystore files - NEVER commit these to version control
+*.jks
+*.keystore
+
+# Environment variables and secrets
+.env.local
+.env.production
+.env
+secrets.properties
+api-keys.properties
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild

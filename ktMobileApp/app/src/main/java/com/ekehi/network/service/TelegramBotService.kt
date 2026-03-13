@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -13,34 +14,31 @@ import javax.inject.Singleton
 class TelegramBotService @Inject constructor(
     private val httpClient: HttpClient
 ) {
-    private val botToken = com.ekehi.network.BuildConfig.TELEGRAM_BOT_TOKEN
-    private val baseUrl = "https://api.telegram.org/bot$botToken"
-    
+    // Calls admin proxy - bot token stays on server, never in APK
+    private val proxyUrl = "https://ekehi-admin.vercel.app/api/verify/telegram"
+
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
     }
-    
+
     suspend fun verifyChannelMembership(
         chatId: String,
         userId: Long
     ): Result<Boolean> {
         return try {
-            val response: HttpResponse = httpClient.get("$baseUrl/getChatMember") {
-                parameter("chat_id", chatId)
-                parameter("user_id", userId)
+            val response: HttpResponse = httpClient.post(proxyUrl) {
+                contentType(ContentType.Application.Json)
+                setBody("""{"chatId":"$chatId","userId":$userId}""")
             }
-            
+
             val responseText = response.bodyAsText()
-            val result = json.decodeFromString<TelegramApiResponse>(responseText)
-            
-            if (result.ok && result.result != null) {
-                val isMember = result.result.status in listOf(
-                    "member", "administrator", "creator"
-                )
-                Result.success(isMember)
+            val result = json.decodeFromString<TelegramProxyResponse>(responseText)
+
+            if (result.success) {
+                Result.success(result.isMember)
             } else {
-                Result.success(false)
+                Result.failure(Exception(result.error ?: "Verification failed"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -49,21 +47,8 @@ class TelegramBotService @Inject constructor(
 }
 
 @Serializable
-data class TelegramApiResponse(
-    val ok: Boolean,
-    val result: ChatMember? = null
-)
-
-@Serializable
-data class ChatMember(
-    val status: String,
-    val user: TelegramUser
-)
-
-@Serializable
-data class TelegramUser(
-    val id: Long,
-    val is_bot: Boolean,
-    val first_name: String,
-    val username: String? = null
+data class TelegramProxyResponse(
+    val success: Boolean,
+    val isMember: Boolean = false,
+    val error: String? = null
 )

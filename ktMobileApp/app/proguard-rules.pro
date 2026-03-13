@@ -124,3 +124,18 @@ LineNumberTable, *Annotation*, EnclosingMethod
 # SLF4J - Keep to prevent missing class errors
 -keep class org.slf4j.** { *; }
 -dontwarn org.slf4j.**
+
+# BuildConfig - Obfuscate to prevent easy extraction of API keys
+# Note: This provides minimal protection - keys are still in bytecode
+-renamesourcefileattribute SourceFile
+-keepattributes *Annotation*
+-dontpreverify
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int i(...);
+    public static int w(...);
+    public static int d(...);
+    public static int e(...);
+}

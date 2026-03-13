@@ -15,26 +15,37 @@ android {
         applicationId "com.ekehi.network"
         minSdk 24
         targetSdk 34
-        versionCode 14
-        versionName "1.4.0"
+        versionCode 15
+        versionName "1.5.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
         
-        // Add build config fields for social media APIs
-        buildConfigField "String", "TELEGRAM_BOT_TOKEN", "\"7969520183:AAGFM4gNVTqnPC_byBfclj--EBw7ytmL_JE\""
-        buildConfigField "String", "YOUTUBE_API_KEY", "\"AIzaSyAO3PhQ_RorWalCim2rby79Wt59sZpG0m4\""
-        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"842046112756-rk2jcdf9l7f4cbh136u4tm591qmtl6bq.apps.googleusercontent.com\""
-        buildConfigField "String", "YOUTUBE_CLIENT_ID", "\"842046112756-9acvuujafbpmu7ld7v54eb2lr97u3acj.apps.googleusercontent.com\""
+        // API Keys - MUST be set via environment variables for release builds
+        // TELEGRAM_BOT_TOKEN removed - Telegram verification now proxied through admin server
+        buildConfigField "String", "YOUTUBE_API_KEY", "\"${System.getenv('YOUTUBE_API_KEY') ?: ''}\""
+        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${System.getenv('GOOGLE_WEB_CLIENT_ID') ?: ''}\""
+        buildConfigField "String", "YOUTUBE_CLIENT_ID", "\"${System.getenv('YOUTUBE_CLIENT_ID') ?: ''}\""
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../ekehi-release.keystore')
+            storePassword System.getenv('KEYSTORE_PASSWORD')
+            keyAlias 'ekehi'
+            keyPassword System.getenv('KEY_PASSWORD')
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug // In production, use a proper signing config
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
