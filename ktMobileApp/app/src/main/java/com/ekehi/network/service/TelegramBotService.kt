@@ -15,7 +15,7 @@ class TelegramBotService @Inject constructor(
     private val httpClient: HttpClient
 ) {
     // Calls admin proxy - bot token stays on server, never in APK
-    private val proxyUrl = "https://ekehi-admin.vercel.app/api/verify/telegram"
+    private val proxyUrl = "https://ekehiadmin.vercel.app/api/verify/telegram"
 
     private val json = Json {
         ignoreUnknownKeys = true
