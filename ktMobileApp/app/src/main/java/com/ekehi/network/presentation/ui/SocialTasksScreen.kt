@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -857,7 +856,6 @@ fun EnhancedSocialTaskCard(
                         Button(
                             onClick = {},
                             enabled = false,
-                            modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 disabledContainerColor = BrandColors.Gray.copy(alpha = 0.2f),
                                 disabledContentColor = BrandColors.Gray
@@ -875,8 +873,15 @@ fun EnhancedSocialTaskCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(8.dp))
-                            val remainingTime = remember(task.nextAvailableAt) {
-                                calculateRemainingCooldown(task.nextAvailableAt)
+                            val remainingTime by produceState(
+                                initialValue = calculateRemainingCooldown(task.nextAvailableAt),
+                                key1 = task.nextAvailableAt
+                            ) {
+                                while (true) {
+                                    delay(1000)
+                                    value = calculateRemainingCooldown(task.nextAvailableAt)
+                                    if (value.isEmpty()) break
+                                }
                             }
                             Text(
                                 text = if (remainingTime.isNotEmpty()) remainingTime else "Cooldown",
@@ -915,8 +920,14 @@ fun EnhancedSocialTaskCard(
                                     fontWeight = FontWeight.Bold
                                 )
                                 if (task.nextResetTime != null) {
-                                    val timeUntilReset = remember(task.nextResetTime) {
-                                        calculateTimeUntilReset(task.nextResetTime)
+                                    val timeUntilReset by produceState(
+                                        initialValue = calculateTimeUntilReset(task.nextResetTime),
+                                        key1 = task.nextResetTime
+                                    ) {
+                                        while (true) {
+                                            delay(60000)
+                                            value = calculateTimeUntilReset(task.nextResetTime)
+                                        }
                                     }
                                     Text(
                                         text = " $timeUntilReset",

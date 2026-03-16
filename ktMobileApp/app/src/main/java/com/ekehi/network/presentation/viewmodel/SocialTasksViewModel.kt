@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -213,8 +214,26 @@ class SocialTasksViewModel @Inject constructor(
                     when (verificationResult) {
                         is VerificationResult.Success -> {
                             // Update local task state instead of refreshing entire list
-                            // For blog tasks, increment completion count
-                            updateTaskStatusLocally(userId, taskId, "completed", isCompleted = true, isVerified = true, incrementCompletionCount = isBlogTask)
+                            // For blog tasks, increment completion count and set cooldown immediately
+                            if (isBlogTask && task != null) {
+                                val newCount = task.completionCountToday + 1
+                                val isLimitNowReached = newCount >= task.maxCompletionsPerDay
+                                val cooldownUntil = Instant.now().plusSeconds(task.cooldownMinutes * 60L).toString()
+                                val nextReset = Instant.now().plusSeconds(86400L).toString()
+                                updateLocalTaskState(taskId, task.copy(
+                                    status = if (isLimitNowReached) "verified" else "pending",
+                                    isCompleted = true,
+                                    isVerified = isLimitNowReached,
+                                    completionCountToday = newCount,
+                                    totalAccumulatedRewards = task.totalAccumulatedRewards + task.rewardCoins,
+                                    nextAvailableAt = if (isLimitNowReached) {
+                                        Instant.now().plusSeconds(86400L).toString()
+                                    } else cooldownUntil,
+                                    nextResetTime = task.nextResetTime ?: nextReset
+                                ))
+                            } else {
+                                updateTaskStatusLocally(userId, taskId, "completed", isCompleted = true, isVerified = true)
+                            }
                         }
                         is VerificationResult.Pending -> {
                             // Update local task state for pending status

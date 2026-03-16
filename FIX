@@ -1,56 +1,133 @@
-The worker looks correct structurally, but here are the most likely reasons reminders aren't firing:
+Looking at your code, there are two specific bugs causing these issues.
 
-## Debug Checklist
+---
 
-**1. Is `recordMiningStop()` actually being called?**
+## Bug 1 — Cooldown timer is frozen (shows static text, not counting down)
 
-The worker exits early if `last_mining_stop_time == 0L`. Add a log immediately in your ViewModel/repository where mining stops:
+`calculateRemainingCooldown` is called inside `remember(task.nextAvailableAt)` which only recalculates when `nextAvailableAt` changes — never while time passes. The string is computed once and frozen.
 
-```kotlin
-miningReminderManager.recordMiningStop()
-Log.d("DEBUG", "recordMiningStop called at ${System.currentTimeMillis()}")
-```
-
-Verify this key is actually being written by checking SecurePreferences after stopping mining.
-
-**2. Is the worker actually running?**
-
-WorkManager won't run periodic workers immediately — there's a minimum 15-minute flex window, and on first enqueue it may delay up to the full interval (1 hour). To verify the worker is being scheduled at all:
-
-```bash
-adb shell dumpsys jobscheduler | grep mining_reminder
-```
-
-Or in the worker, add a log at the very top *before* any early returns:
+**Fix:** Replace the static `remember` with a `produceState` that ticks every second:
 
 ```kotlin
-Log.d(TAG, "=== MiningReminderWorker EXECUTING ===")
+// Replace this:
+val remainingTime = remember(task.nextAvailableAt) {
+    calculateRemainingCooldown(task.nextAvailableAt)
+}
+
+// With this:
+val remainingTime by produceState(
+    initialValue = calculateRemainingCooldown(task.nextAvailableAt),
+    key1 = task.nextAvailableAt
+) {
+    while (true) {
+        delay(1000)
+        value = calculateRemainingCooldown(task.nextAvailableAt)
+        if (value.isEmpty()) break // stop ticking once expired
+    }
+}
 ```
 
-If you never see this log, the worker isn't running at all.
-
-**3. Is `scheduleReminder()` being called?**
-
-Add a log in `NotificationServiceManager.startAllNotificationServices()` and verify it's being called after login. Also check that `miningReminderManager.isMiningReminderEnabled()` returns `true`.
-
-**4. Battery optimization is likely killing it**
-
-On most Android devices, background work gets heavily restricted. Test with:
-
-```bash
-adb shell dumpsys deviceidle whitelist +com.ekehi.network
-```
-
-Or in code during development:
+Do the same for `timeUntilReset`:
 ```kotlin
-// Temporarily force-run the worker for testing
-WorkManager.getInstance(context).enqueue(
-    OneTimeWorkRequestBuilder<MiningReminderWorker>().build()
-)
+val timeUntilReset by produceState(
+    initialValue = calculateTimeUntilReset(task.nextResetTime),
+    key1 = task.nextResetTime
+) {
+    while (true) {
+        delay(60000) // reset time is less urgent, tick every minute
+        value = calculateTimeUntilReset(task.nextResetTime)
+    }
+}
 ```
 
-Use a `OneTimeWorkRequest` to test the logic in isolation — if that fires and still doesn't send a notification, the bug is inside `sendReminderIfAppropriate()`, not the scheduling.
+---
 
-**5. Fastest way to isolate the bug**
+## Bug 2 — "Completed" badge shows instead of cooldown timer after each blog submission
 
-Call `sendReminderIfAppropriate()` directly from a button in your UI during testing, bypassing WorkManager entirely. If the notification shows up, WorkManager scheduling is the problem. If it doesn't, the reminder logic itself is broken.
+This is the condition order problem. Your chain currently is:
+
+```
+1. blog + nextAvailableAt != null → show cooldown button ✅
+2. blog + completionCountToday >= max → show daily limit badge ✅
+3. isVerified → show "Completed" ← THIS fires for blog tasks too
+4. status == pending → show reviewing
+5. blog partial → show Start Task
+6. else → show Start Task
+```
+
+For a blog task that has been completed once but is now in cooldown, `isVerified` is `true` (your backend marks it verified after each completion). So branch 3 fires **before** branch 1 even gets evaluated — because `isVerified` is checked on the card-level modifier chain separately from the button logic.
+
+Wait — actually looking more carefully, branch 1 checks `nextAvailableAt != null && !task.isVerified` in v3, but in this v4 the condition is:
+
+```kotlin
+if (task.platform.lowercase() == "blog" && task.nextAvailableAt != null && !task.isVerified)
+```
+
+The `!task.isVerified` guard means if the blog task sets `isVerified = true` after completion, the cooldown button **never shows** — it falls through to the `isVerified` → "Completed" branch instead.
+
+**The real question is: what does your backend set `isVerified` to after a blog task completion?**
+
+There are two cases:
+
+**Case A — Backend sets `isVerified = true` permanently after first completion:**
+
+Remove `!task.isVerified` from the cooldown condition, and reorder so blog-specific states always take priority over `isVerified`:
+
+```kotlin
+if (task.platform.lowercase() == "blog" && task.nextAvailableAt != null) {
+    // Cooldown timer button
+} else if (task.platform.lowercase() == "blog" && task.completionCountToday >= task.maxCompletionsPerDay) {
+    // Daily limit reached
+} else if (task.platform.lowercase() == "blog") {
+    // Blog available (0 completions or partial with no cooldown)
+    Button(onClick = onClick, ...) { Text("Start Task") }
+} else if (task.isVerified) {
+    // Non-blog verified
+} else if (task.status == "pending") {
+    // Pending review
+} else {
+    // Not started
+    Button(onClick = onClick, ...) { Text("Start Task") }
+}
+```
+
+**Case B — Backend sets `isVerified = false` during cooldown and `true` only when fully done:**
+
+Then your `!task.isVerified` guard is correct, but the clickable modifier on the card is blocking it. Check this section:
+
+```kotlin
+} else if (!task.isVerified && task.status != "pending") {
+    Modifier.clickable(onClick = onClick)
+```
+
+For a blog task in cooldown where `isVerified = false`, this makes the **card clickable** even though the button is disabled — confusing UX but not the display bug.
+
+---
+
+## Bug 3 — Cooldown doesn't show immediately after submission
+
+After `onSubmit` is called, `selectedTask` is set to `null` and the dialog closes. The task list only updates when the ViewModel's `localTaskState` is updated or a network refresh completes. If your ViewModel doesn't immediately set `nextAvailableAt` on the local task state after submission, the card won't show cooldown until the next network poll (60 seconds).
+
+**Fix in your ViewModel** — after a successful blog task submission, immediately update the local task state optimistically:
+
+```kotlin
+// In SocialTasksViewModel, after completeSocialTask succeeds:
+val cooldownUntil = Instant.now().plusSeconds(cooldownMinutes * 60L).toString()
+updateLocalTaskState(taskId, currentTask.copy(
+    nextAvailableAt = cooldownUntil,
+    completionCountToday = currentTask.completionCountToday + 1,
+    isVerified = true
+))
+```
+
+This makes the UI respond instantly without waiting for the server refresh.
+
+---
+
+## Summary of what to change
+
+| Issue | Location | Fix |
+|-------|----------|-----|
+| Timer frozen | `EnhancedSocialTaskCard` | Replace `remember` with `produceState` + `delay(1000)` loop |
+| "Completed" shows instead of cooldown | Button condition order | Move all blog-specific conditions above `isVerified` check, remove `!task.isVerified` guard |
+| Cooldown doesn't appear immediately | ViewModel | Optimistically update `localTaskState` with `nextAvailableAt` on submission |
