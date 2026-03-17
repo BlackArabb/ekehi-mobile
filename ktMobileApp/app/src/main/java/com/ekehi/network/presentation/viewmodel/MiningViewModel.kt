@@ -365,9 +365,6 @@ class MiningViewModel @Inject constructor(
                             _progressPercentage.value = 100.0
                             _sessionEarnings.value = status.reward // Set to full reward when complete
                             
-                            // Send mining completion notification
-                            sendMiningCompletionNotification(status.reward)
-                            
                             updateJob?.cancel()
                         }
                     }
@@ -390,24 +387,6 @@ class MiningViewModel @Inject constructor(
         _sessionEarnings.value = 0.0 // Reset earnings
         _finalRewardClaimed.value = false
         sessionStartTime = 0
-    }
-
-    /**
-     * Sends notification when mining session completes
-     */
-    private fun sendMiningCompletionNotification(reward: Double) {
-        viewModelScope.launch {
-            try {
-                Log.d("MiningViewModel", "Sending mining completion notification for reward: $reward")
-                
-                // Use PushNotificationService to show notification
-                pushNotificationService.showMiningUpdateNotification(reward, "mining_session_complete")
-                
-                Log.d("MiningViewModel", "✅ Mining completion notification sent")
-            } catch (e: Exception) {
-                Log.e("MiningViewModel", "Failed to send mining completion notification: ${e.message}", e)
-            }
-        }
     }
 
     /**
