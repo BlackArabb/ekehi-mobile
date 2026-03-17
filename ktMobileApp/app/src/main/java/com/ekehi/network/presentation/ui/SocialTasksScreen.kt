@@ -440,40 +440,66 @@ fun SocialTasksScreen(
 
         // ── Dialogs ──────────────────────────────────────────────────────
         if (selectedTask != null && !showVerificationDialog) {
-            if (selectedTask!!.status == "pending") {
-                PendingTaskDialog(
-                    task = selectedTask!!,
-                    onDeleteTask = {
-                        viewModel.deletePendingTask(userId, selectedTask!!.id)
-                        selectedTask = null
-                    },
-                    onDismiss = { selectedTask = null }
-                )
-            } else {
-                TaskActionDialog(
-                    task = selectedTask!!,
-                    onDismiss = {
-                        selectedTask = null
-                        taskActionCompleted = false
-                    },
-                    onTaskCompleted = {
-                        taskActionCompleted = true
-                        showVerificationDialog = true
-                    },
-                    onBlogSubmit = {
-                        // Blog tasks need no review — submit directly and close
-                        viewModel.completeSocialTask(
-                            userId,
-                            selectedTask!!.id,
-                            mapOf(
-                                "platform"     to "blog",
-                                "submitted_at" to System.currentTimeMillis()
+            val isBlogSelected = selectedTask!!.platform.lowercase() == "blog"
+            when {
+                // Blog tasks never go to PendingTaskDialog regardless of status —
+                // they use TaskActionDialog which routes to onBlogSubmit directly.
+                isBlogSelected -> {
+                    TaskActionDialog(
+                        task = selectedTask!!,
+                        onDismiss = {
+                            selectedTask = null
+                            taskActionCompleted = false
+                        },
+                        onTaskCompleted = {
+                            // Non-blog path (not reached for blog, kept for safety)
+                            taskActionCompleted = true
+                            showVerificationDialog = true
+                        },
+                        onBlogSubmit = {
+                            viewModel.completeSocialTask(
+                                userId,
+                                selectedTask!!.id,
+                                mapOf(
+                                    "platform"     to "blog",
+                                    "submitted_at" to System.currentTimeMillis()
+                                )
                             )
-                        )
-                        selectedTask = null
-                        taskActionCompleted = false
-                    }
-                )
+                            selectedTask = null
+                            taskActionCompleted = false
+                        }
+                    )
+                }
+                // Non-blog task pending manual review
+                selectedTask!!.status == "pending" -> {
+                    PendingTaskDialog(
+                        task = selectedTask!!,
+                        onDeleteTask = {
+                            viewModel.deletePendingTask(userId, selectedTask!!.id)
+                            selectedTask = null
+                        },
+                        onDismiss = { selectedTask = null }
+                    )
+                }
+                // Non-blog task — normal action + verification flow
+                else -> {
+                    TaskActionDialog(
+                        task = selectedTask!!,
+                        onDismiss = {
+                            selectedTask = null
+                            taskActionCompleted = false
+                        },
+                        onTaskCompleted = {
+                            taskActionCompleted = true
+                            showVerificationDialog = true
+                        },
+                        onBlogSubmit = {
+                            // Safety fallback — should not be reached for non-blog
+                            selectedTask = null
+                            taskActionCompleted = false
+                        }
+                    )
+                }
             }
         }
 
@@ -1204,7 +1230,10 @@ fun TaskActionDialog(
         },
         confirmButton = {
             when {
-                task.status == "pending" -> Button(
+                // "Under Review" only applies to non-blog tasks.
+                // Blog tasks with status="pending" still go through the normal
+                // blog flow — they complete instantly with no manual review.
+                !isBlogTask && task.status == "pending" -> Button(
                     onClick = {}, enabled = false,
                     colors = ButtonDefaults.buttonColors(containerColor = BrandColors.Gray),
                     shape = RoundedCornerShape(12.dp),
